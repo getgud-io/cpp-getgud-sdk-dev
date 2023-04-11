@@ -1,0 +1,8 @@
+# User settings
+*.user
+*.vcxproj.filters
+*.htm
+
+# Windows files
+x64
+.vs
