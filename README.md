@@ -1,1 +1,1 @@
-# sdk-cpp
+# gg-cpp-sdk
