@@ -6,3 +6,5 @@
 # Windows files
 x64
 .vs
+Lib_x64
+Starter_x64

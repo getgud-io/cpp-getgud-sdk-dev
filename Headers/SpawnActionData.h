@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace GG_SDK
+namespace GetGudSdk
 {
 	class SpawnActionData : public BaseActionData
 	{
@@ -15,10 +15,10 @@ namespace GG_SDK
 
 	public:
 		SpawnActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-			int _action_type, long _action_time_epoch, std::vector<float> _position,
-			int _initial_health, int team_id, std::string character_guid);
-		SpawnActionData(BaseData data_info, std::vector<float> _position,
-			int _initial_health, int team_id, std::string character_guid);
+			Actions _action_type, long _action_time_epoch, std::vector<float> _position,
+			float _initial_health, int _team_id, std::string _character_guid);
+		SpawnActionData(BaseData _data_info, std::vector<float> _position,
+			float _initial_health, int _team_id, std::string _character_guid);
 		SpawnActionData(SpawnActionData&) = delete;
 		SpawnActionData() = delete;
 		~SpawnActionData();

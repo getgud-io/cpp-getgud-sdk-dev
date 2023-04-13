@@ -25,7 +25,7 @@
 
 */
 
-namespace GG_SDK {
+namespace GetGudSdk {
 
 	std::string start_game(int title_id, std::string server_name, std::string game_mode);
 
@@ -55,5 +55,5 @@ namespace GG_SDK {
 
 	bool send_position_action(std::string match_guid, std::string player_guid, std::vector<float> position);
 
-	void cleanup();
+	void Dispose();
 }

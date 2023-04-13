@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace GG_SDK
+namespace GetGudSdk
 {
 	class PositionActionData : public BaseActionData
 	{
@@ -12,7 +12,7 @@ namespace GG_SDK
 
 	public:
 		PositionActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-			int _action_type, long _action_time_epoch, std::vector<float> _position);
+			Actions _action_type, long _action_time_epoch, std::vector<float> _position);
 		PositionActionData(BaseData _data_info, std::vector<float> _position);
 		PositionActionData(PositionActionData&) = delete;
 		PositionActionData() = delete;

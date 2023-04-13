@@ -1,10 +1,14 @@
 #include <iostream>
 
-#include "../Headers/GG_SDK.h"
+#include "../Headers/GetGudSdk.h"
 
 int main()
 {
-    GG_SDK::DeathActionData data(GG_SDK::BaseData{});
+    GetGudSdk::DeathActionData data(GetGudSdk::BaseData{});
+    GetGudSdk::AttackActionData data2(GetGudSdk::BaseData{}, std::string());
+    GetGudSdk::DamageActionData data3(GetGudSdk::BaseData{}, 10, std::string(), std::string());
+    GetGudSdk::HealActionData data4(GetGudSdk::BaseData{}, 10);
+    GetGudSdk::PositionActionData data5(GetGudSdk::BaseData{}, std::vector<float>());
 
     return 0;
 }
