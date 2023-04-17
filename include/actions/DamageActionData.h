@@ -11,8 +11,8 @@ namespace GetGudSdk
 		std::string weapon_guid;
 
 	public:
-		DamageActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-			Actions _action_type, long _action_time_epoch, float _damage_done, std::string _victim_player_guid,
+		DamageActionData(std::string _player_guid, std::string _match_guid,
+			long _action_time_epoch, float _damage_done, std::string _victim_player_guid,
 			std::string _weapon_guid);
 		DamageActionData(BaseData _data_info, float _damage_done, std::string _victim_player_guid,
 			std::string _weapon_guid);

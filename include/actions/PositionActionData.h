@@ -11,8 +11,8 @@ namespace GetGudSdk
 		std::vector<float> position;
 
 	public:
-		PositionActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-			Actions _action_type, long _action_time_epoch, std::vector<float> _position);
+		PositionActionData(std::string _player_guid, std::string _match_guid,
+			long _action_time_epoch, std::vector<float> _position);
 		PositionActionData(BaseData _data_info, std::vector<float> _position);
 		PositionActionData(PositionActionData&) = delete;
 		PositionActionData() = delete;

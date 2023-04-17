@@ -7,8 +7,8 @@ namespace GetGudSdk
 	class DeathActionData : public BaseActionData
 	{
 	public:
-		DeathActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-			Actions _action_type, long _action_time_epoch);
+		DeathActionData(std::string _player_guid, std::string _match_guid,
+			long _action_time_epoch);
 		DeathActionData(BaseData _data_info);
 		DeathActionData(DeathActionData&) = delete;
 		DeathActionData() = delete;

@@ -1,20 +1,23 @@
-#include "..\..\Headers\DamageActionData.h"
+#include "..\..\include\actions\DamageActionData.h"
 
 using namespace GetGudSdk;
 
 DamageActionData::DamageActionData(BaseData _data_info, float _damage_done, 
-	std::string _victim_player_guid, std::string _weapon_guid) : BaseActionData(_data_info)
+	std::string _victim_player_guid, std::string _weapon_guid) 
+	: BaseActionData(_data_info) //fill the base data
 {
+	//fill the action specified data
 	damage_done = _damage_done;
 	weapon_guid = _weapon_guid;
 	victim_player_guid = _victim_player_guid;
 };
 
-DamageActionData::DamageActionData(std::string _player_guid, std::string _game_guid, std::string _match_guid,
-	Actions _action_type, long _action_time_epoch, float _damage_done,
+DamageActionData::DamageActionData(std::string _player_guid, std::string _match_guid,
+	long _action_time_epoch, float _damage_done,
 	std::string _victim_player_guid, std::string _weapon_guid) :
-	BaseActionData({ _action_type, _action_time_epoch, _player_guid, _game_guid, _match_guid })
+	BaseActionData({ Actions::Damage, _action_time_epoch, _player_guid, _match_guid }) //fill the base data
 {
+	//fill the action specified data
 	damage_done = _damage_done;
 	weapon_guid = _weapon_guid;
 	victim_player_guid = _victim_player_guid;
@@ -27,8 +30,10 @@ DamageActionData::~DamageActionData()
 
 std::map<std::string, std::string> DamageActionData::get_data()
 {
+	//make a new buffer with <key, value> pairs
 	std::map<std::string, std::string> data;
 
+	//fill the buffer by key, value
 	data["player_guid"] = player_guid;
 	data["game_guid"] = game_guid;
 	data["match_guid"] = match_guid;

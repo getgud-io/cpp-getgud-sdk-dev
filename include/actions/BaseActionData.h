@@ -16,12 +16,27 @@ namespace GetGudSdk
 		Spawn
 	};
 
+	struct GameData
+	{
+		std::string game_guid; //auto-generated value
+		int title_id = 0;
+		std::string server_name;
+		std::string game_mode;
+	};
+
+	struct MatchData
+	{
+		std::string match_guid; //auto-generated value
+		std::string game_guid;
+		std::string match_mode;
+		std::string map_name;
+	};
+
 	struct BaseData
 	{
 		Actions action_type = Actions::none; //replace to enum
 		long action_time_epoch = 0;
 		std::string player_guid;
-		std::string game_guid;
 		std::string match_guid;
 	};
 
