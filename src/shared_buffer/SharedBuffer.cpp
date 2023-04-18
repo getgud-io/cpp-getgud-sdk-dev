@@ -55,7 +55,7 @@ namespace GetGudSdk
 	bool SharedBuffer::push_game(GameData game_data)
 	{
 		game_buffer_locker.lock();
-		game_buffer.push_back(game_data);
+		start_game_buffer.push_back(game_data);
 		game_buffer_locker.unlock();
 
 		return true;
@@ -76,7 +76,7 @@ namespace GetGudSdk
 	bool SharedBuffer::push_match(MatchData match_data)
 	{
 		match_buffer_locker.lock();
-		match_buffer.push_back(match_data);
+		start_match_buffer.push_back(match_data);
 		match_buffer_locker.unlock();
 
 		return true;
@@ -88,11 +88,11 @@ namespace GetGudSdk
 
 		//clear all buffers via lockers
 		match_buffer_locker.lock();
-		match_buffer.clear();
+		start_match_buffer.clear();
 		match_buffer_locker.unlock();
 
 		game_buffer_locker.lock();
-		game_buffer.clear();
+		start_game_buffer.clear();
 		game_buffer_locker.unlock();
 
 		buffer_locker.lock();

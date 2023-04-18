@@ -98,11 +98,11 @@ namespace GetGudSdk {
 	}
 
 	bool send_spawn_action(std::string match_guid, std::string player_guid, std::string character_guid,
-		int team_id, int initial_health, std::vector<float> position, long action_time_epoch)
+		int team_id, int initial_health, PositionF position, RotationF rotation, long action_time_epoch)
 	{
 
 		SpawnActionData* spawn_data = new SpawnActionData(
-			player_guid, match_guid, action_time_epoch, position, initial_health, team_id, character_guid);
+			player_guid, match_guid, action_time_epoch, position, rotation, initial_health, team_id, character_guid);
 
 		buffer.push_action(spawn_data);
 
@@ -120,11 +120,11 @@ namespace GetGudSdk {
 		return true;
 	}
 
-	bool send_position_action(std::string match_guid, std::string player_guid, std::vector<float> position, long action_time_epoch)
+	bool send_position_action(std::string match_guid, std::string player_guid, PositionF position, RotationF rotation, long action_time_epoch)
 	{
 
 		PositionActionData* spawn_data = new PositionActionData(
-			player_guid, match_guid, action_time_epoch, position);
+			player_guid, match_guid, action_time_epoch, position, rotation);
 
 		buffer.push_action(spawn_data);
 

@@ -34,15 +34,16 @@ namespace GetGudSdk
 		return output;
 	}
 
-	std::string position_to_string(std::vector<float> in_position)
+	std::string position_to_string(PositionF _position, RotationF _rotation)
 	{
-		//making string in format "position" "[1,2,3....n]"
-		std::string output_position = "[";
-		for (auto coordinate : in_position)
-		{
-			output_position += std::to_string(coordinate) + ",";
-		}
-		output_position[output_position.size() - 1] = ']';
+		std::string output_position;
+
+		output_position += std::to_string(_position.x) + '~';
+		output_position += std::to_string(_position.y) + '~';
+		output_position += std::to_string(_position.z) + '~';
+
+		output_position += std::to_string(_rotation.Pitch) + '~';
+		output_position += std::to_string(_rotation.Roll);
 
 		return output_position;
 	}

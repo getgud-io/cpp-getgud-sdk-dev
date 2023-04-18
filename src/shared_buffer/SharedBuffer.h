@@ -16,10 +16,10 @@ namespace GetGudSdk
 		std::deque<BaseActionData*> buffer;
 
 		std::mutex game_buffer_locker;
-		std::deque<GameData> game_buffer;
+		std::deque<GameData> start_game_buffer;
 
 		std::mutex match_buffer_locker;
-		std::deque<MatchData> match_buffer;
+		std::deque<MatchData> start_match_buffer;
 
 		std::mutex end_game_locker;
 		std::deque<std::pair<std::chrono::system_clock::time_point, std::string>>

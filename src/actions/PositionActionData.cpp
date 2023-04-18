@@ -4,19 +4,21 @@
 
 using namespace GetGudSdk;
 
-PositionActionData::PositionActionData(BaseData _data_info, std::vector<float> _position) 
+PositionActionData::PositionActionData(BaseData _data_info, PositionF _position, RotationF _rotation)
 	: BaseActionData(_data_info) //fill the base data
 {
 	//fill the action specified data
 	position = _position;
+	rotation = _rotation;
 };
 
 PositionActionData::PositionActionData(std::string _player_guid, std::string _match_guid,
-	long _action_time_epoch, std::vector<float> _position) :
+	long _action_time_epoch, PositionF _position, RotationF _rotation) :
 	BaseActionData({ Actions::Position, _action_time_epoch, _player_guid, _match_guid }) //fill the base data
 {
 	//fill the action specified data
 	position = _position;
+	rotation = _rotation;
 };
 
 PositionActionData::~PositionActionData()
@@ -35,7 +37,7 @@ std::map<std::string, std::string> PositionActionData::get_data()
 	data["match_guid"] = match_guid;
 	data["action_type"] = std::to_string((int)action_type);
 	data["action_time_epoch"] = std::to_string(action_time_epoch);
-	data["position"] = position_to_string(position);
+	data["position"] = position_to_string(position, rotation);
 
 	return data;
 };

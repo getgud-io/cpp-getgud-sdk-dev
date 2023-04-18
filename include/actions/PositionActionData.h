@@ -1,19 +1,18 @@
 #pragma once
 #include "BaseActionData.h"
 
-#include <vector>
-
 namespace GetGudSdk
 {
 	class PositionActionData : public BaseActionData
 	{
 	public:
-		std::vector<float> position;
+		PositionF position;
+		RotationF rotation;
 
 	public:
 		PositionActionData(std::string _player_guid, std::string _match_guid,
-			long _action_time_epoch, std::vector<float> _position);
-		PositionActionData(BaseData _data_info, std::vector<float> _position);
+			long _action_time_epoch, PositionF _position, RotationF _rotation);
+		PositionActionData(BaseData _data_info, PositionF _position, RotationF _rotation);
 		PositionActionData(PositionActionData&) = delete;
 		PositionActionData() = delete;
 		~PositionActionData();

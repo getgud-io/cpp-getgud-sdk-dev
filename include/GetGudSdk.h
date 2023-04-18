@@ -6,6 +6,7 @@
 #include "actions/PositionActionData.h"
 #include "actions/HealActionData.h"
 #include "actions/DeathActionData.h"
+#include "actions/Helpers.h"
 
 #include <deque>
 
@@ -52,11 +53,11 @@ namespace GetGudSdk {
 	bool send_heal_action(std::string match_guid, std::string player_guid, int health_gained, long action_time_epoch);
 
 	bool send_spawn_action(std::string match_guid, std::string player_guid, std::string character_guid,
-		int team_id, int initial_health, std::vector<float> position, long action_time_epoch);
+		int team_id, int initial_health, PositionF position, RotationF rotation, long action_time_epoch);
 
 	bool send_death_action(std::string match_guid, std::string player_guid, long action_time_epoch);
 
-	bool send_position_action(std::string match_guid, std::string player_guid, std::vector<float> position, long action_time_epoch);
+	bool send_position_action(std::string match_guid, std::string player_guid, PositionF position, RotationF rotation, long action_time_epoch);
 
 	void dispose();
 
