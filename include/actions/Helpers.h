@@ -28,21 +28,21 @@ namespace GetGudSdk
 		float Roll = 0;
 	};
 
-	struct GameData
-	{
-		std::string game_guid; //auto-generated value
-		int title_id = 0;
-		std::string server_name;
-		std::string game_mode;
-	};
-
-	struct MatchData
-	{
-		std::string match_guid; //auto-generated value
-		std::string game_guid;
-		std::string match_mode;
-		std::string map_name;
-	};
+	//struct GameData
+	//{
+	//	std::string game_guid; //auto-generated value
+	//	int title_id = 0;
+	//	std::string server_name;
+	//	std::string game_mode;
+	//};
+	//
+	//struct MatchData
+	//{
+	//	std::string match_guid; //auto-generated value
+	//	std::string game_guid;
+	//	std::string match_mode;
+	//	std::string map_name;
+	//};
 
 	struct BaseData
 	{
