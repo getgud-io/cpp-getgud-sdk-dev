@@ -22,7 +22,7 @@ namespace GetGudSdk
 			{
 				int value = 0;
 				value = dist(rd); //generate symbol randomly, using random generator and limit
-				if (value <= 10) //verify if the symbol is number
+				if (value <= 9) //verify if the symbol is number
 					output += (value + 48); // int to char number, append 48 by ASCII table
 				else //the symbol is letter
 					output += (value + 97 - 10); // int to char letter, append 97 by ASCII table

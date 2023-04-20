@@ -141,12 +141,19 @@ namespace GetGudSdk {
 
 	namespace Debug //accessible when the configuration is Debug
 	{
-		std::deque<BaseActionData*> get_buffer()
+		std::deque<BaseActionData*> get_actions_buffer()
 		{
 			std::deque<BaseActionData*> out_buffer;
 			actions_buffer.get_actions(&out_buffer);
 
 			return out_buffer;
+		}
+
+		std::deque<GameData>& get_packets_buffer()
+		{
+			std::deque<GameData> & data = packets_buffer.get_buffer();
+
+			return packets_buffer.get_buffer();
 		}
 	}
 }

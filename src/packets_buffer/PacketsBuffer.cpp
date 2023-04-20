@@ -10,7 +10,7 @@ namespace GetGudSdk
 		buffer_locker.lock();
 
 		//send end game if game already exists
-		for (auto game : buffer) //parse every game in the buffer
+		for (auto& game : buffer) //parse every game in the buffer
 		{
 			if (game.get_game_guid() == game_data.get_game_guid()) //if game found
 			{
@@ -27,7 +27,7 @@ namespace GetGudSdk
 	bool PacketsBuffer::push_end_game(std::string game_guid)
 	{
 		buffer_locker.lock();
-		for (auto game : buffer) //parse every game in the buffer
+		for (auto& game : buffer) //parse every game in the buffer
 		{
 			if (game.get_game_guid() == game_guid) //if game found
 			{
@@ -44,7 +44,7 @@ namespace GetGudSdk
 	{
 		bool result = false;
 		buffer_locker.lock();
-		for (auto game : buffer) //parse every game in the buffer
+		for (auto& game : buffer) //parse every game in the buffer
 		{
 			if (game.get_game_guid() == game_guid) //if game found
 			{
@@ -61,5 +61,12 @@ namespace GetGudSdk
 		buffer.clear();
 		buffer_locker.unlock();
 	}
+
+#ifdef _DEBUG
+	std::deque<GameData>& PacketsBuffer::get_buffer() 
+	{ 
+		return buffer; 
+	};
+#endif
 
 }

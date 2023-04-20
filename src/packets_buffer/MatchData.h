@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../../include/actions/BaseActionData.h"
 
 #include <deque>

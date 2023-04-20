@@ -8,6 +8,10 @@
 #include "actions/DeathActionData.h"
 #include "actions/Helpers.h"
 
+#ifdef _DEBUG
+#include "../src/packets_buffer/GameData.h"
+#endif
+
 #include <deque>
 
 /*
@@ -64,7 +68,8 @@ namespace GetGudSdk {
 #ifdef _DEBUG
 	namespace Debug
 	{
-		std::deque<BaseActionData*> get_buffer();
+		std::deque<BaseActionData*> get_actions_buffer();
+		std::deque<GameData>& get_packets_buffer();
 	}
 #endif
 

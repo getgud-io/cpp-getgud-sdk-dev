@@ -11,10 +11,6 @@ namespace GetGudSdk
 		std::mutex buffer_locker;
 		std::deque<GameData> buffer;
 
-		std::mutex end_game_locker;
-		std::deque<std::pair<std::chrono::system_clock::time_point, std::string>>
-			end_game_buffer; //first value - delay, second value - guid
-
 		bool dispose_required = false;
 
 	public:
@@ -25,5 +21,9 @@ namespace GetGudSdk
 		bool push_match(std::string game_guid, MatchData match_data);
 
 		void dispose();
+
+#ifdef _DEBUG
+		std::deque<GameData>& get_buffer();
+#endif
 	};
 }

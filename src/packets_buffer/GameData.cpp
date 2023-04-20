@@ -13,7 +13,7 @@ namespace GetGudSdk
 		//pointers delete function.
 	}
 
-	std::string& GameData::get_game_guid()
+	std::string GameData::get_game_guid()
 	{
 		return game_guid;
 	}
@@ -46,7 +46,7 @@ namespace GetGudSdk
 			return result;
 		}
 
-		matches.emplace(std::make_pair(key, match_data)); //add new guid and match pair
+		matches.emplace(std::make_pair(key, std::move(match_data))); //add new guid and match pair
 
 		return result;
 	}
