@@ -10,7 +10,7 @@ namespace GetGudSdk
 
 	GameData::~GameData()
 	{
-		//pointers delete function.
+		//verify that containers will be empty
 	}
 
 	std::string GameData::get_game_guid()
@@ -32,7 +32,7 @@ namespace GetGudSdk
 		return true;
 	}
 
-	bool GameData::push_match(MatchData match_data)
+	bool GameData::add_match(MatchData match_data)
 	{
 		bool result = true;
 		//push key, match_data pair
@@ -50,4 +50,11 @@ namespace GetGudSdk
 
 		return result;
 	}
+
+#ifdef _DEBUG
+	std::map<std::string, MatchData>& GameData::get_matches_buffer()
+	{
+		return matches;
+	}
+#endif
 }

@@ -1,12 +1,12 @@
 #include "..\include\GetGudSdk.h"
 #include "utils\Utils.h"
 #include "actions_buffer\ActionsBuffer.h"
-#include "packets_buffer\PacketsBuffer.h"
+#include "game_container\GameContainer.h"
 
 namespace GetGudSdk {
 
 	extern ActionsBuffer actions_buffer;
-	extern PacketsBuffer packets_buffer;
+	extern GameContainer game_container;
 
 	std::string start_game(int title_id, std::string server_name, std::string game_mode)
 	{
@@ -14,7 +14,7 @@ namespace GetGudSdk {
 
 		GameData game_data(game_guid, title_id, server_name, game_mode); //fill game data
 
-		bool result = packets_buffer.push_game(game_data);
+		bool result = game_container.add_game(game_data);
 
 		return game_guid;
 	}
@@ -25,28 +25,40 @@ namespace GetGudSdk {
 
 		MatchData match_data(match_guid, match_mode, map_name); //fill match data
 
-		bool result = packets_buffer.push_match(game_guid, match_data);
+		bool result = game_container.add_match(game_guid, match_data);
 
 		return match_guid;
 	}
 
-	bool end_game(std::string game_guid)
+	bool set_end_game(std::string game_guid)
 	{
-		bool result = packets_buffer.push_end_game(game_guid);
+		bool result = game_container.set_end_game(game_guid);
 
 		return result;
 	}
 
-	//ReportData struct required
-	//bool send_in_match_report(std::string match_guid, ReportData report_data);
+	bool send_in_match_report(std::string match_guid, ReportInfo report_info)
+	{
+		ReportData report_data(report_info);
 
-	//ChatMessageData struct required
-	//bool send_chat(std::string match_guid, ChatMessageData chat_message_data);
+		bool result = game_container.add_report(match_guid, report_data);
+
+		return result;
+	}
+
+	bool send_chat_message(std::string match_guid, std::string player_guid, std::string message)
+	{
+		ChatMessageData chat_message_data(player_guid, message);
+
+		bool result = game_container.add_chat_message(match_guid, chat_message_data);
+
+		return result;
+	}
 
 	bool send_actions(std::deque<BaseActionData*> actions)
 	{
 		//push a deque buffer
-		bool result = actions_buffer.push_actions(actions);
+		bool result = actions_buffer.add_actions(actions);
 		return result;
 	}
 
@@ -56,14 +68,14 @@ namespace GetGudSdk {
 		std::deque<BaseActionData*> _actions(actions.begin(), actions.end());
 
 		//push deque buffer
-		bool result = actions_buffer.push_actions(_actions);
+		bool result = actions_buffer.add_actions(_actions);
 		return result;
 	}
 
 	bool send_action(BaseActionData* action)
 	{
 		//push action
-		bool result = actions_buffer.push_action(action);
+		bool result = actions_buffer.add_action(action);
 		return result;
 	}
 
@@ -72,7 +84,7 @@ namespace GetGudSdk {
 		AttackActionData* attack_data = new AttackActionData(
 			player_guid, match_guid, action_time_epoch, weapon_guid);
 		
-		bool result = actions_buffer.push_action(attack_data);
+		bool result = actions_buffer.add_action(attack_data);
 
 		return result;
 	}
@@ -83,7 +95,7 @@ namespace GetGudSdk {
 		DamageActionData* damage_data = new DamageActionData(
 			player_guid, match_guid, action_time_epoch, damage_done, victim_player_guid, weapon_guid);
 
-		bool result = actions_buffer.push_action(damage_data);
+		bool result = actions_buffer.add_action(damage_data);
 
 		return result;
 	}
@@ -94,7 +106,7 @@ namespace GetGudSdk {
 		HealActionData* heal_data = new HealActionData(
 			player_guid, match_guid, action_time_epoch, health_gained);
 
-		bool result = actions_buffer.push_action(heal_data);
+		bool result = actions_buffer.add_action(heal_data);
 
 		return result;
 	}
@@ -106,7 +118,7 @@ namespace GetGudSdk {
 		SpawnActionData* spawn_data = new SpawnActionData(
 			player_guid, match_guid, action_time_epoch, position, rotation, initial_health, team_id, character_guid);
 
-		bool result = actions_buffer.push_action(spawn_data);
+		bool result = actions_buffer.add_action(spawn_data);
 
 		return result;
 	}
@@ -117,7 +129,7 @@ namespace GetGudSdk {
 		DeathActionData* spawn_data = new DeathActionData(
 			player_guid, match_guid, action_time_epoch);
 
-		bool result = actions_buffer.push_action(spawn_data);
+		bool result = actions_buffer.add_action(spawn_data);
 
 		return result;
 	}
@@ -128,7 +140,7 @@ namespace GetGudSdk {
 		PositionActionData* spawn_data = new PositionActionData(
 			player_guid, match_guid, action_time_epoch, position, rotation);
 
-		bool result = actions_buffer.push_action(spawn_data);
+		bool result = actions_buffer.add_action(spawn_data);
 
 		return result;
 	}
@@ -136,7 +148,7 @@ namespace GetGudSdk {
 	void dispose()
 	{
 		actions_buffer.dispose();
-		packets_buffer.dispose();
+		game_container.dispose();
 	}
 
 	namespace Debug //accessible when the configuration is Debug
@@ -149,11 +161,18 @@ namespace GetGudSdk {
 			return out_buffer;
 		}
 
-		std::deque<GameData>& get_packets_buffer()
+		std::deque<GameData>& get_game_container()
 		{
-			std::deque<GameData> & data = packets_buffer.get_buffer();
+			std::deque<GameData> & data = game_container.get_buffer();
 
-			return packets_buffer.get_buffer();
+			return game_container.get_buffer();
+		}
+
+		std::map<std::string, MatchData>* get_matches_buffer(std::string game_guid)
+		{
+			std::map<std::string, MatchData>* data = game_container.get_matches(game_guid);
+
+			return data;
 		}
 	}
 }

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../../include/actions/BaseActionData.h"
-
+#include "ChatMessageData.h"
+#include "ReportData.h"
 #include <deque>
 #include <mutex>
 
 namespace GetGudSdk
 {
-
 	class MatchData
 	{
 	private:
@@ -22,6 +22,7 @@ namespace GetGudSdk
 
 	public:
 		MatchData(std::string _match_guid, std::string _match_mode, std::string _map_name);
+		~MatchData();
 		std::string& get_match_guid();
 	};
 }

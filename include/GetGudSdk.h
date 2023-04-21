@@ -9,7 +9,7 @@
 #include "actions/Helpers.h"
 
 #ifdef _DEBUG
-#include "../src/packets_buffer/GameData.h"
+#include "../src/game_container/GameData.h"
 #endif
 
 #include <deque>
@@ -38,13 +38,11 @@ namespace GetGudSdk {
 
 	std::string start_match(std::string game_guid, std::string match_mode, std::string map_name);
 
-	bool end_game(std::string game_guid);
+	bool set_end_game(std::string game_guid);
 
-	//ReportData struct required
-	//bool send_in_match_report(std::string match_guid, ReportData report_data);
+	bool send_in_match_report(std::string match_guid, ReportInfo report_info);
 
-	//ChatMessageData struct required
-	//bool send_chat(std::string match_guid, ChatMessageData chat_message_data);
+	bool send_chat_message(std::string match_guid, std::string player_guid, std::string message);
 
 	bool send_actions(std::vector<BaseActionData*> actions);
 	bool send_actions(std::deque<BaseActionData*> actions);
@@ -69,7 +67,8 @@ namespace GetGudSdk {
 	namespace Debug
 	{
 		std::deque<BaseActionData*> get_actions_buffer();
-		std::deque<GameData>& get_packets_buffer();
+		std::deque<GameData>& get_game_container();
+		std::map<std::string, MatchData>* get_matches_buffer(std::string game_guid);
 	}
 #endif
 

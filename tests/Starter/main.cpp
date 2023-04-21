@@ -35,7 +35,9 @@ int main()
 
     std::string match3 = GetGudSdk::start_match(guid, "match2 mode", "map2 name");
 
-    bool result = GetGudSdk::end_game(guid);
+    auto* matches_buffer_data = GetGudSdk::Debug::get_matches_buffer(guid);
+
+    bool result = GetGudSdk::set_end_game(guid);
 
     return 0;
 }

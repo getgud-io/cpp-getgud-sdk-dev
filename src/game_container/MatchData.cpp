@@ -8,6 +8,17 @@ namespace GetGudSdk
 
 	}
 
+	MatchData::~MatchData()
+	{
+		//delete every action's pointer in the buffer
+		for (auto it = actions.begin(); it != actions.end(); ++it)
+		{
+			delete* it;
+		}
+
+		actions.clear();
+	}
+
 	std::string& MatchData::get_match_guid()
 	{
 		return match_guid;

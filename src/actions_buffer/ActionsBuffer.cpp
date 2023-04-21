@@ -33,7 +33,7 @@ namespace GetGudSdk
 	}
 
 	//append a new action at the end of the buffer
-	bool ActionsBuffer::push_action(BaseActionData* in_action)
+	bool ActionsBuffer::add_action(BaseActionData* in_action)
 	{
 		buffer_locker.lock();
 		buffer.push_back(in_action);
@@ -43,7 +43,7 @@ namespace GetGudSdk
 	}
 
 	//append an array of actions to the bufer
-	bool ActionsBuffer::push_actions(std::deque<BaseActionData*>& in_buffer)
+	bool ActionsBuffer::add_actions(std::deque<BaseActionData*>& in_buffer)
 	{
 		buffer_locker.lock();
 		buffer.insert(buffer.end(), in_buffer.begin(), in_buffer.end());

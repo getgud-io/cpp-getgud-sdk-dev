@@ -20,8 +20,8 @@ namespace GetGudSdk
 	public:
 		bool get_first_action(BaseActionData* out_action);
 		bool get_actions(std::deque<BaseActionData*>* out_buffer);
-		bool push_action(BaseActionData* in_action);
-		bool push_actions(std::deque<BaseActionData*>& in_buffer);
+		bool add_action(BaseActionData* in_action);
+		bool add_actions(std::deque<BaseActionData*>& in_buffer);
 		void dispose();
 	};
 }
