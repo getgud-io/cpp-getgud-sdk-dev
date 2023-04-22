@@ -20,12 +20,13 @@ namespace GetGudSdk
 		GameData(std::string _game_guid, int _title_id, std::string _server_name, std::string _game_mode);
 		~GameData();
 		
-	public:
-		std::string get_game_guid();
+	public: //sdk functions
 		bool set_end_game(std::chrono::system_clock::time_point end_time);
 		bool add_match(MatchData match_data);
-#ifdef _DEBUG
-		std::map<std::string, MatchData>& get_matches_buffer(); //replace to get buffer in debug mode
-#endif
+
+	public: //game updater functions
+		std::string get_game_guid();
+		std::map<std::string, MatchData>& get_matches_buffer();
+		void game_to_string(std::string& game_out);
 	};
 }

@@ -9,14 +9,16 @@ namespace GetGudSdk
 	class GameContainer
 	{
 	private:
-		std::mutex buffer_locker;
-		std::deque<GameData> buffer;
+		std::mutex games_buffer_locker;
+		std::deque<GameData> games;
 		std::map<std::string, std::deque<ChatMessageData>> chat_messages;
 		std::map<std::string, std::deque<ReportData>> reports;
 
 		bool dispose_required = false;
 
-	public:
+		std::string private_key = "c3b6ff90-5b1e-11ed-9c6e-1d473e0b061e"; //will be replaced by config
+
+	public: //sdk functions
 		bool add_game(GameData game_data);
 
 		bool set_end_game(std::string game_guid);
@@ -28,6 +30,11 @@ namespace GetGudSdk
 		bool add_chat_message(std::string match_guid, ChatMessageData match_data);
 
 		void dispose();
+
+	public: //GameSender functions
+		bool add_actions(std::string match_guid, std::deque<BaseActionData*>& actions_buffer);
+		bool add_sorted_actions(std::string match_guid, std::deque<BaseActionData*>& actions_buffer);
+		void get_game_stream(std::string& stream_out, bool erase);
 
 #ifdef _DEBUG
 		std::deque<GameData>& get_buffer();

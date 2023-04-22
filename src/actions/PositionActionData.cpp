@@ -33,11 +33,21 @@ std::map<std::string, std::string> PositionActionData::get_data()
 
 	//fill the buffer by key, value
 	data["player_guid"] = player_guid;
-	data["game_guid"] = game_guid;
+	//data["game_guid"] = game_guid; //not required
 	data["match_guid"] = match_guid;
 	data["action_type"] = std::to_string((int)action_type);
 	data["action_time_epoch"] = std::to_string(action_time_epoch);
 	data["position"] = position_to_string(position, rotation);
 
 	return data;
+};
+
+std::string PositionActionData::get_action_stream()
+{
+	std::map<std::string, std::string> data = get_data();
+	std::string output_string;
+
+	//TODO: create string here
+
+	return output_string;
 };

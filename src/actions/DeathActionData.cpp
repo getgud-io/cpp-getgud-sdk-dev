@@ -28,10 +28,19 @@ std::map<std::string, std::string> DeathActionData::get_data()
 
 	//fill the buffer by key, value
 	data["player_guid"] = player_guid;
-	data["game_guid"] = game_guid;
+	//data["game_guid"] = game_guid; //not required
 	data["match_guid"] = match_guid;
 	data["action_type"] = std::to_string((int)action_type);
 	data["action_time_epoch"] = std::to_string(action_time_epoch);
 
 	return data;
+};
+
+std::string DeathActionData::get_action_stream()
+{
+	std::string output_string;
+
+	//TODO: create string here
+
+	return output_string;
 };

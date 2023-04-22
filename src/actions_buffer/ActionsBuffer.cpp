@@ -8,10 +8,8 @@ namespace GetGudSdk
 	//return to out_action the first action in the buffer
 	bool ActionsBuffer::get_first_action(BaseActionData* out_action)
 	{
-		buffer_locker.lock();
-		out_action = *buffer.begin(); //copy value of the first element
-		buffer.erase(buffer.begin());
-		buffer_locker.unlock();
+		out_action = *unified_actions.begin(); //copy value of the first element
+		unified_actions.erase(unified_actions.begin());
 
 		return true;
 	}
@@ -19,15 +17,16 @@ namespace GetGudSdk
 	//return all actions from the buffer, clean the buffer
 	bool ActionsBuffer::get_actions(std::deque<BaseActionData*>* out_buffer)
 	{
+		if (unified_actions.size() == 0) //check if buffer doesnt have any action
+			return false; //return error
+
 		//make or clean a new buffer in order to swap it with the buffer
 		if (out_buffer == nullptr)
 			out_buffer = new std::deque<BaseActionData*>();
 		else if (out_buffer->size())
 			out_buffer->clear();
 
-		buffer_locker.lock();
-		out_buffer->swap(buffer); //fast processing function to move elements from the buffer
-		buffer_locker.unlock();
+		out_buffer->swap(unified_actions); //fast processing function to move elements from the buffer
 
 		return true;
 	}
@@ -35,9 +34,7 @@ namespace GetGudSdk
 	//append a new action at the end of the buffer
 	bool ActionsBuffer::add_action(BaseActionData* in_action)
 	{
-		buffer_locker.lock();
-		buffer.push_back(in_action);
-		buffer_locker.unlock();
+		unified_actions.push_back(in_action);
 
 		return true;
 	}
@@ -45,9 +42,7 @@ namespace GetGudSdk
 	//append an array of actions to the bufer
 	bool ActionsBuffer::add_actions(std::deque<BaseActionData*>& in_buffer)
 	{
-		buffer_locker.lock();
-		buffer.insert(buffer.end(), in_buffer.begin(), in_buffer.end());
-		buffer_locker.unlock();
+		unified_actions.insert(unified_actions.end(), in_buffer.begin(), in_buffer.end());
 
 		return true;
 	}
@@ -57,9 +52,7 @@ namespace GetGudSdk
 		dispose_required = true; //set dispose to background thread
 
 		//clear all buffers via lockers
-		buffer_locker.lock();
-		buffer.clear();
-		buffer_locker.unlock();
+		unified_actions.clear();
 	}
 	
 }

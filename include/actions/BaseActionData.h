@@ -16,7 +16,7 @@ namespace GetGudSdk
 		Actions action_type = Actions::none; //replace to enum
 		long action_time_epoch = 0;
 		std::string player_guid;
-		std::string game_guid;
+		//std::string game_guid; doesnt use on this stage
 		std::string match_guid;
 
 	public:
@@ -24,6 +24,8 @@ namespace GetGudSdk
 		BaseActionData() = delete;
 		BaseActionData(BaseActionData&) = delete;
 		~BaseActionData();
+		bool operator()(BaseActionData& a, BaseActionData& b);
 		virtual std::map<std::string, std::string> get_data();
+		virtual std::string get_action_stream();
 	};
 }

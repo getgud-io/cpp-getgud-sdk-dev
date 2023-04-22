@@ -51,10 +51,55 @@ namespace GetGudSdk
 		return result;
 	}
 
-#ifdef _DEBUG
+	void GameData::game_to_string(std::string& game_out)
+	{
+		//{
+		//		"privateKey": "c3b6ff90-5b1e-11ed-9c6e-1d473e0b061e",
+		//		"titleId" : 24,
+		//		"gameGuid" : "549cf69d-0d55-4849-b2d1-a49a4f0a0b1a",
+		//		"gameMode" : "Guys_Mode!",
+		//		"gameLastPacket" : true,
+		//		"matches" :
+		//		[
+
+		game_out += "	\"titleId\": \"" + std::to_string(title_id) + "\",\n";
+		game_out += "	\"gameGuid\": " + game_guid + ",\n";
+		game_out += "	\"gameMode\": \"" + game_mode + "\",\n";
+		game_out += "	\"gameLastPacket\": " + std::string("true") + ",\n";
+		game_out += "	\"matches\":\n	[\n";
+
+		for (auto& match : matches)
+		{
+			//	"matchGuid": "8a600280-33d2-44cf-9eb7-06a497fc219e",
+			//	"mapName" : "Dust",
+			//	"matchMode" : "night",
+			game_out += "	{\n";
+			game_out += "	\"matchGuid\": \"" + match.first + "\",\n"; //first value is match_guid
+			game_out += "	\"mapName\": \"" + match.second.get_map_name() + "\",\n";
+			game_out += "	\"matchMode\": \"" + match.second.get_match_mode() + "\",\n";
+			game_out += "	\"matchActionSteam\": \""; //stream start
+
+			//std::deque<BaseActionData*> sorted_actions; //have 2 choises, should be tested
+			//match.second.get_sorted_actions(sorted_actions); //make a new buffer and copy actions to sorted buffer
+			match.second.sort_actions();
+			for (auto& action : match.second.get_actions())
+			{
+				game_out += action->get_action_stream() + ",";
+			}
+			//no need by syntax
+			//game_out[game_out.size() - 1] = '\"'; //replace last ',' symbol
+			game_out += "\",\n"; //stream end
+			game_out += "	},\n";
+		}
+		game_out.pop_back(); //delete last '\n'
+		game_out.pop_back(); //delete last ','
+
+		game_out += "\n	]\n"; //end matches
+
+	};
+
 	std::map<std::string, MatchData>& GameData::get_matches_buffer()
 	{
 		return matches;
 	}
-#endif
 }

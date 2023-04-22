@@ -23,7 +23,17 @@ BaseActionData::~BaseActionData()
 	total_amount = total_amount - 1; //total amount counter decreasing when action deletes
 };
 
+bool BaseActionData::operator()(BaseActionData& a, BaseActionData& b)
+{
+	return a.action_time_epoch < b.action_time_epoch;
+}
+
 std::map<std::string, std::string> BaseActionData::get_data() 
 {
 	return std::map<std::string, std::string>(); //empty filled buffer, inheritance syntax
+};
+
+std::string BaseActionData::get_action_stream()
+{
+	return std::string();
 };

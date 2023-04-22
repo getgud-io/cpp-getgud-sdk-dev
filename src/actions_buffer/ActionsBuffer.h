@@ -12,8 +12,7 @@ namespace GetGudSdk
 	class ActionsBuffer
 	{
 	private:
-		std::mutex buffer_locker;
-		std::deque<BaseActionData*> buffer;
+		std::deque<BaseActionData*> unified_actions;
 
 		bool dispose_required = false;
 

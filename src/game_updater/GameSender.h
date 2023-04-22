@@ -4,6 +4,7 @@
 #include "..\game_container\GameContainer.h"
 #include <thread>
 #include <chrono>
+#include <unordered_map>
 
 namespace GetGudSdk
 {
@@ -36,14 +37,19 @@ namespace GetGudSdk
 	private: //parameters
 		bool stop_required;
 		
-	private:
-		void CheckActions();
-		void SendPacket(std::string& packet);
+	private: //calculation helpers
+		void split_actions_by_match(std::deque<BaseActionData*>& actions_in,
+			std::unordered_map<std::string, std::deque<BaseActionData*>>& actions_out);
+
+	private: //update logic
+		void check_actions();
+		void append_splitted_actions(std::unordered_map<std::string, std::deque<BaseActionData*>>& actions_it);
+		void send_packet(std::string& packet);
 
 	public: //main functions
 		GameSender();
 		~GameSender();
 
-		void UpdateLoop();
+		void update_loop();
 	};
 }

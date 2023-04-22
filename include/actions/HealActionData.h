@@ -17,5 +17,6 @@ namespace GetGudSdk
 		~HealActionData();
 
 		std::map<std::string, std::string> get_data() override;
+		std::string get_action_stream() override;
 	};
 }
