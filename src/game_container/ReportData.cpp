@@ -2,18 +2,27 @@
 
 namespace GetGudSdk
 {
+	/**
+	* ReportData:
+	* @report_info: All the report metadata in the ReportInfo struct
+	*
+	* Creates a new report that will be used in GameData Container
+	**/
 	ReportData::ReportData(ReportInfo report_info)
 		: info(report_info)
 	{
 
 	}
 
+	/**
+	* get_data:
+	*
+	* Assigns the fields from ReportData class to the map data struct
+	**/
 	std::map<std::string, std::string> ReportData::get_data()
 	{
-		//make a new buffer with <key, value> pairs
 		std::map<std::string, std::string> data;
 
-		//fill the buffer by key, value
 		data["match_guid"] = info.match_guid;
 		data["reporter_name"] = info.reporter_name;
 		data["reporter_type"] = std::to_string(info.reporter_type);
