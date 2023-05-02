@@ -14,28 +14,6 @@ GameSender::GameSender()
     init_curl();
 }
 
-GameSender::~GameSender() 
-{
-    logger.log(LogType::MESSAGE, LogLevel::Processes, "Game sender disposed");
-    stop_required = true;
-    updater_thread.detach();
-}
-
-void GameSender::init_curl() 
-{
-    logger.log(LogType::MESSAGE, LogLevel::Responses, "REST Api connection prepared");
-
-    curl = curl_easy_init();
-    headers = curl_slist_append(headers, "Accept: application/json");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, "charset: utf-8");
-
-    // TODO: describe what this does
-    curl_easy_setopt(curl, CURLOPT_POST, 1); 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_URL, sdk_config.rest_api_link);
-}
-
 void GameSender::start(int sleep_interval_milli) 
 {
     thread_working = true;
@@ -61,10 +39,11 @@ void GameSender::send_next_game()
     if(game_data_to_send == null) return;
 
     // convert the game to a sendable string and send it to Getgud.io's could using curl
-    send_game_packet(game_data_to_send.game_to_string(&game_out));
+    game_data_to_send.game_to_string(&game_out);
+    send_game_packet(&game_out);
 }
 
-CURLcode GameSender::send_packet(std::string& packet) {
+CURLcode GameSender::send_game_packet(std::string& packet) {
   if (!curl) 
   {
     return CURLcode::CURLE_SEND_ERROR;
@@ -78,6 +57,28 @@ CURLcode GameSender::send_packet(std::string& packet) {
   CURLcode send_code = curl_easy_perform(curl); 
 
   return send_code;
+}
+
+void GameSender::init_curl() 
+{
+    logger.log(LogType::MESSAGE, LogLevel::Responses, "REST Api connection prepared");
+
+    curl = curl_easy_init();
+    headers = curl_slist_append(headers, "Accept: application/json");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, "charset: utf-8");
+
+    // TODO: describe what this does
+    curl_easy_setopt(curl, CURLOPT_POST, 1); 
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_URL, sdk_config.rest_api_link);
+}
+
+GameSender::~GameSender() 
+{
+    logger.log(LogType::MESSAGE, LogLevel::Processes, "Game sender disposed");
+    stop_required = true;
+    updater_thread.detach();
 }
 
 
