@@ -51,7 +51,7 @@ namespace GetGudSdk
 		
 		void init_curl();
 		void send_next_game();
+		void manage_hyper_mode();
 		CURLcode send_game_packet(std::string& packet);
-
 	};
 }

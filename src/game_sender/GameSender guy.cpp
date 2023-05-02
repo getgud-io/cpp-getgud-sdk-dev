@@ -22,7 +22,8 @@ void GameSender::start(int sleep_interval_milli)
     updater_thread = std::thread([&]() 
     {
         std::this_thread::sleep_for(std::chrono::seconds(sleep_in_milli * 1000));
-        send_next_game(); 
+        send_next_game();
+        manage_hyper_mode(); 
     });
 }
 
@@ -38,9 +39,20 @@ void GameSender::send_next_game()
     GameData game_data_to_send = game_container.pop_next_game_to_process();
     if(game_data_to_send == null) return;
 
-    // convert the game to a sendable string and send it to Getgud.io's could using curl
+    // convert the game to a sendable string and send it to Getgud.io's cloud using curl
     game_data_to_send.game_to_string(&game_out);
     send_game_packet(&game_out);
+}
+
+void GameSender::manage_hyper_mode()
+{
+    // first check if hyper mode is even enabled
+
+    // then check if hyper mode needs to be activated - buffer might be small enough that hyper mode is not needed
+
+    // check if the number of threads we currently have is the right number, we might need to kill and spawn new GameSenders according to buffer size
+
+    // spawn or mark threads not to wake up again as needed - be sure to stagger the creation of the threads to avoid them all waking up at the same time  
 }
 
 CURLcode GameSender::send_game_packet(std::string& packet) {
