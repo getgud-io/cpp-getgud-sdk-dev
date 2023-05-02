@@ -36,7 +36,7 @@ namespace GetGudSdk
 
 		bool AddChatMessage(std::string matchGuid, ChatMessageData matchData);
 
-		GameData PopNextGameDataToSend();
+		GameData PopNextGameDataToProcess();
 
 		bool MarkEndGame(std::string gameGuid);
 
