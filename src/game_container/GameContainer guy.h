@@ -30,13 +30,13 @@ namespace GetGudSdk
 
 		bool AddMatch(std::string gameGuid, std::string matchMode, std::string mapName);
 
-		bool AddActions(std::string matchGuid, std::vector<BaseActionData*>& actionVector);
+		bool add_actions(std::vector<BaseActionData*>& action_vector);
 
 		bool AddInMatchReport(std::string matchGuid, ReportData reportData);
 
 		bool AddChatMessage(std::string matchGuid, ChatMessageData matchData);
 
-		GameData PopNextGameDataToProcess();
+		GameData pop_next_game_to_process();
 
 		bool MarkEndGame(std::string gameGuid);
 
