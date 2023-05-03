@@ -33,7 +33,7 @@ namespace GetGudSdk
 
 		PlayerUpdater();
 		void start(int sleep_interval_milli);
-		bool add_players(std::vector<PlayerInfo*> player_vector);
+		bool add_players(int titleId, std::string privateKey, std::vector<PlayerInfo*> player_vector);
 		~PlayerUpdater();
 		dispose();	
 		

@@ -33,7 +33,7 @@ namespace GetGudSdk
 
 		ReportSender();
 		void start(int sleep_interval_milli);
-		bool add_reports(std::vector<ReportInfo*> report_vector);
+		bool add_reports(int titleId, std::string privateKey, std::vector<ReportInfo*> report_vector);
 		~ReportSender();
 		dispose();	
 		

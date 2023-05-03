@@ -26,7 +26,7 @@ void ReportSender::start(int sleep_interval_milli)
     });
 }
 
-bool ReportSender::add_reports(std::vector<ReportData*> arriving_report_vector) 
+bool ReportSender::add_reports(int titleId, std::string privateKey, std::vector<ReportData*> arriving_report_vector) 
 {
     // before doing anything, make sure the report vector has enough room for more reports
     if (aGame_vector.size() > sdk_config.reports_max_buffer_size)
@@ -40,7 +40,7 @@ bool ReportSender::add_reports(std::vector<ReportData*> arriving_report_vector)
     // insert the arriving new reports to the report vector, to be consumed later on by the background thread
     for(int index = 0; index < arriving_report_vector.size(); index++)
     {
-        report_vector.insert(report_vector.begin(), new ReportData(arriving_report_vector[index]));
+        report_vector.insert(report_vector.begin(), new ReportData(titleId, privateKey, arriving_report_vector[index]));
     }
     
     report_sender_mutex.unlock();
