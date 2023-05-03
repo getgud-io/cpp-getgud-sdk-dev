@@ -26,21 +26,21 @@ namespace GetGudSdk
 		WaitTime send_produce;
 	};
 
-	class ReportSender
+	class PlayerUpdater
 	{
 
 	public: 
 
-		ReportSender();
+		PlayerUpdater();
 		void start(int sleep_interval_milli);
-		bool add_reports(std::vector<ReportInfo*> report_vector);
-		~ReportSender();
+		bool add_players(std::vector<PlayerInfo*> player_vector);
+		~PlayerUpdater();
 		dispose();	
 		
 	private:
 
 		// holds all the reports being sent by the client to the SDK
-		std::vector<ReportData*> report_vector;
+		std::vector<ReportData*> player_vector;
 
 		// helpers and data holders
 		std::thread updater_thread;
@@ -49,12 +49,12 @@ namespace GetGudSdk
 		curl_slist* headers = NULL; 
 		CURL* curl = nullptr; 
 		bool stop_required = false;
-		std::mutex report_sender_mutex; 
+		std::mutex player_updater_mutex; 
 		
 	private:
 		
 		void init_curl();
-		void send_next_report_batch();
-		CURLcode send_report_packet(std::string& packet);
+		void send_next_player_batch();
+		CURLcode send_update_players_packet(std::string& packet);
 	};
 }

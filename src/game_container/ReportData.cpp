@@ -27,7 +27,7 @@ namespace GetGudSdk
 		data["reporter_name"] = info.reporter_name;
 		data["reporter_type"] = std::to_string(info.reporter_type);
 		data["reporter_sub_type"] = std::to_string(info.reporter_sub_type);
-		data["suspected_player_name"] = info.suspected_player_name;
+		data["suspected_player_guid"] = info.suspected_player_guid;
 		data["tb_type"] = std::to_string(info.tb_type);
 		data["tb_sub_type"] = std::to_string(info.tb_sub_type);
 		data["tb_time_epoch"] = std::to_string(info.tb_time_epoch);

@@ -63,8 +63,11 @@ namespace GetGudSdk {
         RotationF rotation,
         long action_time_epoch
     );
-    bool send_reports(std::vector<ReportData*> report_vector);
-    bool update_players_data(std::vector<PlayerData*> player_vector);
+    
+    bool send_reports(int titleId, std::string privateKey, std::vector<ReportInfo*> report_vector);
+    bool send_reports(std::vector<ReportInfo*> report_vector); // will take title id and PK from env variables 
+    bool update_players(int titleId, std::string privateKey, std::vector<PlayerInfo*> player_vector);
+    bool update_players(std::vector<PlayerInfo*> player_vector); // will take title id and PK from env variables 
     void dispose();
 
 }  // namespace GetGudSdk

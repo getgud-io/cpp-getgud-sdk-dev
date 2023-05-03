@@ -40,7 +40,7 @@ bool ReportSender::add_reports(std::vector<ReportData*> arriving_report_vector)
     // insert the arriving new reports to the report vector, to be consumed later on by the background thread
     for(int index = 0; index < arriving_report_vector.size(); index++)
     {
-        report_vector.insert(report_vector.begin(), arriving_report_vector[index].clone());
+        report_vector.insert(report_vector.begin(), new ReportData(arriving_report_vector[index]));
     }
     
     report_sender_mutex.unlock();

@@ -87,7 +87,7 @@ namespace GetGudSdk {
    * @reporter_name:
    * @reporter_type:
    * @reporter_sub_type:
-   * @suspected_player_name:
+   * @suspected_player_guid:
    * @tb_type:
    * @tb_sub_type:
    * @tb_time_epoch:
@@ -101,12 +101,20 @@ namespace GetGudSdk {
     std::string reporter_name;
     int reporter_type = 0;
     int reporter_sub_type = 0;
-    std::string suspected_player_name;
+    std::string suspected_player_guid;
     int tb_type = 0;
     int tb_sub_type = 0;
     long tb_time_epoch = 0;
     int suggested_toxicity_score = 0;
     long reported_time_epoch = 0;
+  };
+
+    struct PlayerInfo {
+    std::string player_guid;
+    std::string player_nickname;
+    std::string player_email;
+    int player_rank;
+    long player_join_date_epoch;
   };
 
   /**
