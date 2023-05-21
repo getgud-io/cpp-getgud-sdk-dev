@@ -1,31 +1,18 @@
 #pragma once
-#include <string>
 #include <map>
+#include <string>
 
 #include "../../include/actions/Helpers.h"
 
-namespace GetGudSdk
-{
-    class ReportData
-    {
-    private:
-        ReportInfo info;
+namespace GetGudSdk {
+unsigned int GetReportDataSize();
 
-    public:
-
-        /**
-        * ReportData:
-        * @report_info: All the report metadata in the ReportInfo struct
-        *
-        * Creates a new report that will be used in GameData Container
-        **/
-        ReportData(ReportInfo report_info);
-
-        /**
-        * get_data:
-        *
-        * Assigns the fields from ReportData class to the map data struct
-        **/
-        std::map<std::string, std::string> get_data();
-    };
-}
+class ReportData {
+ public:
+  int titleId = 0;
+  std::string privateKey;
+  ReportInfo reportInfo;
+  ReportData(int titleId, std::string privateKey, ReportInfo reportInfo);
+  std::string ToString();
+};
+}  // namespace GetGudSdk

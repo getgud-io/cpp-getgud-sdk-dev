@@ -2,6 +2,7 @@
 *.user
 *.vcxproj.filters
 *.htm
+.vscode
 
 # Windows files
 x64
@@ -9,3 +10,18 @@ x64
 
 # Temp files
 build
+*logs.txt
+
+# Custom
+.editorconfig
+
+# libss
+libs/*
+
+build/*
+
+.vscode/*
+
+libs
+
+output.txt

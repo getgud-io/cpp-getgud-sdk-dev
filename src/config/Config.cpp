@@ -1,8 +1,10 @@
-#include "../../include/config/Config.h"
+#include "../config/Config.h"
+#include "../logger/Logger.h"
+#include "../utils/Validator.h"
 
-//file modification verification
-#include <sys/types.h>
+// file modification verification
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
@@ -11,89 +13,228 @@
 #define stat _stat
 #endif
 
+#include <fstream>
 #include <iostream>
 #include <memory>
-#include <fstream>
-
-time_t config_edit_time = 0;
 
 namespace GetGudSdk {
-Config sdk_config;
+Config sdkConfig;
+extern Logger logger;
 
 /**
-* Config:
-* 
-* Constructor of Config, properties will manage the SDK features
-**/
-Config::Config() {
+ * LoadSettings:
+ *
+ * Get values of variables from the config file
+ **/
+void Config::LoadSettings() {
+  char* logsFilePathHolder = std::getenv("LOG_FILE_PATH");
+  if (logsFilePathHolder == nullptr) {
+    logger.Log(
+        LogType::FATAL,
+        std::string("Error: environment variable LOG_FILE_PATH is required"));
+    return;
+  }
+  std::string _logsFilePath(logsFilePathHolder);
+  logsFilePath = _logsFilePath;
+
+  // TODO: check what will the values be if config path is wrong
+  std::map<std::string, std::string> configData = ReadUserConfigFile();
+
+  // Read all Getgud API URLs
+  sdkConfig.streamGameURL = GetConfigValue<std::string>(
+      configData, sdkConfigFieldNames.streamGameURL);
+  sdkConfig.updatePlayersURL = GetConfigValue<std::string>(
+      configData, sdkConfigFieldNames.updatePlayersURL);
+  sdkConfig.sendReportsURL = GetConfigValue<std::string>(
+      configData, sdkConfigFieldNames.sendReportsURL);
+  sdkConfig.throttleCheckUrl = GetConfigValue<std::string>(
+      configData, sdkConfigFieldNames.throttleCheckUrl);
+
+  // Read report sender variables
+  unsigned int reportsMaxBufferSizeInBytes = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.reportsMaxBufferSizeInBytes);
+  if (Validator::ValidateItemValue(reportsMaxBufferSizeInBytes, 0U,
+                                   10000000U)) {
+    sdkConfig.reportsMaxBufferSizeInBytes = reportsMaxBufferSizeInBytes;
+  }
+
+  unsigned int maxReportsToSendAtOnce = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.maxReportsToSendAtOnce);
+  if (Validator::ValidateItemValue(maxReportsToSendAtOnce, 0U, 100U)) {
+    sdkConfig.maxReportsToSendAtOnce = maxReportsToSendAtOnce;
+  }
+
+  // Read player updeter variables
+  unsigned int playersMaxBufferSizeInBytes = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.playersMaxBufferSizeInBytes);
+  if (Validator::ValidateItemValue(playersMaxBufferSizeInBytes, 0U,
+                                   10000000U)) {
+    sdkConfig.playersMaxBufferSizeInBytes = playersMaxBufferSizeInBytes;
+  }
+
+  unsigned int maxPlayerUpdatesToSendAtOnce = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.maxPlayerUpdatesToSendAtOnce);
+  if (Validator::ValidateItemValue(maxPlayerUpdatesToSendAtOnce, 0U, 100U)) {
+    sdkConfig.maxPlayerUpdatesToSendAtOnce = maxPlayerUpdatesToSendAtOnce;
+  }
+
+  // Read game sender variables
+  unsigned int gameSenderSleepIntervalMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.gameSenderSleepIntervalMilliseconds);
+  if (Validator::ValidateItemValue(gameSenderSleepIntervalMilliseconds, 0U,
+                                   5000U)) {
+    sdkConfig.gameSenderSleepIntervalMilliseconds =
+        gameSenderSleepIntervalMilliseconds;
+  }
+  unsigned int apiTimeoutMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.apiTimeoutMilliseconds);
+  if (Validator::ValidateItemValue(apiTimeoutMilliseconds, 0U, 20000U)) {
+    sdkConfig.apiTimeoutMilliseconds = apiTimeoutMilliseconds;
+  }
+  unsigned int apiWaitTimeMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.apiWaitTimeMilliseconds);
+  if (Validator::ValidateItemValue(apiWaitTimeMilliseconds, 0U, 20000U)) {
+    sdkConfig.apiWaitTimeMilliseconds = apiWaitTimeMilliseconds;
+  }
+  unsigned int packetMaxSizeInBytes =
+      GetConfigValue<int>(configData, sdkConfigFieldNames.packetMaxSizeInBytes);
+  if (Validator::ValidateItemValue(packetMaxSizeInBytes, 0U, 2000000U)) {
+    sdkConfig.packetMaxSizeInBytes = packetMaxSizeInBytes;
+  }
+
+  // Read action buffer variables
+  unsigned int actionsBufferMaxSizeInBytes = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.actionsBufferMaxSizeInBytes);
+  if (Validator::ValidateItemValue(actionsBufferMaxSizeInBytes, 500U,
+                                   100000000U)) {
+    sdkConfig.actionsBufferMaxSizeInBytes = actionsBufferMaxSizeInBytes;
+  }
+
+  // Read game container variables
+  unsigned int gameContainerMaxSizeInBytes = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.gameContainerMaxSizeInBytes);
+  if (Validator::ValidateItemValue(gameContainerMaxSizeInBytes, 500U,
+                                   500000000U)) {
+    sdkConfig.gameContainerMaxSizeInBytes = gameContainerMaxSizeInBytes;
+  }
+  unsigned int maxGames =
+      GetConfigValue<int>(configData, sdkConfigFieldNames.maxGames);
+  if (Validator::ValidateItemValue(maxGames, 1U, 100U)) {
+    sdkConfig.maxGames = maxGames;
+  }
+  unsigned int maxMatchesPerGame =
+      GetConfigValue<int>(configData, sdkConfigFieldNames.maxMatchesPerGame);
+  if (Validator::ValidateItemValue(maxMatchesPerGame, 1U, 100U)) {
+    sdkConfig.maxMatchesPerGame = maxMatchesPerGame;
+  }
+  unsigned int minPacketSizeForSendingInBytes = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.minPacketSizeForSendingInBytes);
+  if (Validator::ValidateItemValue(minPacketSizeForSendingInBytes, 500U,
+                                   1500000U)) {
+    sdkConfig.minPacketSizeForSendingInBytes = minPacketSizeForSendingInBytes;
+  }
+  unsigned int packetTimeoutInMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.packetTimeoutInMilliseconds);
+  if (Validator::ValidateItemValue(packetTimeoutInMilliseconds, 500U, 10000U)) {
+    sdkConfig.packetTimeoutInMilliseconds = packetTimeoutInMilliseconds;
+  }
+  unsigned int gameCloseGraceAfterMarkEndInMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.gameCloseGraceAfterMarkEndInMilliseconds);
+  if (Validator::ValidateItemValue(gameCloseGraceAfterMarkEndInMilliseconds, 0U,
+                                   30000U)) {
+    sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds =
+        gameCloseGraceAfterMarkEndInMilliseconds;
+  }
+  unsigned int liveGameTimeoutInMilliseconds = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.liveGameTimeoutInMilliseconds);
+  if (Validator::ValidateItemValue(liveGameTimeoutInMilliseconds, 0U,
+                                   300000U)) {
+    sdkConfig.liveGameTimeoutInMilliseconds = liveGameTimeoutInMilliseconds;
+  }
+
+  // Read hyper mode variables
+  bool hyperModeFeatureEnabled = GetConfigValue<bool>(
+      configData, sdkConfigFieldNames.hyperModeFeatureEnabled);
+  sdkConfig.hyperModeFeatureEnabled = hyperModeFeatureEnabled;
+
+  unsigned int hyperModeMaxThreads =
+      GetConfigValue<int>(configData, sdkConfigFieldNames.hyperModeMaxThreads);
+  if (Validator::ValidateItemValue(hyperModeMaxThreads, 1U, 20U)) {
+    sdkConfig.hyperModeMaxThreads = hyperModeMaxThreads;
+  }
+  unsigned int hyperModeAtBufferPercentage = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.hyperModeAtBufferPercentage);
+  if (Validator::ValidateItemValue(hyperModeAtBufferPercentage, 10U, 90U)) {
+    sdkConfig.hyperModeAtBufferPercentage = hyperModeAtBufferPercentage;
+  }
+  unsigned int hyperModeUpperPercentageBound = GetConfigValue<int>(
+      configData, sdkConfigFieldNames.hyperModeUpperPercentageBound);
+  if (Validator::ValidateItemValue(hyperModeUpperPercentageBound, 30U, 90U) &&
+      (sdkConfig.hyperModeAtBufferPercentage < hyperModeUpperPercentageBound)) {
+    sdkConfig.hyperModeUpperPercentageBound = hyperModeUpperPercentageBound;
+  }
+  unsigned int hyperModeThreadCreationStaggerMilliseconds = GetConfigValue<int>(
+      configData,
+      sdkConfigFieldNames.hyperModeThreadCreationStaggerMilliseconds);
+  if (Validator::ValidateItemValue(hyperModeThreadCreationStaggerMilliseconds,
+                                   0U, 10000U)) {
+    sdkConfig.hyperModeThreadCreationStaggerMilliseconds =
+        hyperModeThreadCreationStaggerMilliseconds;
+  }
+
+  // Read other variables
+  LogLevel logLevel =
+      GetConfigValue<LogLevel>(configData, sdkConfigFieldNames.logLevel);
+  sdkConfig.logLevel = logLevel;
 }
 
 /**
-* load_settings:
-* 
-* Get values of variables from the config file
-* TODO: rename sdk_config_key_names
-**/
-bool Config::load_settings() {
-  std::map<std::string, std::string> values = read_user_config_file(); 
-
-  get_config_value(values, sdk_keys.rest_api_link, rest_api_link);
-  get_config_value(values, sdk_keys.private_key, private_key);
-  get_config_value(values, sdk_keys.send_packet_interval_seconds, send_packet_interval_seconds);
-  get_config_value(values, sdk_keys.send_packet_at_percentage, send_packet_at_percentage);
-  get_config_value(values, sdk_keys.game_senders_limit, game_senders_limit);
-  get_config_value(values, sdk_keys.actions_buffer_max_size, actions_buffer_max_size);
-  get_config_value(values, sdk_keys.packets_size_mb , packets_size_mb );
-  get_config_value(values, sdk_keys.api_timeout_seconds, api_timeout_seconds);
-  get_config_value(values, sdk_keys.max_games, max_games);
-  get_config_value(values, sdk_keys.max_matches_per_game, max_matches_per_game);
-  get_config_value(values, sdk_keys.live_game_timeout_seconds, live_game_timeout_seconds);
-  get_config_value(values, sdk_keys.hyper_speed_feature_enabled, hyper_speed_feature_enabled);
-  get_config_value(values, sdk_keys.hyper_speed_at_buffer_percentage, hyper_speed_at_buffer_percentage);
-
-  get_config_value_enum(values, sdk_keys.log_level, log_level);
-  get_config_value_enum(values, sdk_keys.log_type, log_type);
-
-  return true;
-}
-
-/**
-* read_user_config_file:
-* 
-* Read all config values from the file
-* TODO: test this
-**/
-std::map<std::string, std::string> Config::read_user_config_file() {
+ * ReadUserConfigFile:
+ *
+ * Read all config values from the file
+ **/
+std::map<std::string, std::string> Config::ReadUserConfigFile() {
   std::map<std::string, std::string> output_map;
-  std::string key;
-  std::string value;
+
+  char* configPathHolder = std::getenv("CONFIG_PATH");
+  if (configPathHolder == nullptr) {
+    logger.Log(
+        LogType::FATAL,
+        std::string("Error: environment variable CONFIG_PATH is required"));
+    return output_map;
+  }
+  std::string configPath(configPathHolder);
+
+  std::string next_key;
+  std::string next_value;
 
   bool key_started = false;
   bool key_ended = false;
   bool value_started = false;
 
-  // TODO: rename all the variables here, make this function CLEAR
-  std::ifstream in(config_path + config_filename);
-  char c;
+  std::ifstream file_stream(configPath);
+  char next_character = 0;
 
-  // Read config values from the file so we can later map them to map
-  if (in.is_open()) {
-    while (in.good()) {
-      in.get(c);
+  if (file_stream.is_open()) {
+    while (file_stream.good()) {
+      file_stream.get(next_character);
 
-      if (c == '\t')
+      if (next_character == '\t')
         continue;
 
-      if (key_started && c != '\"' && c != ',' && c != '\n') {
-        key += c;
-      } else if (value_started && c != '\"' && c != ',' && c != '\n' &&
-                 c != '}') {
-        value += c;
+      if (key_started && next_character != '\"' && next_character != ',' &&
+          next_character != '\n') {
+        next_key += next_character;
+      } else if (value_started && next_character != ' ' &&
+                 next_character != '\"' && next_character != ',' &&
+                 next_character != '\n' && next_character != '}') {
+        next_value += next_character;
       }
 
-      if (c == '\"' || c == ',' || (c == '\n' && key_ended) ||
-          (c == ':' && key_ended && !value_started)) {
-        if (value_started && c == '\"')
+      if (next_character == '\"' || next_character == ',' ||
+          (next_character == '\n' && key_ended) ||
+          (next_character == ':' && key_ended && !value_started)) {
+        if (value_started && next_character == '\"')
           continue;
 
         if (key_ended && !value_started) {
@@ -107,11 +248,10 @@ std::map<std::string, std::string> Config::read_user_config_file() {
           key_ended = true;
         }
       }
-      // map key value to map
-      if ((c == ',' || c == '}') && key_ended) {
-        output_map.insert(std::make_pair(key, value));
-        key.clear();
-        value.clear();
+      if ((next_character == ',' || next_character == '}') && key_ended) {
+        output_map.insert(std::make_pair(next_key, next_value));
+        next_key.clear();
+        next_value.clear();
         key_started = false;
         key_ended = false;
         value_started = false;
@@ -119,85 +259,116 @@ std::map<std::string, std::string> Config::read_user_config_file() {
     }
   }
 
-  in.close();
+  file_stream.close();
 
   return output_map;
 }
 
 /**
-* find_value:
-* @values: Map with all config values
-* @key: specific key we need value for in the Map
-* 
-* Find specific value in the map
-**/
-std::string Config::find_value(std::map<std::string, std::string>& values,
-                      std::string key) {
-  std::string value;
+ * GetConfigValue:
+ *
+ **/
 
-  auto itr_out = values.find(key);
-  if (itr_out != values.end())
-    value = itr_out->second;
+// TODO will be crash here, because int can be pushed here
+// as well as any struct or class
+// TODO output value as a parameter is better
+template <>
+int Config::GetConfigValue<int>(std::map<std::string, std::string>& configData,
+                                std::string configKey) {
+  int configValueOut;
+  std::string configValue;
 
-  return value;
+  auto configIter = configData.find(configKey);
+  if (configIter != configData.end())
+    configValue = configIter->second;
+
+  if (!configValue.empty())
+    configValueOut = std::stoi(configValue);
+  else
+    configValueOut = 0;
+
+  return configValueOut;
 }
 
 /**
-* get_config_value:
-* @user_config: Map with all config values
-* @key: specific key we need value for in the Map
-* @value_out: the variable we need to set from the config TODO: just return this variable, don't set it inside, this is inconsistent
-* 
-* Set specific value from the config map
-**/
-void Config::get_config_value(std::map<std::string, std::string>& user_config,
-                              std::string key_in,
-                              std::string& value_out) {
-  std::string value = find_value(user_config, sdk_keys.rest_api_link);
-  if (!value.empty())
-    value_out = value;
+ * GetConfigValue:
+ *
+ **/
+template <>
+std::string Config::GetConfigValue<std::string>(
+    std::map<std::string, std::string>& configData,
+    std::string configKey) {
+  std::string configValue;
+
+  auto configIter = configData.find(configKey);
+  if (configIter != configData.end())
+    configValue = configIter->second;
+
+  return configValue;
 }
 
 /**
-* get_config_value:
-* @user_config: Map with all config values
-* @key: specific key we need value for in the Map
-* @value_out: the variable we need to set from the config
-* 
-* Find specific value from the config map by key
-**/
-void Config::get_config_value(std::map<std::string, std::string>& user_config,
-                              std::string key_in,
-                              unsigned int& value_out) {
-  std::string value = find_value(user_config, sdk_keys.rest_api_link);
-  if (!value.empty())
-    value_out = std::stoi(value);
-}
+ * GetConfigValue:
+ *
+ **/
+template <>
+bool Config::GetConfigValue<bool>(
+    std::map<std::string, std::string>& configData,
+    std::string configKey) {
+  bool configValueOut;
+  std::string configValue;
 
-void Config::get_config_value(std::map<std::string, std::string>& user_config,
-                              std::string key_in,
-                              bool& value_out) {
-  std::string value = find_value(user_config, sdk_keys.rest_api_link);
-  if (!value.empty())
-    value_out = std::stoi(value);
+  auto configIter = configData.find(configKey);
+  if (configIter != configData.end())
+    configValue = configIter->second;
+
+  if (!configValue.empty()) {
+    if (configValue == "true") {
+      configValueOut = true;
+    } else if (configValue == "false") {
+      configValueOut = false;
+    } else {
+      throw std::runtime_error("Invalid boolean value for " + configKey);
+    }
+  } else {
+    configValueOut = false;
+  }
+
+  return configValueOut;
 }
 
 /**
-* get_config_value_enum:
-* @user_config: Map with all config values
-* @key: specific key we need value for in the Map
-* @value_out: the variable we need to set from the config
-* 
-* Set specific value from the config map
-**/
-template <typename T>
-void Config::get_config_value_enum(
-    std::map<std::string, std::string>& user_config,
-    std::string key_in,
-    T& value_out) {
-  std::string value = find_value(user_config, sdk_keys.rest_api_link);
-  if (!value.empty())
-    value_out = static_cast<T>(std::stoi(value));
+ * GetConfigValue:
+ *
+ **/
+template <>
+LogLevel Config::GetConfigValue<LogLevel>(
+    std::map<std::string, std::string>& configData,
+    std::string configKey) {
+  LogLevel configValueOut;
+  std::string configValue;
+
+  auto configIter = configData.find(configKey);
+  if (configIter != configData.end())
+    configValue = configIter->second;
+
+  if (!configValue.empty()) {
+    if (configValue == "FATAL") {
+      configValueOut = LogLevel::FATAL;
+    } else if (configValue == "_ERROR") {
+      configValueOut = LogLevel::_ERROR;
+    } else if (configValue == "WARN_AND_ERROR") {
+      configValueOut = LogLevel::WARN_AND_ERROR;
+    } else if (configValue == "FULL") {
+      configValueOut = LogLevel::FULL;
+    } else {
+      configValueOut = LogLevel::FULL;
+    }
+  } else {
+    configValueOut = LogLevel::FULL;
+  }
+
+  return configValueOut;
 }
 
-}
+}  // namespace GetGudSdk

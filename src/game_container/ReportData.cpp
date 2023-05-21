@@ -1,39 +1,62 @@
 #include "ReportData.h"
 
-namespace GetGudSdk
-{
-	/**
-	* ReportData:
-	* @report_info: All the report metadata in the ReportInfo struct
-	*
-	* Creates a new report that will be used in GameData Container
-	**/
-	ReportData::ReportData(ReportInfo report_info)
-		: info(report_info)
-	{
+namespace GetGudSdk {
 
-	}
-
-	/**
-	* get_data:
-	*
-	* Assigns the fields from ReportData class to the map data struct
-	**/
-	std::map<std::string, std::string> ReportData::get_data()
-	{
-		std::map<std::string, std::string> data;
-
-		data["match_guid"] = info.match_guid;
-		data["reporter_name"] = info.reporter_name;
-		data["reporter_type"] = std::to_string(info.reporter_type);
-		data["reporter_sub_type"] = std::to_string(info.reporter_sub_type);
-		data["suspected_player_guid"] = info.suspected_player_guid;
-		data["tb_type"] = std::to_string(info.tb_type);
-		data["tb_sub_type"] = std::to_string(info.tb_sub_type);
-		data["tb_time_epoch"] = std::to_string(info.tb_time_epoch);
-		data["suggested_toxicity_score"] = std::to_string(info.suggested_toxicity_score);
-		data["reported_time_epoch"] = std::to_string(info.reported_time_epoch);
-
-		return data;
-	}
+/**
+ * GetReportDataSize:
+ *
+ * We use this to calculate report size in ReportSender outside of the 
+ * live games
+ **/
+unsigned int GetReportDataSize() {
+  int size = 0;
+  size += 40 * sizeof(char);  // matchGuid size
+  size += 20 * sizeof(char);  // reporterName size
+  size += sizeof(int);        // reporterType size
+  size += sizeof(int);        // reporterSubType size
+  size += 40 * sizeof(char);  // suspectedPlayerGuid size
+  size += sizeof(int);        // TBType size
+  size += sizeof(int);        // TBSubType size
+  size += sizeof(long long);  // TBTimeEpoch size
+  size += sizeof(int);        // SuggestedToxicityScore size
+  size += sizeof(long long);  // TBTimeEpoch size
+  return size;
 }
+
+/**
+ * ReportData:
+ * 
+ **/
+ReportData::ReportData(int titleId, std::string privateKey, ReportInfo reportInfo)
+    : reportInfo(reportInfo), titleId(titleId), privateKey(privateKey) {}
+
+/**
+ * ToString:
+ *
+ * Used for sending reports to Getgud
+ **/
+std::string ReportData::ToString() {
+  std::string reportString;
+  reportString += "{";
+  reportString += "	\"reporterName\": \"" + reportInfo.ReporterName + "\",";
+  reportString +=
+      "	\"reporterType\": " + std::to_string(reportInfo.ReporterType) + ",";
+  reportString +=
+      "	\"reporterSubType\": " + std::to_string(reportInfo.ReporterSubType) +
+      ",";
+  reportString +=
+      "	\"suspectedPlayerGuid\": \"" + reportInfo.SuspectedPlayerGuid + "\",";
+  reportString += "	\"TBType\": " + std::to_string(reportInfo.TbType) + ",";
+  reportString +=
+      "	\"TBSubType\": " + std::to_string(reportInfo.TbSubType) + ",";
+  reportString +=
+      "	\"TBTimeEpoch\": " + std::to_string(reportInfo.TbTimeEpoch) + ",";
+  reportString += "	\"suggestedToxicityScore\": " +
+                  std::to_string(reportInfo.SuggestedToxicityScore) + ",";
+  reportString +=
+      "	\"reportedTimeEpoch\": " + std::to_string(reportInfo.ReportedTimeEpoch);
+  reportString += "}";
+
+  return reportString;
+}
+}  // namespace GetGudSdk

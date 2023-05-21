@@ -2,7 +2,7 @@ file(GLOB MAIN_HEADER "../include/GetGudSdk.h")
 file(GLOB MAIN_SOURCE "GetGudSdk.cpp")
 file(GLOB ACTIONS_HEADERS "../include/actions/*.h")
 file(GLOB ACTIONS_SOURCES "actions/*.cpp")
-file(GLOB CONFIG_HEADERS "../include/config/*.h")
+file(GLOB CONFIG_HEADERS "config/*.h")
 file(GLOB CONFIG_SOURCES "config/*.cpp")
 file(GLOB ACTIONS_BUFFER_HEADERS "actions_buffer/*.h")
 file(GLOB ACTIONS_BUFFER_SOURCES "actions_buffer/*.cpp")
@@ -10,6 +10,12 @@ file(GLOB GAME_CONTAINER_HEADERS "game_container/*.h")
 file(GLOB GAME_CONTAINER_SOURCES "game_container/*.cpp")
 file(GLOB GAME_SENDER_HEADERS "game_sender/*.h")
 file(GLOB GAME_SENDER_SOURCES "game_sender/*.cpp")
+file(GLOB PLAYER_UPDATER_HEADERS "player_updater/*.h")
+file(GLOB PLAYER_UPDATER_SOURCES "player_updater/*.cpp")
+file(GLOB REPORT_SENDER_HEADERS "report_sender/*.h")
+file(GLOB REPORT_SENDER_SOURCES "report_sender/*.cpp")
+file(GLOB ZIP_HEADERS "game_container/zip/*.h")
+file(GLOB ZIP_SOURCES "game_container/zip/*.cpp")
 file(GLOB LOGGER_HEADERS "logger/*.h")
 file(GLOB LOGGER_SOURCES "logger/*.cpp")
 file(GLOB UTILS_HEADERS "utils/*.h")
@@ -20,6 +26,9 @@ add_library(GetGudSdk	${MAIN_HEADER} ${MAIN_SOURCE}
 						${CONFIG_HEADERS} ${CONFIG_SOURCES}
 						${ACTIONS_BUFFER_HEADERS} ${ACTIONS_BUFFER_SOURCES}
 						${LOGGER_HEADERS} ${LOGGER_SOURCES}
+						${PLAYER_UPDATER_HEADERS} ${PLAYER_UPDATER_SOURCES}
+						${REPORT_SENDER_HEADERS} ${REPORT_SENDER_SOURCES}
+						${ZIP_HEADERS} ${ZIP_SOURCES}
 						${GAME_CONTAINER_HEADERS} ${GAME_CONTAINER_SOURCES}
 						${GAME_SENDER_HEADERS} ${GAME_SENDER_SOURCES}
 						${UTILS_HEADERS} ${UTILS_SOURCES}
@@ -33,8 +42,14 @@ source_group("Header Files\\config" FILES ${CONFIG_HEADERS})
 source_group("Source Files\\config" FILES ${CONFIG_SOURCES})
 source_group("Header Files\\actions_buffer" FILES ${ACTIONS_BUFFER_HEADERS})
 source_group("Source Files\\actions_buffer" FILES ${ACTIONS_BUFFER_SOURCES})
+source_group("Header Files\\player_updater" FILES ${PLAYER_UPDATER_HEADERS})
+source_group("Source Files\\player_updater" FILES ${PLAYER_UPDATER_SOURCES})
+source_group("Header Files\\report_sender" FILES ${REPORT_SENDER_HEADERS})
+source_group("Source Files\\report_sender" FILES ${REPORT_SENDER_SOURCES})
 source_group("Header Files\\game_container" FILES ${GAME_CONTAINER_HEADERS})
 source_group("Source Files\\game_container" FILES ${GAME_CONTAINER_SOURCES})
+source_group("Header Files\\game_container\\zip" FILES ${ZIP_HEADERS})
+source_group("Source Files\\game_container\\zip" FILES ${ZIP_SOURCES})
 source_group("Header Files\\game_sender" FILES ${GAME_SENDER_HEADERS})
 source_group("Source Files\\game_sender" FILES ${GAME_SENDER_SOURCES})
 source_group("Header Files\\logger" FILES ${LOGGER_HEADERS})

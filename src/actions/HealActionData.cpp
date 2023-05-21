@@ -1,128 +1,80 @@
 #include "../../include/actions/HealActionData.h"
-
-#include "../../include/config/Config.h"
-
+#include "../config/Config.h"
+#include "../utils/Validator.h"
 using namespace GetGudSdk;
 
-extern Config sdk_config;
+extern Config sdkConfig;
 
 /**
-* HealActionData:
-* @_data_info: Instance of the base data class which contains all the
-* required fields
-* @_health_gained: amount of health gained during healing action
-*
-* Constructor of  Heal Action, this action is later
-* passed to the action buffer
-**/
-HealActionData::HealActionData(BaseData _data_info, float _health_gained)
-	: BaseActionData(_data_info) 
-{
-	health_gained = _health_gained;
-
-	// calculate size of the action string so it can be used later for total size assesment
-	calculate_size();
-};
+ * HealActionData:
+ *
+ **/
+HealActionData::HealActionData(std::string matchGuid,
+                               long long actionTimeEpoch,
+                               std::string playerGuid,
+                               float healthGained)
+    : BaseActionData({Actions::Heal, actionTimeEpoch, playerGuid, matchGuid}),
+      healthGained(healthGained) {}
 
 /**
-* HealActionData:
-* @_player_guid: guid of the player who performed heal action
-* @_match_guid: guid of the match where the action took place
-* @_action_time_epoch: timestamp of the action in the Epoch time in
-* milliseconds. Example: 1643717696000
-* @_health_gained: amount of health gained during healing action
-*
-* Constructor of  Heal Action, this action is later
-* passed to the action buffer
-**/
-HealActionData::HealActionData(std::string _player_guid, std::string _match_guid,
-	long _action_time_epoch, float _health_gained) :
-	BaseActionData({ Actions::Heal, _action_time_epoch, _player_guid, _match_guid })
-{
-	health_gained = _health_gained;
-
-	// calculate size of the action string so it can be used later for total size assesment
-	calculate_size();
-};
+ * HealActionData:
+ *
+ **/
+HealActionData::HealActionData(const HealActionData& data)
+    : BaseActionData(data), healthGained(data.healthGained) {}
 
 /**
-* HealActionData:
-* @copy: Heal action to copy
-*
-* Constructor of  Heal Action, this action is later
-* passed to the action buffer
-**/
-HealActionData::HealActionData(HealActionData& copy)
-	: BaseActionData(copy)
-{
-	health_gained = copy.health_gained;
-}
-
-HealActionData::~HealActionData()
-{
+ * ~HealActionData:
+ *
+ **/
+HealActionData::~HealActionData(){
 
 };
 
 /**
-* get_data:
-*
-* Fills action metadata struct from config and from fields set in action constructor
-**/
-std::map<std::string, std::string> HealActionData::get_data()
-{
-	std::map<std::string, std::string> data;
-	const ActionStreamFileConfig& config = sdk_config.rest_api_keys; // TODO: why rest api keys??
-
-	// fill part of the action metadata from config
-	data[config.player_guid] = player_guid;
-	data[config.match_guid] = match_guid;
-	data[config.action_type] = std::to_string((int)action_type);
-	data[config.action_time_epoch] = std::to_string(action_time_epoch);
-	data[config.health_gained] = std::to_string(health_gained);
-
-	return data;
-};
-
-/**
-* get_action_stream:
-*
-* Transforms action metadata from map to string, so this data can be used when sending packets 
-* to the server
-**/
-std::string HealActionData::get_action_stream()
-{
-	std::map<std::string, std::string> data = get_data();
-	const ActionStreamFileConfig& config = sdk_config.rest_api_keys; // TODO: why rest api keys?
-	std::string output_string;
-
-	// Transform action into string in format
-	//<Timestamp>, HEAL, <playerID>, <Health gained>
-	output_string += data[config.action_time_epoch] + ",";
-	output_string += data[config.action_type] + ",";
-	output_string += data[config.player_guid] + ",";
-	output_string += data[config.health_gained];
-
-	return output_string;
-};
-
-/**
-* clone:
-*
-**/
-HealActionData* HealActionData::clone()
-{
-	return new HealActionData(*this);
+ * IsValid:
+ *
+ * Check if action is valid, if action is not valid we will delete the
+ * game!
+ **/
+bool HealActionData::IsValid() {
+  bool isActionValid = BaseActionData::IsValid();
+  return isActionValid;
 }
 
 /**
-* calculate_size:
-*
-* Calculate size of the action string
-**/
-void HealActionData::calculate_size()
-{
-	// We have part of the action variables in base data class
-	BaseActionData::calculate_size();
+ * ToString:
+ *
+ * For sending action stream to Getgud
+ **/
+std::string HealActionData::ToString() {
+  std::string actionString;
+  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += "H,";
+  actionString += playerGuid + ",";
+  actionString += std::to_string(healthGained);
 
-	size += sizeof(health_gained);
+  return actionString;
+}
+
+/**
+ * ToStringMeta:
+ *
+ * ToString, but for logging purposes
+ **/
+std::string HealActionData::ToStringMeta() {
+  std::string actionMetaString = BaseActionData::ToStringMeta();
+
+  actionMetaString +=
+      "Action health gained: " + std::to_string(healthGained) + "\n";
+
+  return actionMetaString;
+}
+
+/**
+ * Clone:
+ *
+ **/
+HealActionData* HealActionData::Clone() {
+  return new HealActionData(*this);
 }

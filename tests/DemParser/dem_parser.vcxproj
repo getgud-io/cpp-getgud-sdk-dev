@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{4e2d6f23-1f3a-48c1-a300-d622903d8f86}</ProjectGuid>
-    <RootNamespace>starter</RootNamespace>
+    <ProjectGuid>{C0C8F680-EB5A-4C75-B4DA-8CE9A9FCDA94}</ProjectGuid>
+    <RootNamespace>dem_parser</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -72,10 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)..\..\build\_build\Starter\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\build\_build\DemParser\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)..\..\build\_build\Starter\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\build\_build\DemParser\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

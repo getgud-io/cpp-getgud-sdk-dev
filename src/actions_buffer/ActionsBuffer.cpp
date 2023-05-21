@@ -1,143 +1,121 @@
 #include "ActionsBuffer.h"
-
-#include "../../include/config/Config.h"
+#include <deque>
+#include <mutex>
+#include "../../include/actions/BaseActionData.h"
+#include "../../include/actions/PositionActionData.h"
+#include "../config/Config.h"
+#include "../logger/Logger.h"
 
 namespace GetGudSdk {
-extern Config sdk_config;
+extern Config sdkConfig;
+extern Logger logger;
 
-// create a new shared actions buffer
-ActionsBuffer actions_buffer;
-
-/**
-* get_first_action:
-* @out_action: Object to write first buffer action in
-*
-* Takes first action from the buffer and writes it into out_action data
-**/
-bool ActionsBuffer::get_first_action(BaseActionData* out_action) {
-  actions_locker.lock();
-  out_action = *unified_actions.begin(); 
-  unified_actions.erase(unified_actions.begin());
-  actions_buffer_size = actions_buffer_size - out_action->get_data_size(); 
-  actions_locker.unlock();
-
-  return true;
-}
+ActionsBuffer actionsBuffer;
 
 /**
-* get_actions:
-* @out_buffer: Object to write all buffer actions in
-*
-* Copy all actions from action buffer to the out_buffer structure
-**/
-unsigned int ActionsBuffer::get_actions(std::deque<BaseActionData*>* out_buffer) {
-  int actions_size = 0;
-  actions_locker.lock();
-  if (unified_actions.size() != 0)  
-  {
-    // make or clean a new buffer in order to swap it with the buffer
-    if (out_buffer == nullptr)
-      out_buffer = new std::deque<BaseActionData*>();
-    else if (out_buffer->size())
-      out_buffer->clear();
+ * PopActions:
+ *
+ * Pop all actions we have added to action buffer, this is done through 
+ * one of the GameSender threads
+ **/
+std::deque<BaseActionData*> ActionsBuffer::PopActions() {
+  // TODO why do we need outputActionsBuffer? update PopActions (no need
+  // outputActionsBuffer)
+  std::deque<BaseActionData*> outputActionsBuffer; // used for faster copy with swap
+  actionsBufferLocker.lock();
 
+  if (actionsBuffer.size() != 0) {
     // fast processing function to move elements from the buffer
-    out_buffer->swap(unified_actions); 
-    actions_size = actions_buffer_size;
-    actions_buffer_size = 0;
+    outputActionsBuffer.swap(actionsBuffer);
+    logger.Log(LogType::DEBUG, "Popped " +
+                                   std::to_string(outputActionsBuffer.size()) +
+                                   " action(s) from ActionBuffer");
   }
-  actions_locker.unlock();
+  // We recalculate this on every pop to make hypermode more efficient
+  averageSize.UpdateSize(actionsBufferSize);
 
-  return actions_size;
+  actionsBufferSize = 0;
+  actionsBufferLocker.unlock();
+
+  return outputActionsBuffer;
 }
 
 /**
-* add_action:
-* @in_action: A new action to append
-*
-* Appends the new action to the end of the buffer
-**/
-bool ActionsBuffer::add_action(BaseActionData* in_action) {
-  actions_locker.lock();
-  actions_buffer_size = actions_buffer_size + in_action->get_data_size();
-  unified_actions.push_back(in_action);
-  actions_locker.unlock();
+ * AddActions:
+ * @actions: A deque of actions to append
+ *
+ * Appends the new actions to the end of the action buffer
+ **/
+bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
+  std::deque<BaseActionData*> actionToSend;
+  unsigned int actionSize = GetPositionActionSize();
+  //TODO: size can cross the limit because of unlocked mutex
+  if (actionsBufferSize >= sdkConfig.actionsBufferMaxSizeInBytes) {
+    // TODO: this shluldn't be called every time but just once.
+    logger.Log(LogType::WARN,
+               std::string("ActionsBuffer::AddActions->Actions buffer memory "
+                           "limit reached, cannot add more actions."));
+    // game sender will grab those actions and will delete the game because
+    // those actions are empty and marked 
+    for (auto& action : actions) {
+      auto* emptyAction = new BaseActionData(BaseData(), true);
+      emptyAction->matchGuid = action->matchGuid;
+      actionToSend.push_back(emptyAction);
+    }
+    actionSize = GetEmptyActionSize();
+  } else {
+    // if the action buffer is not full yet we just push regular actions
+    for (auto& action : actions)
+      actionToSend.push_back(action->Clone());
+  }
+
+  actionsBufferLocker.lock();
+
+  // return size that calculated in the code
+  // 99% of actions are position data, so we assume all actions are position
+  // data, BUT in case it is empty actions we use empty action size
+  actionsBufferSize += actionSize * actionToSend.size(); 
+
+  actionsBuffer.insert(actionsBuffer.end(), actionToSend.begin(),
+                       actionToSend.end());
+  actionsBufferLocker.unlock();
 
   return true;
 }
 
 /**
-* add_actions:
-* @in_buffer: A deque of actions to append
-*
-* Appends the new actions to the end of the buffer
-**/
-bool ActionsBuffer::add_actions(std::deque<BaseActionData*>& in_buffer) {
-  actions_locker.lock();
+ * GetSizeInBytes:
+ *
+ **/
+unsigned int ActionsBuffer::GetSizeInBytes() {
+  return actionsBufferSize;
+}
 
-  for (auto& action : in_buffer) {
-    actions_buffer_size = actions_buffer_size + action->get_data_size();
+/**
+ * GetAverageSizeInBytes:
+ *
+ * We calculate action buffer avg size to be able to control hyper mode better
+ **/
+unsigned int ActionsBuffer::GetAverageSizeInBytes() {
+  return averageSize.filledAverageSize;
+}
+
+/**
+ * Dispose:
+ *
+ **/
+void ActionsBuffer::Dispose() {
+  actionsBufferLocker.lock();
+
+  // Iterate through all the actions in the buffer and delete them
+  for (auto* action : actionsBuffer) {
+    delete action;
   }
 
-  unified_actions.insert(unified_actions.end(), in_buffer.begin(),
-                         in_buffer.end());
-  actions_locker.unlock();
+  actionsBuffer.clear();
+  actionsBufferSize = 0;
 
-  return true;
-}
-
-/**
-* check_buffer_limit:
-*
-* Check if buffer has memory in it.
-**/
-bool ActionsBuffer::check_buffer_limit() {
-  if (actions_buffer_size > sdk_config.actions_buffer_max_size)
-    return true; 
-  else
-    return false;
-}
-
-/**
-* check_buffer_load:
-*
-* Check if buffer has memory in it.
-**/
-unsigned int ActionsBuffer::check_buffer_load() {
-  // TODO: bug actions_buffer_size / sdk_config.actions_buffer_max_size
-  int percentage_load =
-      sdk_config.actions_buffer_max_size / actions_buffer_size;
-
-  // We should not have any threads because the buffer is full
-  if (percentage_load > 100 && percentage_load < 0)
-    return 0;
-  
-  // Determine the total amount of threads we should have at the given point of time
-  unsigned int threads_amount =
-      percentage_load / sdk_config.hyper_speed_at_buffer_percentage;
-
-  return threads_amount;
-}
-
-/**
-* get_buffer_size:
-*
-**/
-unsigned int ActionsBuffer::get_buffer_size() {
-  return actions_buffer_size;
-}
-
-/**
-* dispose:
-*
-* Delete action buffer
-**/
-void ActionsBuffer::dispose() {
-  actions_locker.lock();
-  dispose_required = true; 
-  unified_actions.clear();
-  actions_buffer_size = 0;
-  actions_locker.unlock();
+  actionsBufferLocker.unlock();
 }
 
 }  // namespace GetGudSdk

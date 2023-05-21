@@ -1,33 +1,27 @@
 #pragma once
 
-#include <string>
+#include <chrono>
 #include <random>
+#include <string>
 #include <vector>
 
 #include "../../include/actions/Helpers.h"
 
-namespace GetGudSdk
-{	
-	/**
-	* generate_guid:
-	*
-	* generate game or match guid, we will use this when we create new match or new game
-	**/
-	std::string generate_guid();
-
-	/**
-	* position_to_string:
-	*
-	* Generate positon string in format x~y~z~pitch~roll from data structures containing
-	* position and rotation of the player. This will be used when we send actions to getgud to
-	* put action strings in the packet json
-	**/
-	std::string position_to_string(PositionF _position, RotationF _rotation);
-
-	/**
-	* get_current_time_string:
-	*
-	* Get current time stamp as string in format %Y-%m-%d %X 
-	**/
-	std::string get_current_time_string();
-}
+namespace GetGudSdk {
+/**
+ * FilledAverage:
+ *
+ * Used to calculate avg size of Action Buffer and Game Container for
+ * better hyper mode managing
+ **/
+struct FilledAverage {
+  int filledAverageSize = 0;
+  unsigned int ticks = 0;
+  int totalSize = 0;
+  std::chrono::system_clock::time_point lastUpdate =
+      std::chrono::system_clock::now();
+  void UpdateSize(unsigned int size);
+};
+std::string GenerateGuid();
+std::string GetCurrentTimeString();
+}  // namespace GetGudSdk

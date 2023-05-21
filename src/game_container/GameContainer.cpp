@@ -1,368 +1,563 @@
 #include "GameContainer.h"
-
-#include "../../include/config/Config.h"
+#include "../config/Config.h"
+#include "../logger/Logger.h"
 
 namespace GetGudSdk {
-// create a new shared packets buffer
-GameContainer game_container;
 
-extern Config sdk_config;
+GameContainer gameContainer;
+
+extern Config sdkConfig;
+extern Logger logger;
 
 /**
-* add_game:
-* @game_data: game metadata
-*  
-* Add new game to the game container
-**/
-bool GameContainer::add_game(GameData game_data) {
-  games_buffer_locker.lock();
-
-  for (auto& game : games) 
-  {
-    if (game.get_game_guid() == game_data.get_game_guid())  // if game found
-    {
-      games_buffer_locker.unlock();
-      return false; 
-    }
+ * AddGame:
+ *
+ **/
+std::string GameContainer::AddGame(int titleId,
+                                   std::string privateKey,
+                                   std::string serverGuid,
+                                   std::string gameMode) {
+  std::string gameGuid;
+  // make sure the container has enough room for another game
+  if (gameVector.size() >= sdkConfig.maxGames) {
+    logger.Log(LogType::WARN,
+               std::string("GameContainer::AddGame->Live game limit reached, "
+                           "cannot add a new game"));
+    return gameGuid;
   }
 
-  games.push_back(game_data);
-  games_buffer_locker.unlock();
-  return true;
+  // create a GameData and a pointer to it so we can reference the same GameData
+  // object from different data structures
+  GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode);
+
+  gameContainerMutex.lock();
+
+  // insert the game to the game map (for quick access when searching for a game
+  // via guid)
+  auto gameGuidPair = std::make_pair(gameData->GetGameGuid(), gameData);
+  gameMap.insert(gameGuidPair);
+
+  // insert the game to the game vector, because this is a new game, its place
+  // is at the last of the line (which is the tail of the vector)
+  gameVector.push_back(gameData);
+  gameGuid = gameData->GetGameGuid();
+  std::string gameStringMeta = gameData->ToStringMeta();
+  gameContainerMutex.unlock();
+
+  logger.Log(LogType::DEBUG,
+             std::string("A new game has been created.\n" + gameStringMeta));
+
+  // return the guid of the match, this acts as it's key to finding it
+  return gameGuid;
 }
 
 /**
-* set_end_game:
-* @game_guid: guid of the game that should be ended
-*  
-* End game by game_guid
-**/
-bool GameContainer::set_end_game(std::string game_guid) {
-  games_buffer_locker.lock();
-  for (auto& game : games)  
-  {
-    if (game.get_game_guid() == game_guid) 
-    {
-      auto current_point =
-          std::chrono::system_clock::now(); 
+ * AddMatch:
+ *
+ **/
+std::string GameContainer::AddMatch(std::string gameGuid,
+                                    std::string matchMode,
+                                    std::string mapName) {
+  std::string retValue;
+  MatchData* matchData = nullptr;
+  std::string matchStringMeta;
 
-      // TODO: why do we add delay?
-      game.set_end_game(
-          current_point +
-          std::chrono::seconds(5)); 
-    }
+  gameContainerMutex.lock();
+
+  // TODO change this implementation using same logic
+  //  find the game that this new match is asking to join to
+  auto game_it = gameMap.find(gameGuid);
+  if (game_it == gameMap.end()) {
+    logger.Log(
+        LogType::WARN,
+        std::string(
+            "GameContainer::AddMatch->Can't find game to push match into"));
+    gameContainerMutex.unlock();
+    return retValue;
   }
-  games_buffer_locker.unlock();
-  return true;
+  // make sure SDK has enough room for another match
+  if (matchMap.size() >= sdkConfig.maxMatchesPerGame) {
+    logger.Log(LogType::WARN,
+               std::string("GameContainer::AddMatch->Live matches limit "
+                           "reached, cannot add a new match"));
+    gameContainerMutex.unlock();
+    return retValue;
+  }
+  // create a new match from the passed parameters and add it to the game we
+  // found above
+  matchData = game_it->second->AddMatch(matchMode, mapName);
+  if (matchData == nullptr) {
+    gameContainerMutex.unlock();
+    return retValue;
+  }
+
+  // insert the match to the match map (for quick access when searching for
+  // a match via guid, for example, when inserting actions)
+  auto matchGuidPair = std::make_pair(matchData->GetMatchGuid(), matchData);
+  matchMap.insert(matchGuidPair);
+
+  // return the guid of the match, this acts as it's key to finding it
+  retValue = matchData->GetMatchGuid();
+  matchStringMeta = matchData->ToStringMeta();
+
+  gameContainerMutex.unlock();
+
+  if (matchData != nullptr) {
+    logger.Log(LogType::DEBUG,
+               std::string("A new match has been added.\n" + matchStringMeta));
+  }
+
+  return retValue;
 }
 
 /**
-* add_match:
-* @game_guid: guid of the game to which we are adding match
-* @match_data: metadata of the match we are adding
-*  
-* Add new match to existing game packet
-**/
-bool GameContainer::add_match(std::string game_guid, MatchData match_data) {
-  bool result = false;
-  games_buffer_locker.lock();
-  for (auto& game : games)  
-  {
-    if (game.get_game_guid() == game_guid) 
-    {
-      result = game.add_match(match_data);
+ * AddActions:
+ *
+ **/
+bool GameContainer::AddActions(std::deque<BaseActionData*>& actionVector) {
+  // TODO update the variables
+  // TODO implement verifications of pointers and iterators
+  //  first check that we are allowed to add more action to the game container
+  //  and did not run out of allowed memory to consume
+  gameContainerMutex.lock();
+  bool result = true;
+
+  // if game is full we add empty actions that will then trigger deletion of
+  // game because they are invalid
+  if (gameContainerSizeInBytes >= sdkConfig.gameContainerMaxSizeInBytes &&
+      actionVector.size() > 0) {
+    logger.Log(LogType::WARN,
+               std::string("GameContainer::AddActions->Game container memory "
+                           "limit reached reached, cannot add more actions."));
+    std::deque<BaseActionData*> emptyActionVector;
+    for (auto& action : actionVector) {
+      auto* emptyAction = new BaseActionData(BaseData(), true);
+      emptyAction->matchGuid = action->matchGuid;
+      emptyActionVector.push_back(emptyAction);
+      delete action;
+    }
+    actionVector.clear();  // TODO: Placed by Art, should it be here?
+    actionVector = emptyActionVector;
+
+    result = false;
+  }
+
+  // this local (temp) map will hold all the actions per match. we do this to
+  // inject all the actions to a match at the same time (and for that we need to
+  // sort them by match guid first)
+  std::unordered_map<MatchData*, std::vector<BaseActionData*>> matchActionsMap;
+
+  // this vector will hold all the match guids which have new actions coming in
+  std::vector<MatchData*> matchPtrVector;
+
+  int matchSizeInBytes = 0;
+
+  // calculate the size of the new actions vector here to avoid calling this
+  // method in the 'for loop' which happens many times
+  int actionVectorSize = actionVector.size();
+  BaseActionData* nextAction = nullptr;
+  MatchData* matchData = nullptr;
+  long long lastActionTime = 0;
+  long long runningSubActionTimeEpoch = 0;
+
+  // cluster all new actions according to their match guid and place them in a
+  // dedicated vector per match guid
+  for (int index = 0; index < actionVectorSize; index++) {
+    // find the match that belongs to the action we are now iterating
+    nextAction = actionVector[index];
+    auto match_it = matchMap.find(nextAction->matchGuid);
+    if (match_it == matchMap.end() || match_it->second == nullptr) {
+      delete nextAction;
+      continue;  // if a match with the passed guid was not found, just
+                 // ignore the action
+    }
+
+    matchData = match_it->second;
+
+    // validate the structure and parameters of the next action we are going to
+    // assimilate
+    if (nextAction->IsValid() == false) {
+      // action is invalid and thus -> we are going to delete the entire game :/
+      // why? Ask Art!
+      DeleteGame(matchData->GetGameGuid(), false, matchPtrVector);
+      logger.Log(
+          LogType::WARN,
+          std::string("GameContainer::AddActions->The following action is \
+invalid OR is marked as empty from full Action Buffer \
+or full game container. Deleting associated Game and \
+matches:\n" + nextAction->ToStringMeta()));
+      delete nextAction;
+      continue;
+    }
+
+    // TODO changing real data of the pointer, should be a copy or something
+    //  change the action time to work with dynamic programming
+    nextAction->actionTimeEpoch -= lastActionTime;
+    lastActionTime += nextAction->actionTimeEpoch;
+    runningSubActionTimeEpoch += nextAction->actionTimeEpoch;
+    // TODO matchActionsMap is empty and initialized inside the scope, update
+    // this
+    //  get the local vector (from the local map) that belong longs to this
+    //  match and insert the action to it
+    auto matchActions_it = matchActionsMap.find(matchData);
+    if (matchActions_it == matchActionsMap.end()) {
+      // the vector might not exists yet since this is the first time an action
+      // with this match guid appeared in the method call
+      // TODO: do we need new here? do we need to dispose of this below?
+
+      // TODO: this was changed by Art, verify it works correctly
+      std::vector<BaseActionData*> newMatchActions;
+      newMatchActions.push_back(nextAction);
+      auto matchActionsPair = std::make_pair(matchData, newMatchActions);
+      matchActionsMap.insert(matchActionsPair);
+      // save the match pointer so we can iterate over all of them later on
+      matchPtrVector.push_back(matchData);
+    } else {
+      // insert the new action to the temp vector which is associated to the
+      // same match guid that the action is
+      matchActions_it->second.push_back(nextAction);
     }
   }
-  games_buffer_locker.unlock();
+
+  // now run through all the matches that have new actions and insert the new
+  // action vector to the match all at once while doing it, need to make sure
+  // the game container size parameter is update accordingly
+  for (int index = 0; index < matchPtrVector.size(); index++) {
+    // TODO: here is the bug
+    // TODO returns iterator, not a vector
+    auto matchActions_it = matchActionsMap.find(matchPtrVector[index]);
+    // save the size of the match before inserting the new actions
+    // TODO GetMatchSizeInBytes returns wrong value
+    matchSizeInBytes = matchPtrVector[index]->GetMatchSizeInBytes();
+    matchPtrVector[index]->AddActions(matchActions_it->second,
+                                      runningSubActionTimeEpoch);
+
+    std::string matchGameGuid = matchPtrVector[index]->GetGameGuid();
+    auto game_it = gameMap.find(matchGameGuid);
+    if (game_it == gameMap.end() || game_it->second == nullptr)
+      continue;
+    game_it->second->UpdateLastUpdateTime();
+
+    // update the game container size after adding the new messages to the match
+    gameContainerSizeInBytes +=
+        matchPtrVector[index]->GetMatchSizeInBytes() - matchSizeInBytes;
+  }
+
+  averageSize.UpdateSize(gameContainerSizeInBytes);
+
+  // TODO: should we dispose of the passed vector and locally created maps and
+  // vectors?
+
+  gameContainerMutex.unlock();
+
   return result;
 }
 
 /**
-* add_report:
-* @match_guid: guid of the match to which we are adding report
-* @report_data: report metadata we are adding
-*  
-* Add report to specific match guid in the packet
-**/
-bool GameContainer::add_report(std::string match_guid, ReportData report_data) {
-  games_buffer_locker.lock();
+ * AddInMatchReport:
+ *
+ **/
+bool GameContainer::AddInMatchReport(ReportInfo reportData) {
+  bool retValue = true;
 
-  auto reports_it = reports.find(match_guid); 
+  gameContainerMutex.lock();
 
-  if (reports_it != reports.end()) 
-  {
-    reports_it->second.push_back(report_data);  
-  } else                                      
-  {
-    std::deque<ReportData> _report_buffer;  
-    _report_buffer.push_back(report_data);  
+  auto matchData_it = matchMap.find(reportData.MatchGuid);
+  if (matchData_it == matchMap.end())
+    retValue = false;
 
-    reports[match_guid] = _report_buffer; 
+  else {
+    // TODO: if we remove titleId and privateKey here we will not have
+    // to do this extra search
+    auto gameData_it = gameMap.find(matchData_it->second->GetGameGuid());
+    if (gameData_it != gameMap.end())
+      matchData_it->second->AddInMatchReport(
+          gameData_it->second->GetTitleId(),
+          gameData_it->second->GetPrivateKey(), reportData);
   }
 
-  games_buffer_locker.unlock();
+  gameContainerMutex.unlock();
 
-  return true;
+  return retValue;
 }
 
 /**
-* add_chat_message:
-* @match_guid: guid of the match to which we are adding report
-* @message_data: chat metadata we are adding
-*  
-* Add chat message to specific match guid in the packet
-**/
-bool GameContainer::add_chat_message(std::string match_guid,
-                                     ChatMessageData message_data) {
-  games_buffer_locker.lock();
+ * AddChatMessage:
+ *
+ **/
+bool GameContainer::AddChatMessage(std::string matchGuid,
+                                   ChatMessageInfo chatData) {
+  bool retValue = true;
 
-  auto messages_it =
-      chat_messages.find(match_guid);
+  gameContainerMutex.lock();
 
-  if (messages_it != chat_messages.end())  
-  {
-    messages_it->second.push_back(message_data); 
-  } else                                        
-  {
-    std::deque<ChatMessageData> _messages_buffer;  
-    _messages_buffer.push_back(message_data);     
+  auto matchData_it = matchMap.find(matchGuid);
+  if (matchData_it == matchMap.end())
+    retValue = false;
 
-    chat_messages[match_guid] = _messages_buffer;
-  }
-
-  games_buffer_locker.unlock();
-
-  return true;
-}
-
-/**
-* check_games_limit:
-*  
-* Check if we have more open games in SDK than is allowed by config
-**/
-bool GameContainer::check_games_limit() {
-  if (games.size() > sdk_config.max_games)
-    return true;
   else
-    return false;
+    matchData_it->second->AddChatMessage(chatData);
+
+  gameContainerMutex.unlock();
+
+  return retValue;
 }
 
 /**
-* check_matches_limit:
-*  
-* Check if we have more open matches in SDK than is allowed by config
-* TODO: wrong logic, we should add mathes from all games togetger
-**/
-bool GameContainer::check_matches_limit(std::string game_guid) {
+ * PopNextGameToProcess:
+ *
+ * Returns the next game packet to be sent to Getgud, may return nullptr
+ * meaning no packet is ready to be sent at the moment
+ **/
+GameData* GameContainer::PopNextGameToProcess() {
+  GameData* gameData = nullptr;
+  std::string matchGuid;
+  std::string gameGuid;
+  unsigned gameDataSizeInBytes;
 
-  bool result = true; 
-  games_buffer_locker.lock();
-  for (auto& game : games)  
-  {
-    if (game.get_game_guid() == game_guid) {
-      if (game.get_matches_buffer().size() > sdk_config.max_matches_per_game)
-        result = true; 
-      else
-        result = false;
-      break;
+  gameContainerMutex.lock();
+
+  // traverse through all the live games and find the first eligible game to be
+  // processed and pop it.
+  for (int index = 0; index < gameVector.size(); index++) {
+    gameData = gameVector[index];
+    gameGuid = gameData->GetGameGuid();
+
+    gameDataSizeInBytes = gameData->GetGameSizeInBytes();
+    if (gameData->IsGameEligibleForProcessing() == true) {
+      // we found our earliest injected, eligible game
+      // check if this game is bigger than max allowed size to process
+      if (gameDataSizeInBytes > sdkConfig.packetMaxSizeInBytes) {
+        //  create a copy of game data with max allowed size, the rest will
+        //  remain for next time someone will try to pop a game
+        gameData = gameData->SliceGame(sdkConfig.packetMaxSizeInBytes);
+
+        // update the game container size after this slice
+        gameContainerSizeInBytes -= gameData->GetGameSizeInBytes();
+        break;
+      } else if (gameData->CanDeleteGame() == true) {
+        // the delete method will take care of reducing the game size from the
+        // container
+        // we are cleaning game container on the way by removing
+        // unneeded games
+        DeleteGame(gameGuid, false);  
+        gameData = nullptr;
+      } else if (gameDataSizeInBytes > 0 ||
+                 gameData->GetNumberOfGameReportsAndMessages() > 0) {
+        // this is a normal sized game packet that is ready to be sent whole
+        // Do the old switcheroo trick: pop it and insert an empty GameData
+        // instance instead of it
+        std::vector<GameData*>::iterator it;
+        it = gameVector.begin() + index;
+        gameVector.erase(it);
+        gameMap.erase(gameGuid); // TODO: do we really have to do this?
+
+        // TODO implement verifications of pointers and iterators
+        //  create the empty game data that will replace the one we are popping
+        //  and insert it to all the data structures
+        GameData* cloneGameData = gameData->Clone(false);
+        gameVector.push_back(cloneGameData);
+
+        std::pair<std::string, GameData*> gameGuidPair(gameGuid, cloneGameData);
+        gameMap.insert(gameGuidPair);
+
+        // TODO update this logic
+        //  fill the match map (abomination) with the new match pointers of the
+        //  new game (replace the old one that belong longed to the game we are
+        //  popping)
+        std::vector<std::string> gameMatchGuids;
+        cloneGameData->GetGameMatchGuids(gameMatchGuids);
+        for (int index = 0; index < gameMatchGuids.size(); index++) {
+          matchGuid = gameMatchGuids[index];
+          auto matchData_it = matchMap.find(matchGuid);
+
+          // if this match that we are titrating over belong longs to the game
+          // we popped, replace match pointers with the clone's pointers
+          if (matchData_it != matchMap.end())
+            matchMap[matchGuid] = cloneGameData->GetGameMatch(matchGuid);
+        }
+
+        // we just removed a game packet, update the size of the container
+        // accordingly
+        gameContainerSizeInBytes -= gameDataSizeInBytes;
+        break;
+      } else {
+        // if gameContainerSizeInBytes = 0 we can't send it
+        gameData = nullptr;
+      }
+    } else {
+      gameData = nullptr;
     }
   }
-  games_buffer_locker.unlock();
 
-  return result;
+  gameContainerMutex.unlock();
+
+  // make sure a none empty game was found elidible and return it (even an empty
+  // game has to go through the logic above) note that an empty game (with no
+  // actions) will NOT be sent for processing and will not have any record it
+  // ever existed
+  if (gameData == nullptr || gameData->GetGameSizeInBytes() == 0) {
+    gameData = nullptr;
+    logger.Log(
+        LogType::DEBUG,
+        std::string(
+            "GameContainer::PopNextGameToProcess called->No game to pop.\n"));
+  } else
+    logger.Log(LogType::DEBUG, std::string("Popping GameData with guid.\n" +
+                                           gameData->GetGameGuid()));
+  return gameData;
 }
 
 /**
-* dispose_oldest_game:
-*  
-* Pick the oldest game and dispose it
-* TODO: should be replaced by queue
-**/
-bool GameContainer::dispose_oldest_game() {
-  std::chrono::system_clock::time_point oldest_timer = std::chrono::system_clock::now();
-  int oldest_game = 0; // TODO: rename to oldest_game_index or smth like this
+ * MarkEndGame:
+ *
+ **/
+bool GameContainer::MarkEndGame(std::string gameGuid) {
+  bool retValue = true;
 
-  games_buffer_locker.lock();
-  
-  for (int i = 0; i < games.size(); i++) {
-    if (games[i].get_start_time() < oldest_timer) {
-      oldest_game = i;
-      oldest_timer = games[i].get_start_time();
-    }
+  gameContainerMutex.lock();
+
+  // find the game that needs to be marked, and mark it :)
+  auto gameData_it = gameMap.find(gameGuid);
+  if (gameData_it == gameMap.end()) {
+    logger.Log(LogType::WARN,
+               std::string("GameContainer::MarkEndGame->Failed to find a \
+game with the guid: " + gameGuid));
+    retValue = false;
+  } else {
+    gameData_it->second->MarkGameAsEnded();
   }
 
-  games[oldest_game].dispose_matches();
-  games.erase(games.begin() + oldest_game);
+  gameContainerMutex.unlock();
 
-  games_buffer_locker.unlock();
-
-  return true;
+  return retValue;
 }
 
 /**
-* dispose:
-*  
-**/
-void GameContainer::dispose() {
-  games_buffer_locker.lock();
-  games.clear();
-  games_buffer_locker.unlock();
+ * GetSizeInBytes:
+ *
+ **/
+unsigned int GameContainer::GetSizeInBytes() {
+  return gameContainerSizeInBytes;
 }
 
 /**
-* add_actions:
-* @match_guid: guid of the match to which we are adding actions
-* @actions_buffer: deque with all actions
-*  
-* Add all actions to the match data
-**/
-bool GameContainer::add_actions(std::string match_guid,
-                                std::deque<BaseActionData*>& actions_buffer) {
-  bool result = false;
-  bool match_found = false;
-  games_buffer_locker.lock();
-  // TODO: update add_actions logic, make it thought game_container
-  // TODO: what happens if when adding match we see that the buffer is full?
-  for (auto& game : games) 
-  {
-    for (auto& match : game.get_matches_buffer())
-    {
-      if (match.first == match_guid) {
-        unsigned int size_increase = 0;
+ * GetAverageSizeInBytes:
+ *
+ **/
+unsigned int GameContainer::GetAverageSizeInBytes() {
+  return averageSize.filledAverageSize;
+}
 
-        if (game.get_matches_buffer().empty())
-          size_increase = game.get_game_size();
+/**
+ * DeleteGame:
+ *
+ **/
+bool GameContainer::DeleteGame(std::string gameGuid, bool externalCall = true) {
+  std::vector<MatchData*> emptyMatchPtrVector;
+  return DeleteGame(gameGuid, externalCall, emptyMatchPtrVector);
+}
 
-        size_increase = size_increase + match.second.push_actions(actions_buffer);
-        game_container_size = game_container_size + size_increase;
-        match_found = true;
-        result = true;
-        game.update_game();
+/**
+ * DeleteGame:
+ *
+ **/
+bool GameContainer::DeleteGame(std::string gameGuid,
+                               bool externalCall,
+                               std::vector<MatchData*>& matchPtrVector) {
+  bool retValue = true;
 
-        // we already added all actions to the match, we do not need to search further
-        break; 
+  // this method might be called from another method that is already locking
+  // gameContainerMutex
+  if (externalCall)
+    gameContainerMutex.lock();
+
+  // find the game that needs to be deleted
+  auto gameData_it = gameMap.find(gameGuid);
+  if (gameData_it == gameMap.end()) {
+    logger.Log(LogType::WARN,
+               std::string("GameContainer::DeleteGame->Failed to find and \
+deleted a game with the guid: " +
+                           gameGuid));
+    retValue = false;
+  } else {
+    GameData* gameToDelete = gameData_it->second;
+    // remove the GameData pointer that resides in all the different data
+    // structures
+    gameMap.erase(gameGuid);
+    for (int index = 0; index < gameVector.size(); index++) {
+      // locate the GameData that resides in the game vector that has the
+      // same guis that was passed to us
+      if (gameVector[index]->GetGameGuid() == gameGuid) {
+        gameVector.erase(gameVector.begin() + index);
+        break;
+        // TODO: do we have to call dispose here?
       }
     }
-    
-    // we already added all actions to the match, we do not need to search further
-    if (match_found) 
-      break;
+
+    // TODO update this
+    //  remove all the game's matches from the container's match map
+    std::vector<std::string> matchGuidVector;
+    gameToDelete->GetGameMatchGuids(matchGuidVector);
+    for (int index = 0; index < matchGuidVector.size(); index++) {
+      auto match_it = matchMap.find(matchGuidVector[index]);
+      int matchPtrSize = matchPtrVector.size();
+
+      // also search for matches in matchPtrVector and clear pointers too
+      for (int i = 0; i < matchPtrSize;) {
+        if (match_it->second == matchPtrVector[i]) {
+          matchPtrVector.erase(matchPtrVector.begin() + i);
+          matchPtrSize--;
+        } else
+          i++;
+      }
+      matchMap.erase(matchGuidVector[index]);
+    }
+
+    // update the game container's size (reducing the size of the game) and
+    // delete the gameData we found
+    gameContainerSizeInBytes -= gameToDelete->GetGameSizeInBytes();
+    gameToDelete->Dispose();
+    delete gameToDelete;
+    logger.Log(LogType::DEBUG,
+               std::string("Deleted the game with the guid: " + gameGuid));
   }
-  games_buffer_locker.unlock();
-  return result;
+
+  if (externalCall)
+    gameContainerMutex.unlock();
+
+  return retValue;
 }
 
 /**
-* get_game_stream:
-* @stream_out: guid of the match to which we are adding actions
-* @erase: deque with all actions
-*  
-* Creates game packet for the first game in games (buffer). Can delete game packets if needed
-* TODO: why first game in games? how are they stored
-**/
-void GameContainer::get_game_stream(std::string& stream_out, bool erase) {
-  games_buffer_locker.lock();
-  if (games.empty()) {
-    games_buffer_locker.unlock();
+ * GetMatchMap:
+ *
+ **/
+std::unordered_map<std::string, MatchData*>& GameContainer::GetMatchMap() {
+  return matchMap;
+}
+
+/**
+ * Dispose:
+ *
+ **/
+void GameContainer::Dispose() {
+  // TODO: check logic here
+  gameContainerMutex.lock();
+  if (disposeRequired == false) {
+    gameContainerMutex.unlock();
     return;
   }
 
-  stream_out.clear();
-
-  stream_out += "{ \n";
-  stream_out += "	\"privateKey\": \"" + sdk_config.private_key + "\",\n";
-
-  if (erase) {
-    GameData first_game = games[0];
-    games.pop_front();
-    games_buffer_locker.unlock();
-
-    // reduce game container size because we delete the game
-    game_container_size = game_container_size - first_game.get_game_size();
-
-    // write json data of the game packet to stream_out
-    first_game.game_to_string(stream_out);
-  } else {
-    // write json data of game packet to stream_out
-    games[0].game_to_string(stream_out);
-    games_buffer_locker.unlock();
+  gameMap.clear();
+  matchMap.clear();
+  for (int index = 0; index < gameVector.size(); index++) {
+    gameVector[index]->Dispose();
   }
-  stream_out += "}"; 
+  gameVector.clear();
+
+  disposeRequired = false;
+  gameContainerMutex.unlock();
 }
-
-/**
-* get_container_size:
-*
-**/
-unsigned int GameContainer::get_container_size(){
-  return game_container_size;
-}
-
-/**
-* get_game_to_send:
-*
-* Determines the next game packet to be sent to Getgud
-**/
-GameData GameContainer::get_game_to_send() {
-  GameData game_out;
-
-  unsigned int packets_limit_in_bytes =
-      sdk_config.packets_size_mb * 1024 * 1024; // TODO: should be in data holder
-
-
-  // TODO: the name is wrong it is not percentage
-  unsigned int packet_send_percentage =
-      (packets_limit_in_bytes * sdk_config.send_packet_at_percentage) / 100; // TODO: should be in data holder
-
-  games_buffer_locker.lock();
-  auto game_it = games.begin();
-
-  while (game_it != games.end()) {
-    if (game_it->get_game_ended() ||  // if game is ended
-        game_it->get_game_size() > packet_send_percentage  ||  // or if game size if overlimit
-        game_it->get_end_by_time(sdk_config.live_game_timeout_seconds))  // or game inactive
-    {
-      game_out = *game_it; 
-      games.erase(game_it);
-      game_container_size = game_container_size - game_out.get_game_size();
-
-      // we found the game to send and do not need to search anymore
-      break;
-    }
-    game_it++;
-  }
-
-  games_buffer_locker.unlock();
-
-  return game_out;
-}
-
-
-/**
-* get_buffer:
-*
-**/
-std::deque<GameData>& GameContainer::get_buffer() {
-  return games;
-};
-
-/**
-* get_matches:
-* @game_guid: guid of the game for which we need to get matches
-* 
-* Get matches of specific game guid
-**/
-std::map<std::string, MatchData>* GameContainer::get_matches(
-    std::string game_guid) {
-  for (auto& game : games)  
-  {
-    if (game.get_game_guid() == game_guid)
-    {
-      return &game.get_matches_buffer();
-    }
-  }
-
-  return nullptr;
-};
 
 }  // namespace GetGudSdk

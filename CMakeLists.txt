@@ -21,10 +21,12 @@ target_include_directories(GetGudSdk
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
+		./libs/ #zlib builds into root
 )
 
 target_link_libraries(GetGudSdk
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
+		./libs/zlib/zlib.lib
 )

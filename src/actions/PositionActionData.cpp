@@ -1,139 +1,106 @@
 #include "../../include/actions/PositionActionData.h"
-
+#include "../config/Config.h"
 #include "../utils/Utils.h"
 
-#include "../../include/config/Config.h"
-
-using namespace GetGudSdk;
-
-extern Config sdk_config;
-
+namespace GetGudSdk {
 /**
-* PositionActionData:
-* @_data_info: Instance of the base data class which contains all the
-* required fields
-* @_position: <x,y,z> position of player at _action_time_epoch time
-* @_rotation: <pitch, roll> of where player looks on the screen at
-* _action_time_epoch time
-*
-* Constructor of  Position Action, this action is later
-* passed to the action buffer
-**/
-PositionActionData::PositionActionData(BaseData _data_info, PositionF _position, RotationF _rotation)
-	: BaseActionData(_data_info) 
-{
-	position = _position;
-	rotation = _rotation;
-
-	// calculate size of the action string so it can be used later for total size assesment
-	calculate_size();
-};
-
-/**
-* PositionActionData:
-* @_player_guid: guid of the player who performed attack action
-* @_match_guid: guid of the match where the action took place
-* @_action_time_epoch: timestamp of the action in the Epoch time in
-* milliseconds. Example: 1643717696000
-* @_position: <x,y,z> position of player at _action_time_epoch time
-* @_rotation: <pitch, roll> of where player looks on the screen at
-* _action_time_epoch time
-*
-* Constructor of  Position Action, this action is later
-* passed to the action buffer
-**/
-PositionActionData::PositionActionData(std::string _player_guid, std::string _match_guid,
-	long _action_time_epoch, PositionF _position, RotationF _rotation) :
-	BaseActionData({ Actions::Position, _action_time_epoch, _player_guid, _match_guid }) //fill the base data
-{
-	position = _position;
-	rotation = _rotation;
-
-	// calculate size of the action string so it can be used later for total size assesment
-	calculate_size();
-};
-
-/**
-* PositionActionData:
-* @copy: Position action to copy
-*
-* Constructor of  Position Action, this action is later
-* passed to the action buffer
-**/
-PositionActionData::PositionActionData(PositionActionData& copy)
-	: BaseActionData(copy)
-{
-	position = copy.position;
-	rotation = copy.rotation;
+ * GetPositionActionSize:
+ *
+ * Return avg size of position data for calculating Game Container
+ * and Action Buffer size because they consist of actions 99% of the time
+ **/
+unsigned int GetPositionActionSize() {
+  int size = 0;
+  size += 40 * sizeof(char);  // matchGuid size
+  size += sizeof(long);       // actionTimeEpoch size
+  size += 40 * sizeof(char);  // gameGuid size
+  size += sizeof(float) * 3;  // position size
+  size += sizeof(float) * 2;  // rotation size
+  return size;
 }
 
-PositionActionData::~PositionActionData()
-{
-
-};
+extern Config sdkConfig;
 
 /**
-* get_data:
-*
-* Fills action metadata struct from config and from fields set in action constructor
-**/
-std::map<std::string, std::string> PositionActionData::get_data()
-{
-	std::map<std::string, std::string> data;
-	const ActionStreamFileConfig& config = sdk_config.rest_api_keys; // TODO: why rest api keys??
-
-	// fill part of the action metadata from config
-	data[config.player_guid] = player_guid;
-	data[config.match_guid] = match_guid;
-	data[config.action_type] = std::to_string((int)action_type);
-	data[config.action_time_epoch] = std::to_string(action_time_epoch);
-	data[config.position] = position_to_string(position, rotation);
-
-	return data;
-};
+ * PositionActionData:
+ *
+ **/
+PositionActionData::PositionActionData(std::string matchGuid,
+                                       long long actionTimeEpoch,
+                                       std::string playerGuid,
+                                       PositionF position,
+                                       RotationF rotation)
+    : BaseActionData(
+          {Actions::Position, actionTimeEpoch, playerGuid, matchGuid}),
+      position(position),
+      rotation(rotation) {}
 
 /**
-* get_action_stream:
-*
-* Transforms action metadata from map to string, so this data can be used when sending packets 
-* to the server
-**/
-std::string PositionActionData::get_action_stream()
-{
-	std::map<std::string, std::string> data = get_data();
-	const ActionStreamFileConfig& config = sdk_config.rest_api_keys; // TODO: why rest api keys?
-	std::string output_string;
-
-	// Transform action into string in format
-	//<Timestamp>, POSITION, <playerID>, <x~y~z~pitch~yaw>
-
-	output_string += data[config.action_time_epoch] + ",";
-	output_string += data[config.action_type] + ",";
-	output_string += data[config.player_guid] + ",";
-	output_string += data[config.position];
-
-	return output_string;
-};
+ * PositionActionData:
+ *
+ **/
+PositionActionData::PositionActionData(const PositionActionData& data)
+    : BaseActionData(data), position(data.position), rotation(data.rotation) {}
 
 /**
-* clone:
-*
-**/
-PositionActionData* PositionActionData::clone()
-{
-	return new PositionActionData(*this);
+ * ~PositionActionData:
+ *
+ **/
+PositionActionData::~PositionActionData() {}
+
+/**
+ * IsValid:
+ *
+ * Check if action is valid, if action is not valid we will delete the
+ * game!
+ **/
+bool PositionActionData::IsValid() {
+  bool isActionValid = BaseActionData::IsValid();
+  return isActionValid;
 }
 
 /**
-* calculate_size:
-*
-* Calculate size of the action string
-**/
-void PositionActionData::calculate_size()
-{
-	// We have part of the action variables in base data class
-	BaseActionData::calculate_size(); 
-	
-	size += sizeof(position);
-	size += sizeof(rotation);
+ * ToString:
+ *
+ * For sending action stream to Getgud
+ **/
+std::string PositionActionData::ToString() {
+  std::string actionString;
+  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += "P,";
+  actionString += playerGuid + ",";
+  actionString += std::to_string(position.X) + "~" +
+                  std::to_string(position.Y) + "~" +
+                  std::to_string(position.Z) + "~";
+  actionString +=
+      std::to_string(rotation.Pitch) + "~" + std::to_string(rotation.Roll);
+
+  return actionString;
 }
+
+/**
+ * ToStringMeta:
+ *
+ * ToString, but for logging purposes
+ **/
+std::string PositionActionData::ToStringMeta() {
+  std::string actionMetaString = BaseActionData::ToStringMeta();
+
+  actionMetaString += "Action position <x,y,z>: " + std::to_string(position.X) +
+                      ", " + std::to_string(position.Y) + ", " +
+                      std::to_string(position.Z) + "\n";
+  actionMetaString +=
+      "Action rotation <pitch, roll>: " + std::to_string(rotation.Pitch) +
+      ", " + std::to_string(rotation.Roll) + "\n";
+
+  return actionMetaString;
+}
+
+/**
+ * Clone:
+ *
+ **/
+PositionActionData* PositionActionData::Clone() {
+  return new PositionActionData(*this);
+}
+}  // namespace GetGudSdk
