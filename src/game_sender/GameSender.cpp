@@ -267,7 +267,7 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
  **/
 bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   // in case somthing goes wrong we will consider match not interesting
-  if (!m_throttleCurl) {
+  if (!m_throttleCurl || packet.empty()) {
     return false;
   }
 
