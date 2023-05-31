@@ -43,7 +43,7 @@ cd libs/libcurl/
 ./configure --disable-shared --with-openssl --prefix=FULL_PATH_TO_SDK/libs/libcurl/builds/libcurl-x64-debug-static --enable-debug
 ./configure --disable-shared --with-openssl --prefix=FULL_PATH_TO_SDK/libs/libcurl/builds/libcurl-x64-release-static
 ```
-
+If you do not need release build you can remove the last ./configure command
 Replace `FULL_PATH_TO_SDK` to your full system path to `cpp-getgud-sdk-dev` folder!
 
 Next do 
@@ -65,20 +65,22 @@ make install
 The build files will appear in the root folder of zlib folder, you will need mostly `zlib.a` and `zlib.so` for Linux! 
 
 
-### Building Getgudsdk
+### Build SDK
 
-cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S/home/admin/gg-cpp-sdk -B/home/admin/gg-cpp-sdk/build -G "Unix Makefiles"
-
+Now that we have build libraries that we need, let's build SDK itself.
+```bash
+cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -SFULL_PATH_TO_SDK -BFULL_PATH_TO_SDK -G "Unix Makefiles"
 cd build 
-
-cmake --build /home/admin/gg-cpp-sdk/build --config Release --target all -j 4 --
-
+cmake --build FULL_PATH_TO_SDK/build --config Release --target all -j 4 --
+```
 
 Rm all from build folder except _build
 
-cmake --no-warn-unused-cli -DSO_BUILD:BOOL=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S/home/admin/gg-cpp-sdk -B/home/admin/gg-cpp-sdk/build -G "Unix Makefiles"
+```bash
+cmake --no-warn-unused-cli -DSO_BUILD:BOOL=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -SFULL_PATH_TO_SDK -BFULL_PATH_TO_SDK/build -G "Unix Makefiles"
+cmake --build FULL_PATH_TO_SDK/build --config Release --target all -j 4 --
+```
+
+Replace `FULL_PATH_TO_SDK` with your full system path to SDK. Example: `/home/admin/cpp-getgud-sdk-dev`
  
-
-cmake --build /home/admin/gg-cpp-sdk/build --config Release --target all -j 4 --
-
 ## Build for Windows
