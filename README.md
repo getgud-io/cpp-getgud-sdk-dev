@@ -68,12 +68,14 @@ The build files will appear in the root folder of zlib folder, you will need mos
 ### Build SDK
 
 Now that we have build libraries that we need, let's build SDK itself.
+This build sdk .a file
 ```bash
 cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -SFULL_PATH_TO_SDK -BFULL_PATH_TO_SDK/build -G "Unix Makefiles"
 cd build 
 cmake --build FULL_PATH_TO_SDK/build --config Release --target all -j 4 --
 ```
 
+And this builds sdk .so file
 Rm all from build folder except _build
 
 ```bash
