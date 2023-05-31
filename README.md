@@ -54,7 +54,7 @@ make install
 The build files will appear in the build folder, you will need mostly `libcurl.a` and `libcurl.so` for Linux!
 
 
-### Zlib
+### zlib
 ```bash
 cd libs/zlib/
 ./configure -prefix=./
@@ -82,5 +82,7 @@ cmake --build FULL_PATH_TO_SDK/build --config Release --target all -j 4 --
 ```
 
 Replace `FULL_PATH_TO_SDK` with your full system path to SDK. Example: `/home/admin/cpp-getgud-sdk-dev`
+
+Congrats, SDK is built! You will mostly need `getgudsdk.a` and `getguddsk.so` files for Linux. Sometime you will also need to use build files for zlib and libcurl that we created
  
 ## Build for Windows
