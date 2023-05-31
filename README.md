@@ -16,15 +16,15 @@ When a new build is created upload it to a corresponding folder on our **public*
 
 Build versions can be named using a combination of semantic versioning, build date, and unique identifiers for efficient organization and communication. Here's a suggestion on how to name build versions:
 
-[Major].[Minor].[Patch]-[BuildType]-[BuildDate]-[ShortCommitHash]
+`[Major].[Minor].[Patch]-[BuildType]-[BuildDate]-[ShortCommitHash]`
 
-For example: 1.2.3-Alpha-230531-abc1234
+For example: `1.2.3-Alpha-230531-abc1234`
 
 1. Major, Minor, and Patch - Use semantic versioning (e.g., 1.2.3) to indicate the level of changes made to the codebase. Major represents incompatible, API-changing modifications, Minor represents added functionality that is backwards-compatible, and Patch represents backwards-compatible bug fixes.
 
 2. BuildType - Include an identifier to indicate the type of build, such as Alpha, Beta, RC (Release Candidate), or Final.
 
-3. BuildDate - Include the date when the build was created (e.g., 20211001 for October 1, 2021) to maintain a chronological record of builds.
+3. BuildDate - Include the date when the build was created (e.g., 211001 for October 1, 2021) to maintain a chronological record of builds.  Date format `YYMMDD`
 
 4. ShortCommitHash - Add a short commit hash from your version control system (e.g., Git) to easily trace the build back to a specific commit.
 
