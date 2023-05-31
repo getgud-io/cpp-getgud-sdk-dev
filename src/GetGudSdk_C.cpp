@@ -37,10 +37,8 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
         std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
                   std::string(gameInfo.gameMode, gameInfo.gameModeSize));
   }
-  //gameGuidOut = new char[gameGuid.size()];
   strcpy(gameGuidOut, gameGuid.c_str());
-  int gameGuidSize = gameGuid.size();
-  return gameGuidSize;
+  return gameGuid.size();
 }
 
 /**
@@ -48,15 +46,7 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
  *
  * Start a new match for an existing game
  **/
-int StartMatch(StartMatchInfo matchInfo, char** matchGuidOut) {
-  /*typedef struct StartMatchInfo {
-    char* gameGuid;
-    int guidSize;
-    char* matchMode;
-    int modeSize;
-    char* mapName;
-    int nameSize;
-  };*/
+int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
 
   std::string matchGuid;
 
@@ -65,8 +55,7 @@ int StartMatch(StartMatchInfo matchInfo, char** matchGuidOut) {
                  std::string(matchInfo.matchMode, matchInfo.matchModeSize),
                  std::string(matchInfo.mapName, matchInfo.mapNameSize));
 
-  *matchGuidOut = new char[matchGuid.size()];
-  strcmp(*matchGuidOut, matchGuid.c_str());
+  strcpy(matchGuidOut, matchGuid.c_str());
 
   return matchGuid.size();
 }
@@ -86,21 +75,6 @@ int MarkEndGame(char* gameGuid, int guidSize) {
  * Send a report which belongs to specifc match which is now live
  **/
 int SendInMatchReport(ReportInfo reportInfo) {
-  /*typedef struct ReportInfo {
-  char* matchGuid;
-  int matchGuidSize;
-  char* reporterName;
-  int nameSize;
-  int reporterType;
-  int reporterSubType;
-  char* suspectedPlayerGuid;
-  int playerGuidSize;
-  int tbType;
-  int tbSubType;
-  long long tbTimeEpoch;
-  int suggestedToxicityScore;
-  long long reportedTimeEpoch;
-};*/
 
   return GetGudSdk::SendInMatchReport(GetGudSdk::ReportInfo{
       std::string(reportInfo.matchGuid, reportInfo.matchGuidSize),
@@ -118,12 +92,7 @@ int SendInMatchReport(ReportInfo reportInfo) {
  *  Send a message which belongs to specifc match which is now live
  **/
 int SendChatMessage(ChatMessageInfo messageInfo) {
-  /*struct ChatMessageInfo {
-  long long messageTimeEpoch = 0;//>=time.min, <=time.max
-  std::string playerGuid;//36 + SQL
-  std::string message;//SQL, size <=10.000
-};
-*/
+
   return GetGudSdk::SendChatMessage(
       std::string(messageInfo.matchGuid, messageInfo.matchGuidSize),
       GetGudSdk::ChatMessageInfo{

@@ -4,9 +4,9 @@
 
 int main()
 {
-  char gameGuidCpy[36];
-  int gameGuidSize = 0;
   init();
+  char gameGuid[36];
+  int gameGuidSize = 0;
   struct StartGameInfo gameInfo;
   gameInfo.gameMode = "gameMode";
   gameInfo.gameModeSize = 8;
@@ -15,7 +15,27 @@ int main()
   gameInfo.serverGuid = "serverGuid";
   gameInfo.serverGuidSize = 10;
   gameInfo.titleId = 1;
-  gameGuidSize = StartGame(gameInfo, &gameGuidCpy);
-  printf("%i\n", gameGuidSize);
-  Sleep(10000);
+  gameGuidSize = StartGame(gameInfo, gameGuid);
+
+  char matchGuid[36];
+  int matchGuidSize = 0;
+  struct StartMatchInfo matchInfo;
+  /*
+  *   char* gameGuid;
+  int gameGuidSize;
+  char* matchMode;
+  int matchModeSize;
+  char* mapName;
+  int mapNameSize;
+  */
+  matchInfo.gameGuid = gameGuid;
+  matchInfo.gameGuidSize = 36;
+  matchInfo.matchMode = "4143253";
+  matchInfo.matchModeSize = 7;
+  matchInfo.mapName = "serverGuid";
+  matchInfo.mapNameSize = 10;
+  matchGuidSize = StartMatch(matchInfo, matchGuid);
+
+
+  Sleep(2000);
 }

@@ -2,6 +2,7 @@ file(GLOB MAIN_HEADER "../include/GetGudSdk.h")
 file(GLOB MAIN_SOURCE "GetGudSdk.cpp")
 file(GLOB C_HEADER "../include/GetGudSdk_C.h")
 file(GLOB C_SOURCE "GetGudSdk_C.cpp")
+file(GLOB DLLMAIN_SOURCE "dllMain.cpp")
 file(GLOB ACTIONS_HEADERS "../include/actions/*.h")
 file(GLOB ACTIONS_SOURCES "actions/*.cpp")
 file(GLOB CONFIG_HEADERS "config/*.h")
@@ -38,7 +39,8 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 						)
 if (DLL_BUILD)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-add_library(GetGudSdk SHARED ${project_files})
+add_library(GetGudSdk SHARED ${project_files} ${DLLMAIN_SOURCE})
+source_group("Source Files\\C" FILES ${DLLMAIN_SOURCE})
 else() 
 if (SO_BUILD)
 add_library(GetGudSdk SHARED ${project_files})
@@ -108,7 +110,7 @@ if (DLL_BUILD)
 		Crypt32.lib
 		wldap32.lib
 	)
-	target_precompile_headers(GetGudSdk PRIVATE src/pch.h)
+	target_precompile_headers(GetGudSdk PRIVATE pch.h)
 	set_target_properties(GetGudSdk PROPERTIES 
 	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetGudSdk>/C_Starter.exe")
 

@@ -1,4 +1,4 @@
-#ifdef _cplusplus
+#ifdef __cplusplus
 #ifndef GETGUDSDK_EXPORTS
 #define GETGUDSDK_API __declspec(dllexport)
 #else
@@ -89,7 +89,7 @@ extern "C" {
 
 GETGUDSDK_API void init();
 GETGUDSDK_API int StartGame(struct StartGameInfo gameInfo, char* gameGuidOut);
-GETGUDSDK_API int StartMatch(struct StartMatchInfo matchInfo, char** matchGuidOut);
+GETGUDSDK_API int StartMatch(struct StartMatchInfo matchInfo, char* matchGuidOut);
 GETGUDSDK_API int MarkEndGame(char* gameGuid, int guidSize);
 GETGUDSDK_API int SendInMatchReport(struct ReportInfo reportInfo);
 GETGUDSDK_API int SendChatMessage(struct ChatMessageInfo messageInfo);
