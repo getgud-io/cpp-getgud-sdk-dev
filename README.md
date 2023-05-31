@@ -33,4 +33,52 @@ By following this version naming convention, you will provide clear information 
 
 ## Build for Linux
 
+First we need to build libcurl and zlib which are used inside SDK
+
+### libcurl
+```bash
+sudo apt-get install binutils make csh g++ sed gawk autoconf automake autotools-dev shtool libtool curl cmake
+cd libs/libcurl/
+./buildconf
+./configure --disable-shared --with-openssl --prefix=FULL_PATH_TO_SDK/libs/libcurl/builds/libcurl-x64-debug-static --enable-debug
+./configure --disable-shared --with-openssl --prefix=FULL_PATH_TO_SDK/libs/libcurl/builds/libcurl-x64-release-static
+```
+
+Replace `FULL_PATH_TO_SDK` to your full system path to `cpp-getgud-sdk-dev` folder!
+
+Next do 
+```bash
+make
+make install
+```
+The build files will appear in the build folder, you will need mostly `libcurl.a` and `libcurl.so` for Linux!
+
+
+### Zlib
+```bash
+cd libs/zlib/
+./configure -prefix=./
+make
+make install 
+```
+
+The build files will appear in the root folder of zlib folder, you will need mostly `zlib.a` and `zlib.so` for Linux! 
+
+
+### Building Getgudsdk
+
+cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S/home/admin/gg-cpp-sdk -B/home/admin/gg-cpp-sdk/build -G "Unix Makefiles"
+
+cd build 
+
+cmake --build /home/admin/gg-cpp-sdk/build --config Release --target all -j 4 --
+
+
+Rm all from build folder except _build
+
+cmake --no-warn-unused-cli -DSO_BUILD:BOOL=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S/home/admin/gg-cpp-sdk -B/home/admin/gg-cpp-sdk/build -G "Unix Makefiles"
+ 
+
+cmake --build /home/admin/gg-cpp-sdk/build --config Release --target all -j 4 --
+
 ## Build for Windows
