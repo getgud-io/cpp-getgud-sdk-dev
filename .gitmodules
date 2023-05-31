@@ -1,0 +1,6 @@
+[submodule "libs/libcurl"]
+	path = libs/libcurl
+	url = https://github.com/curl/curl.git
+[submodule "libs/zlib"]
+	path = libs/zlib
+	url = https://github.com/madler/zlib.git
