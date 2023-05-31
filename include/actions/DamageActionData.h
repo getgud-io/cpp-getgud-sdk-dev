@@ -3,9 +3,9 @@
 
 namespace GetGudSdk {
 class DamageActionData : public BaseActionData {
-  std::string weaponGuid;
-  std::string victimPlayerGuid;
-  float damageDone = 0;
+  std::string m_weaponGuid;
+  std::string m_victimPlayerGuid;
+  float m_damageDone = 0;
 
  public:
   DamageActionData(std::string matchGuid,

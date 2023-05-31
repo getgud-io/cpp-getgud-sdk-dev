@@ -1,5 +1,7 @@
 file(GLOB MAIN_HEADER "../include/GetGudSdk.h")
 file(GLOB MAIN_SOURCE "GetGudSdk.cpp")
+file(GLOB C_HEADER "../include/GetGudSdk_C.h")
+file(GLOB C_SOURCE "GetGudSdk_C.cpp")
 file(GLOB ACTIONS_HEADERS "../include/actions/*.h")
 file(GLOB ACTIONS_SOURCES "actions/*.cpp")
 file(GLOB CONFIG_HEADERS "config/*.h")
@@ -21,7 +23,8 @@ file(GLOB LOGGER_SOURCES "logger/*.cpp")
 file(GLOB UTILS_HEADERS "utils/*.h")
 file(GLOB UTILS_SOURCES "utils/*.cpp")
 
-add_library(GetGudSdk	${MAIN_HEADER} ${MAIN_SOURCE}
+set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
+						${C_HEADER} ${C_SOURCE}
 						${ACTIONS_HEADERS} ${ACTIONS_SOURCES}
 						${CONFIG_HEADERS} ${CONFIG_SOURCES}
 						${ACTIONS_BUFFER_HEADERS} ${ACTIONS_BUFFER_SOURCES}
@@ -32,10 +35,23 @@ add_library(GetGudSdk	${MAIN_HEADER} ${MAIN_SOURCE}
 						${GAME_CONTAINER_HEADERS} ${GAME_CONTAINER_SOURCES}
 						${GAME_SENDER_HEADERS} ${GAME_SENDER_SOURCES}
 						${UTILS_HEADERS} ${UTILS_SOURCES}
-)
+						)
+if (DLL_BUILD)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+add_library(GetGudSdk SHARED ${project_files})
+else() 
+if (SO_BUILD)
+add_library(GetGudSdk SHARED ${project_files})
+target_precompile_headers(GetGudSdk PRIVATE pch.h)
+else()
+add_library(GetGudSdk STATIC ${project_files})
+endif()
+endif()
 
 source_group("Header Files\\" FILES ${MAIN_HEADER})
 source_group("Source Files\\" FILES ${MAIN_SOURCE})
+source_group("Header Files\\C" FILES ${C_HEADER})
+source_group("Source Files\\C" FILES ${C_SOURCE})
 source_group("Header Files\\actions" FILES ${ACTIONS_HEADERS})
 source_group("Source Files\\actions" FILES ${ACTIONS_SOURCES})
 source_group("Header Files\\config" FILES ${CONFIG_HEADERS})
@@ -57,3 +73,43 @@ source_group("Source Files\\logger" FILES ${LOGGER_SOURCES})
 source_group("Header Files\\utils" FILES ${UTILS_HEADERS})
 source_group("Source Files\\utils" FILES ${UTILS_SOURCES})
 
+file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*x64-debug*/")
+file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*x64-release*/")
+file(GLOB zlib_lib "../libs/zlib/zlib.lib")
+
+target_include_directories(GetGudSdk
+    PRIVATE
+        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
+        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
+		../libs/ #zlib builds into root
+		../src/
+)
+
+if (SO_BUILD)
+target_link_libraries(GetGudSdk
+    PRIVATE
+        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl.a>
+        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl.a>
+		${zlib_lib}
+)
+else()
+target_link_libraries(GetGudSdk
+    PRIVATE
+        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
+        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
+		${zlib_lib}
+)
+endif()
+if (DLL_BUILD)
+	target_link_libraries(GetGudSdk
+		PRIVATE
+		Normaliz.lib
+		Ws2_32.lib
+		Crypt32.lib
+		wldap32.lib
+	)
+	target_precompile_headers(GetGudSdk PRIVATE src/pch.h)
+	set_target_properties(GetGudSdk PROPERTIES 
+	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetGudSdk>/C_Starter.exe")
+
+endif()

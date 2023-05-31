@@ -11,10 +11,10 @@ namespace GetGudSdk {
 
 class ActionsBuffer {
  private:
-  std::mutex actionsBufferLocker;
-  std::deque<BaseActionData*> actionsBuffer;
-  unsigned int actionsBufferSize = 0;
-  FilledAverage averageSize;
+  std::mutex m_actionsBufferLocker;
+  std::deque<BaseActionData*> m_actionsBuffer;
+  unsigned int m_actionsBufferSize = 0;
+  FilledAverage m_averageSize;
 
  public:
   std::deque<BaseActionData*> PopActions();

@@ -1,10 +1,11 @@
+#include "pch.h"
 #include "GameSender.h"
 #include "../../include/actions/Helpers.h"
 #include "../actions_buffer/ActionsBuffer.h"
 #include "../config/Config.h"
 #include "../game_container/GameContainer.h"
 #include "../game_container/GameData.h"
-#include "../logger/logger.h"
+#include "../logger/Logger.h"
 
 #include <memory>
 
@@ -40,7 +41,6 @@ SharedGameSenders sharedGameSenders;
  **/
 GameSender::GameSender() {
   InitCurl();
-  // TODO: here is push_back bug, might be not pushed
   sharedGameSenders.gameSendersCount++;
   sharedGameSenders.gameSenders.push_back(this);
 }
@@ -51,24 +51,25 @@ GameSender::GameSender() {
  * Start new Game Sender thread
  **/
 void GameSender::Start(int sleepIntervalMilli) {
-  sleepTimeMilli = sleepIntervalMilli;
-  threadWorking = true;
+  m_sleepTimeMilli = sleepIntervalMilli;
+  m_threadWorking = true;
   logger.Log(LogType::DEBUG,
              "Game Sender is starting with the sleep interval of " +
                  std::to_string(sleepIntervalMilli));
 
-  updaterThread = std::thread([&]() {
+  m_updaterThread = std::thread([&]() {
     // Stagger the creation of the threads to avoid them all waking up at the
     // same time
-    // TODO: we can replace this by random waiting time from min to max
     std::this_thread::sleep_for(std::chrono::milliseconds(
         sdkConfig.hyperModeThreadCreationStaggerMilliseconds));
-    while (threadWorking) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(sleepTimeMilli));
+    while (m_threadWorking) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_sleepTimeMilli));
       ManageHyperMode();
       SendNextGame();
     }
-    this->~GameSender();  // TODO: self destruct shouldn't be
+    // TODO: For future: we shouldn't be self destructing
+    // this is a long term task
+    this->~GameSender();
   });
 }
 
@@ -84,8 +85,8 @@ void GameSender::SendNextGame() {
   bool result = gameContainer.AddActions(nextActions);
   if (result == false)
     logger.Log(LogType::WARN,
-               "GameSender::sendNextGame()->Failed to add actions to "
-               "GameContainer (it's probably full)");
+               "GameSender::SendNextGame->Failed to add actions to "
+               "GameContainer");
 
   // get the next game we need to send. might be that there are no games to send
   GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
@@ -101,9 +102,11 @@ void GameSender::SendNextGame() {
   // using curl
   std::string gameOut;
   gameDataToSend->GameToString(gameOut);
-  // TODO: clean this logs for prod
-  logger.Log(LogType::WARN, gameOut);
-  SendGamePacket(gameOut);
+  if (!gameOut.empty()) {
+    logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " +
+                                   gameDataToSend->GetGameGuid());
+    SendGamePacket(gameOut);
+  }
 
   // Dispose actions
   gameDataToSend->Dispose();
@@ -123,10 +126,8 @@ void GameSender::ManageHyperMode() {
   if (sdkConfig.hyperModeMaxThreads <= 0)
     return;
 
-  if (sdkConfig.hyperModeUpperPercentageBound == 0) {
-    logger.Log(LogType::WARN,
-               "GameSender->manageHyperMode hyperModeUpperPercentage should be "
-               "> 0 for hypermode activation");
+  // hyperModeUpperPercentage should be > 0 for hypermode activation
+  if (sdkConfig.hyperModeUpperPercentageBound <= 0) {
     return;
   }
 
@@ -172,8 +173,8 @@ void GameSender::ManageHyperMode() {
 
       newGameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
     }
-    logger.Log(LogType::WARN, "Spawned extra threads, total thread count " +
-                                  std::to_string(numThreadsNeeded));
+    logger.Log(LogType::DEBUG, "Spawned extra threads, total thread count " +
+                                   std::to_string(numThreadsNeeded));
   } else if (numThreadsNeeded <
              activeThreads) {  // in case we need to delete extra threads
     int threadsToStop = activeThreads - numThreadsNeeded;
@@ -183,8 +184,8 @@ void GameSender::ManageHyperMode() {
       sharedGameSenders.gameSenders.back()->Dispose();
       sharedGameSenders.gameSenders.pop_back();
     }
-    logger.Log(LogType::WARN, "Removed extra threads, total thread count " +
-                                  std::to_string(numThreadsNeeded));
+    logger.Log(LogType::DEBUG, "Removed extra threads, total thread count " +
+                                   std::to_string(numThreadsNeeded));
   }
 
   sharedGameSenders.gameSendersMutex.unlock();
@@ -236,6 +237,17 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
       // save throttle check result for the match
       match.second->SetThrottleCheckResults(true, result);
 
+      if (result == true) {
+        logger.Log(LogType::DEBUG,
+                   std::string("Getgud found interesting Match with guid: " +
+                               match.second->GetMatchGuid()));
+      } else {
+        logger.Log(
+            LogType::DEBUG,
+            std::string("Getgud found NOT interesting Match with guid: " +
+                        match.second->GetMatchGuid()));
+      }
+
       // Because we Slice too large packets we also need to make sure we
       // set throttle check results for the same match but in original
       // match map, we may be working in the copy of match map after Slice
@@ -255,13 +267,13 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
  **/
 bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   // in case somthing goes wrong we will consider match not interesting
-  if (!curl) {
+  if (!m_curl) {
     return false;
   }
 
-  curlReadBuffer.clear();
-  curl_easy_setopt(curl, CURLOPT_URL, sdkConfig.throttleCheckUrl.c_str());
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.c_str());
+  m_curlReadBuffer.clear();
+  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.throttleCheckUrl.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // time when we should stop trying to send packet
   auto stopWaitingTime =
@@ -269,23 +281,24 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
       std::chrono::milliseconds(sdkConfig.apiWaitTimeMilliseconds);
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
-  bool result = false;  // we consider match not interesting by default
+  bool result = true;  // we consider match not interesting by default
   while (!result && sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
-    sendCode = curl_easy_perform(curl);
+    sendCode = curl_easy_perform(m_curl);
     // make small delay in order to save hardware usage
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   if (sendCode == CURLcode::CURLE_OK) {
-    logger.Log(LogType::DEBUG, "Packet sent: " + curlReadBuffer);
     // check what response we got from Getgud
-    if (curlReadBuffer == "true" || curlReadBuffer == "TRUE")
+    if (m_curlReadBuffer == "true" || m_curlReadBuffer == "TRUE")
       result = true;
   } else {
-    logger.Log(LogType::_ERROR, "Failed to send throttle request: " +
-                                    std::string(curl_easy_strerror(sendCode)));
+    logger.Log(LogType::_ERROR,
+               "GameSender::SendThrottleCheckForMatch->Failed to send throttle "
+               "request: " +
+                   std::string(curl_easy_strerror(sendCode)));
   }
 
   return result;
@@ -297,12 +310,12 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
  * Send game packet with action streams of game matches to Getgud
  **/
 void GameSender::SendGamePacket(std::string& packet) {
-  if (!curl || packet.empty()) {
+  if (!m_curl || packet.empty()) {
     return;
   }
-  curlReadBuffer.clear();
-  curl_easy_setopt(curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.c_str());
+  m_curlReadBuffer.clear();
+  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // time when we should stop trying to send packet
   auto stopWaitingTime =
@@ -314,16 +327,15 @@ void GameSender::SendGamePacket(std::string& packet) {
   while (sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
-    sendCode = curl_easy_perform(curl);
+    sendCode = curl_easy_perform(m_curl);
     // make small delay in order to save hardware usage
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
-  if (sendCode == CURLcode::CURLE_OK) {
-    logger.Log(LogType::DEBUG, "Packet sent: " + curlReadBuffer);
-  } else {
-    logger.Log(LogType::_ERROR, "Failed to send packet: " +
-                                    std::string(curl_easy_strerror(sendCode)));
+  if (sendCode != CURLcode::CURLE_OK) {
+    logger.Log(LogType::_ERROR,
+               "GameSender::SendGamePacket->Failed to send packet: " +
+                   std::string(curl_easy_strerror(sendCode)));
   }
 }
 
@@ -335,22 +347,21 @@ void GameSender::SendGamePacket(std::string& packet) {
 void GameSender::InitCurl() {
   logger.Log(LogType::DEBUG, "REST Api connection prepared in GameSender");
 
-  curl = curl_easy_init();
+  m_curl = curl_easy_init();
 
-  if (!curl) {
+  if (!m_curl) {
     logger.Log(LogType::WARN, "GameSender->InitCurl Couldn't init curl");
   }
-  headers = curl_slist_append(headers, "Accept: application/json");
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-  headers = curl_slist_append(headers, "charset: utf-8");
+  m_headers = curl_slist_append(m_headers, "Accept: application/json");
+  m_headers = curl_slist_append(m_headers, "Content-Type: application/json");
+  m_headers = curl_slist_append(m_headers, "charset: utf-8");
 
-  // TODO: describe what this does
-  curl_easy_setopt(curl, CURLOPT_POST, 1);
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  curl_easy_setopt(curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, sdkConfig.apiTimeoutMilliseconds);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlReadBuffer);
+  curl_easy_setopt(m_curl, CURLOPT_POST, 1);
+  curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_TIMEOUT_MS, sdkConfig.apiTimeoutMilliseconds);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
 }
 
 /**
@@ -358,10 +369,9 @@ void GameSender::InitCurl() {
  *
  **/
 void GameSender::Dispose() {
-  updaterThread.detach();
-  threadWorking = false;
+  m_updaterThread.detach();
+  m_threadWorking = false;
   sharedGameSenders.gameSendersCount--;
-  logger.Log(LogType::WARN, "Game sender disposed");
 }
 
 /**
@@ -369,10 +379,10 @@ void GameSender::Dispose() {
  *
  **/
 GameSender::~GameSender() {
-  if (curl) {
-    curl_easy_cleanup(curl);
+  if (m_curl) {
+    curl_easy_cleanup(m_curl);
   }
-  curl_slist_free_all(headers);
+  curl_slist_free_all(m_headers);
 }
 
 }  // namespace GetGudSdk

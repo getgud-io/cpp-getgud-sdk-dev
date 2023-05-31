@@ -3,7 +3,7 @@
 
 namespace GetGudSdk {
 class AttackActionData : public BaseActionData {
-  std::string weaponGuid;
+  std::string m_weaponGuid;
 
  public:
   AttackActionData(std::string matchGuid,

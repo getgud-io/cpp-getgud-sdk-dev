@@ -5,11 +5,11 @@
 
 namespace GetGudSdk {
 class SpawnActionData : public BaseActionData {
-  PositionF position;
-  RotationF rotation;
-  float initialHealth = 0;
-  int teamId = 0;
-  std::string characterGuid;
+  PositionF m_position;
+  RotationF m_rotation;
+  float m_initialHealth = 0;
+  int m_teamId = 0;
+  std::string m_characterGuid;
 
  public:
   SpawnActionData(std::string matchGuid,

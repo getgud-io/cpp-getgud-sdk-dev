@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ActionsBuffer.h"
 #include <deque>
 #include <mutex>
@@ -19,24 +20,21 @@ ActionsBuffer actionsBuffer;
  * one of the GameSender threads
  **/
 std::deque<BaseActionData*> ActionsBuffer::PopActions() {
-  // TODO why do we need outputActionsBuffer? update PopActions (no need
-  // outputActionsBuffer)
   std::deque<BaseActionData*> outputActionsBuffer; // used for faster copy with swap
-  actionsBufferLocker.lock();
-
-  if (actionsBuffer.size() != 0) {
+  m_actionsBufferLocker.lock();
+  m_actionsBuffer.shrink_to_fit();
+  if (m_actionsBuffer.size() != 0) {
     // fast processing function to move elements from the buffer
-    outputActionsBuffer.swap(actionsBuffer);
+    m_actionsBuffer.swap(outputActionsBuffer);
     logger.Log(LogType::DEBUG, "Popped " +
                                    std::to_string(outputActionsBuffer.size()) +
                                    " action(s) from ActionBuffer");
   }
   // We recalculate this on every pop to make hypermode more efficient
-  averageSize.UpdateSize(actionsBufferSize);
+  m_averageSize.UpdateSize(m_actionsBufferSize);
 
-  actionsBufferSize = 0;
-  actionsBufferLocker.unlock();
-
+  m_actionsBufferSize = 0;
+  m_actionsBufferLocker.unlock();
   return outputActionsBuffer;
 }
 
@@ -49,17 +47,12 @@ std::deque<BaseActionData*> ActionsBuffer::PopActions() {
 bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
   std::deque<BaseActionData*> actionToSend;
   unsigned int actionSize = GetPositionActionSize();
-  //TODO: size can cross the limit because of unlocked mutex
-  if (actionsBufferSize >= sdkConfig.actionsBufferMaxSizeInBytes) {
-    // TODO: this shluldn't be called every time but just once.
-    logger.Log(LogType::WARN,
-               std::string("ActionsBuffer::AddActions->Actions buffer memory "
-                           "limit reached, cannot add more actions."));
+  if (m_actionsBufferSize >= sdkConfig.actionsBufferMaxSizeInBytes) {
     // game sender will grab those actions and will delete the game because
     // those actions are empty and marked 
     for (auto& action : actions) {
       auto* emptyAction = new BaseActionData(BaseData(), true);
-      emptyAction->matchGuid = action->matchGuid;
+      emptyAction->m_matchGuid = action->m_matchGuid;
       actionToSend.push_back(emptyAction);
     }
     actionSize = GetEmptyActionSize();
@@ -68,17 +61,21 @@ bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
     for (auto& action : actions)
       actionToSend.push_back(action->Clone());
   }
-
-  actionsBufferLocker.lock();
+  // TODO: delete this for prod
+  /*for (auto& action : actions) {
+    logger.WriteActionToFile(action->m_matchGuid, action->ToString() + ",");
+  }*/
+  m_actionsBufferLocker.lock();
 
   // return size that calculated in the code
   // 99% of actions are position data, so we assume all actions are position
   // data, BUT in case it is empty actions we use empty action size
-  actionsBufferSize += actionSize * actionToSend.size(); 
+  m_actionsBufferSize += actionSize * actionToSend.size(); 
 
-  actionsBuffer.insert(actionsBuffer.end(), actionToSend.begin(),
+  m_actionsBuffer.insert(m_actionsBuffer.end(), actionToSend.begin(),
                        actionToSend.end());
-  actionsBufferLocker.unlock();
+  m_actionsBuffer.shrink_to_fit();
+  m_actionsBufferLocker.unlock();
 
   return true;
 }
@@ -88,7 +85,7 @@ bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
  *
  **/
 unsigned int ActionsBuffer::GetSizeInBytes() {
-  return actionsBufferSize;
+  return m_actionsBufferSize;
 }
 
 /**
@@ -97,7 +94,7 @@ unsigned int ActionsBuffer::GetSizeInBytes() {
  * We calculate action buffer avg size to be able to control hyper mode better
  **/
 unsigned int ActionsBuffer::GetAverageSizeInBytes() {
-  return averageSize.filledAverageSize;
+  return m_averageSize.filledAverageSize;
 }
 
 /**
@@ -105,17 +102,17 @@ unsigned int ActionsBuffer::GetAverageSizeInBytes() {
  *
  **/
 void ActionsBuffer::Dispose() {
-  actionsBufferLocker.lock();
+  m_actionsBufferLocker.lock();
 
   // Iterate through all the actions in the buffer and delete them
-  for (auto* action : actionsBuffer) {
+  for (auto* action : m_actionsBuffer) {
     delete action;
   }
 
-  actionsBuffer.clear();
-  actionsBufferSize = 0;
+  m_actionsBuffer.clear();
+  m_actionsBufferSize = 0;
 
-  actionsBufferLocker.unlock();
+  m_actionsBufferLocker.unlock();
 }
 
 }  // namespace GetGudSdk

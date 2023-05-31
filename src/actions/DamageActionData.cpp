@@ -1,6 +1,8 @@
+#include "pch.h"
 #include "../../include/actions/DamageActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include "../utils/Utils.h"
 
 namespace GetGudSdk {
 
@@ -17,9 +19,9 @@ DamageActionData::DamageActionData(std::string matchGuid,
                                    float damageDone,
                                    std::string weaponGuid)
     : BaseActionData({Actions::Damage, actionTimeEpoch, playerGuid, matchGuid}),
-      damageDone(damageDone),
-      weaponGuid(weaponGuid),
-      victimPlayerGuid(victimPlayerGuid) {}
+      m_damageDone(damageDone),
+      m_weaponGuid(weaponGuid),
+      m_victimPlayerGuid(victimPlayerGuid) {}
 
 /**
  * DamageActionData:
@@ -27,9 +29,9 @@ DamageActionData::DamageActionData(std::string matchGuid,
  **/
 DamageActionData::DamageActionData(const DamageActionData& data)
     : BaseActionData(data),
-      damageDone(data.damageDone),
-      weaponGuid(data.weaponGuid),
-      victimPlayerGuid(data.victimPlayerGuid) {}
+      m_damageDone(data.m_damageDone),
+      m_weaponGuid(data.m_weaponGuid),
+      m_victimPlayerGuid(data.m_victimPlayerGuid) {}
 
 /**
  * ~DamageActionData:
@@ -47,10 +49,10 @@ DamageActionData::~DamageActionData(){
  **/
 bool DamageActionData::IsValid() {
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(victimPlayerGuid, 1, 36);
-  isActionValid &= Validator::ValidateStringChars(victimPlayerGuid);
-  isActionValid &= Validator::ValidateStringLength(weaponGuid, 1, 3);
-  isActionValid &= Validator::ValidateStringChars(weaponGuid);
+  isActionValid &= Validator::ValidateStringLength(m_victimPlayerGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_victimPlayerGuid);
+  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 3);
+  isActionValid &= Validator::ValidateStringChars(m_weaponGuid);
 
   return isActionValid;
 }
@@ -62,12 +64,12 @@ bool DamageActionData::IsValid() {
  **/
 std::string DamageActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "D,";
-  actionString += playerGuid + ",";
-  actionString += victimPlayerGuid + ",";
-  actionString += std::to_string(damageDone) + ",";
-  actionString += weaponGuid;
+  actionString += m_playerGuid + ",";
+  actionString += m_victimPlayerGuid + ",";
+  actionString += CutDecimalNumber(std::to_string(m_damageDone)) + ",";
+  actionString += m_weaponGuid;
 
   return actionString;
 }
@@ -80,10 +82,10 @@ std::string DamageActionData::ToString() {
 std::string DamageActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action victim player guid: " + victimPlayerGuid + "\n";
-  actionMetaString += "Action weapon guid: " + weaponGuid + "\n";
+  actionMetaString += "Action victim player guid: " + m_victimPlayerGuid + "\n";
+  actionMetaString += "Action weapon guid: " + m_weaponGuid + "\n";
   actionMetaString +=
-      "Action damage done: " + std::to_string(damageDone) + "\n";
+      "Action damage done: " + std::to_string(m_damageDone) + "\n";
 
   return actionMetaString;
 }

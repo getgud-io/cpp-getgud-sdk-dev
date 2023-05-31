@@ -33,12 +33,12 @@ class GameSender {
   ~GameSender();
 
  private:
-  int sleepTimeMilli = 0;
-  std::thread updaterThread;
-  bool threadWorking = false;
-  curl_slist* headers = NULL;
-  CURL* curl = nullptr;
-  std::string curlReadBuffer;
+  int m_sleepTimeMilli = 0;
+  std::thread m_updaterThread;
+  bool m_threadWorking = false;
+  curl_slist* m_headers = NULL;
+  CURL* m_curl = nullptr;
+  std::string m_curlReadBuffer;
 
  private:
   void InitCurl();

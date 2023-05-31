@@ -5,9 +5,9 @@ namespace GetGudSdk {
 unsigned int GetPositionActionSize();
 
 class PositionActionData : public BaseActionData {
-  PositionF position;
-  RotationF rotation;
-  unsigned int size = 0;
+  PositionF m_position;
+  RotationF m_rotation;
+  unsigned int m_size = 0;
 
  public:
   PositionActionData(std::string matchGuid,

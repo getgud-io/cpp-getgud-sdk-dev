@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../../include/actions/BaseActionData.h"
 #include <mutex>
 #include "../config/Config.h"
@@ -24,37 +25,37 @@ extern Config sdkConfig;
  * Constructor of Base Action, all other actions inherit from BaseAction
  **/
 BaseActionData::BaseActionData(BaseData data, bool _isEmpty) {
-  actionType = data.ActionType;
-  actionTimeEpoch = data.ActionTimeEpoch;
-  playerGuid = data.PlayerGuid;
-  matchGuid = data.MatchGuid;
-  isEmpty = _isEmpty;
-
-   if (isEmpty) {
+  m_actionType = data.ActionType;
+  m_actionTimeEpoch = data.ActionTimeEpoch;
+  m_playerGuid = data.PlayerGuid;
+  m_matchGuid = data.MatchGuid;
+  m_isEmpty = _isEmpty;
+#ifdef _DEBUG
+  if (m_isEmpty) {
     sdkConfig.emptyActionsAmount++;
     sdkConfig.totalCreatedEmptyActions++;
   } else {
     sdkConfig.actionsAmount++;
     sdkConfig.totalCreatedActions++;
   }
-  // TODO: we need to make it long long and
-                                   // when it is
-                          // full refresh the var
+#endif
 };
 
 BaseActionData::BaseActionData(const BaseActionData& data) {
-  actionType = data.actionType;
-  actionTimeEpoch = data.actionTimeEpoch;
-  playerGuid = data.playerGuid;
-  matchGuid = data.matchGuid;
-  isEmpty = data.isEmpty;
-  if (isEmpty) {
+  m_actionType = data.m_actionType;
+  m_actionTimeEpoch = data.m_actionTimeEpoch;
+  m_playerGuid = data.m_playerGuid;
+  m_matchGuid = data.m_matchGuid;
+  m_isEmpty = data.m_isEmpty;
+#ifdef _DEBUG
+  if (m_isEmpty) {
     sdkConfig.emptyActionsAmount++;
     sdkConfig.totalCreatedEmptyActions++;
   } else {
     sdkConfig.actionsAmount++;
     sdkConfig.totalCreatedActions++;
   }
+#endif
 }
 
 /**
@@ -62,11 +63,13 @@ BaseActionData::BaseActionData(const BaseActionData& data) {
  *
  **/
 BaseActionData::~BaseActionData() {
-  if (isEmpty) {
+#ifdef _DEBUG
+  if (m_isEmpty) {
     sdkConfig.emptyActionsAmount--;
   } else {
     sdkConfig.actionsAmount--;
   }
+#endif
 };
 
 /**
@@ -76,21 +79,18 @@ BaseActionData::~BaseActionData() {
  * game!
  **/
 bool BaseActionData::IsValid() {
-  // TODO add flag so that actions can mark for game deletion themselves
-  // TODO ValidateStringChars shoudn't be used as a GUID validator, guid is
-  // letters, numbers and dashes only
-  // TODO validate actionType (can be pushed wrong using cast from int)
-  bool isActionValid = Validator::ValidateStringLength(playerGuid, 1, 36);
-  isActionValid &= Validator::ValidateStringChars(playerGuid);
-  isActionValid &= Validator::ValidateStringLength(matchGuid, 1, 36);
-  isActionValid &= Validator::ValidateStringChars(matchGuid);
+  bool isActionValid = Validator::ValidateStringLength(m_playerGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_playerGuid);
+  isActionValid &= Validator::ValidateStringLength(m_matchGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_matchGuid);
   isActionValid &= Validator::ValidateItemValue(
-      actionTimeEpoch, sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+      m_actionTimeEpoch, sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
       sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  isActionValid &= Validator::ValidateActionType((unsigned int)m_actionType);
 
   // empty action is passed when game container or action buffer are full
   // for game deletion purposes
-  isActionValid &= !isEmpty;
+  isActionValid &= !m_isEmpty;
 
   return isActionValid;
 }
@@ -116,7 +116,7 @@ std::string BaseActionData::ToStringMeta() {
 
   std::string actionTypeStr;
 
-  switch (actionType) {
+  switch (m_actionType) {
     case Actions::None:
       actionTypeStr = "None";
       break;
@@ -145,9 +145,9 @@ std::string BaseActionData::ToStringMeta() {
 
   actionMetaString += "\n";
   actionMetaString += "Action type: " + actionTypeStr + "\n";
-  actionMetaString += "Action time: " + std::to_string(actionTimeEpoch) + "\n";
-  actionMetaString += "Action match guid: " + matchGuid + "\n";
-  actionMetaString += "Action player guid: " + playerGuid + "\n";
+  actionMetaString += "Action time: " + std::to_string(m_actionTimeEpoch) + "\n";
+  actionMetaString += "Action match guid: " + m_matchGuid + "\n";
+  actionMetaString += "Action player guid: " + m_playerGuid + "\n";
 
   return actionMetaString;
 }

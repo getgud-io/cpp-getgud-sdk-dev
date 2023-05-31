@@ -19,51 +19,6 @@ struct SdkValidatorConfig {
 };
 
 /**
- * SdkApiFieldNames:
- *
- * Define all field names that can be used in JSON body of all API requests
- * sent to Getgud
- * TODO: check if we need those
- **/
-struct SdkApiFieldNames {
-  const std::string privateKey = "privateKey";
-  const std::string titleId = "titleId";
-  const std::string gameGuid = "gameGuid";
-  const std::string gameMode = "gameMode";
-  const std::string gameLastPacket = "gameLastPacket";
-  struct Match {
-    const std::string matchGuid = "matchGuid";
-    const std::string mapName = "mapName";
-    const std::string matchMode = "matchMode";
-    const std::string matchActionStream = "matchActionStream";
-  } match;
-  struct Report {
-    const std::string matchGuid = "matchGuid";
-    const std::string reporterName = "reporterName";
-    const std::string reporterType = "reporterType";
-    const std::string reporterSubType = "reporterSubType";
-    const std::string suspectedPlayerGuid = "suspectedPlayerGuid";
-    const std::string tbType = "tbType";
-    const std::string tbSubType = "tbSubType";
-    const std::string tbTimeEpoch = "tbTimeEpoch";
-    const std::string suggestedToxicityScore = "suggestedToxicityScore";
-    const std::string reportedTimeEpoch = "reportedTimeEpoch";
-  } report;
-  struct Message {
-    const std::string playerGuid = "playerGuid";
-    const std::string messageTimeEpoch = "messageTimeEpoch";
-    const std::string message = "message";
-  } message;
-  struct PlayerUpdate {
-    const std::string playerName = "playerName";
-    const std::string playerNickname = "playerNickname";
-    const std::string playerEmail = "playerEmail";
-    const std::string playerRank = "playerRank";
-    const std::string playerJoinDateEpoch = "playerJoinDateEpoch";
-  };
-};
-
-/**
  * SdkConfigFieldNames:
  *
  * Define names of the fields in SDK, so we can easily change names
@@ -75,6 +30,14 @@ struct SdkConfigFieldNames {
   std::string sendReportsURL = "sendReportsURL";
   std::string throttleCheckUrl = "throttleCheckUrl";
 
+  //Logger fields
+  std::string logToFile = "logToFile";
+  std::string logFileSizeInBytes = "logFileSizeInBytes";
+  std::string linesDeletionAmount = "linesDeletionAmount";
+  std::string circularLogFile = "circularLogFile";
+  std::string logType = "logType";
+  std::string logLevel = "logLevel";
+
   // Report sender fields
   std::string reportsMaxBufferSizeInBytes = "reportsMaxBufferSizeInBytes";
   std::string maxReportsToSendAtOnce = "maxReportsToSendAtOnce";
@@ -82,6 +45,9 @@ struct SdkConfigFieldNames {
   // Player updater fields
   std::string playersMaxBufferSizeInBytes = "playersMaxBufferSizeInBytes";
   std::string maxPlayerUpdatesToSendAtOnce = "maxPlayerUpdatesToSendAtOnce";
+
+  // Match chat fields
+  std::string maxChatMessagesToSendAtOnce = "maxChatMessagesToSendAtOnce";
 
   // Game sender fields
   std::string gameSenderSleepIntervalMilliseconds =
@@ -110,10 +76,6 @@ struct SdkConfigFieldNames {
   std::string hyperModeUpperPercentageBound = "hyperModeUpperPercentageBound";
   std::string hyperModeThreadCreationStaggerMilliseconds =
       "hyperModeThreadCreationStaggerMilliseconds";
-
-  // Other sdk fields
-  std::string logType = "logType";
-  std::string logLevel = "logLevel";
 };
 
 /**
@@ -123,10 +85,12 @@ struct SdkConfigFieldNames {
 class Config {
 #ifdef _DEBUG
  public:
-  int actionsAmount = 0;
-  int totalCreatedActions = 0;
-  int emptyActionsAmount = 0;
-  int totalCreatedEmptyActions = 0;
+  long long actionsAmount = 0;
+  long long totalCreatedActions = 0;
+  long long emptyActionsAmount = 0;
+  long long totalCreatedEmptyActions = 0;
+  long long totalReportsSent = 0;
+  long long totalChatSent = 0;
 #endif
 
  public:
@@ -136,8 +100,15 @@ class Config {
   std::string throttleCheckUrl;
 
   const SdkValidatorConfig sdkValidatorConfig;
-  const SdkApiFieldNames sdkApiFieldNames;
   const SdkConfigFieldNames sdkConfigFieldNames;
+
+  // Logger default values
+  bool logToFile = false;
+  unsigned int logFileSizeInBytes = 10000000;
+  unsigned int linesDeletionAmount = 30;
+  bool circularLogFile = true;
+  std::string logsFilePath;
+  LogLevel logLevel = LogLevel::FULL;
 
   // Report sender default values
   unsigned int reportsMaxBufferSizeInBytes = 1000000;
@@ -147,12 +118,14 @@ class Config {
   unsigned int playersMaxBufferSizeInBytes = 1000000;
   unsigned int maxPlayerUpdatesToSendAtOnce = 100;
 
+  // Chat messages default values
+  unsigned int maxChatMessagesToSendAtOnce = 100;
+
   // Game sender default values
   unsigned int gameSenderSleepIntervalMilliseconds = 1000;
   unsigned int apiTimeoutMilliseconds = 1000;
   long long apiWaitTimeMilliseconds = 1000;
   unsigned int packetMaxSizeInBytes = 1500000;
-  unsigned int bufferAvgSizeCalcDelayMilliseconds = 2000;
 
   // Action buffer default values
   unsigned int actionsBufferMaxSizeInBytes = 2000000;
@@ -174,34 +147,26 @@ class Config {
   unsigned int hyperModeThreadCreationStaggerMilliseconds = 500;
 
   // Other sdk default values
-  std::string logsFilePath;
-  LogLevel logLevel = LogLevel::FULL;
+  unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;
 
   void LoadSettings();
+  std::string ToString();
 
  private:
   std::map<std::string, std::string> ReadUserConfigFile();
 
-  template <typename T>
-  T GetConfigValue(std::map<std::string, std::string>& configData,
-                   std::string configKey);
+ bool GetConfigValue(std::map<std::string, std::string>& configData,
+                          std::string configKey, unsigned int& outValue);
 
-  template <>
-  int GetConfigValue<int>(std::map<std::string, std::string>& configData,
-                          std::string configKey);
-
-  template <>
-  std::string GetConfigValue<std::string>(
+ bool GetConfigValue(
       std::map<std::string, std::string>& configData,
-      std::string configKey);
+      std::string configKey, std::string& outValue);
 
-  template <>
-  bool GetConfigValue<bool>(std::map<std::string, std::string>& configData,
-                            std::string configKey);
+bool GetConfigValue(std::map<std::string, std::string>& configData,
+                            std::string configKey, bool& outValue);
 
-  template <>
-  LogLevel GetConfigValue<LogLevel>(
+bool GetConfigValue(
       std::map<std::string, std::string>& configData,
-      std::string configKey);
+      std::string configKey, LogLevel& outValue);
 };
 }  // namespace GetGudSdk

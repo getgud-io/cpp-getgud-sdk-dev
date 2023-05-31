@@ -15,9 +15,9 @@ namespace GetGudSdk {
 void Init();
 std::string StartGame(int titleId,
                       std::string privateKey,
-                      std::string serverName,
+                      std::string serverGuid,
                       std::string gameMode);
-std::string StartGame(std::string serverName, std::string gameMode);
+std::string StartGame(std::string serverGuid, std::string gameMode);
 std::string StartMatch(std::string gameGuid,
                        std::string matchMode,
                        std::string mapName);
@@ -59,12 +59,12 @@ bool SendPositionAction(std::string matchGuid,
 
 bool SendReports(int titleId,
                  std::string privateKey,
-                 std::deque<ReportInfo*>& reports);
-bool SendReports(std::deque<ReportInfo*>& reports);
+                 std::deque<ReportInfo>& reports);
+bool SendReports(std::deque<ReportInfo>& reports);
 bool UpdatePlayers(int titleId,
                    std::string privateKey,
-                   std::deque<PlayerInfo*>& players);
-bool UpdatePlayers(std::deque<PlayerInfo*>& players);
+                   std::deque<PlayerInfo>& players);
+bool UpdatePlayers(std::deque<PlayerInfo>& players);
 void Dispose();
 
 }  // namespace GetGudSdk

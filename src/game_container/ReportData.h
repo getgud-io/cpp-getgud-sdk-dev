@@ -9,10 +9,9 @@ unsigned int GetReportDataSize();
 
 class ReportData {
  public:
-  int titleId = 0;
-  std::string privateKey;
-  ReportInfo reportInfo;
-  ReportData(int titleId, std::string privateKey, ReportInfo reportInfo);
-  std::string ToString();
+  ReportInfo m_reportInfo;
+  ReportData(ReportInfo reportInfo);
+  std::string ToString(bool isOutsideMatch=false);
+  virtual bool IsValid();
 };
 }  // namespace GetGudSdk

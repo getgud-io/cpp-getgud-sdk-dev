@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../../include/actions/AttackActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
@@ -15,7 +16,7 @@ AttackActionData::AttackActionData(std::string matchGuid,
                                    std::string playerGuid,
                                    std::string weaponGuid)
     : BaseActionData({Actions::Attack, actionTimeEpoch, playerGuid, matchGuid}),
-      weaponGuid(weaponGuid){
+      m_weaponGuid(weaponGuid){
 
       };
 
@@ -24,7 +25,7 @@ AttackActionData::AttackActionData(std::string matchGuid,
  *
  **/
 AttackActionData::AttackActionData(const AttackActionData& data)
-    : BaseActionData(data), weaponGuid(data.weaponGuid) {}
+    : BaseActionData(data), m_weaponGuid(data.m_weaponGuid) {}
 
 
 /**
@@ -44,8 +45,8 @@ AttackActionData::~AttackActionData(){
 bool AttackActionData::IsValid() {
   // basic validations are done in the base class first
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(weaponGuid, 1, 3);
-  isActionValid &= Validator::ValidateStringChars(weaponGuid);
+  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 3);
+  isActionValid &= Validator::ValidateStringChars(m_weaponGuid);
 
   return isActionValid;
 }
@@ -57,10 +58,10 @@ bool AttackActionData::IsValid() {
  **/
 std::string AttackActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "A,";
-  actionString += playerGuid + ",";
-  actionString += weaponGuid;
+  actionString += m_playerGuid + ",";
+  actionString += m_weaponGuid;
 
   return actionString;
 }
@@ -73,7 +74,7 @@ std::string AttackActionData::ToString() {
 std::string AttackActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action weapon guid: " + weaponGuid + "\n";
+  actionMetaString += "Action weapon guid: " + m_weaponGuid + "\n";
 
   return actionMetaString;
 }

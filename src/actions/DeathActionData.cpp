@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../../include/actions/DeathActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
@@ -50,9 +51,9 @@ bool DeathActionData::IsValid() {
  **/
 std::string DeathActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "DD,";
-  actionString += playerGuid;
+  actionString += m_playerGuid;
 
   return actionString;
 }

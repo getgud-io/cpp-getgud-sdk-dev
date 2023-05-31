@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "Zip.h"
+#include "../../pch.h"
 
 namespace GetGudSdk {
 Zipper zipper;
@@ -70,8 +72,6 @@ std::string Base64Encode(unsigned char const* bytes_to_encode,
  **/
 bool Zipper::CompressString(std::string& inString,
                             std::string& outCompressedString) {
-  // TODO make sure that gzip and zlib works same
-  // currently compress method for a string only
   bool compressedSuccess = false;
   unsigned long compressedDataSize = compressBound(inString.size());
   unsigned char* compressedData = new unsigned char[compressedDataSize];

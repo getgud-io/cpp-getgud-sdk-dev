@@ -1,7 +1,14 @@
+#include "pch.h"
 #include "GameData.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 #include "../utils/Utils.h"
+
+#ifdef __linux__
+#include <limits.h>
+#include <stdio.h>
+#endif
+
 namespace GetGudSdk {
 extern Config sdkConfig;
 extern Logger logger;
@@ -19,13 +26,13 @@ GameData::GameData(int titleId,
                    std::string privateKey,
                    std::string serverGuid,
                    std::string gameMode)
-    : titleId(titleId),
-      privateKey(privateKey),
-      serverGuid(serverGuid),
-      gameMode(gameMode) {
-  gameGuid = GenerateGuid();
-  startGameTimer = std::chrono::system_clock::now();
-  lastUpdateTime = std::chrono::system_clock::now();
+    : m_titleId(titleId),
+      m_privateKey(privateKey),
+      m_serverGuid(serverGuid),
+      m_gameMode(gameMode) {
+  m_gameGuid = GenerateGuid();
+  m_startGameTimer = std::chrono::system_clock::now();
+  m_lastUpdateTime = std::chrono::system_clock::now();
   gamesAmount++;
   totalCreatedGames++;
 }
@@ -35,17 +42,17 @@ GameData::GameData(int titleId,
  *
  **/
 GameData::GameData(const GameData& data)
-    : matchMap(data.matchMap),
-      matchGuidVector(data.matchGuidVector),
-      titleId(data.titleId),
-      privateKey(data.privateKey),
-      gameGuid(data.gameGuid),
-      serverGuid(data.serverGuid),
-      gameMode(data.gameMode),
-      isGameMarkedAsEnded(data.isGameMarkedAsEnded),
-      sizeInBytes(data.sizeInBytes),
-      startGameTimer(data.startGameTimer),
-      lastUpdateTime(data.lastUpdateTime) {
+    : m_matchMap(data.m_matchMap),
+      m_matchGuidVector(data.m_matchGuidVector),
+      m_titleId(data.m_titleId),
+      m_privateKey(data.m_privateKey),
+      m_gameGuid(data.m_gameGuid),
+      m_serverGuid(data.m_serverGuid),
+      m_gameMode(data.m_gameMode),
+      m_isGameMarkedAsEnded(data.m_isGameMarkedAsEnded),
+      m_sizeInBytes(data.m_sizeInBytes),
+      m_startGameTimer(data.m_startGameTimer),
+      m_lastUpdateTime(data.m_lastUpdateTime) {
   gamesAmount++;
   totalCreatedGames++;
 }
@@ -67,25 +74,27 @@ GameData::~GameData() {
 GameData* GameData::Clone(bool isWithActions) {
   // Clone some metadata variables
   GameData* cloneGameData =
-      new GameData(titleId, privateKey, serverGuid, gameMode);
-  cloneGameData->gameGuid = gameGuid;
-  cloneGameData->isGameMarkedAsEnded = isGameMarkedAsEnded;
-  cloneGameData->sizeInBytes = sizeInBytes;
-  cloneGameData->startGameTimer = startGameTimer;
-  cloneGameData->lastUpdateTime = lastUpdateTime;
+      new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode);
+  cloneGameData->m_gameGuid = m_gameGuid;
+  cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
+  cloneGameData->m_sizeInBytes = m_sizeInBytes;
+  cloneGameData->m_startGameTimer = m_startGameTimer;
+  cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
 
   std::string matchGuid;
 
   // run through all the game's matches and clone them as well
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    matchGuid = matchGuidVector[index];
-    auto matchData_it = matchMap.find(matchGuid);
-    if (matchData_it == matchMap.end())
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    matchGuid = m_matchGuidVector[index];
+    auto matchData_it = m_matchMap.find(matchGuid);
+    if (matchData_it == m_matchMap.end())
       continue;
-    std::pair<std::string, MatchData*> matchGuidPair(
-        matchGuid, matchData_it->second->Clone(isWithActions));
-    cloneGameData->matchMap.insert(matchGuidPair);
-    cloneGameData->matchGuidVector.push_back(matchGuid);
+    auto* cloneMatchPtr = matchData_it->second->Clone(isWithActions);
+    if (cloneMatchPtr == nullptr)
+      continue;
+    std::pair<std::string, MatchData*> matchGuidPair(matchGuid, cloneMatchPtr);
+    cloneGameData->m_matchMap.insert(matchGuidPair);
+    cloneGameData->m_matchGuidVector.push_back(matchGuid);
   }
 
   return cloneGameData;
@@ -96,9 +105,9 @@ GameData* GameData::Clone(bool isWithActions) {
  *
  **/
 void GameData::MarkGameAsEnded() {
-  isGameMarkedAsEnded = true;
+  m_isGameMarkedAsEnded = true;
   logger.Log(LogType::DEBUG,
-             std::string("Mark end game for game guid.\n" + gameGuid));
+             std::string("Mark end game for game guid: " + m_gameGuid));
 }
 
 /**
@@ -107,24 +116,29 @@ void GameData::MarkGameAsEnded() {
  **/
 MatchData* GameData::AddMatch(std::string matchMode, std::string mapName) {
   // make sure the game has enough room for another match
-  if (matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
+  if (m_matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
     logger.Log(
         LogType::WARN,
         std::string("GameData::AddMatch->Live matches per game limit reached, "
                     "cannot add a new match to game with guid: " +
-                    gameGuid));
+                    m_gameGuid));
     return nullptr;
   }
 
   // create the new match with the passed parameters and insert it to the game's
   // match map
-  MatchData* matchData = new MatchData(gameGuid, matchMode, mapName);
+  MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName);
+  if (!matchData->IsValid()) {
+    delete matchData;
+    return nullptr;
+  }
   std::pair<std::string, MatchData*> matchGuidPair(matchData->GetMatchGuid(),
                                                    matchData);
-  matchMap.insert(matchGuidPair);
-  matchGuidVector.push_back(matchData->GetMatchGuid());
+  m_matchMap.insert(matchGuidPair);
+  m_matchGuidVector.push_back(matchData->GetMatchGuid());
+  m_matchGuidVector.shrink_to_fit();
 
-  lastUpdateTime = std::chrono::system_clock::now();
+  m_lastUpdateTime = std::chrono::system_clock::now();
 
   return matchData;
 }
@@ -145,8 +159,8 @@ bool GameData::IsGameEligibleForProcessing() {
 
   // check if the game is marked as ended AND enough time has passed since the
   // marking (to give time for actions to assimilate before closing)
-  else if (isGameMarkedAsEnded == true &&
-           lastUpdateTime +
+  else if (m_isGameMarkedAsEnded == true &&
+           m_lastUpdateTime +
                    std::chrono::milliseconds(
                        sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds) <
                std::chrono::system_clock::now())
@@ -154,7 +168,7 @@ bool GameData::IsGameEligibleForProcessing() {
 
   // check if this game's packet has been waiting for long long enough without
   // any data coming in to it
-  else if (lastUpdateTime + std::chrono::milliseconds(
+  else if (m_lastUpdateTime + std::chrono::milliseconds(
                                 sdkConfig.packetTimeoutInMilliseconds) <
            std::chrono::system_clock::now())
     return true;
@@ -176,7 +190,7 @@ GameData* GameData::SliceGame(int sizeToSliceInBytes) {
   // only clone the metadata of the game, without any actions
   GameData* cloneGameData = this->Clone(false);
   // if we are cloning we might have more packets and this is not the last one
-  cloneGameData->isGameMarkedAsEnded = false;
+  cloneGameData->m_isGameMarkedAsEnded = false;
   std::string matchGuid;
 
   // calculate the action percentage that we need to take from each match in
@@ -184,28 +198,40 @@ GameData* GameData::SliceGame(int sizeToSliceInBytes) {
   unsigned int gameSizeInBytes = GetGameSizeInBytes();
   float ratio = ((float)sizeToSliceInBytes / (float)gameSizeInBytes);
 
+  logger.Log(
+      LogType::DEBUG,
+      "Packet too large to send, slicing Game with guid " +
+          m_gameGuid);
+
   // run through all the game's matches and fetch the calculated ratio of their
   // actions
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    matchGuid = matchGuidVector[index];
-    auto matchData_it = matchMap.find(matchGuid);
-    if (matchData_it == matchMap.end())
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    matchGuid = m_matchGuidVector[index];
+    auto matchData_it = m_matchMap.find(matchGuid);
+    if (matchData_it == m_matchMap.end())
       continue;
 
-    auto cloneMatchData_it = cloneGameData->matchMap.find(matchGuid);
+    auto cloneMatchData_it = cloneGameData->m_matchMap.find(matchGuid);
     std::vector<BaseActionData*> slicedActions;
+    std::vector<ReportData*> slicedReports;
+    std::vector<ChatMessageData*> slicedChatMessages;
 
     // grabs the ratio of full actions of the match that we will write
     // into the match copy
     matchData_it->second->SliceMatch(ratio, slicedActions);
+    cloneMatchData_it->second->AddActions(slicedActions);
 
-    long long slicedActionsTimeStamp = 0;
-    // calculate running sum of slicedActions
-    for (auto& action : slicedActions) {
-      slicedActionsTimeStamp += action->actionTimeEpoch;
-    }
-    cloneMatchData_it->second->AddActions(slicedActions,
-                                          slicedActionsTimeStamp);
+    // slice reports 
+    matchData_it->second->SliceMatchReportVector(
+        sdkConfig.maxReportsToSendAtOnce, slicedReports);
+    for (auto& report: slicedReports)
+      cloneMatchData_it->second->AddInMatchReport(report);
+
+    // slice chat
+    matchData_it->second->SliceMatchChatMessageVector(
+        sdkConfig.maxChatMessagesToSendAtOnce, slicedChatMessages);
+    for (auto& chatMessage : slicedChatMessages)
+      cloneMatchData_it->second->AddChatMessage(chatMessage);
   }
 
   return cloneGameData;
@@ -226,15 +252,15 @@ bool GameData::CanDeleteGame() {
   unsigned int gameSizeInBytes = GetGameSizeInBytes();
   // Check if game is ended, has no actions and grace time to add remaining
   // actions has passed
-  if (isGameMarkedAsEnded == true && gameSizeInBytes == 0 &&
-      lastUpdateTime + std::chrono::milliseconds(
+  if (m_isGameMarkedAsEnded == true && gameSizeInBytes == 0 &&
+      m_lastUpdateTime + std::chrono::milliseconds(
                            sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds) <
           std::chrono::system_clock::now())
     return true;
 
   // Check if this game did not receive any actions for a very long long time,
   // indicating it's probably closed
-  else if (lastUpdateTime + std::chrono::milliseconds(
+  else if (m_lastUpdateTime + std::chrono::milliseconds(
                                 sdkConfig.liveGameTimeoutInMilliseconds) <
            std::chrono::system_clock::now())
     return true;
@@ -248,7 +274,7 @@ bool GameData::CanDeleteGame() {
  *
  **/
 std::string GameData::GetGameGuid() {
-  return gameGuid;
+  return m_gameGuid;
 }
 
 /**
@@ -256,7 +282,7 @@ std::string GameData::GetGameGuid() {
  *
  **/
 int GameData::GetTitleId() {
-  return titleId;
+  return m_titleId;
 }
 
 /**
@@ -264,7 +290,7 @@ int GameData::GetTitleId() {
  *
  **/
 std::string GameData::GetPrivateKey() {
-  return privateKey;
+  return m_privateKey;
 }
 
 /**
@@ -272,7 +298,7 @@ std::string GameData::GetPrivateKey() {
  *
  **/
 void GameData::UpdateLastUpdateTime() {
-  lastUpdateTime = std::chrono::system_clock::now();
+  m_lastUpdateTime = std::chrono::system_clock::now();
 }
 
 /**
@@ -283,8 +309,8 @@ void GameData::GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut) {
   MatchData* matchData;
   std::string matchGuid;
 
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    matchGuid = matchGuidVector[index];
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    matchGuid = m_matchGuidVector[index];
     matchGuidVectorOut.push_back(matchGuid);
   }
 }
@@ -294,9 +320,9 @@ void GameData::GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut) {
  *
  **/
 MatchData* GameData::GetGameMatch(std::string matchGuid) {
-  auto foundMatch_it = matchMap.find(matchGuid);
+  auto foundMatch_it = m_matchMap.find(matchGuid);
   MatchData* MatchOut = nullptr;
-  if (foundMatch_it != matchMap.end())
+  if (foundMatch_it != m_matchMap.end())
     MatchOut = foundMatch_it->second;
 
   return MatchOut;
@@ -308,26 +334,26 @@ MatchData* GameData::GetGameMatch(std::string matchGuid) {
  **/
 void GameData::GameToString(std::string& gameOut) {
   std::string lastPacket = "false";
-  if (isGameMarkedAsEnded == true)
+  if (m_isGameMarkedAsEnded == true)
     lastPacket = "true";
 
   bool containsMatch = false;
 
   gameOut += "{ \n";
-  gameOut += "	\"privateKey\": \"" + privateKey + "\",\n";
-  gameOut += "	\"titleId\": " + std::to_string(titleId) + ",\n";
-  gameOut += "	\"gameGuid\": \"" + gameGuid + "\",\n";
-  gameOut += "	\"gameMode\": \"" + gameMode + "\",\n";
-  gameOut += "	\"serverGuid\": \"" + serverGuid + "\",\n";
+  gameOut += "	\"privateKey\": \"" + m_privateKey + "\",\n";
+  gameOut += "	\"titleId\": " + std::to_string(m_titleId) + ",\n";
+  gameOut += "	\"gameGuid\": \"" + m_gameGuid + "\",\n";
+  gameOut += "	\"gameMode\": \"" + m_gameMode + "\",\n";
+  gameOut += "	\"serverGuid\": \"" + m_serverGuid + "\",\n";
   gameOut += "	\"gameLastPacket\": " + lastPacket + ",\n";
   gameOut += "	\"matches\":\n	[\n";
 
   // run through all the game's matches, get their match_out string and append
   // them to the game
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    auto matchGuid = matchGuidVector[index];
-    auto matchData_it = matchMap.find(matchGuid);
-    if (matchData_it == matchMap.end() || matchData_it->second == nullptr)
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    auto matchGuid = m_matchGuidVector[index];
+    auto matchData_it = m_matchMap.find(matchGuid);
+    if (matchData_it == m_matchMap.end() || matchData_it->second == nullptr)
       continue;
 
     std::string matchString;
@@ -355,8 +381,8 @@ void GameData::GameToString(std::string& gameOut) {
  *
  **/
 std::string GameData::ToStringMeta() {
-  return "Game Guid: " + gameGuid + " | Server: " + serverGuid +
-         " | Title id: " + std::to_string(titleId);
+  return "Game Guid: " + m_gameGuid + " | Server: " + m_serverGuid +
+         " | Title id: " + std::to_string(m_titleId);
 }
 
 /**
@@ -368,10 +394,10 @@ unsigned int GameData::GetGameSizeInBytes() {
 
   // traverse through all the game's matches, get their size and add it together
   // to get the total size of the current GameData object
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    auto matchGuid_it = matchGuidVector[index];
-    auto matchData_it = matchMap.find(matchGuid_it);
-    if (matchData_it != matchMap.end())
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    auto matchGuid_it = m_matchGuidVector[index];
+    auto matchData_it = m_matchMap.find(matchGuid_it);
+    if (matchData_it != m_matchMap.end())
       totalGameSize += matchData_it->second->GetMatchSizeInBytes();
   }
 
@@ -387,10 +413,10 @@ unsigned int GameData::GetNumberOfGameReportsAndMessages() {
 
   // traverse through all the game's matches, get their size and add it together
   // to get the total size of the current GameData object
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    auto matchGuid_it = matchGuidVector[index];
-    auto matchData_it = matchMap.find(matchGuid_it);
-    if (matchData_it == matchMap.end())
+  for (int index = 0; index < m_matchGuidVector.size(); index++) {
+    auto matchGuid_it = m_matchGuidVector[index];
+    auto matchData_it = m_matchMap.find(matchGuid_it);
+    if (matchData_it == m_matchMap.end())
       continue;
     numberOfReportAndMessages +=
         matchData_it->second->GetNumberOfMatchReportsAndMessages();
@@ -404,7 +430,7 @@ unsigned int GameData::GetNumberOfGameReportsAndMessages() {
  *
  **/
 std::unordered_map<std::string, MatchData*>& GameData::GetMatchMap() {
-  return matchMap;
+  return m_matchMap;
 }
 
 /**
@@ -412,7 +438,7 @@ std::unordered_map<std::string, MatchData*>& GameData::GetMatchMap() {
  *
  **/
 std::string GameData::GetServerGuid() {
-  return serverGuid;
+  return m_serverGuid;
 }
 
 /**
@@ -420,7 +446,7 @@ std::string GameData::GetServerGuid() {
  *
  **/
 std::string GameData::GetGameMode() {
-  return gameMode;
+  return m_gameMode;
 }
 
 /**
@@ -428,17 +454,27 @@ std::string GameData::GetGameMode() {
  *
  **/
 void GameData::Dispose() {
-  for (int index = 0; index < matchGuidVector.size(); index++) {
-    auto matchGuid = matchGuidVector[index];
-    // TODO matchMap iteration should be better
-    auto matchData_it = matchMap.find(matchGuid);
-    if (matchData_it == matchMap.end() || matchData_it->second == nullptr)
+  for (auto& matchData_it : m_matchMap) {
+    if (matchData_it.second == nullptr)
       continue;
-    matchData_it->second->Dispose();
-    delete matchData_it->second;
+    matchData_it.second->Dispose();
+    delete matchData_it.second;
+    matchData_it.second = nullptr;
   }
 
-  matchMap.clear();
-  matchGuidVector.clear();
+  m_matchMap.clear();
+  m_matchGuidVector.clear();
+  m_matchGuidVector.shrink_to_fit();
+}
+
+bool GameData::IsValid() {
+  bool isActionValid = Validator::ValidateStringLength(m_privateKey, 1, 100);
+  isActionValid &= Validator::ValidateStringChars(m_privateKey);
+  isActionValid = Validator::ValidateStringLength(m_serverGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_serverGuid);
+  isActionValid = Validator::ValidateStringLength(m_gameMode, 1, 100);
+  isActionValid &= Validator::ValidateStringChars(m_gameMode);
+  isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
+  return isActionValid;
 }
 }  // namespace GetGudSdk

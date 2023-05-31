@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../utils/Validator.h"
 #include "../../include/actions/Helpers.h"
 #include "../config/Config.h"
@@ -90,6 +91,36 @@ bool ValidateStringChars(std::string& sdkString) {
       return false;
   }
   return true;
+}
+
+/**
+ * ValidateGuid:
+ *
+ * Validate that we are using only allowed GUID by ISO/IEC
+ **/
+bool ValidateGuid(std::string& guid) {
+
+  for (auto& symbol : guid) {
+    if (symbol < '0' && symbol > '9' && symbol < 'a' && symbol > 'z' &&
+        symbol < 'A' && symbol > 'Z' && symbol != '-')
+      return false;
+  }
+
+  return true;
+}
+
+/**
+ * ValidateActionType:
+ *
+ * Validate that we are using only allowed actions
+ * Actions type can be created by int casting into Actions type
+ **/
+bool ValidateActionType(unsigned int actionType) {
+  if (actionType > 0U &&
+      actionType <= (unsigned int)Actions::Spawn)
+    return true;
+  else
+    return false;
 }
 
 }  // namespace Validator

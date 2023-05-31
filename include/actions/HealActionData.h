@@ -3,7 +3,7 @@
 
 namespace GetGudSdk {
 class HealActionData : public BaseActionData {
-  float healthGained = 0;
+  float m_healthGained = 0;
 
  public:
   HealActionData(std::string matchGuid,

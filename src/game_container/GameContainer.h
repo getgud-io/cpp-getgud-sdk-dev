@@ -9,21 +9,20 @@ namespace GetGudSdk {
 class GameContainer {
  private:
   // fast access map for when we need the GameData via game guid
-  std::unordered_map<std::string, GameData*> gameMap;
+  std::unordered_map<std::string, GameData*> m_gameMap;
 
   // fast access map for when we need the MatchData via match guid - this is
   // abusing game encapsulation but needed for speed
-  std::unordered_map<std::string, MatchData*> matchMap;
+  std::unordered_map<std::string, MatchData*> m_matchMap;
 
   // holds the GameData and the order of the games as they need to be processed
   // (first game to be processed resides at the beginning of the vector)
-  std::vector<GameData*> gameVector;
+  std::vector<GameData*> m_gameVector;
 
   // helpers and data holders
-  unsigned int gameContainerSizeInBytes = 0;
-  bool disposeRequired = true;
-  std::mutex gameContainerMutex;
-  FilledAverage averageSize;
+  unsigned int m_gameContainerSizeInBytes = 0;
+  std::mutex m_gameContainerMutex;
+  FilledAverage m_averageSize;
 
  public:
   std::string AddGame(int titleId,
@@ -45,7 +44,7 @@ class GameContainer {
   std::unordered_map<std::string, MatchData*>& GetMatchMap();
 
  private:
-  bool GameContainer::DeleteGame(std::string gameGuid,
+  bool DeleteGame(std::string gameGuid,
                                  bool externalCall,
                                  std::vector<MatchData*>& matchPtrVector);
 };

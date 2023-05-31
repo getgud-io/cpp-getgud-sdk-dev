@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../../include/actions/SpawnActionData.h"
 #include "../config/Config.h"
 #include "../utils/Utils.h"
@@ -19,11 +20,11 @@ SpawnActionData::SpawnActionData(std::string matchGuid,
                                  PositionF position,
                                  RotationF rotation)
     : BaseActionData({Actions::Spawn, actionTimeEpoch, playerGuid, matchGuid}),
-      position(position),
-      rotation(rotation),
-      initialHealth(initialHealth),
-      teamId(teamId),
-      characterGuid(characterGuid) {}
+      m_position(position),
+      m_rotation(rotation),
+      m_initialHealth(initialHealth),
+      m_teamId(teamId),
+      m_characterGuid(characterGuid) {}
 
 /**
  * SpawnActionData:
@@ -31,11 +32,11 @@ SpawnActionData::SpawnActionData(std::string matchGuid,
  **/
 SpawnActionData::SpawnActionData(const SpawnActionData& data)
     : BaseActionData(data),
-      position(data.position),
-      rotation(data.rotation),
-      initialHealth(data.initialHealth),
-      teamId(data.teamId),
-      characterGuid(data.characterGuid) {}
+      m_position(data.m_position),
+      m_rotation(data.m_rotation),
+      m_initialHealth(data.m_initialHealth),
+      m_teamId(data.m_teamId),
+      m_characterGuid(data.m_characterGuid) {}
 
 /**
  * ~SpawnActionData:
@@ -51,8 +52,8 @@ SpawnActionData::~SpawnActionData() {}
  **/
 bool SpawnActionData::IsValid() {
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(characterGuid, 1, 36);
-  isActionValid &= Validator::ValidateStringChars(characterGuid);
+  isActionValid &= Validator::ValidateStringLength(m_characterGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_characterGuid);
 
   return isActionValid;
 }
@@ -64,17 +65,17 @@ bool SpawnActionData::IsValid() {
  **/
 std::string SpawnActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "S,";
-  actionString += playerGuid + ",";
-  actionString += characterGuid + ",";
-  actionString += std::to_string(teamId) + ",";
-  actionString += std::to_string(initialHealth) + ",";
-  actionString += std::to_string(position.X) + "~" +
-                  std::to_string(position.Y) + "~" +
-                  std::to_string(position.Z) + "~";
-  actionString +=
-      std::to_string(rotation.Pitch) + "~" + std::to_string(rotation.Roll);
+  actionString += m_playerGuid + ",";
+  actionString += m_characterGuid + ",";
+  actionString += std::to_string(m_teamId) + ",";
+  actionString += CutDecimalNumber(std::to_string(m_initialHealth)) + ",";
+  actionString += CutDecimalNumber(std::to_string(m_position.X)) + "~" +
+                  CutDecimalNumber(std::to_string(m_position.Y)) + "~" +
+                  CutDecimalNumber(std::to_string(m_position.Z)) + "~";
+  actionString += CutDecimalNumber(std::to_string(m_rotation.Pitch)) + "~" + 
+                  CutDecimalNumber(std::to_string(m_rotation.Roll));
 
   return actionString;
 }
@@ -87,14 +88,14 @@ std::string SpawnActionData::ToString() {
 std::string SpawnActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action characterGuid: " + characterGuid + "\n";
-  actionMetaString += "Action teamId: " + std::to_string(teamId) + "\n";
-  actionMetaString += "Action position <x,y,z>: " + std::to_string(position.X) +
-                      ", " + std::to_string(position.Y) + ", " +
-                      std::to_string(position.Z) + "\n";
+  actionMetaString += "Action characterGuid: " + m_characterGuid + "\n";
+  actionMetaString += "Action teamId: " + std::to_string(m_teamId) + "\n";
+  actionMetaString += "Action position <x,y,z>: " + std::to_string(m_position.X) +
+                      ", " + std::to_string(m_position.Y) + ", " +
+                      std::to_string(m_position.Z) + "\n";
   actionMetaString +=
-      "Action rotation <pitch, roll>: " + std::to_string(rotation.Pitch) +
-      ", " + std::to_string(rotation.Roll) + "\n";
+      "Action rotation <pitch, roll>: " + std::to_string(m_rotation.Pitch) +
+      ", " + std::to_string(m_rotation.Roll) + "\n";
 
   return actionMetaString;
 }

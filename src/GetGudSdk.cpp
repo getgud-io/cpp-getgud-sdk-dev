@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../include/GetGudSdk.h"
 #include <exception>
 #include <string>
@@ -28,29 +29,14 @@ void Init() {
   try {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     sdkConfig.LoadSettings();
-
-    // if (reportSender == nullptr)
-    //   reportSender = new ReportSender();
-    //
-    // if (playerUpdater == nullptr)
-    //   playerUpdater = new PlayerUpdater();
-
-    // Create first Game Sender, if hypermode is on there will be more than 1
-    sharedGameSenders.gameSendersMutex.lock();
-    locked = true;
-    GetGudSdk::GameSender* gameSender = new GameSender();
-    sharedGameSenders.gameSendersMutex.unlock();
-    locked = false;
-
-    // Start all services
-    gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
-    // playerUpdater->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
-    // reportSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    logger.Log(LogType::DEBUG,
+               "Loaded config with the following parameters: \n" +
+                   sdkConfig.ToString());
   } catch (std::exception& _error) {
-    if (locked)
-      sharedGameSenders.gameSendersMutex.unlock();
-    logger.Log(LogType::FATAL, std::string("Couldn't initialize Getgud SDK: ") +
-                                   std::string(_error.what()));
+    logger.Log(
+        LogType::FATAL,
+        std::string("GetGudSdk::Init->Couldn't initialize Getgud SDK: ") +
+            std::string(_error.what()));
   }
 }
 
@@ -61,19 +47,27 @@ void Init() {
  **/
 std::string StartGame(int titleId,
                       std::string privateKey,
-                      std::string serverName,
+                      std::string serverGuid,
                       std::string gameMode) {
   std::string gameGuid;
 
   try {
-    gameGuid = gameContainer.AddGame(titleId, privateKey, serverName, gameMode);
+    if (sharedGameSenders.gameSenders.empty()) {
+      GetGudSdk::GameSender* gameSender = nullptr;
+      {  // lock_guard scope
+        // Create first Game Sender, if hypermode is on there will be more than
+        // 1
+        std::lock_guard<std::mutex> locker(sharedGameSenders.gameSendersMutex);
+        gameSender = new GameSender();
+      }
+      // Start all services
+      gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
+    gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't start new game: ") +
-                                   std::string(_error.what()));
-  }
-
-  if (!gameGuid.empty()) {
-    logger.Log(LogType::DEBUG, std::string("Game started: " + gameGuid));
+    logger.Log(LogType::FATAL,
+               std::string("GetGudSdk::StartGame->Couldn't start new game: ") +
+                   std::string(_error.what()));
   }
 
   return gameGuid;
@@ -84,31 +78,41 @@ std::string StartGame(int titleId,
  *
  * Start new game
  **/
-std::string StartGame(std::string serverName, std::string gameMode) {
+std::string StartGame(std::string serverGuid, std::string gameMode) {
   std::string gameGuid;
 
   try {
+     if (sharedGameSenders.gameSenders.empty()) {
+      GetGudSdk::GameSender* gameSender = nullptr;
+      {  // lock_guard scope
+        // Create first Game Sender, if hypermode is on there will be more than
+        // 1
+        std::lock_guard<std::mutex> locker(sharedGameSenders.gameSendersMutex);
+        gameSender = new GameSender();
+      }
+      // Start all services
+      gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
+
     const char* titleIdHolder = std::getenv("TITLE_ID");
     const char* privateKeyHolder = std::getenv("PRIVATE_KEY");
 
     if (titleIdHolder == nullptr || privateKeyHolder == nullptr) {
       logger.Log(LogType::FATAL,
-                 std::string("Error: environment variables CONFIG_PATH and "
-                             "CONFIG_FILENAME are required"));
+                 std::string(
+                     "GetGudSdk::StartGame->Environment variables TITLE_ID and "
+                     "PRIVATE_KEY are required"));
     }
 
     std::string titleId(titleIdHolder);
     std::string privateKey(privateKeyHolder);
 
     gameGuid = gameContainer.AddGame(std::stoi(titleId.c_str()), privateKey,
-                                     serverName, gameMode);
+                                     serverGuid, gameMode);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't start new game") +
-                                   std::string(_error.what()));
-  }
-
-  if (!gameGuid.empty()) {
-    logger.Log(LogType::DEBUG, std::string("Game started: " + gameGuid));
+    logger.Log(LogType::FATAL,
+               std::string("GetGudSdk::StartGame->Couldn't start new game") +
+                   std::string(_error.what()));
   }
 
   return gameGuid;
@@ -127,11 +131,10 @@ std::string StartMatch(std::string gameGuid,
     matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName);
 
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't start new match") +
-                                   std::string(_error.what()));
-  }
-  if (!matchGuid.empty()) {
-    logger.Log(LogType::DEBUG, std::string("Match started: " + matchGuid));
+    logger.Log(
+        LogType::FATAL,
+        std::string("GetGudSdk::StartMatch->Couldn't start new match: ") +
+            std::string(_error.what()));
   }
 
   return matchGuid;
@@ -148,12 +151,8 @@ bool MarkEndGame(std::string gameGuid) {
     gameEnded = gameContainer.MarkEndGame(gameGuid);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("Couldn't end game") + std::string(_error.what()));
-  }
-
-  if (gameEnded) {
-    logger.Log(LogType::DEBUG,
-               std::string("Stopped game with game guid: " + gameGuid));
+               std::string("GetGudSdk::MarkEndGame->Couldn't end game: ") +
+                   std::string(_error.what()));
   }
 
   return gameEnded;
@@ -169,13 +168,11 @@ bool SendInMatchReport(ReportInfo reportInfo) {
   try {
     inMatchReportAdded = gameContainer.AddInMatchReport(reportInfo);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't add in match report") +
-                                   std::string(_error.what()));
-  }
-
-  if (inMatchReportAdded) {
-    logger.Log(LogType::DEBUG, std::string("Added report to match with guid: " +
-                                           reportInfo.MatchGuid));
+    logger.Log(
+        LogType::FATAL,
+        std::string(
+            "GetGudSdk::SendInMatchReport->Couldn't add in match report: ") +
+            std::string(_error.what()));
   }
 
   return inMatchReportAdded;
@@ -191,14 +188,11 @@ bool SendChatMessage(std::string matchGuid, ChatMessageInfo messageInfo) {
   try {
     chatMessageSent = gameContainer.AddChatMessage(matchGuid, messageInfo);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't send match chat message") +
-                                   std::string(_error.what()));
-  }
-
-  if (chatMessageSent) {
     logger.Log(
-        LogType::DEBUG,
-        std::string("Added chat message to match with guid: " + matchGuid));
+        LogType::FATAL,
+        std::string(
+            "GetGudSdk::SendChatMessage->Couldn't send match chat message: ") +
+            std::string(_error.what()));
   }
 
   return chatMessageSent;
@@ -216,14 +210,9 @@ bool SendActions(std::deque<BaseActionData*> actions) {
     actionsSize = actions.size();
     actionsSent = actionsBuffer.AddActions(actions);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("Couldn't send actions") +
+    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendActions->Couldn't "
+                                           "send actions to Action Buffer: ") +
                                    std::string(_error.what()));
-  }
-
-  if (actionsSent) {
-    logger.Log(LogType::DEBUG,
-               std::string("Added " + std::to_string(actionsSize)) +
-                   " action(s) to ActionBuffer");
   }
 
   return actionsSent;
@@ -351,14 +340,19 @@ bool SendPositionAction(std::string matchGuid,
  **/
 bool SendReports(int titleId,
                  std::string privateKey,
-                 std::deque<ReportInfo*>& reports) {
+                 std::deque<ReportInfo>& reports) {
   try {
+    if (reportSender == nullptr) {
+      reportSender = new ReportSender();
+      reportSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
     return reportSender->AddReports(titleId, privateKey, reports);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL,
-               std::string(
-                   "GetgudSDK::SendReports failed, reports will not be sent.") +
-                   std::string(_error.what()));
+    logger.Log(
+        LogType::FATAL,
+        std::string(
+            "GetGudSdk::SendReports->Failed, reports can not be sent: ") +
+            std::string(_error.what()));
     return false;
   }
 }
@@ -368,19 +362,40 @@ bool SendReports(int titleId,
  *
  * Send reports which are outside of the live match
  **/
-bool SendReports(std::deque<ReportInfo*>& reports) {
-  const char* titleIdVar = std::getenv("TITLE_ID");
-  const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+bool SendReports(std::deque<ReportInfo>& reports) {
+  std::string titleId;
+  std::string privateKey;
+  try {
+    if (reportSender == nullptr) {
+      reportSender = new ReportSender();
+      reportSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
 
-  if (titleIdVar == nullptr || privateKeyVar == nullptr) {
-    logger.Log(LogType::FATAL,
-               std::string("Error: environment variables CONFIG_PATH and "
-                           "CONFIG_FILENAME are required"));
+    const char* titleIdVar = std::getenv("TITLE_ID");
+    const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+
+    if (titleIdVar == nullptr || privateKeyVar == nullptr) {
+      logger.Log(
+          LogType::FATAL,
+          std::string(
+              "GetGudSdk::SendReports->Environment variables TITLE_ID and "
+              "PRIVATE_KEY are required"));
+      return false;
+    }
+
+    titleId = std::string(titleIdVar);
+    privateKey = std::string(privateKeyVar);
+  } catch (std::exception& _error) {
+    logger.Log(
+        LogType::FATAL,
+        std::string(
+            "GetGudSdk::SendReports->Failed, reports can not be sent: ") +
+            std::string(_error.what()));
+    return false;
   }
 
-  std::string titleId(titleIdVar);
-  std::string privateKey(privateKeyVar);
   return SendReports(std::stoi(titleId.c_str()), privateKey, reports);
+  
 }
 
 /**
@@ -390,13 +405,18 @@ bool SendReports(std::deque<ReportInfo*>& reports) {
  **/
 bool UpdatePlayers(int titleId,
                    std::string privateKey,
-                   std::deque<PlayerInfo*>& players) {
+                   std::deque<PlayerInfo>& players) {
   try {
+    if (playerUpdater == nullptr) {
+      playerUpdater = new PlayerUpdater();
+
+      playerUpdater->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
     return playerUpdater->AddPlayers(titleId, privateKey, players);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetgudSDK::UpdatePlayers failed, player data "
-                           "will not be updated.") +
+               std::string("GetGudSdk::UpdatePlayers->Player data "
+                           "can not be updated: ") +
                    std::string(_error.what()));
     return false;
   }
@@ -407,20 +427,38 @@ bool UpdatePlayers(int titleId,
  *
  * Update player info outside of the live match
  **/
-bool UpdatePlayers(std::deque<PlayerInfo*>& players) {
-  const char* titleIdVar = std::getenv("TITLE_ID");
-  const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+bool UpdatePlayers(std::deque<PlayerInfo>& players) {
+  std::string titleId;
+  std::string privateKey;
+  try {
+    if (playerUpdater == nullptr) {
+      playerUpdater = new PlayerUpdater();
 
-  if (titleIdVar == nullptr || privateKeyVar == nullptr) {
-    logger.Log(LogType::FATAL,
-               std::string("Error: environment variables CONFIG_PATH and "
-                           "CONFIG_FILENAME are required"));
+      playerUpdater->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    }
+
+    const char* titleIdVar = std::getenv("TITLE_ID");
+    const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+
+    if (titleIdVar == nullptr || privateKeyVar == nullptr) {
+      logger.Log(
+          LogType::FATAL,
+          std::string(
+              "GetGudSdk::UpdatePlayers->Environment variables TITLE_ID and "
+              "PRIVATE_KEY are required"));
+      return false;
+    }
+
+    titleId = std::string(titleIdVar);
+    privateKey = std::string(privateKeyVar);
   }
-
-  // TODO validate ENV first
-  std::string titleId(titleIdVar);
-  std::string privateKey(privateKeyVar);
-
+  catch (std::exception& _error) {
+    logger.Log(LogType::FATAL,
+               std::string("GetGudSdk::UpdatePlayers->Player data "
+                           "can not be updated: ") +
+                   std::string(_error.what()));
+    return false;
+  }
   return UpdatePlayers(std::stoi(titleId), privateKey, players);
 }
 
@@ -432,21 +470,32 @@ void Dispose() {
   try {
     actionsBuffer.Dispose();
     gameContainer.Dispose();
-    if (reportSender)
+    if (reportSender != nullptr) {
       reportSender->Dispose();
-    if (playerUpdater)
+      reportSender = nullptr;
+    }
+    if (playerUpdater != nullptr) {
       playerUpdater->Dispose();
+      playerUpdater = nullptr;
+    }
 
-    // TODO: is this correct that we dispose them because they are pointers?
-    if (reportSender)
-      delete reportSender;
-    if (playerUpdater)
-      delete playerUpdater;
+    for (auto& senderThread : sharedGameSenders.gameSenders)
+      senderThread->Dispose();
+    sharedGameSenders.gameSenders.clear();
+    sharedGameSenders.gameSendersCount = 0;
+    curl_global_cleanup();
 
-    logger.Log(LogType::DEBUG, std::string("SDK disposed"));
+    #ifdef _DEBUG
+    sdkConfig.actionsAmount = 0;
+    sdkConfig.totalCreatedActions = 0;
+    sdkConfig.emptyActionsAmount = 0;
+    sdkConfig.totalCreatedEmptyActions = 0;
+    #endif
+
+    logger.Log(LogType::DEBUG, std::string("SDK stopped.."));
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("Dispose error") + std::string(_error.what()));
+               std::string("GetGudSdk::Dispose->Couldn't dispose SDK: ") + std::string(_error.what()));
   }
 }
 

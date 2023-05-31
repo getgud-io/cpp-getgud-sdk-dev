@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MatchData.h"
 #include <algorithm>
 #include "../../include/actions/DamageActionData.h"
@@ -5,11 +6,11 @@
 #include "../logger/Logger.h"
 #include "../utils/Utils.h"
 #include "./zip/Zip.h"
-// TODO: tmps
-#include <fstream>
-#include <iostream>
+#include "../src/utils/Validator.h"
+#include "../src/config/Config.h"
 
 namespace GetGudSdk {
+extern Config sdkConfig;
 extern Zipper zipper;
 extern Logger logger;
 
@@ -25,8 +26,8 @@ int totalCreatedMatches = 0;  // total created matches;
 MatchData::MatchData(std::string gameGuid,
                      std::string matchMode,
                      std::string mapName)
-    : gameGuid(gameGuid), matchMode(matchMode), mapName(mapName) {
-  matchGuid = GenerateGuid();
+    : m_gameGuid(gameGuid), m_matchMode(matchMode), m_mapName(mapName) {
+  m_matchGuid = GenerateGuid();
   matchesAmount++;
   totalCreatedMatches++;
 }
@@ -36,19 +37,19 @@ MatchData::MatchData(std::string gameGuid,
  *
  **/
 MatchData::MatchData(const MatchData& data)
-    : matchGuid(data.matchGuid),
-      gameGuid(data.gameGuid),
-      matchMode(data.matchMode),
-      mapName(data.mapName),
-      actionVector(data.actionVector),
-      reportVector(data.reportVector),
-      chatMessageVector(data.chatMessageVector),
-      throttleChecked(data.throttleChecked),
-      isInteresting(data.isInteresting),
-      playerGuids(data.playerGuids),
-      actionsCount(data.actionsCount),
-      sizeInBytes(data.sizeInBytes),
-      runningSubActionTimeEpoch(data.runningSubActionTimeEpoch) {
+    : m_matchGuid(data.m_matchGuid),
+      m_gameGuid(data.m_gameGuid),
+      m_matchMode(data.m_matchMode),
+      m_mapName(data.m_mapName),
+      m_actionVector(data.m_actionVector),
+      m_reportVector(data.m_reportVector),
+      m_chatMessageVector(data.m_chatMessageVector),
+      m_throttleChecked(data.m_throttleChecked),
+      m_isInteresting(data.m_isInteresting),
+      m_playerGuids(data.m_playerGuids),
+      m_actionsCount(data.m_actionsCount),
+      m_sizeInBytes(data.m_sizeInBytes)
+ {
   matchesAmount++;
   totalCreatedMatches++;
 }
@@ -68,30 +69,37 @@ MatchData::~MatchData() {
  * to the original match and match copy that will be sent to Getgud
  **/
 MatchData* MatchData::Clone(bool isWithActions) {
-  MatchData* cloneMatchData = new MatchData(gameGuid, matchMode, mapName);
+  MatchData* cloneMatchData = new MatchData(m_gameGuid, m_matchMode, m_mapName);
   // Clone some metadata variables
-  cloneMatchData->matchGuid = matchGuid;
-  cloneMatchData->gameGuid = gameGuid;
-  cloneMatchData->matchMode = matchMode;
-  cloneMatchData->mapName = mapName;
-  cloneMatchData->isInteresting = isInteresting;
-  cloneMatchData->throttleChecked = throttleChecked;
+  cloneMatchData->m_matchGuid = m_matchGuid;
+  cloneMatchData->m_gameGuid = m_gameGuid;
+  cloneMatchData->m_matchMode = m_matchMode;
+  cloneMatchData->m_mapName = m_mapName;
+  cloneMatchData->m_isInteresting = m_isInteresting;
+  cloneMatchData->m_throttleChecked = m_throttleChecked;
 
   // Clone actions, reports and chat if needed
   if (isWithActions == true) {
-    cloneMatchData->AddActions(actionVector, runningSubActionTimeEpoch);
+    cloneMatchData->AddActions(m_actionVector);
 
-    cloneMatchData->reportVector.insert(cloneMatchData->reportVector.end(),
-                                        reportVector.begin(),
-                                        reportVector.end());
-    cloneMatchData->chatMessageVector.insert(
-        cloneMatchData->chatMessageVector.end(), chatMessageVector.begin(),
-        chatMessageVector.end());
+    cloneMatchData->m_reportVector.insert(cloneMatchData->m_reportVector.end(),
+                                        m_reportVector.begin(),
+                                        m_reportVector.end());
+    cloneMatchData->m_chatMessageVector.insert(
+        cloneMatchData->m_chatMessageVector.end(), m_chatMessageVector.begin(),
+        m_chatMessageVector.end());
 
     // only if we are going to clone the data (AKA - actions) should we also
     // update the size of the object
-    cloneMatchData->actionsCount = actionsCount;
-    cloneMatchData->sizeInBytes = sizeInBytes;
+    cloneMatchData->m_actionsCount = m_actionsCount;
+    cloneMatchData->m_sizeInBytes = m_sizeInBytes;
+  }
+
+  if (isWithActions == true && cloneMatchData->m_reportVector.empty() &&
+      cloneMatchData->m_chatMessageVector.empty() &&
+      cloneMatchData->m_actionVector.empty()) {
+    delete cloneMatchData;
+    cloneMatchData = nullptr;
   }
 
   return cloneMatchData;
@@ -103,35 +111,30 @@ MatchData* MatchData::Clone(bool isWithActions) {
  * Add actions to the match, make sure dynamic time stamps of the actions are
  *linked to previous actions if we copy match
  **/
-void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector,
-                           long long newRunningSubActionTimeEpoch) {
+void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector) {
   if (incomingActionVector.size() == 0)
     return;
 
   int newActionVectorSize = incomingActionVector.size();
 
-  // change the first arriving action's time to work with dynamic programming
-  // with the last action's time that already resides in the vector
-  // TODO: validate that it actually works as expected
-  BaseActionData* firstNewAction = incomingActionVector.back();
-  firstNewAction->actionTimeEpoch -= runningSubActionTimeEpoch;
-  runningSubActionTimeEpoch += newRunningSubActionTimeEpoch;
-
   // add the newly arrived action vector to the current action vector, where all
   // the actions are waiting to be processed
   for (auto& actionPtr : incomingActionVector) {
-    actionVector.push_back(actionPtr);
-    // store unique player guids of the match
-    playerGuids.insert(actionPtr->playerGuid);
-  }
+    actionPtr->m_actionTimeEpoch -= m_lastActionTimeEpoch;
+    m_lastActionTimeEpoch += actionPtr->m_actionTimeEpoch;
 
+    m_actionVector.push_back(actionPtr);
+    // store unique player guids of the match
+    m_playerGuids.insert(actionPtr->m_playerGuid);
+  }
+  m_actionVector.shrink_to_fit();
   // calculate the new size of this object (using deltas only)
-  actionsCount += newActionVectorSize;
-  sizeInBytes += GetPositionActionSize() * newActionVectorSize;
+  m_actionsCount += newActionVectorSize;
+  m_sizeInBytes += GetPositionActionSize() * newActionVectorSize;
 
   logger.Log(LogType::DEBUG,
-             std::string("Actions added to match guid.\n" + matchGuid +
-                         " # added: " + std::to_string(newActionVectorSize)));
+             std::string("Added " + std::to_string(newActionVectorSize) +
+                         " action(s) to Match guid " + m_matchGuid));
 }
 
 /**
@@ -144,34 +147,100 @@ void MatchData::SliceMatch(float ratioToSlice,
                            std::vector<BaseActionData*>& toActionVector) {
   // calculate the number of actions we need to slice from this match
   // we take upper bound here so we will take at least 1 action always
-  int actionsToTakeFromMatch = ceil(ratioToSlice * (float)actionVector.size());
+  int actionsToTakeFromMatch = ceil(ratioToSlice * (float)m_actionVector.size());
   if (actionsToTakeFromMatch <= 0)
     return;
-  long long newRunningSumActionTimeEpoch = 0;
+
 
   // the the actions to the passed vector and erase them from this match's
   // vector
-  toActionVector.insert(toActionVector.end(), actionVector.begin(),
-                        actionVector.begin() + actionsToTakeFromMatch);
-  actionVector.erase(actionVector.begin(),
-                     actionVector.begin() + actionsToTakeFromMatch);
+  toActionVector.insert(toActionVector.end(), m_actionVector.begin(),
+                        m_actionVector.begin() + actionsToTakeFromMatch);
+  m_actionVector.erase(m_actionVector.begin(),
+                     m_actionVector.begin() + actionsToTakeFromMatch);
+  m_actionVector.shrink_to_fit();
+
+  // we need to convert time stamps of returned actions to the old format
+  // because later we call add and the format will  be calculated
+  // again
+  long long lastActionTimeEpochToSlice = 0;
+  for (auto& actionPtr : toActionVector) {
+    actionPtr->m_actionTimeEpoch += lastActionTimeEpochToSlice;
+    lastActionTimeEpochToSlice = actionPtr->m_actionTimeEpoch;
+  }
+  // adjust first remaining action for dynamic programming
+  if (!m_actionVector.empty())
+    m_actionVector.front()->m_actionTimeEpoch += lastActionTimeEpochToSlice;
 
   // calculate the new size of this match after the slice
-  actionsCount -= actionsToTakeFromMatch;
-  sizeInBytes -= GetPositionActionSize() * actionsToTakeFromMatch;
+  m_actionsCount -= actionsToTakeFromMatch;
+  m_sizeInBytes -= GetPositionActionSize() * actionsToTakeFromMatch;
+}
 
-  // adjust the running sum after removing a bulk of accordingly
-  for (int index = 0; index < actionsToTakeFromMatch; index++) {
-    // calculate the running sum of the new vector we are going to send
-    newRunningSumActionTimeEpoch += toActionVector[index]->actionTimeEpoch;
+
+/**
+ * SliceMatchReportVector:
+ *
+ * Devide match reports vector into 2 parts so we will not send too
+ * many reports at once
+ **/
+void MatchData::SliceMatchReportVector(int numberToSlice,
+                            std::vector<ReportData*>& toReportVector){
+  if (numberToSlice <= 0)
+    return;
+
+  if (m_reportVector.size() < numberToSlice)
+    return;
+
+  // insert reports to the output vector and erase them from this match's
+  // vector
+  toReportVector.insert(toReportVector.end(), m_reportVector.begin(),
+                        m_reportVector.begin() + numberToSlice);
+  m_reportVector.erase(m_reportVector.begin(),
+                       m_reportVector.begin() + numberToSlice);
+  m_reportVector.shrink_to_fit();
+}
+
+/**
+ * SliceMatchChatMessageVector:
+ *
+ * Devide chat message vector into 2 parts so we will not send too
+ * many chat messages at once
+ **/
+void MatchData::SliceMatchChatMessageVector(int numberToSlice,
+    std::vector<ChatMessageData*>& toChatMessageVector) {
+  if (numberToSlice <= 0)
+    return;
+
+  if (m_chatMessageVector.size() < numberToSlice)
+    return;
+
+  // insert chat messages to the output vector and erase them from this match's
+  // vector
+  toChatMessageVector.insert(toChatMessageVector.end(), m_chatMessageVector.begin(),
+                             m_chatMessageVector.begin() + numberToSlice);
+  m_chatMessageVector.erase(m_chatMessageVector.begin(),
+                            m_chatMessageVector.begin() + numberToSlice);
+  m_chatMessageVector.shrink_to_fit();
+}
+
+
+/**
+ * AddInMatchReport:
+ *
+ * Attach report to the match
+ **/
+bool MatchData::AddInMatchReport(ReportInfo reportInfo) {
+  ReportData* reportData = new ReportData(reportInfo);
+  if (!reportData->IsValid()) {
+    delete reportData;
+    return false;
   }
-  // adjust the match's running sum after removing actions
-  runningSubActionTimeEpoch -= newRunningSumActionTimeEpoch;
-
-  // TODO: make sure dynamic algo works here
-  // give a real timestamp to the first action in the array we are going to send
-  if (toActionVector.size() > 0)
-    toActionVector[0]->actionTimeEpoch += runningSubActionTimeEpoch;
+  // we do not have to pass titleId and privateKey here
+  m_reportVector.push_back(reportData);
+  logger.Log(LogType::DEBUG,
+             std::string("Report added to Match with guid: " + m_matchGuid));
+  return true;
 }
 
 /**
@@ -179,14 +248,16 @@ void MatchData::SliceMatch(float ratioToSlice,
  *
  * Attach report to the match
  **/
-void MatchData::AddInMatchReport(int titleId,
-                                 std::string privateKey,
-                                 ReportInfo reportInfo) {
-  // TODO: we should use ReportInfo not report data in the vector
+bool MatchData::AddInMatchReport(ReportData* reportData) {
+  if (!reportData->IsValid()) {
+    delete reportData;
+    return false;
+  }
   // we do not have to pass titleId and privateKey here
-  reportVector.push_back(new ReportData(titleId, privateKey, reportInfo));
+  m_reportVector.push_back(reportData);
   logger.Log(LogType::DEBUG,
-             std::string("Report added to match guid.\n" + matchGuid));
+             std::string("Report added to Match with guid: " + m_matchGuid));
+  return true;
 }
 
 /**
@@ -194,12 +265,38 @@ void MatchData::AddInMatchReport(int titleId,
  *
  * Add chat message to the match
  **/
-void MatchData::AddChatMessage(ChatMessageInfo chatInfo) {
-  chatMessageVector.push_back(new ChatMessageData(
-      chatInfo.playerGuid, chatInfo.message, chatInfo.messageTimeEpoch));
-  logger.Log(LogType::DEBUG,
-             std::string("Chat message added to match guid.\n" + matchGuid));
+bool MatchData::AddChatMessage(ChatMessageInfo chatInfo) {
+  ChatMessageData* chatMessageData = new ChatMessageData(
+      chatInfo.playerGuid, chatInfo.message, chatInfo.messageTimeEpoch);
+  if (!chatMessageData->IsValid()) {
+    delete chatMessageData;
+    return false;
+  }
+  m_chatMessageVector.push_back(chatMessageData);
+  logger.Log(
+      LogType::DEBUG,
+      std::string("Chat message added to Match with guid: " + m_matchGuid));
+  return true;
 }
+
+/**
+ * AddChatMessage:
+ *
+ * Add chat message to the match
+ **/
+bool MatchData::AddChatMessage(ChatMessageData* chatMessageData) {
+  if (!chatMessageData->IsValid()) {
+    delete chatMessageData;
+    return false;
+  }
+  m_chatMessageVector.push_back(chatMessageData);
+  logger.Log(
+      LogType::DEBUG,
+      std::string("Chat message added to Match with guid: " + m_matchGuid));
+  return true;
+}
+
+
 
 /**
  * MatchToString:
@@ -208,26 +305,26 @@ void MatchData::AddChatMessage(ChatMessageInfo chatInfo) {
  * if the match is not interesting
  **/
 void MatchData::MatchToString(std::string& matchOut) {
-  if (actionVector.size() + reportVector.size() + chatMessageVector.size() == 0)
+  if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0)
     return;
 
   // if match is not interesting from throttle check we do not need to send it
-  if (!isInteresting)
+  if (!m_isInteresting)
     return;
 
   std::string actionStream;
   std::string compressedActionStream;
 
   matchOut += "\n	{";
-  matchOut += "	\"matchGuid\": \"" + matchGuid + "\",\n";
-  matchOut += "	\"mapName\": \"" + mapName + "\",\n";
-  matchOut += "	\"matchMode\": \"" + matchMode + "\",\n";
+  matchOut += "	\"matchGuid\": \"" + m_matchGuid + "\",\n";
+  matchOut += "	\"mapName\": \"" + m_mapName + "\",\n";
+  matchOut += "	\"matchMode\": \"" + m_matchMode + "\",\n";
   matchOut += "	\"matchActionStream\": \"";
 
   // run through all the actions and append them as strings - creating the
   // action stream
-  for (int index = 0; index < actionVector.size(); index++) {
-    actionStream += actionVector[index]->ToString() + ",";
+  for (int index = 0; index < m_actionVector.size(); index++) {
+    actionStream += m_actionVector[index]->ToString() + ",";
   }
   if (actionStream.size() > 1) {
     actionStream.pop_back();  // pop the last delimiter
@@ -237,16 +334,22 @@ void MatchData::MatchToString(std::string& matchOut) {
   matchOut += compressedActionStream;
   // convert all reports to json string
   matchOut += "\",\n	\"reports\":\n	[\n";
-  for (int index = 0; index < reportVector.size(); index++) {
-    matchOut += "\n" + reportVector[index]->ToString() + ",";
+  for (int index = 0; index < m_reportVector.size(); index++) {
+    matchOut += "\n" + m_reportVector[index]->ToString() + ",";
+    #ifdef _DEBUG
+    sdkConfig.totalReportsSent++;
+    #endif
   }
   matchOut.pop_back();       // pop the last delimiter
   matchOut += "\n	]";  // close the report array
 
   // convert all chat messages to json string
   matchOut += ",\n	\"chat\":\n	[\n";
-  for (int index = 0; index < chatMessageVector.size(); index++) {
-    matchOut += "\n" + chatMessageVector[index]->ToString() + ",";
+  for (int index = 0; index < m_chatMessageVector.size(); index++) {
+    matchOut += "\n" + m_chatMessageVector[index]->ToString() + ",";
+#ifdef _DEBUG
+    sdkConfig.totalChatSent++;
+#endif
   }
   matchOut.pop_back();         // pop the last delimiter
   matchOut += "\n	]\n";  // close the chat array
@@ -260,8 +363,9 @@ void MatchData::MatchToString(std::string& matchOut) {
  **/
 void MatchData::SetThrottleCheckResults(bool inThrottleChecked,
                                         bool inIsInteresting) {
-  throttleChecked = inThrottleChecked;
-  isInteresting = inIsInteresting;
+  m_throttleChecked = inThrottleChecked;
+  m_isInteresting = inIsInteresting;
+
 }
 
 /**
@@ -270,7 +374,7 @@ void MatchData::SetThrottleCheckResults(bool inThrottleChecked,
  * Check if match was throttle checked before
  **/
 bool MatchData::GetThrottleChecked() {
-  return throttleChecked;
+  return m_throttleChecked;
 }
 
 /**
@@ -278,7 +382,7 @@ bool MatchData::GetThrottleChecked() {
  *
  **/
 unsigned int MatchData::GetMatchSizeInBytes() {
-  return sizeInBytes;
+  return m_sizeInBytes;
 }
 
 /**
@@ -286,7 +390,7 @@ unsigned int MatchData::GetMatchSizeInBytes() {
  *
  **/
 std::set<std::string> MatchData::GetPlayerGuids() {
-  return playerGuids;
+  return m_playerGuids;
 }
 
 /**
@@ -294,7 +398,7 @@ std::set<std::string> MatchData::GetPlayerGuids() {
  *
  **/
 std::string MatchData::GetMatchMode() {
-  return matchMode;
+  return m_matchMode;
 }
 
 /**
@@ -302,7 +406,7 @@ std::string MatchData::GetMatchMode() {
  *
  **/
 std::string MatchData::GetMapName() {
-  return mapName;
+  return m_mapName;
 }
 
 /**
@@ -310,7 +414,7 @@ std::string MatchData::GetMapName() {
  *
  **/
 unsigned int MatchData::GetNumberOfMatchReportsAndMessages() {
-  return reportVector.size() + chatMessageVector.size();
+  return m_reportVector.size() + m_chatMessageVector.size();
 }
 
 /**
@@ -318,7 +422,7 @@ unsigned int MatchData::GetNumberOfMatchReportsAndMessages() {
  *
  **/
 std::string MatchData::GetMatchGuid() {
-  return matchGuid;
+  return m_matchGuid;
 }
 
 /**
@@ -326,7 +430,7 @@ std::string MatchData::GetMatchGuid() {
  *
  **/
 std::string MatchData::GetGameGuid() {
-  return gameGuid;
+  return m_gameGuid;
 }
 
 /**
@@ -335,9 +439,9 @@ std::string MatchData::GetGameGuid() {
  * ToString but for logging purposes
  **/
 std::string MatchData::ToStringMeta() {
-  return std::string("Match Guid: " + matchGuid +
-                     " | Parent Game Guid: " + gameGuid +
-                     " | Match Mode: " + matchMode + " | Map Name: " + mapName);
+  return std::string("Match Guid: " + m_matchGuid +
+                     " | Parent Game Guid: " + m_gameGuid +
+                     " | Match Mode: " + m_matchMode + " | Map Name: " + m_mapName);
 }
 
 /**
@@ -345,15 +449,28 @@ std::string MatchData::ToStringMeta() {
  *
  **/
 void MatchData::Dispose() {
-  for (auto& action : actionVector)
+  for (auto& action : m_actionVector)
     delete action;
-  actionVector.clear();
-  for (auto& report : reportVector)
+  m_actionVector.clear();
+  m_actionVector.shrink_to_fit();
+  for (auto& report : m_reportVector)
     delete report;
-  reportVector.clear();
-  for (auto& chatMessage : chatMessageVector)
+  m_reportVector.clear();
+  m_reportVector.shrink_to_fit();
+  for (auto& chatMessage : m_chatMessageVector)
     delete chatMessage;
-  chatMessageVector.clear();
-  playerGuids.clear();
+  m_chatMessageVector.clear();
+  m_chatMessageVector.shrink_to_fit();
+  m_playerGuids.clear();
+}
+
+bool MatchData::IsValid() {
+  bool isActionValid = Validator::ValidateStringLength(m_gameGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_gameGuid);
+  isActionValid = Validator::ValidateStringLength(m_matchMode, 1, 100);
+  isActionValid &= Validator::ValidateStringChars(m_matchMode);
+  isActionValid = Validator::ValidateStringLength(m_matchMode, 1, 100);
+  isActionValid &= Validator::ValidateStringChars(m_matchMode);
+  return isActionValid;
 }
 }  // namespace GetGudSdk

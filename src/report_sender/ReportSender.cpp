@@ -1,8 +1,15 @@
+#include "pch.h"
 #include "ReportSender.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 
-namespace {  // unnamed namespace
+namespace {
+
+/**
+ * CURLWriteCallback:
+ *
+ * Curl custom callback to grab response from Getgud
+ **/
 size_t CURLWriteCallback(char* contents,
                          size_t size,
                          size_t nmemb,
@@ -20,108 +27,171 @@ namespace GetGudSdk {
 extern Logger logger;
 extern Config sdkConfig;
 
+CredentialsReportData::CredentialsReportData(int titleId,
+                                             std::string privateKey,
+                                             ReportInfo reportInfo)
+    : ReportData(reportInfo), m_titleId(titleId), m_privateKey(privateKey) {}
+
+bool CredentialsReportData::IsValid() {
+  bool isActionValid = ReportData::IsValid();
+  isActionValid &= Validator::ValidateStringLength(m_privateKey, 1, 10000);
+  isActionValid &= Validator::ValidateStringChars(m_privateKey);
+  isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
+  return isActionValid;
+}
+
+/**
+ * ReportSender:
+ *
+ **/
 ReportSender::ReportSender() {
   InitCurl();
 }
 
+/**
+ * Start:
+ *
+ * Start new Report Sender thread
+ **/
 void ReportSender::Start(int sleepIntervalMilli) {
-  sleepTimeMilli = sleepIntervalMilli;
-  threadWorking = true;
+  m_sleepTimeMilli = sleepIntervalMilli;
+  m_threadWorking = true;
   logger.Log(LogType::DEBUG,
-             "Player Updater is starting with the sleep interval of " +
+             "Report Sender is starting with the sleep interval of " +
                  std::to_string(sleepIntervalMilli));
 
-  updaterThread = std::thread([&]() {
+  m_updaterThread = std::thread([&]() {
+    // Stagger the creation of the threads to avoid them all waking up at the
+    // same time
     std::this_thread::sleep_for(std::chrono::milliseconds(
         sdkConfig.hyperModeThreadCreationStaggerMilliseconds));
-    while (threadWorking) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(sleepTimeMilli));
+    while (m_threadWorking) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_sleepTimeMilli));
       SendNextReportBatch();
     }
+    this->~ReportSender();
   });
 }
 
+/**
+ * AddReports:
+ *
+ * Add new reports to send to Getgud
+ **/
 bool ReportSender::AddReports(int titleId,
                               std::string privateKey,
-                              std::deque<ReportInfo*>& arrivingReportVector) {
+                              std::deque<ReportInfo>& arrivingReportVector) {
   // before doing anything, make sure the report vector has enough room for more
   // reports
-  if (reportVector.size() > sdkConfig.reportsMaxBufferSizeInBytes) {
+  if (m_reportVector.size() > sdkConfig.reportsMaxBufferSizeInBytes) {
     logger.Log(LogType::DEBUG,
                std::string("ReportSender::AddReports->Reached max report "
                            "buffer size, cannot add more reports"));
     return false;
   }
 
-  reportSenderMutex.lock();
+  m_reportSenderMutex.lock();
 
   // insert the arriving new reports to the report vector, to be consumed later
   // on by the background thread
   for (int index = 0; index < arrivingReportVector.size(); index++) {
-    // TODO change pointer in order to prevents pointers convertion
-    reportVector.push_back(
-        new ReportData(titleId, privateKey, *arrivingReportVector[index]));
-    reportBufferSize += GetReportDataSize();
-  }
+    CredentialsReportData* credentialsReportData = new CredentialsReportData(
+        titleId, privateKey, arrivingReportVector[index]);
 
-  reportSenderMutex.unlock();
+    if (!credentialsReportData->IsValid()) {
+      delete credentialsReportData;
+      m_reportSenderMutex.unlock();
+      return false;
+    }
+
+    m_reportVector.push_back(credentialsReportData);
+    m_reportBufferSize += GetReportDataSize();
+  }
+  logger.Log(
+      LogType::DEBUG,
+      std::string("Added " + std::to_string(arrivingReportVector.size()) +
+                  " action(s) to Report Sender"));
+  m_reportVector.shrink_to_fit();
+  m_reportSenderMutex.unlock();
   return true;
 }
 
+/**
+ * SendNextReportBatch:
+ *
+ * Send next batch of reports to Getgud
+ **/
 void ReportSender::SendNextReportBatch() {
   // Check the max allowed reports that we can send in a single https request
   int maxReportsToSendAtOnce = sdkConfig.maxReportsToSendAtOnce;
 
-  std::vector<ReportData*> reportsBatch;
-  std::vector<ReportData*>::iterator it;
-  ReportData* reportData;
+  std::deque<CredentialsReportData*> reportsBatch;
+  CredentialsReportData* reportData;
 
-  reportSenderMutex.lock();
+  m_reportSenderMutex.lock();
 
   // check if there are any reports to send
-  int reportsCount = reportVector.size();
-  if (reportsCount == 0) {
-    reportSenderMutex.unlock();
+  if (m_reportVector.size() == 0) {
+    m_reportVector.clear();
+    m_reportSenderMutex.unlock();
     return;
   }
 
   // the first arriving report will determine the title id for the next packet
   // -> find reports with the same title to create the packet of reports
-  int packetTitleId = reportVector[0]->titleId;
-  for (int index = 0; index < reportsCount || index < maxReportsToSendAtOnce;
+  int packetTitleId = m_reportVector[0]->m_titleId;
+  std::string packetPrivateKey = m_reportVector[0]->m_privateKey;
+  for (int index = 0; index < m_reportVector.size() &&
+                      reportsBatch.size() < maxReportsToSendAtOnce;
        index++) {
-    reportData = reportVector[index];
-    if (reportData->titleId == packetTitleId) {
+    reportData = m_reportVector[index];
+    if (reportData->m_titleId == packetTitleId) {
       reportsBatch.push_back(reportData);
-      it = reportVector.begin() + index;
-      reportVector.erase(it);
-      reportsCount--;
-      reportBufferSize -= GetReportDataSize();
+      m_reportVector.erase(m_reportVector.begin() + index);
+      index--;
+      m_reportBufferSize -= GetReportDataSize();
     }
   }
+  m_reportVector.shrink_to_fit();
+  m_reportSenderMutex.unlock();
+  if (reportsBatch.empty())
+    return;
 
-  reportSenderMutex.unlock();
+  logger.Log(LogType::DEBUG,
+             std::string("Popped " + std::to_string(reportsBatch.size()) +
+                         " Reports for sending"));
 
   // Convert the reportsBatch into reports packet
   std::string reportsPacket;
-  reportsPacket += +"{\"reports\":[";
-  for (ReportData* report : reportsBatch) {
-    reportsPacket += report->ToString();
+  reportsPacket += "{ \n";
+  reportsPacket += "	\"privateKey\": \"" + packetPrivateKey + "\",\n";
+  reportsPacket += "	\"titleId\": " + std::to_string(packetTitleId) + ",\n";
+  reportsPacket += +"\"reports\":[";
+  for (auto& report : reportsBatch) {
+    reportsPacket += report->ToString(true) + ",";  // report is outside match
+    delete report;
   }
+  reportsPacket.pop_back();  // pop the last delimiter
   reportsPacket += +"]}";
 
-  
+  // Send new reports to Getgud
+  // TODO: delete this log for prod
+  logger.Log(LogType::DEBUG, reportsPacket);
   SendReportPacket(reportsPacket);
-
 }
 
+/**
+ * SendReportPacket:
+ *
+ * Send packet to getgud
+ **/
 void ReportSender::SendReportPacket(std::string& packet) {
-  if (!curl || packet.empty()) {
+  if (!m_curl || packet.empty()) {
     return;
   }
-  curlReadBuffer.clear();
-  curl_easy_setopt(curl, CURLOPT_URL, sdkConfig.sendReportsURL.c_str());
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, packet.c_str());
+  m_curlReadBuffer.clear();
+  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.sendReportsURL.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // time when we should stop trying to send packet
   auto stopWaitingTime =
@@ -133,65 +203,73 @@ void ReportSender::SendReportPacket(std::string& packet) {
   while (sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
-    sendCode = curl_easy_perform(curl);
+    sendCode = curl_easy_perform(m_curl);
 
     // make small delay in order to save hardware usage
     std::this_thread::sleep_for(std::chrono::microseconds(50));
   }
 
-  if (sendCode == CURLcode::CURLE_OK) {
-    logger.Log(LogType::DEBUG, "Packet sent: " + curlReadBuffer);
-  } else {
+  if (sendCode != CURLcode::CURLE_OK) {
     logger.Log(LogType::_ERROR, "Failed to send packet: " +
                                     std::string(curl_easy_strerror(sendCode)));
   }
 }
 
+/**
+ * InitCurl:
+ *
+ * Prepare CURL for sending requests
+ **/
 void ReportSender::InitCurl() {
   logger.Log(LogType::DEBUG, "REST Api connection prepared in ReportSender");
 
-  curl = curl_easy_init();
+  m_curl = curl_easy_init();
 
-  if (!curl) {
-    logger.Log(LogType::WARN, "ReportSender->initCurl Couldn't init curl");
+  if (!m_curl) {
+    logger.Log(LogType::WARN, "ReportSender->InitCurl Couldn't init curl");
   }
-  headers = curl_slist_append(headers, "Accept: application/json");
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-  headers = curl_slist_append(headers, "charset: utf-8");
+  m_headers = curl_slist_append(m_headers, "Accept: application/json");
+  m_headers = curl_slist_append(m_headers, "Content-Type: application/json");
+  m_headers = curl_slist_append(m_headers, "charset: utf-8");
 
-  // TODO: describe what this does
-  curl_easy_setopt(curl, CURLOPT_POST, 1);
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  curl_easy_setopt(curl, CURLOPT_URL, sdkConfig.sendReportsURL.c_str());
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, sdkConfig.apiTimeoutMilliseconds);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &curlReadBuffer);
+  curl_easy_setopt(m_curl, CURLOPT_POST, 1);
+  curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.sendReportsURL.c_str());
+  curl_easy_setopt(m_curl, CURLOPT_TIMEOUT_MS,
+                   sdkConfig.apiTimeoutMilliseconds);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
 }
 
+/**
+ * ~ReportSender:
+ *
+ **/
 ReportSender::~ReportSender() {
-  reportSenderMutex.lock();
-  logger.Log(LogType::DEBUG, "Disposing Report Sender");
+  if (m_curl) {
+    curl_easy_cleanup(m_curl);
+  }
+  curl_slist_free_all(m_headers);
+  logger.Log(LogType::DEBUG, "Report Sender stopped..");
+}
+
+/**
+ * Dispose:
+ *
+ **/
+void ReportSender::Dispose() {
+  m_threadWorking = false;
+  m_reportSenderMutex.lock();
   // Iterate through all the actions in the buffer and delete them
-  for (auto* reportData : reportVector) {
+  for (auto* reportData : m_reportVector) {
     delete reportData;
   }
 
-  reportVector.clear();
-  reportBufferSize = 0;
-  Dispose();  // TODO: do i call inside or outside lock?
+  m_reportVector.clear();
+  m_reportBufferSize = 0;
 
-  reportSenderMutex.unlock();
-}
-
-void ReportSender::Dispose() {
-  threadWorking = false;
-  updaterThread.detach();
-
-  if (curl) {
-    curl_easy_cleanup(curl);
-  }
-  curl_slist_free_all(headers);
-  logger.Log(LogType::DEBUG, "Report Sender Disposed");
+  m_reportSenderMutex.unlock();
+  m_updaterThread.detach();
 }
 
 }  // namespace GetGudSdk

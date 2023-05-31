@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Utils.h"
 
 #include <chrono>
@@ -88,5 +89,42 @@ std::string GetCurrentTimeString() {
   std::stringstream ss;
   ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
   return ss.str();
+}
+
+/**
+ * CutDecimalNumber:
+ *
+ * Cut a number string and left 3 zeros after the dot
+ **/
+std::string CutDecimalNumber(std::string decimalIn) {
+  std::string decimalOut = decimalIn;
+  bool dotFound = false;
+  bool stopCut = false;
+  int leaveDot = 3;
+  int numbersToDelete = 0;
+  int numbersAfterDot = 0;
+  for (int i = decimalOut.size() - 1; i >= 0; i--) {
+    if (decimalOut[i] == '.') {
+      dotFound = true;
+      break;
+    } else if (!stopCut && decimalOut[i] == '0') {
+      numbersToDelete++;
+    }
+    else if (decimalOut[i] != '0') {
+      stopCut = true;
+    }
+    numbersAfterDot++;
+  }
+  
+  int maxNumbersToDelete = numbersAfterDot - leaveDot;
+  // left minimum number and cat zeros as it's possible
+  for (int i = 0; i < maxNumbersToDelete && i < numbersToDelete; i++) {
+    decimalOut.pop_back();
+  }
+  if (dotFound) {
+    return decimalOut;
+  } else {
+    return decimalIn; 
+  }
 }
 }  // namespace GetGudSdk

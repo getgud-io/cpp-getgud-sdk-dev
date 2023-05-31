@@ -1,5 +1,7 @@
+#include "pch.h"
 #include "../../include/actions/PositionActionData.h"
 #include "../config/Config.h"
+#include "../utils/Utils.h"
 #include "../utils/Utils.h"
 
 namespace GetGudSdk {
@@ -32,15 +34,15 @@ PositionActionData::PositionActionData(std::string matchGuid,
                                        RotationF rotation)
     : BaseActionData(
           {Actions::Position, actionTimeEpoch, playerGuid, matchGuid}),
-      position(position),
-      rotation(rotation) {}
+      m_position(position),
+      m_rotation(rotation) {}
 
 /**
  * PositionActionData:
  *
  **/
 PositionActionData::PositionActionData(const PositionActionData& data)
-    : BaseActionData(data), position(data.position), rotation(data.rotation) {}
+    : BaseActionData(data), m_position(data.m_position), m_rotation(data.m_rotation) {}
 
 /**
  * ~PositionActionData:
@@ -66,14 +68,14 @@ bool PositionActionData::IsValid() {
  **/
 std::string PositionActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "P,";
-  actionString += playerGuid + ",";
-  actionString += std::to_string(position.X) + "~" +
-                  std::to_string(position.Y) + "~" +
-                  std::to_string(position.Z) + "~";
-  actionString +=
-      std::to_string(rotation.Pitch) + "~" + std::to_string(rotation.Roll);
+  actionString += m_playerGuid + ",";
+  actionString += CutDecimalNumber(std::to_string(m_position.X)) + "~" +
+                  CutDecimalNumber(std::to_string(m_position.Y)) + "~" +
+                  CutDecimalNumber(std::to_string(m_position.Z)) + "~";
+  actionString += CutDecimalNumber(std::to_string(m_rotation.Pitch)) + "~" +
+                  CutDecimalNumber(std::to_string(m_rotation.Roll));
 
   return actionString;
 }
@@ -86,12 +88,12 @@ std::string PositionActionData::ToString() {
 std::string PositionActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action position <x,y,z>: " + std::to_string(position.X) +
-                      ", " + std::to_string(position.Y) + ", " +
-                      std::to_string(position.Z) + "\n";
+  actionMetaString += "Action position <x,y,z>: " + std::to_string(m_position.X) +
+                      ", " + std::to_string(m_position.Y) + ", " +
+                      std::to_string(m_position.Z) + "\n";
   actionMetaString +=
-      "Action rotation <pitch, roll>: " + std::to_string(rotation.Pitch) +
-      ", " + std::to_string(rotation.Roll) + "\n";
+      "Action rotation <pitch, roll>: " + std::to_string(m_rotation.Pitch) +
+      ", " + std::to_string(m_rotation.Roll) + "\n";
 
   return actionMetaString;
 }

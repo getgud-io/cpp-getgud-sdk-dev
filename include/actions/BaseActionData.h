@@ -10,11 +10,11 @@ unsigned int GetEmptyActionSize();
 
 class BaseActionData {
  public:
-  Actions actionType = Actions::None;
-  long long actionTimeEpoch = 0;
-  std::string playerGuid;
-  std::string matchGuid;
-  bool isEmpty = false;
+  Actions m_actionType = Actions::None;
+  long long m_actionTimeEpoch = 0;
+  std::string m_playerGuid;
+  std::string m_matchGuid;
+  bool m_isEmpty = false;
 
  public:
   BaseActionData(BaseData data, bool _isEmpty = false);
@@ -25,8 +25,5 @@ class BaseActionData {
   virtual std::string ToString();
   virtual std::string ToStringMeta();
   virtual BaseActionData* Clone();
-
-  // TODO implement Clone function in order to prevent deletion control of
-  // external data
 };
 }  // namespace GetGudSdk

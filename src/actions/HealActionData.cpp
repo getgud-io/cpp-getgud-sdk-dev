@@ -1,6 +1,9 @@
+#include "pch.h"
 #include "../../include/actions/HealActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include "../utils/Utils.h"
+
 using namespace GetGudSdk;
 
 extern Config sdkConfig;
@@ -12,16 +15,16 @@ extern Config sdkConfig;
 HealActionData::HealActionData(std::string matchGuid,
                                long long actionTimeEpoch,
                                std::string playerGuid,
-                               float healthGained)
+                               const float healthGained)
     : BaseActionData({Actions::Heal, actionTimeEpoch, playerGuid, matchGuid}),
-      healthGained(healthGained) {}
+      m_healthGained(healthGained) {}
 
 /**
  * HealActionData:
  *
  **/
 HealActionData::HealActionData(const HealActionData& data)
-    : BaseActionData(data), healthGained(data.healthGained) {}
+    : BaseActionData(data), m_healthGained(data.m_healthGained) {}
 
 /**
  * ~HealActionData:
@@ -49,10 +52,10 @@ bool HealActionData::IsValid() {
  **/
 std::string HealActionData::ToString() {
   std::string actionString;
-  actionString += std::to_string(actionTimeEpoch) + ",";
+  actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "H,";
-  actionString += playerGuid + ",";
-  actionString += std::to_string(healthGained);
+  actionString += m_playerGuid + ",";
+  actionString += CutDecimalNumber(std::to_string(m_healthGained));
 
   return actionString;
 }
@@ -66,7 +69,7 @@ std::string HealActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
   actionMetaString +=
-      "Action health gained: " + std::to_string(healthGained) + "\n";
+      "Action health gained: " + std::to_string(m_healthGained) + "\n";
 
   return actionMetaString;
 }

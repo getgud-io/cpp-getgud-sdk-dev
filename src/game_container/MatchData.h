@@ -13,24 +13,24 @@ class MatchData {
  private:
   // holds all the actions (in order) that arrived from the client and are
   // waiting to be processed
-  std::vector<BaseActionData*> actionVector;
+  std::vector<BaseActionData*> m_actionVector;
 
   // holds all the in match reports that are waiting to be sent
-  std::vector<ReportData*> reportVector;
+  std::vector<ReportData*> m_reportVector;
 
   // holds all the chat massages that are waiting to be send
-  std::vector<ChatMessageData*> chatMessageVector;
+  std::vector<ChatMessageData*> m_chatMessageVector;
 
-  std::string matchGuid;
-  std::string gameGuid;
-  std::string matchMode;
-  std::string mapName;
-  bool throttleChecked = false;
-  bool isInteresting = false;
-  std::set<std::string> playerGuids;
-  unsigned int actionsCount = 0;
-  unsigned int sizeInBytes = 0;
-  long long runningSubActionTimeEpoch = 0;
+  std::string m_matchGuid;
+  std::string m_gameGuid;
+  std::string m_matchMode;
+  std::string m_mapName;
+  bool m_throttleChecked = false;
+  bool m_isInteresting = false;
+  std::set<std::string> m_playerGuids;
+  unsigned int m_actionsCount = 0;
+  unsigned int m_sizeInBytes = 0;
+  long long m_lastActionTimeEpoch = 0;
 
  public:
   MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
@@ -38,14 +38,17 @@ class MatchData {
   MatchData() = delete;
   ~MatchData();
   MatchData* Clone(bool isWithActions);
-  void AddActions(std::vector<BaseActionData*>& actionVector,
-                  long long newRunningSubActionTimeEpoch);
+  void AddActions(std::vector<BaseActionData*>& actionVector);
   void SliceMatch(float ratioToSlice,
                   std::vector<BaseActionData*>& toActionVector);
-  void AddInMatchReport(int titleId,
-                        std::string privateKey,
-                        ReportInfo reportInfo);
-  void AddChatMessage(ChatMessageInfo chatInfo);
+  void SliceMatchReportVector(int numberToSlice,
+                              std::vector<ReportData*>& toReportVector);
+  void SliceMatchChatMessageVector(int numberToSlice,
+                                   std::vector<ChatMessageData*>& toChatMessageVector);
+  bool AddInMatchReport(ReportInfo reportInfo);
+  bool AddChatMessage(ChatMessageInfo chatInfo);
+  bool AddInMatchReport(ReportData* reportData);
+  bool AddChatMessage(ChatMessageData* chatMessageData);
   void MatchToString(std::string& match_out);
   unsigned int GetMatchSizeInBytes();
   unsigned int GetNumberOfMatchReportsAndMessages();
@@ -58,5 +61,6 @@ class MatchData {
   std::string GetMatchMode();
   std::string GetMapName();
   void Dispose();
+  bool IsValid();
 };
 }  // namespace GetGudSdk

@@ -12,28 +12,38 @@
 
 namespace GetGudSdk {
 
+  class CredentialsReportData : public ReportData {
+ public:
+    int m_titleId = 0;
+    std::string m_privateKey;
+    CredentialsReportData(int titleId,
+                          std::string privateKey,
+                          ReportInfo reportInfo);
+    bool IsValid() override;
+  };
+
 class ReportSender {
  public:
   ReportSender();
   void Start(int sleepIntervalMilli);
   bool AddReports(int titleId,
                   std::string privateKey,
-                  std::deque<ReportInfo*>& reportVector);
+                  std::deque<ReportInfo>& reportVector);
   ~ReportSender();
   void Dispose();
 
  private:
   // holds all the reports being sent by the client to the SDK
-  std::vector<ReportData*> reportVector;
+  std::deque<CredentialsReportData*> m_reportVector;
 
-  int sleepTimeMilli = 0;
-  std::thread updaterThread;
-  bool threadWorking = false;
-  curl_slist* headers = NULL;
-  CURL* curl = nullptr;
-  std::string curlReadBuffer;
-  std::mutex reportSenderMutex;
-  unsigned int reportBufferSize = 0;
+  int m_sleepTimeMilli = 0;
+  std::thread m_updaterThread;
+  bool m_threadWorking = false;
+  curl_slist* m_headers = NULL;
+  CURL* m_curl = nullptr;
+  std::string m_curlReadBuffer;
+  std::mutex m_reportSenderMutex;
+  unsigned int m_reportBufferSize = 0;
 
  private:
   void InitCurl();

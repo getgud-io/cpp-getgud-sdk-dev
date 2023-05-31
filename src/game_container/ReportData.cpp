@@ -1,7 +1,15 @@
+#include "pch.h"
 #include "ReportData.h"
+#include "../src/utils/Validator.h"
+#include "../src/config/Config.h"
+
+#ifdef __linux__
+#include <limits.h>
+#include <stdio.h>
+#endif
 
 namespace GetGudSdk {
-
+extern Config sdkConfig;
 /**
  * GetReportDataSize:
  *
@@ -27,36 +35,86 @@ unsigned int GetReportDataSize() {
  * ReportData:
  * 
  **/
-ReportData::ReportData(int titleId, std::string privateKey, ReportInfo reportInfo)
-    : reportInfo(reportInfo), titleId(titleId), privateKey(privateKey) {}
+ReportData::ReportData(ReportInfo reportInfo)
+    : m_reportInfo(reportInfo) {}
 
 /**
  * ToString:
  *
  * Used for sending reports to Getgud
  **/
-std::string ReportData::ToString() {
+std::string ReportData::ToString(bool isOutsideMatch) {
   std::string reportString;
   reportString += "{";
-  reportString += "	\"reporterName\": \"" + reportInfo.ReporterName + "\",";
+  if (isOutsideMatch)
+    reportString += "	\"matchGuid\": \"" + m_reportInfo.MatchGuid + "\",";
+  reportString += "	\"reporterName\": \"" + m_reportInfo.ReporterName + "\",";
+  if (m_reportInfo.ReporterType != -1)
+    reportString +=
+        "	\"reporterType\": " + std::to_string(m_reportInfo.ReporterType) + ",";
+  if (m_reportInfo.ReporterSubType != -1)
+    reportString +=
+        "	\"reporterSubType\": " + std::to_string(m_reportInfo.ReporterSubType) +
+        ",";
   reportString +=
-      "	\"reporterType\": " + std::to_string(reportInfo.ReporterType) + ",";
-  reportString +=
-      "	\"reporterSubType\": " + std::to_string(reportInfo.ReporterSubType) +
-      ",";
-  reportString +=
-      "	\"suspectedPlayerGuid\": \"" + reportInfo.SuspectedPlayerGuid + "\",";
-  reportString += "	\"TBType\": " + std::to_string(reportInfo.TbType) + ",";
-  reportString +=
-      "	\"TBSubType\": " + std::to_string(reportInfo.TbSubType) + ",";
-  reportString +=
-      "	\"TBTimeEpoch\": " + std::to_string(reportInfo.TbTimeEpoch) + ",";
-  reportString += "	\"suggestedToxicityScore\": " +
-                  std::to_string(reportInfo.SuggestedToxicityScore) + ",";
-  reportString +=
-      "	\"reportedTimeEpoch\": " + std::to_string(reportInfo.ReportedTimeEpoch);
+      "	\"suspectedPlayerGuid\": \"" + m_reportInfo.SuspectedPlayerGuid + "\",";
+  if (m_reportInfo.TbType != -1)
+    reportString += "	\"TBType\": " + std::to_string(m_reportInfo.TbType) + ",";
+  if (m_reportInfo.TbSubType != -1)
+    reportString +=
+        "	\"TBSubType\": " + std::to_string(m_reportInfo.TbSubType) + ",";
+  if (m_reportInfo.TbTimeEpoch != -1)
+    reportString +=
+        "	\"TBTimeEpoch\": " + std::to_string(m_reportInfo.TbTimeEpoch) + ",";
+  if (m_reportInfo.SuggestedToxicityScore != -1)
+    reportString += "	\"suggestedToxicityScore\": " +
+                    std::to_string(m_reportInfo.SuggestedToxicityScore) + ",";
+  if (m_reportInfo.ReportedTimeEpoch != -1)
+    reportString += "	\"reportedTimeEpoch\": " +
+                    std::to_string(m_reportInfo.ReportedTimeEpoch) + ",";
+  reportString.pop_back(); // remove last comma
   reportString += "}";
 
   return reportString;
+}
+
+bool ReportData::IsValid() {
+  bool isActionValid =
+      Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
+  isActionValid &=
+      Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 10000);
+  isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
+ 
+  if (m_reportInfo.ReporterType != -1)
+    isActionValid &= 
+      Validator::ValidateItemValue(m_reportInfo.ReporterType, 1, INT_MAX);
+  if (m_reportInfo.ReporterSubType != -1)
+    isActionValid &=
+        Validator::ValidateItemValue(m_reportInfo.ReporterSubType, 1, INT_MAX);
+  isActionValid &= Validator::ValidateStringLength(
+      m_reportInfo.SuspectedPlayerGuid, 1, 36);
+  isActionValid &=
+      Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
+  if (m_reportInfo.TbType != -1)
+    isActionValid &=
+        Validator::ValidateItemValue(m_reportInfo.TbType, 1, INT_MAX);
+  if (m_reportInfo.TbSubType != -1)
+    isActionValid &=
+        Validator::ValidateItemValue(m_reportInfo.TbSubType, 1, INT_MAX);
+  if (m_reportInfo.TbTimeEpoch != -1)
+    isActionValid &= Validator::ValidateItemValue(
+        m_reportInfo.TbTimeEpoch,
+        sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+        sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  if (m_reportInfo.SuggestedToxicityScore != -1)
+    isActionValid &=
+        Validator::ValidateItemValue(m_reportInfo.SuggestedToxicityScore, 1, 100);
+  if (m_reportInfo.ReportedTimeEpoch != -1)
+    isActionValid &= Validator::ValidateItemValue(
+        m_reportInfo.ReportedTimeEpoch,
+        sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+        sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  return isActionValid;
 }
 }  // namespace GetGudSdk
