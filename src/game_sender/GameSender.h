@@ -36,9 +36,16 @@ class GameSender {
   int m_sleepTimeMilli = 0;
   std::thread m_updaterThread;
   bool m_threadWorking = false;
-  curl_slist* m_headers = NULL;
-  CURL* m_curl = nullptr;
-  std::string m_curlReadBuffer;
+  
+  //game stream CURL
+  curl_slist* m_streamHeaders = NULL;
+  CURL* m_streamCurl = nullptr;
+  std::string m_streamCurlReadBuffer;
+
+  //throttle check CURL
+  curl_slist* m_throttleHeaders = NULL;
+  CURL* m_throttleCurl = nullptr;
+  std::string m_throttleCurlReadBuffer;
 
  private:
   void InitCurl();

@@ -267,13 +267,12 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
  **/
 bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   // in case somthing goes wrong we will consider match not interesting
-  if (!m_curl) {
+  if (!m_throttleCurl) {
     return false;
   }
 
-  m_curlReadBuffer.clear();
-  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.throttleCheckUrl.c_str());
-  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
+  m_throttleCurlReadBuffer.clear();
+  curl_easy_setopt(m_throttleCurl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // time when we should stop trying to send packet
   auto stopWaitingTime =
@@ -285,14 +284,15 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   while (!result && sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
-    sendCode = curl_easy_perform(m_curl);
+    sendCode = curl_easy_perform(m_throttleCurl);
     // make small delay in order to save hardware usage
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   if (sendCode == CURLcode::CURLE_OK) {
     // check what response we got from Getgud
-    if (m_curlReadBuffer == "true" || m_curlReadBuffer == "TRUE")
+    if (m_throttleCurlReadBuffer == "true" ||
+        m_throttleCurlReadBuffer == "TRUE")
       result = true;
   } else {
     logger.Log(LogType::_ERROR,
@@ -310,12 +310,11 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
  * Send game packet with action streams of game matches to Getgud
  **/
 void GameSender::SendGamePacket(std::string& packet) {
-  if (!m_curl || packet.empty()) {
+  if (!m_streamCurl || packet.empty()) {
     return;
   }
-  m_curlReadBuffer.clear();
-  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
-  curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
+  m_streamCurlReadBuffer.clear();
+  curl_easy_setopt(m_streamCurl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // time when we should stop trying to send packet
   auto stopWaitingTime =
@@ -327,7 +326,7 @@ void GameSender::SendGamePacket(std::string& packet) {
   while (sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
-    sendCode = curl_easy_perform(m_curl);
+    sendCode = curl_easy_perform(m_streamCurl);
     // make small delay in order to save hardware usage
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
@@ -347,21 +346,48 @@ void GameSender::SendGamePacket(std::string& packet) {
 void GameSender::InitCurl() {
   logger.Log(LogType::DEBUG, "REST Api connection prepared in GameSender");
 
-  m_curl = curl_easy_init();
+  m_throttleCurl = curl_easy_init();
+  m_streamCurl = curl_easy_init();
 
-  if (!m_curl) {
+  if (!m_streamCurl || !m_throttleCurl) {
     logger.Log(LogType::WARN, "GameSender->InitCurl Couldn't init curl");
+    return;
   }
-  m_headers = curl_slist_append(m_headers, "Accept: application/json");
-  m_headers = curl_slist_append(m_headers, "Content-Type: application/json");
-  m_headers = curl_slist_append(m_headers, "charset: utf-8");
+  //Stream Curl
+  m_streamHeaders =
+      curl_slist_append(m_streamHeaders, "Accept: application/json");
+  m_streamHeaders =
+      curl_slist_append(m_streamHeaders, "Content-Type: application/json");
+  m_streamHeaders = curl_slist_append(m_streamHeaders, "charset: utf-8");
 
-  curl_easy_setopt(m_curl, CURLOPT_POST, 1);
-  curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
-  curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
-  curl_easy_setopt(m_curl, CURLOPT_TIMEOUT_MS, sdkConfig.apiTimeoutMilliseconds);
-  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
-  curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
+  curl_easy_setopt(m_streamCurl, CURLOPT_POST, 1);
+  curl_easy_setopt(m_streamCurl, CURLOPT_HTTPHEADER, m_streamHeaders);
+  curl_easy_setopt(m_streamCurl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
+  curl_easy_setopt(m_streamCurl, CURLOPT_TIMEOUT_MS,
+                   sdkConfig.apiTimeoutMilliseconds);
+  curl_easy_setopt(m_streamCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_streamCurl, CURLOPT_WRITEDATA, &m_streamCurlReadBuffer);
+
+  curl_easy_setopt(m_streamCurl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
+
+  //Throttle Curl
+  m_throttleHeaders =
+      curl_slist_append(m_throttleHeaders, "Accept: application/json");
+  m_throttleHeaders =
+      curl_slist_append(m_throttleHeaders, "Content-Type: application/json");
+  m_throttleHeaders = curl_slist_append(m_throttleHeaders, "charset: utf-8");
+
+  curl_easy_setopt(m_throttleCurl, CURLOPT_POST, 1);
+  curl_easy_setopt(m_throttleCurl, CURLOPT_HTTPHEADER, m_throttleHeaders);
+  curl_easy_setopt(m_throttleCurl, CURLOPT_URL,
+                   sdkConfig.streamGameURL.c_str());
+  curl_easy_setopt(m_throttleCurl, CURLOPT_TIMEOUT_MS,
+                   sdkConfig.apiTimeoutMilliseconds);
+  curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEDATA, &m_throttleCurlReadBuffer);
+
+  curl_easy_setopt(m_throttleCurl, CURLOPT_URL,
+                   sdkConfig.throttleCheckUrl.c_str());
 }
 
 /**
@@ -379,10 +405,16 @@ void GameSender::Dispose() {
  *
  **/
 GameSender::~GameSender() {
-  if (m_curl) {
-    curl_easy_cleanup(m_curl);
+  if (m_throttleCurl) {
+    curl_easy_cleanup(m_throttleCurl);
   }
-  curl_slist_free_all(m_headers);
+  if (m_streamCurl) {
+    curl_easy_cleanup(m_streamCurl);
+  }
+  if (m_streamHeaders)
+    curl_slist_free_all(m_streamHeaders);
+  if (m_throttleHeaders)
+    curl_slist_free_all(m_throttleHeaders);
 }
 
 }  // namespace GetGudSdk
