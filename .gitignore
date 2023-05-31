@@ -19,12 +19,9 @@ cmake*
 .editorconfig
 
 # libss
-libs/*
 
 build/*
 
 .vscode/*
-
-libs
 
 output.txt
