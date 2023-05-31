@@ -5,6 +5,7 @@ Getgud C++ SDK allows you to integrate your game with the GetGud platform. Once 
 Since our SDK is not open-source we have to provide build files for different systems as well as header files so clients can use our SDK. We have to provide an extensive list of all possible  builds so that there will be no problem using our SDK in any system.
 
 When a new build is created upload it to a corresponding folder on our **public** S3 bucket with a corresponding version number.
+[S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/getgud-sdk-files)
 
 ## Table of Contents
 
