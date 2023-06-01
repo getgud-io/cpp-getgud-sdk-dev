@@ -1,4 +1,4 @@
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(_WIN32)
 #ifndef GETGUDSDK_EXPORTS
 #define GETGUDSDK_API __declspec(dllexport)
 #else
