@@ -45,7 +45,7 @@ AttackActionData::~AttackActionData(){
 bool AttackActionData::IsValid() {
   // basic validations are done in the base class first
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 3);
+  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 12);
   isActionValid &= Validator::ValidateStringChars(m_weaponGuid);
 
   return isActionValid;

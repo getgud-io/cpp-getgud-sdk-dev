@@ -51,7 +51,7 @@ bool DamageActionData::IsValid() {
   bool isActionValid = BaseActionData::IsValid();
   isActionValid &= Validator::ValidateStringLength(m_victimPlayerGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_victimPlayerGuid);
-  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 3);
+  isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 12);
   isActionValid &= Validator::ValidateStringChars(m_weaponGuid);
 
   return isActionValid;
