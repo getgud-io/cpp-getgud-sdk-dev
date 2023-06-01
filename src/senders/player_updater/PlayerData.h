@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 
-#include "../../include/actions/Helpers.h"
+#include "../../../include/actions/Helpers.h"
 
 namespace GetGudSdk {
 unsigned int GetPlayerDataSize();

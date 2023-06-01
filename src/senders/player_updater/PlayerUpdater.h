@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include "PlayerData.h"
+#include "../SharedPlayerUpdaters.h"
 #define CURL_STATICLIB
 #include <curl/curl.h>
 

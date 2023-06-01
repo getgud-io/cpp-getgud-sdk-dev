@@ -4,16 +4,16 @@
 #include <string>
 #include "config/Config.h"
 #include "game_container/GameContainer.h"
-#include "game_sender/GameSender.h"
+#include "senders/game_sender/GameSender.h"
 #include "logger/Logger.h"
-#include "player_updater/PlayerUpdater.h"
-#include "report_sender/ReportSender.h"
+#include "senders/player_updater/PlayerUpdater.h"
+#include "senders/report_sender/ReportSender.h"
 #include "utils/Utils.h"
 
 namespace GetGudSdk {
 extern SharedGameSenders sharedGameSenders;
-ReportSender* reportSender = nullptr;
-PlayerUpdater* playerUpdater = nullptr;
+extern SharedPlayerUpdaters sharedPlayerUpdaters;
+extern SharedReportSenders sharedReportSenders;
 extern Config sdkConfig;
 extern Logger logger;
 extern ActionsBuffer actionsBuffer;
@@ -342,11 +342,18 @@ bool SendReports(int titleId,
                  std::string privateKey,
                  std::deque<ReportInfo>& reports) {
   try {
-    if (reportSender == nullptr) {
-      reportSender = new ReportSender();
-      reportSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+    if (sharedReportSenders.reportSendersCount == 0) {
+      std::lock_guard<std::mutex> locker(sharedReportSenders.reportSendersMutex);
+      if (sharedReportSenders.reportSendersCount == 0)  // double check in mutex
+      {
+        sharedReportSenders.reportSender = new ReportSender();
+        sharedReportSenders.reportSender->Start(
+            sdkConfig.gameSenderSleepIntervalMilliseconds);
+      }
     }
-    return reportSender->AddReports(titleId, privateKey, reports);
+
+    return sharedReportSenders.reportSender->AddReports(titleId, privateKey,
+                                                        reports);
   } catch (std::exception& _error) {
     logger.Log(
         LogType::FATAL,
@@ -366,10 +373,6 @@ bool SendReports(std::deque<ReportInfo>& reports) {
   std::string titleId;
   std::string privateKey;
   try {
-    if (reportSender == nullptr) {
-      reportSender = new ReportSender();
-      reportSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
-    }
 
     const char* titleIdVar = std::getenv("TITLE_ID");
     const char* privateKeyVar = std::getenv("PRIVATE_KEY");
@@ -407,12 +410,28 @@ bool UpdatePlayers(int titleId,
                    std::string privateKey,
                    std::deque<PlayerInfo>& players) {
   try {
-    if (playerUpdater == nullptr) {
-      playerUpdater = new PlayerUpdater();
+    if (sharedPlayerUpdaters.playerUpdatersCount == 0) {
+      std::lock_guard<std::mutex> locker(
+          sharedPlayerUpdaters.playerUpdatersMutex);
+      if (sharedPlayerUpdaters.playerUpdatersCount == 0)  // double check in mutex
+      {
+        sharedPlayerUpdaters.playerUpdater = new PlayerUpdater();
+      }
 
-      playerUpdater->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
+      sharedPlayerUpdaters.playerUpdater->Start(
+          sdkConfig.gameSenderSleepIntervalMilliseconds);
     }
-    return playerUpdater->AddPlayers(titleId, privateKey, players);
+
+        if (sharedReportSenders.reportSendersCount == 0) {
+      std::lock_guard<std::mutex> locker(
+          sharedReportSenders.reportSendersMutex);
+      if (sharedReportSenders.reportSendersCount == 0)  // double check in mutex
+      {
+        sharedReportSenders.reportSender = new ReportSender();
+      }
+    }
+        return sharedPlayerUpdaters.playerUpdater->AddPlayers(
+            titleId, privateKey, players);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
                std::string("GetGudSdk::UpdatePlayers->Player data "
@@ -431,12 +450,6 @@ bool UpdatePlayers(std::deque<PlayerInfo>& players) {
   std::string titleId;
   std::string privateKey;
   try {
-    if (playerUpdater == nullptr) {
-      playerUpdater = new PlayerUpdater();
-
-      playerUpdater->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
-    }
-
     const char* titleIdVar = std::getenv("TITLE_ID");
     const char* privateKeyVar = std::getenv("PRIVATE_KEY");
 
@@ -470,13 +483,22 @@ void Dispose() {
   try {
     actionsBuffer.Dispose();
     gameContainer.Dispose();
-    if (reportSender != nullptr) {
-      reportSender->Dispose();
-      reportSender = nullptr;
+    {
+      std::lock_guard<std::mutex> locker(
+          sharedReportSenders.reportSendersMutex);
+      if (sharedReportSenders.reportSender != nullptr) {
+        sharedReportSenders.reportSender->Dispose();
+        sharedReportSenders.reportSender = nullptr;
+      }
     }
-    if (playerUpdater != nullptr) {
-      playerUpdater->Dispose();
-      playerUpdater = nullptr;
+
+    {
+      std::lock_guard<std::mutex> locker(
+          sharedPlayerUpdaters.playerUpdatersMutex);
+      if (sharedPlayerUpdaters.playerUpdater != nullptr) {
+        sharedPlayerUpdaters.playerUpdater->Dispose();
+        sharedPlayerUpdaters.playerUpdater = nullptr;
+      }
     }
 
     for (auto& senderThread : sharedGameSenders.gameSenders)

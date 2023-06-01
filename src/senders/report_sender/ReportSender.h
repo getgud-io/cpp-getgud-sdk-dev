@@ -5,7 +5,8 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-#include "../game_container/ReportData.h"
+#include "../../game_container/ReportData.h"
+#include "../SharedReportSenders.h"
 
 #define CURL_STATICLIB
 #include <curl/curl.h>

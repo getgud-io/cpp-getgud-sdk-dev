@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ReportSender.h"
-#include "../config/Config.h"
-#include "../logger/Logger.h"
+#include "../../config/Config.h"
+#include "../../logger/Logger.h"
 
 namespace {
 
@@ -26,6 +26,7 @@ size_t CURLWriteCallback(char* contents,
 namespace GetGudSdk {
 extern Logger logger;
 extern Config sdkConfig;
+extern SharedReportSenders sharedReportSenders;
 
 CredentialsReportData::CredentialsReportData(int titleId,
                                              std::string privateKey,
@@ -46,6 +47,7 @@ bool CredentialsReportData::IsValid() {
  **/
 ReportSender::ReportSender() {
   InitCurl();
+  sharedReportSenders.reportSendersCount++;
 }
 
 /**
@@ -270,6 +272,11 @@ void ReportSender::Dispose() {
 
   m_reportSenderMutex.unlock();
   m_updaterThread.detach();
+
+  {
+    std::lock_guard<std::mutex> locker(sharedReportSenders.reportSendersMutex);
+    sharedReportSenders.reportSendersCount--;
+  }
 }
 
 }  // namespace GetGudSdk

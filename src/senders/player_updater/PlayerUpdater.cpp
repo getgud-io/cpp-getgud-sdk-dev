@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "PlayerUpdater.h"
-#include "../config/Config.h"
-#include "../logger/Logger.h"
+#include "../../config/Config.h"
+#include "../../logger/Logger.h"
 #include "PlayerData.h"
 
 namespace {
+
 /**
  * CURLWriteCallback:
  *
@@ -26,6 +27,7 @@ size_t CURLWriteCallback(char* contents,
 namespace GetGudSdk {
 extern Logger logger;
 extern Config sdkConfig;
+extern SharedPlayerUpdaters sharedPlayerUpdaters;
 
 /**
  * PlayerUpdater:
@@ -33,6 +35,8 @@ extern Config sdkConfig;
  **/
 PlayerUpdater::PlayerUpdater() {
   InitCurl();
+  
+  sharedPlayerUpdaters.playerUpdatersCount++;
 }
 
 /**
@@ -258,6 +262,10 @@ void PlayerUpdater::Dispose() {
   m_playerUpdaterMutex.unlock();
 
   m_updaterThread.detach();
+  {
+    std::lock_guard<std::mutex> locker(sharedPlayerUpdaters.playerUpdatersMutex);
+    sharedPlayerUpdaters.playerUpdatersCount--;
+  }
 }
 
 }  // namespace GetGudSdk

@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "GameSender.h"
-#include "../../include/actions/Helpers.h"
-#include "../actions_buffer/ActionsBuffer.h"
-#include "../config/Config.h"
-#include "../game_container/GameContainer.h"
-#include "../game_container/GameData.h"
-#include "../logger/Logger.h"
+#include "../../../include/actions/Helpers.h"
+#include "../../actions_buffer/ActionsBuffer.h"
+#include "../../config/Config.h"
+#include "../../game_container/GameContainer.h"
+#include "../../game_container/GameData.h"
+#include "../../logger/Logger.h"
 
 #include <memory>
 
@@ -33,7 +33,7 @@ extern Logger logger;
 extern ActionsBuffer actionsBuffer;
 extern GameContainer gameContainer;
 extern Config sdkConfig;
-SharedGameSenders sharedGameSenders;
+extern SharedGameSenders sharedGameSenders;
 
 /**
  * GameSender:

@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "PlayerData.h"
 #include <algorithm>
-#include "../logger/Logger.h"
-#include "../utils/Utils.h"
-#include "../utils/Validator.h"
-#include "../config/Config.h"
+#include "../../logger/Logger.h"
+#include "../../utils/Utils.h"
+#include "../../utils/Validator.h"
+#include "../../config/Config.h"
 
 #ifdef __linux__
 #include <limits.h>

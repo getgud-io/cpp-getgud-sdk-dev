@@ -6,24 +6,16 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include "../../include/actions/Helpers.h"
-#include "../actions_buffer/ActionsBuffer.h"
-#include "../game_container/GameContainer.h"
+//TODO remove back patch moves by additional dirs
+#include "../../../include/actions/Helpers.h"
+#include "../../actions_buffer/ActionsBuffer.h"
+#include "../../game_container/GameContainer.h"
+#include "../SharedGameSenders.h"
 
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
 namespace GetGudSdk {
-class GameSender;
-
-/**
- * Shared data structure that stores all known game senders for easy access
- **/
-struct SharedGameSenders {
-  int gameSendersCount = 0;
-  std::vector<GameSender*> gameSenders;
-  std::mutex gameSendersMutex;
-};
 
 class GameSender {
  public:
