@@ -170,7 +170,7 @@ bool GameContainer::AddActions(std::deque<BaseActionData*>& actionVector) {
           LogType::DEBUG,
           std::string("Action is invalid OR empty because Game Container or Action Buffer is full"));
       logger.Log(LogType::DEBUG,
-          std::string("\tEmpty action match: " + nextAction->m_matchGuid + "; Action type id: " + 
+          std::string("\tInvalid action match: " + nextAction->m_matchGuid + "; Action type id: " + 
           std::to_string((int)nextAction->m_actionType) +
           "; Action is empty: ") + (nextAction->m_isEmpty ? "true": "false"));
       DeleteGame(matchData->GetGameGuid(), false, matchPtrVector);

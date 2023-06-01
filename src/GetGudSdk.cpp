@@ -416,10 +416,9 @@ bool UpdatePlayers(int titleId,
       if (sharedPlayerUpdaters.playerUpdatersCount == 0)  // double check in mutex
       {
         sharedPlayerUpdaters.playerUpdater = new PlayerUpdater();
+        sharedPlayerUpdaters.playerUpdater->Start(
+            sdkConfig.gameSenderSleepIntervalMilliseconds);
       }
-
-      sharedPlayerUpdaters.playerUpdater->Start(
-          sdkConfig.gameSenderSleepIntervalMilliseconds);
     }
 
         if (sharedReportSenders.reportSendersCount == 0) {
