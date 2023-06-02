@@ -143,11 +143,10 @@ std::string BaseActionData::ToStringMeta() {
       break;
   }
 
-  actionMetaString += "\n";
-  actionMetaString += "Action type: " + actionTypeStr + "\n";
-  actionMetaString += "Action time: " + std::to_string(m_actionTimeEpoch) + "\n";
-  actionMetaString += "Action match guid: " + m_matchGuid + "\n";
-  actionMetaString += "Action player guid: " + m_playerGuid + "\n";
+  actionMetaString += "Type:" + actionTypeStr + ";";
+  actionMetaString += "Time:" + std::to_string(m_actionTimeEpoch) + ";";
+  actionMetaString += "Match guid:" + m_matchGuid + ";";
+  actionMetaString += "Player guid: " + m_playerGuid + ";";
 
   return actionMetaString;
 }
