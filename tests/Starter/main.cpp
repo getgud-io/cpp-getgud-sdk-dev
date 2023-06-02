@@ -54,12 +54,12 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
         GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-                             "hypermode_tester", "random_actions");
+                             "hypermod e_tester", "random_actions");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < numberOfMatches; matchNum++) {
       std::string matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+          GetGudSdk::StartMatch(gameGuid, "hypermo de_tester", "empty_map");
       for (int actionNum = 0; actionNum < numberOfItems; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
         if (actionOrNot > 3) {
@@ -211,10 +211,10 @@ int main() {
 
     for (int i = 0; i < 3; i++) {
       testThreads.push_back(std::thread([&]() {
-        // CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
-        //             actionsAmount(rdMain));
+        CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
+                     actionsAmount(rdMain));
         //CreateReports(reportsAmount(rdMain));
-        CreatePlayerUpdates(playerUpdatesAmount(rdMain));
+        //CreatePlayerUpdates(playerUpdatesAmount(rdMain));
       }));
     }
 

@@ -280,7 +280,7 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
       std::chrono::milliseconds(sdkConfig.apiWaitTimeMilliseconds);
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
-  bool result = true;  // we consider match not interesting by default
+  bool result = false;  // we consider match not interesting by default
   while (!result && sendCode != CURLE_OK &&
          stopWaitingTime > std::chrono::system_clock::now()) {
     // send prepared packet
@@ -295,10 +295,19 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
         m_throttleCurlReadBuffer == "TRUE")
       result = true;
   } else {
-    logger.Log(LogType::_ERROR,
-               "GameSender::SendThrottleCheckForMatch->Failed to send throttle "
-               "request: " +
-                   std::string(curl_easy_strerror(sendCode)));
+    if (m_throttleCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+      //skip brackets and spaces
+      std::string outMessage(m_throttleCurlReadBuffer.begin() + 2,
+        m_throttleCurlReadBuffer.begin() + m_throttleCurlReadBuffer.size() - 3);
+      logger.Log(LogType::DEBUG, "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " + 
+        outMessage);
+    } else {
+      logger.Log(
+          LogType::_ERROR,
+          "GameSender::SendThrottleCheckForMatch->Failed to send throttle "
+          "request: " +
+              std::string(curl_easy_strerror(sendCode)));
+    }
   }
 
   return result;
@@ -332,9 +341,18 @@ void GameSender::SendGamePacket(std::string& packet) {
   }
 
   if (sendCode != CURLcode::CURLE_OK) {
-    logger.Log(LogType::_ERROR,
-               "GameSender::SendGamePacket->Failed to send packet: " +
-                   std::string(curl_easy_strerror(sendCode)));
+    if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+      // skip brackets and spaces
+      std::string outMessage(m_streamCurlReadBuffer.begin() + 2,
+          m_streamCurlReadBuffer.begin() + m_streamCurlReadBuffer.size() - 3);
+      logger.Log(LogType::DEBUG,
+                 "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " +
+                     outMessage);
+    } else {
+      logger.Log(LogType::_ERROR,
+                 "GameSender::SendGamePacket->Failed to send packet: " +
+                     std::string(curl_easy_strerror(sendCode)));
+    }
   }
 }
 
@@ -359,7 +377,7 @@ void GameSender::InitCurl() {
   m_streamHeaders =
       curl_slist_append(m_streamHeaders, "Content-Type: application/json");
   m_streamHeaders = curl_slist_append(m_streamHeaders, "charset: utf-8");
-
+  
   curl_easy_setopt(m_streamCurl, CURLOPT_POST, 1);
   curl_easy_setopt(m_streamCurl, CURLOPT_HTTPHEADER, m_streamHeaders);
   curl_easy_setopt(m_streamCurl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
@@ -367,8 +385,6 @@ void GameSender::InitCurl() {
                    sdkConfig.apiTimeoutMilliseconds);
   curl_easy_setopt(m_streamCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
   curl_easy_setopt(m_streamCurl, CURLOPT_WRITEDATA, &m_streamCurlReadBuffer);
-
-  curl_easy_setopt(m_streamCurl, CURLOPT_URL, sdkConfig.streamGameURL.c_str());
 
   //Throttle Curl
   m_throttleHeaders =
@@ -380,14 +396,11 @@ void GameSender::InitCurl() {
   curl_easy_setopt(m_throttleCurl, CURLOPT_POST, 1);
   curl_easy_setopt(m_throttleCurl, CURLOPT_HTTPHEADER, m_throttleHeaders);
   curl_easy_setopt(m_throttleCurl, CURLOPT_URL,
-                   sdkConfig.streamGameURL.c_str());
+                   sdkConfig.throttleCheckUrl.c_str());
   curl_easy_setopt(m_throttleCurl, CURLOPT_TIMEOUT_MS,
                    sdkConfig.apiTimeoutMilliseconds);
   curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
   curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEDATA, &m_throttleCurlReadBuffer);
-
-  curl_easy_setopt(m_throttleCurl, CURLOPT_URL,
-                   sdkConfig.throttleCheckUrl.c_str());
 }
 
 /**
