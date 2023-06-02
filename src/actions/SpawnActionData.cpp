@@ -92,10 +92,10 @@ std::string SpawnActionData::ToStringMeta() {
   actionMetaString += "Character guid:" + m_characterGuid + ";";
   actionMetaString += "Team id:" + std::to_string(m_teamId) + ";";
   actionMetaString += "Health:" + std::to_string(m_initialHealth)  + ";";
-  actionMetaString += "Position:" + std::to_string(m_position.X) + ", " +
-                      std::to_string(m_position.Y) + ", " +
+  actionMetaString += "Position:" + std::to_string(m_position.X) + "," +
+                      std::to_string(m_position.Y) + "," +
                       std::to_string(m_position.Z) + ";";
-  actionMetaString += "Rotation:" + std::to_string(m_rotation.Pitch) + ", " +
+  actionMetaString += "Rotation:" + std::to_string(m_rotation.Pitch) + "," +
                       std::to_string(m_rotation.Roll) + ";";
 
   return actionMetaString;
