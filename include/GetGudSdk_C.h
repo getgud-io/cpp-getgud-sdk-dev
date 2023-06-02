@@ -21,9 +21,9 @@ struct RotationF {
   float Roll;
 };
 struct BaseActionData {
+  long long actionTimeEpoch;
   char* matchGuid;
   int matchGuidSize;
-  long long actionTimeEpoch;
   char* playerGuid;
   int playerGuidSize;
 };
