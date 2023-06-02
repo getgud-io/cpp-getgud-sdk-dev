@@ -74,7 +74,7 @@ std::string AttackActionData::ToString() {
 std::string AttackActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action weapon guid: " + m_weaponGuid + "\n";
+  actionMetaString += "Weapon guid:" + m_weaponGuid + ";";
 
   return actionMetaString;
 }

@@ -82,10 +82,9 @@ std::string DamageActionData::ToString() {
 std::string DamageActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Action victim player guid: " + m_victimPlayerGuid + "\n";
-  actionMetaString += "Action weapon guid: " + m_weaponGuid + "\n";
-  actionMetaString +=
-      "Action damage done: " + std::to_string(m_damageDone) + "\n";
+  actionMetaString += "Victim guid:" + m_victimPlayerGuid + ";";
+  actionMetaString += "Weapon guid:" + m_weaponGuid + ";";
+  actionMetaString += "Damage done:" + std::to_string(m_damageDone) + ";";
 
   return actionMetaString;
 }
