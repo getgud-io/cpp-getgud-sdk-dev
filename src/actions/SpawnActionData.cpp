@@ -52,7 +52,7 @@ SpawnActionData::~SpawnActionData() {}
  **/
 bool SpawnActionData::IsValid() {
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(m_characterGuid, 1, 12);
+  isActionValid &= Validator::ValidateStringLength(m_characterGuid, 1, 20);
   isActionValid &= Validator::ValidateStringChars(m_characterGuid);
 
   return isActionValid;
