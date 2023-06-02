@@ -81,7 +81,9 @@ source_group("Header Files\\utils" FILES ${UTILS_HEADERS})
 source_group("Source Files\\utils" FILES ${UTILS_SOURCES})
 
 file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*x64-debug*/")
+list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*x64-release*/")
+list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
 file(GLOB zlib_lib "../libs/zlib/zlib.lib")
 
 target_include_directories(GetGudSdk
