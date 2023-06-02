@@ -68,8 +68,7 @@ std::string HealActionData::ToString() {
 std::string HealActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString +=
-      "Action health gained: " + std::to_string(m_healthGained) + "\n";
+  actionMetaString += "Health gained:" + std::to_string(m_healthGained) + ";";
 
   return actionMetaString;
 }
