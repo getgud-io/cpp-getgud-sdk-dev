@@ -41,7 +41,7 @@ if not exist %sdkfolder%libs\zlib\zlib.lib (
 mkdir "%sdkfolder%build"
 cd "%sdkfolder%build"
 
-cmake -DDLL_BUILD:STRING=False ..
+cmake -DDLL_BUILD:STRING=True ..
 cmake --build .
 
 goto EOF 
