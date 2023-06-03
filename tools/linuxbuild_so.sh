@@ -39,7 +39,7 @@ make install
 fi
 
 cd ${PROJECT_DIR}
-cmake --no-warn-unused-cli -DSO_BUILD:STRING=False -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -B./build -G "Unix Makefiles"
+cmake --no-warn-unused-cli -DSO_BUILD:STRING=True -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -B./build -G "Unix Makefiles"
 
 cd ${PROJECT_DIR}build/
 
