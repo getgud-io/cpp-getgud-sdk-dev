@@ -43,6 +43,7 @@ cd "%sdkfolder%build"
 
 cmake -DDLL_BUILD:STRING=True ..
 cmake --build .
+cmake --build . --config Release
 
 goto EOF 
 :ERROR
