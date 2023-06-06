@@ -4,7 +4,7 @@
 #else
 #define GETGUDSDK_API __declspec(dllimport)
 #endif
-#else
+#else // not win32
 #define GETGUDSDK_API
 #endif
 
