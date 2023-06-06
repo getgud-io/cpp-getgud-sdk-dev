@@ -72,10 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)..\..\build\_build\Starter\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\build\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)..\..\build\_build\Starter\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\build\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -111,13 +111,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\;$(ProjectDir)..\..\libs\libcurl\builds\libcurl-vc17-x64-$(Configuration)-static-ipv6-sspi-schannel\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\;$(ProjectDir)..\..\lib\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>zlib.lib;Normaliz.lib;Ws2_32.lib;Crypt32.lib;wldap32.lib;advapi32.lib;$(ProjectDir)..\..\build\_build\$(Configuration)\GetGudSdk.lib;;$(CoreLibraryDependencies);%(AdditionalDependencies);libcurl_a_debug.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\libs\zlib\;$(ProjectDir)..\..\libs\libcurl\builds\libcurl-vc17-x64-debug-static-ipv6-sspi-schannel\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Normaliz.lib;Ws2_32.lib;Crypt32.lib;wldap32.lib;advapi32.lib;GetGudSdk.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;$(ProjectDir)..\..\build\_build\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -126,21 +126,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\;$(ProjectDir)..\..\libs\libcurl\builds\libcurl-vc17-x64-$(Configuration)-static-ipv6-sspi-schannel\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include\;$(ProjectDir)..\..\lib\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>zlib.lib;Normaliz.lib;Ws2_32.lib;Crypt32.lib;wldap32.lib;$(ProjectDir)..\..\build\_build\$(Configuration)\GetGudSdk.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);libcurl_a.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\libs\zlib\;$(ProjectDir)..\..\libs\libcurl\builds\libcurl-vc17-x64-$(Configuration)-static-ipv6-sspi-schannel\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GetGudSdk.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;$(ProjectDir)..\..\build\_build\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
