@@ -107,7 +107,7 @@ class Config {
   unsigned int logFileSizeInBytes = 10000000;
   unsigned int linesDeletionAmount = 30;
   bool circularLogFile = true;
-  std::string logsFilePath;
+  std::string logsFilePath = "./logs.txt";
   LogLevel logLevel = LogLevel::FULL;
 
   // Report sender default values
@@ -148,6 +148,7 @@ class Config {
 
   // Other sdk default values
   unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;
+  std::string configFilePath = "./config.json";
 
   void LoadSettings();
   std::string ToString();

@@ -28,13 +28,15 @@ extern Logger logger;
  * Get values of variables from the config file
  **/
 void Config::LoadSettings() {
-  char* logsFilePathHolder = std::getenv("LOG_FILE_PATH");
+  char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
   if (logsFilePathHolder == nullptr) {
     // Environment variable LOG_FILE_PATH is required to work
-    return;
+    logger.Log(LogType::WARN, std::string("Config::LoadSettings->Environment "
+      "variable GETGUD_LOG_FILE_PATH is empty"));
   }
-  std::string _logsFilePath(logsFilePathHolder);
-  logsFilePath = _logsFilePath;
+  else {
+    logsFilePath = std::string(logsFilePathHolder);
+  }
 
   std::map<std::string, std::string> configData = ReadUserConfigFile();
 
@@ -289,16 +291,18 @@ void Config::LoadSettings() {
 std::map<std::string, std::string> Config::ReadUserConfigFile() {
   std::map<std::string, std::string> output_map;
 
-  char* configPathHolder = std::getenv("CONFIG_PATH");
+  char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
   if (configPathHolder == nullptr) {
-    logger.Log(LogType::FATAL, std::string("Config::LoadSettings->Environment "
-                                           "variable CONFIG_PATH is required"));
-    return output_map;
+    logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment "
+                                           "variable GETGUD_CONFIG_PATH is empty"));
   }
-  std::string configPath(configPathHolder);
+  else
+  {
+    configFilePath = std::string(configPathHolder);
+  }
 
   logger.Log(LogType::DEBUG,
-             std::string("Loading config file from " + configPath + " path"));
+             std::string("Loading config file from " + configFilePath + " path"));
 
   std::string next_key;
   std::string next_value;
@@ -307,7 +311,7 @@ std::map<std::string, std::string> Config::ReadUserConfigFile() {
   bool key_ended = false;
   bool value_started = false;
 
-  std::ifstream file_stream(configPath);
+  std::ifstream file_stream(configFilePath);
   char next_character = 0;
 
   if (file_stream.is_open()) {
