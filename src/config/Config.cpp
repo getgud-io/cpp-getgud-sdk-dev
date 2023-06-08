@@ -27,7 +27,7 @@ extern Logger logger;
  *
  * Get values of variables from the config file
  **/
-void Config::LoadSettings() {
+bool Config::LoadSettings() {
   char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
   if (logsFilePathHolder == nullptr) {
     // Environment variable LOG_FILE_PATH is required to work
@@ -41,7 +41,7 @@ void Config::LoadSettings() {
   std::map<std::string, std::string> configData = ReadUserConfigFile();
 
   if (configData.empty())
-    return;
+    return false;
 
   bool valueReadResult = false;
 
@@ -281,6 +281,8 @@ void Config::LoadSettings() {
   }
 
   GetConfigValue(configData, sdkConfigFieldNames.logLevel, sdkConfig.logLevel);
+
+  return true;
 }
 
 /**

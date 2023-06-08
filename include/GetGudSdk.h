@@ -22,7 +22,7 @@
 
 namespace GetGudSdk {
 
-GETGUDSDK_API void Init();
+GETGUDSDK_API bool Init();
 GETGUDSDK_API std::string StartGame(int titleId,
                       std::string privateKey,
                       std::string serverGuid,

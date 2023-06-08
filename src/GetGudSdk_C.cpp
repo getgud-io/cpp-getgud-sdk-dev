@@ -14,8 +14,8 @@ extern "C" {
  *
  * Init Getgud SDK
  **/
-void init() {
-  GetGudSdk::Init();
+bool init() {
+  return GetGudSdk::Init();
 }
 
 /**

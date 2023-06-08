@@ -24,25 +24,34 @@ extern GameContainer gameContainer;
  *
  * Init Getgud SDK
  **/
-void Init() {
-  bool locked = false;
+bool Init() {
+  bool init_result = false;
   try {
     curl_global_init(CURL_GLOBAL_DEFAULT);
-    sdkConfig.LoadSettings();
-    logger.Log(LogType::DEBUG,
-               "Loaded config with the following parameters: \n" +
-                   sdkConfig.ToString());
+    if (sdkConfig.LoadSettings())
+    {
+      logger.Log(LogType::DEBUG,
+        "Loaded config with the following parameters: \n" +
+        sdkConfig.ToString());
+      init_result = true;
+    }
+    else
+    {
+      logger.Log(LogType::_ERROR,
+        "Config can not be loaded, exit");
+    }
   } catch (std::exception& _error) {
     logger.Log(
         LogType::FATAL,
         std::string("GetGudSdk::Init->Couldn't initialize Getgud SDK: ") +
             std::string(_error.what()));
   }
+
+  return init_result;
 }
 
 /**
  * StartGame:
- *
  * Start new game
  **/
 std::string StartGame(int titleId,
