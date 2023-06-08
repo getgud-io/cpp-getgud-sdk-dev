@@ -94,14 +94,14 @@ std::string StartGame(std::string serverGuid, std::string gameMode) {
       gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
     }
 
-    const char* titleIdHolder = std::getenv("TITLE_ID");
-    const char* privateKeyHolder = std::getenv("PRIVATE_KEY");
+    const char* titleIdHolder = std::getenv("GETGUD_TITLE_ID");
+    const char* privateKeyHolder = std::getenv("GETGUD_PRIVATE_KEY");
 
     if (titleIdHolder == nullptr || privateKeyHolder == nullptr) {
       logger.Log(LogType::FATAL,
                  std::string(
-                     "GetGudSdk::StartGame->Environment variables TITLE_ID and "
-                     "PRIVATE_KEY are required"));
+                     "GetGudSdk::StartGame->Environment variables GETGUD_TITLE_ID and "
+                     "GETGUD_PRIVATE_KEY are required"));
     }
 
     std::string titleId(titleIdHolder);
@@ -374,15 +374,15 @@ bool SendReports(std::deque<ReportInfo>& reports) {
   std::string privateKey;
   try {
 
-    const char* titleIdVar = std::getenv("TITLE_ID");
-    const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+    const char* titleIdVar = std::getenv("GETGUD_TITLE_ID");
+    const char* privateKeyVar = std::getenv("GETGUD_PRIVATE_KEY");
 
     if (titleIdVar == nullptr || privateKeyVar == nullptr) {
       logger.Log(
           LogType::FATAL,
           std::string(
-              "GetGudSdk::SendReports->Environment variables TITLE_ID and "
-              "PRIVATE_KEY are required"));
+              "GetGudSdk::SendReports->Environment variables GETGUD_TITLE_ID and "
+              "GETGUD_PRIVATE_KEY are required"));
       return false;
     }
 
@@ -449,15 +449,15 @@ bool UpdatePlayers(std::deque<PlayerInfo>& players) {
   std::string titleId;
   std::string privateKey;
   try {
-    const char* titleIdVar = std::getenv("TITLE_ID");
-    const char* privateKeyVar = std::getenv("PRIVATE_KEY");
+    const char* titleIdVar = std::getenv("GETGUD_TITLE_ID");
+    const char* privateKeyVar = std::getenv("GETGUD_PRIVATE_KEY");
 
     if (titleIdVar == nullptr || privateKeyVar == nullptr) {
       logger.Log(
           LogType::FATAL,
           std::string(
-              "GetGudSdk::UpdatePlayers->Environment variables TITLE_ID and "
-              "PRIVATE_KEY are required"));
+              "GetGudSdk::UpdatePlayers->Environment variables GETGUD_TITLE_ID and "
+              "GETGUD_PRIVATE_KEY are required"));
       return false;
     }
 

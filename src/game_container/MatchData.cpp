@@ -315,11 +315,11 @@ void MatchData::MatchToString(std::string& matchOut) {
   std::string actionStream;
   std::string compressedActionStream;
 
-  matchOut += "\n	{";
-  matchOut += "	\"matchGuid\": \"" + m_matchGuid + "\",\n";
-  matchOut += "	\"mapName\": \"" + m_mapName + "\",\n";
-  matchOut += "	\"matchMode\": \"" + m_matchMode + "\",\n";
-  matchOut += "	\"matchActionStream\": \"";
+  matchOut += "{";
+  matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
+  matchOut += "\"mapName\":\"" + m_mapName + "\",";
+  matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+  matchOut += "\"matchActionStream\":\"";
 
   // run through all the actions and append them as strings - creating the
   // action stream
@@ -332,28 +332,35 @@ void MatchData::MatchToString(std::string& matchOut) {
   }
   actionStream.clear();
   matchOut += compressedActionStream;
+  matchOut += "\"";
   // convert all reports to json string
-  matchOut += "\",\n	\"reports\":\n	[\n";
-  for (int index = 0; index < m_reportVector.size(); index++) {
-    matchOut += "\n" + m_reportVector[index]->ToString() + ",";
-    #ifdef _DEBUG
-    sdkConfig.totalReportsSent++;
-    #endif
-  }
-  matchOut.pop_back();       // pop the last delimiter
-  matchOut += "\n	]";  // close the report array
-
-  // convert all chat messages to json string
-  matchOut += ",\n	\"chat\":\n	[\n";
-  for (int index = 0; index < m_chatMessageVector.size(); index++) {
-    matchOut += "\n" + m_chatMessageVector[index]->ToString() + ",";
+  if (m_reportVector.size() > 0)
+  {
+    matchOut += ",\"reports\":[";
+    for (int index = 0; index < m_reportVector.size(); index++) {
+      matchOut += m_reportVector[index]->ToString() + ",";
 #ifdef _DEBUG
-    sdkConfig.totalChatSent++;
+      sdkConfig.totalReportsSent++;
 #endif
+    }
+    matchOut.pop_back();       // pop the last delimiter
+    matchOut += "]";  // close the report array
   }
-  matchOut.pop_back();         // pop the last delimiter
-  matchOut += "\n	]\n";  // close the chat array
-  matchOut += "\n	}";    // close the match
+
+  if (m_chatMessageVector.size() > 0)
+  {
+    // convert all chat messages to json string
+    matchOut += ",\"chat\":[";
+    for (int index = 0; index < m_chatMessageVector.size(); index++) {
+      matchOut += "" + m_chatMessageVector[index]->ToString() + ",";
+#ifdef _DEBUG
+      sdkConfig.totalChatSent++;
+#endif
+    }
+    matchOut.pop_back();         // pop the last delimiter
+    matchOut += "]";  // close the chat array and match
+  }
+  matchOut += "}";
 }
 
 /**

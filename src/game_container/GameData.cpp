@@ -339,14 +339,14 @@ void GameData::GameToString(std::string& gameOut) {
 
   bool containsMatch = false;
 
-  gameOut += "{ \n";
-  gameOut += "	\"privateKey\": \"" + m_privateKey + "\",\n";
-  gameOut += "	\"titleId\": " + std::to_string(m_titleId) + ",\n";
-  gameOut += "	\"gameGuid\": \"" + m_gameGuid + "\",\n";
-  gameOut += "	\"gameMode\": \"" + m_gameMode + "\",\n";
-  gameOut += "	\"serverGuid\": \"" + m_serverGuid + "\",\n";
-  gameOut += "	\"gameLastPacket\": " + lastPacket + ",\n";
-  gameOut += "	\"matches\":\n	[\n";
+  gameOut += "{";
+  gameOut += "\"privateKey\":\"" + m_privateKey + "\",";
+  gameOut += "\"titleId\":" + std::to_string(m_titleId) + ",";
+  gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
+  gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
+  gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
+  gameOut += "\"gameLastPacket\":" + lastPacket + ",";
+  gameOut += "\"matches\":[\n";
 
   // run through all the game's matches, get their match_out string and append
   // them to the game
@@ -369,8 +369,7 @@ void GameData::GameToString(std::string& gameOut) {
   if (containsMatch) {
     gameOut.pop_back();  // pop the last delimiter
 
-    gameOut += "\n	]\n";
-    gameOut += "}";
+    gameOut += "]}";
   } else {
     gameOut.clear();
   }

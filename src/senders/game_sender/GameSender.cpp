@@ -212,25 +212,25 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
       }
       // start preparing throttle check request JSON body
       std::string packet;
-      packet += "{ \n";
+      packet += "{";
       packet +=
-          "	\"privateKey\": \"" + gameDataToSend->GetPrivateKey() + "\",\n";
+          "\"privateKey\":\"" + gameDataToSend->GetPrivateKey() + "\",";
       packet +=
-          "	\"titleId\": " + std::to_string(gameDataToSend->GetTitleId()) +
-          ",\n";
+          "\"titleId\":" + std::to_string(gameDataToSend->GetTitleId()) +
+          ",";
       packet +=
-          "	\"serverGuid\": \"" + gameDataToSend->GetServerGuid() + "\",\n";
+          "\"serverGuid\":\"" + gameDataToSend->GetServerGuid() + "\",";
       packet +=
-          "	\"gameMode\": \"" + gameDataToSend->GetGameMode() + "\",\n";
+          "\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
       packet +=
-          "	\"matchMode\": \"" + match.second->GetMatchMode() + "\",\n";
-      packet += "	\"mapName\": \"" + match.second->GetMapName() + "\",\n";
-      packet += "	\"playerGuids\": [";
+          "\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
+      packet += "\"mapName\":\"" + match.second->GetMapName() + "\",";
+      packet += "\"playerGuids\":[";
       for (auto& playerGuid : playerGuids) {
         packet += "\"" + playerGuid + "\",";
       }
       packet.pop_back();  // delete last comma
-      packet += "]\n}";
+      packet += "]}";
 
       // send throttle check request
       bool result = SendThrottleCheckForMatch(packet);
