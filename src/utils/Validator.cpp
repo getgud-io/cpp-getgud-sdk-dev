@@ -94,6 +94,23 @@ bool ValidateStringChars(std::string& sdkString) {
 }
 
 /**
+ * ValidateStringCharsSpecial:
+ *
+ * Validate that we are using only allowed chars in the string
+ **/
+bool ValidateStringCharsSpecial(std::string& sdkString) {
+  for (auto& symbol : sdkString) {
+    if (symbol < ' ' && symbol > '~')
+      return false;
+    if (symbol == '$' || symbol == '\'' || symbol == '\"' || symbol == '%' ||
+      symbol == '@')
+      return false;
+  }
+  return true;
+}
+
+
+/**
  * ValidateGuid:
  *
  * Validate that we are using only allowed GUID by ISO/IEC

@@ -66,11 +66,11 @@ struct RotationF {
  * Report data that you send to Getgud in match our outside match
  **/
 struct ReportInfo {
-  std::string MatchGuid; //36 + SQL
-  std::string ReporterName = "";  // SQL, size <=10.000
+  std::string MatchGuid; //36 + SQL // required
+  std::string ReporterName;  // SQL, size <=10.000
   int ReporterType = -1; // >= 1, < max
   int ReporterSubType = -1; // >= 1, < max
-  std::string SuspectedPlayerGuid = "";  // 36 + SQL
+  std::string SuspectedPlayerGuid;  // 36 + SQL //required
   int TbType = -1; //>=1, <max
   int TbSubType = -1; //>=1, < max
   long long TbTimeEpoch = -1; //>=time.min, <= time.max
@@ -84,9 +84,9 @@ struct ReportInfo {
  * Player data you send to Getgud on UpdatePlayer
  **/
 struct PlayerInfo {
-  std::string PlayerGuid;//36 + SQL
-  std::string PlayerNickname = "";  // SQL, size <=10.000
-  std::string PlayerEmail = "";     // SQL, size <=10.000
+  std::string PlayerGuid;//36 + SQL //required
+  std::string PlayerNickname;  // SQL, size <=10.000
+  std::string PlayerEmail;     // SQL, size <=10.000
   int PlayerRank = -1;//>=0, <=max
   long long PlayerJoinDateEpoch = -1;//>=time.min, <=time.max
 };

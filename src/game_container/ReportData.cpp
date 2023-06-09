@@ -48,6 +48,7 @@ std::string ReportData::ToString(bool isOutsideMatch) {
   reportString += "{";
   if (isOutsideMatch)
     reportString += "	\"matchGuid\": \"" + m_reportInfo.MatchGuid + "\",";
+  if (!m_reportInfo.ReporterName.empty())
   reportString += "	\"reporterName\": \"" + m_reportInfo.ReporterName + "\",";
   if (m_reportInfo.ReporterType != -1)
     reportString +=
@@ -80,41 +81,57 @@ std::string ReportData::ToString(bool isOutsideMatch) {
 
 bool ReportData::IsValid() {
   bool isActionValid =
-      Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
+    Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
-  isActionValid &=
+  if (!m_reportInfo.ReporterName.empty())
+  {
+    isActionValid &=
       Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 10000);
-  isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
- 
+    isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
+  }
   if (m_reportInfo.ReporterType != -1)
-    isActionValid &= 
+  {
+    isActionValid &=
       Validator::ValidateItemValue(m_reportInfo.ReporterType, 1, INT_MAX);
+  }
   if (m_reportInfo.ReporterSubType != -1)
+  {
     isActionValid &=
-        Validator::ValidateItemValue(m_reportInfo.ReporterSubType, 1, INT_MAX);
+      Validator::ValidateItemValue(m_reportInfo.ReporterSubType, 1, INT_MAX);
+  }
   isActionValid &= Validator::ValidateStringLength(
-      m_reportInfo.SuspectedPlayerGuid, 1, 36);
+    m_reportInfo.SuspectedPlayerGuid, 1, 36);
   isActionValid &=
-      Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
+    Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
   if (m_reportInfo.TbType != -1)
+  {
     isActionValid &=
-        Validator::ValidateItemValue(m_reportInfo.TbType, 1, INT_MAX);
-  if (m_reportInfo.TbSubType != -1)
+      Validator::ValidateItemValue(m_reportInfo.TbType, 1, INT_MAX);
+  }
+  if (m_reportInfo.TbSubType != -1) //TODO delete TBSubType
+  {
     isActionValid &=
-        Validator::ValidateItemValue(m_reportInfo.TbSubType, 1, INT_MAX);
+      Validator::ValidateItemValue(m_reportInfo.TbSubType, 1, INT_MAX);
+  }
   if (m_reportInfo.TbTimeEpoch != -1)
+  {
     isActionValid &= Validator::ValidateItemValue(
-        m_reportInfo.TbTimeEpoch,
-        sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
-        sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+      m_reportInfo.TbTimeEpoch,
+      sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+      sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  }
   if (m_reportInfo.SuggestedToxicityScore != -1)
+  {
     isActionValid &=
-        Validator::ValidateItemValue(m_reportInfo.SuggestedToxicityScore, 1, 100);
+      Validator::ValidateItemValue(m_reportInfo.SuggestedToxicityScore, 1, 100);
+  }
   if (m_reportInfo.ReportedTimeEpoch != -1)
+  {
     isActionValid &= Validator::ValidateItemValue(
-        m_reportInfo.ReportedTimeEpoch,
-        sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
-        sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+      m_reportInfo.ReportedTimeEpoch,
+      sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+      sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  }
   return isActionValid;
 }
 }  // namespace GetGudSdk

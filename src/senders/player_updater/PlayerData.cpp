@@ -32,9 +32,9 @@ std::string PlayerData::ToString() {
   std::string playerString;
   playerString += "{";
   playerString += "\"playerGuid\": \"" + m_playerInfo.PlayerGuid + "\",";
-  if (m_playerInfo.PlayerNickname != "")
+  if (!m_playerInfo.PlayerNickname.empty())
     playerString += "\"playerNickname\": \"" + m_playerInfo.PlayerNickname + "\",";
-  if (m_playerInfo.PlayerEmail != "")
+  if (!m_playerInfo.PlayerEmail.empty())
     playerString += "\"playerEmail\": \"" + m_playerInfo.PlayerEmail + "\",";
   if (m_playerInfo.PlayerRank != -1)
     playerString +=
@@ -70,20 +70,30 @@ bool PlayerData::IsValid() {
   bool isActionValid =
       Validator::ValidateStringLength(m_playerInfo.PlayerGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_playerInfo.PlayerGuid);
-  isActionValid &=
-      Validator::ValidateStringLength(m_playerInfo.PlayerNickname, 0, 10000);
-  //isActionValid &= Validator::ValidateStringChars(m_playerInfo.PlayerNickname);
-  isActionValid &=
-      Validator::ValidateStringLength(m_playerInfo.PlayerEmail, 0, 10000);
-  //isActionValid &= Validator::ValidateStringChars(m_playerInfo.PlayerEmail);
-  if (m_playerInfo.PlayerRank != -1)
+  if (!m_playerInfo.PlayerNickname.empty())
+  {
     isActionValid &=
-        Validator::ValidateItemValue(m_playerInfo.PlayerRank, 0, INT_MAX);
+      Validator::ValidateStringLength(m_playerInfo.PlayerNickname, 0, 10000);
+    isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNickname);
+  }
+  if (!m_playerInfo.PlayerEmail.empty())
+  {
+    isActionValid &=
+      Validator::ValidateStringLength(m_playerInfo.PlayerEmail, 0, 10000);
+    isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerEmail);
+  }
+  if (m_playerInfo.PlayerRank != -1)
+  {
+    isActionValid &=
+      Validator::ValidateItemValue(m_playerInfo.PlayerRank, 0, INT_MAX);
+  }
   if (m_playerInfo.PlayerJoinDateEpoch != -1)
+  {
     isActionValid &= Validator::ValidateItemValue(
-        m_playerInfo.PlayerJoinDateEpoch,
-        sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
-        sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+      m_playerInfo.PlayerJoinDateEpoch,
+      sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+      sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+  }
   return isActionValid;
 }
 }  // namespace GetGudSdk
