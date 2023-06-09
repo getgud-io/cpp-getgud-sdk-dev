@@ -17,6 +17,7 @@ struct PositionF {
 };
 
 struct RotationF {
+  float Yaw;
   float Pitch;
   float Roll;
 };

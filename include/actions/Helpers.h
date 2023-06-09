@@ -56,6 +56,7 @@ struct PositionF {
  * actions
  **/
 struct RotationF {
+  float Yaw = 0;
   float Pitch = 0;
   float Roll = 0;
 };

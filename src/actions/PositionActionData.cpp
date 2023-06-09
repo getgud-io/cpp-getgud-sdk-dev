@@ -74,7 +74,8 @@ std::string PositionActionData::ToString() {
   actionString += CutDecimalNumber(std::to_string(m_position.X)) + "~" +
                   CutDecimalNumber(std::to_string(m_position.Y)) + "~" +
                   CutDecimalNumber(std::to_string(m_position.Z)) + "~";
-  actionString += CutDecimalNumber(std::to_string(m_rotation.Pitch)) + "~" +
+  actionString += CutDecimalNumber(std::to_string(m_rotation.Yaw)) + "~" +
+                  CutDecimalNumber(std::to_string(m_rotation.Pitch)) + "~" +
                   CutDecimalNumber(std::to_string(m_rotation.Roll));
 
   return actionString;
@@ -91,7 +92,8 @@ std::string PositionActionData::ToStringMeta() {
   actionMetaString += "Position:" + std::to_string(m_position.X) + ", " +
                       std::to_string(m_position.Y) + "," +
                       std::to_string(m_position.Z) + ";";
-  actionMetaString += "Rotation:" + std::to_string(m_rotation.Pitch) + "," +
+  actionMetaString += "Rotation:" + std::to_string(m_rotation.Yaw) + "," +
+                      std::to_string(m_rotation.Pitch) + "," +
                       std::to_string(m_rotation.Roll) + ";";
 
   return actionMetaString;
