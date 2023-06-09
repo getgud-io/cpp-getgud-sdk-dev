@@ -37,6 +37,56 @@ enum class Actions : unsigned int {
   Spawn
 };
 
+enum class TbType : int {
+  None = -1,
+  Aimbot = 0,
+  Wallhack,
+  Laghack,
+  Godmode,
+  Speedhack,
+  Spinbot,
+  Wallpass,
+  Ammohack,
+  Healthhack,
+  Spawnhack,
+  Teamkill,
+  Spawnkill,
+  Camping,
+  Insulting,
+  Boosting,
+  Feeding,
+  Smurfing,
+  Ragequit
+};
+
+enum class ReporterType : int {
+  None = -1,
+  Other = 0,
+  Player,
+  Moderator,
+  Client,
+  AntiCheat,
+  Custom
+};
+
+enum class ReporterSubtype : int {
+  None = -1,
+  Other = 0,
+  CommunityManager,
+  LiveOps,
+  Support,
+  QA,
+  Custom,
+  OtherAntiCheat,
+  CustomAntiCheat,
+  BattleEye,
+  EasyAntiCheat,
+  PunkBuster,
+  VAC,
+  VACNet,
+  FairFight
+};
+
 /**
  * PositionF:
  *
@@ -69,11 +119,10 @@ struct RotationF {
 struct ReportInfo {
   std::string MatchGuid; //36 + SQL // required
   std::string ReporterName;  // SQL, size <=10.000
-  int ReporterType = -1; // >= 1, < max
-  int ReporterSubType = -1; // >= 1, < max
+  ReporterType ReporterType = ReporterType::None; // >= 1, < max
+  ReporterSubtype ReporterSubType = ReporterSubtype::None; // >= 1, < max
   std::string SuspectedPlayerGuid;  // 36 + SQL //required
-  int TbType = -1; //>=1, <max
-  int TbSubType = -1; //>=1, < max
+  TbType TbType = TbType::None; //>=1, <max
   long long TbTimeEpoch = -1; //>=time.min, <= time.max
   int SuggestedToxicityScore = -1; //>=0, <=100
   long long ReportedTimeEpoch = -1; //>=time.min, <=time.max

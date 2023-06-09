@@ -79,10 +79,10 @@ int SendInMatchReport(ReportInfo reportInfo) {
   return GetGudSdk::SendInMatchReport(GetGudSdk::ReportInfo{
       std::string(reportInfo.matchGuid, reportInfo.matchGuidSize),
       std::string(reportInfo.reporterName, reportInfo.reporterNameSize),
-      reportInfo.reporterType, reportInfo.reporterSubType,
+      static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType), static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType),
       std::string(reportInfo.suspectedPlayerGuid,
                   reportInfo.suspectedPlayerGuidSize),
-      reportInfo.tbType, reportInfo.tbSubType, reportInfo.tbTimeEpoch,
+      static_cast<GetGudSdk::TbType>(reportInfo.tbType), reportInfo.tbTimeEpoch,
       reportInfo.suggestedToxicityScore, reportInfo.reportedTimeEpoch});
 }
 

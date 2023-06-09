@@ -50,20 +50,17 @@ std::string ReportData::ToString(bool isOutsideMatch) {
     reportString += "	\"matchGuid\": \"" + m_reportInfo.MatchGuid + "\",";
   if (!m_reportInfo.ReporterName.empty())
   reportString += "	\"reporterName\": \"" + m_reportInfo.ReporterName + "\",";
-  if (m_reportInfo.ReporterType != -1)
+  if (m_reportInfo.ReporterType != ReporterType::None)
     reportString +=
-        "	\"reporterType\": " + std::to_string(m_reportInfo.ReporterType) + ",";
-  if (m_reportInfo.ReporterSubType != -1)
+        "	\"reporterType\": " + std::to_string(static_cast<int>(m_reportInfo.ReporterType)) + ",";
+  if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
     reportString +=
-        "	\"reporterSubType\": " + std::to_string(m_reportInfo.ReporterSubType) +
+        "	\"reporterSubType\": " + std::to_string(static_cast<int>(m_reportInfo.ReporterSubType)) +
         ",";
   reportString +=
       "	\"suspectedPlayerGuid\": \"" + m_reportInfo.SuspectedPlayerGuid + "\",";
-  if (m_reportInfo.TbType != -1)
-    reportString += "	\"TBType\": " + std::to_string(m_reportInfo.TbType) + ",";
-  if (m_reportInfo.TbSubType != -1)
-    reportString +=
-        "	\"TBSubType\": " + std::to_string(m_reportInfo.TbSubType) + ",";
+  if (m_reportInfo.TbType != TbType::None)
+    reportString += "	\"TBType\": " + std::to_string(static_cast<int>(m_reportInfo.TbType)) + ",";
   if (m_reportInfo.TbTimeEpoch != -1)
     reportString +=
         "	\"TBTimeEpoch\": " + std::to_string(m_reportInfo.TbTimeEpoch) + ",";
@@ -89,29 +86,24 @@ bool ReportData::IsValid() {
       Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 10000);
     isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
   }
-  if (m_reportInfo.ReporterType != -1)
+  if (m_reportInfo.ReporterType != ReporterType::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(m_reportInfo.ReporterType, 1, INT_MAX);
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterType), 0, static_cast<int>(ReporterType::Custom));
   }
-  if (m_reportInfo.ReporterSubType != -1)
+  if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(m_reportInfo.ReporterSubType, 1, INT_MAX);
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::FairFight));
   }
   isActionValid &= Validator::ValidateStringLength(
     m_reportInfo.SuspectedPlayerGuid, 1, 36);
   isActionValid &=
     Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
-  if (m_reportInfo.TbType != -1)
+  if (m_reportInfo.TbType != TbType::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(m_reportInfo.TbType, 1, INT_MAX);
-  }
-  if (m_reportInfo.TbSubType != -1) //TODO delete TBSubType
-  {
-    isActionValid &=
-      Validator::ValidateItemValue(m_reportInfo.TbSubType, 1, INT_MAX);
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::Ragequit));
   }
   if (m_reportInfo.TbTimeEpoch != -1)
   {
