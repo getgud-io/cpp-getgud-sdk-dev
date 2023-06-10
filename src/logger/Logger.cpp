@@ -119,7 +119,7 @@ void Logger::Log(LogType logType, std::string logString) {
   if (logType == LogType::DEBUG && sdkConfig.logLevel >= LogLevel::FULL) {
     messageTag = "::Debug-> ";
     WriteToFile(current_time + messageTag + logString + messageEnd);
-  } else if (logType >= LogType::WARN &&
+  } else if (logType == LogType::WARN &&
              sdkConfig.logLevel >= LogLevel::WARN_AND_ERROR) {
     messageTag = "::Warning-> ";
     WriteToFile(current_time + messageTag + logString + messageEnd);

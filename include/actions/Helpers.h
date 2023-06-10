@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <limits>
 
 namespace GetGudSdk {
 
@@ -108,7 +109,7 @@ struct PositionF {
 struct RotationF {
   float Yaw = 0;
   float Pitch = 0;
-  float Roll = 0;
+  float Roll = -1000.f; // optional
 };
 
 /**

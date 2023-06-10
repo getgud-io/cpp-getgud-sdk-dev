@@ -75,8 +75,12 @@ std::string SpawnActionData::ToString() {
                   CutDecimalNumber(std::to_string(m_position.Y)) + "~" +
                   CutDecimalNumber(std::to_string(m_position.Z)) + "~";
   actionString += CutDecimalNumber(std::to_string(m_rotation.Yaw)) + "~" +
-                  CutDecimalNumber(std::to_string(m_rotation.Pitch)) + "~" + 
-                  CutDecimalNumber(std::to_string(m_rotation.Roll));
+    CutDecimalNumber(std::to_string(m_rotation.Pitch));
+  if (m_rotation.Roll != -1000.f)
+  {
+    actionString += "~" +
+      CutDecimalNumber(std::to_string(m_rotation.Roll));
+  }
 
   return actionString;
 }
@@ -98,7 +102,14 @@ std::string SpawnActionData::ToStringMeta() {
                       std::to_string(m_position.Z) + ";";
   actionMetaString += "Rotation:" + std::to_string(m_rotation.Yaw) + "," +
                       std::to_string(m_rotation.Pitch) + "," +
-                      std::to_string(m_rotation.Roll) + ";";
+                      std::to_string(m_rotation.Roll);
+
+  if (m_rotation.Roll != -1000.f)
+  {
+    actionMetaString += "," + std::to_string(m_rotation.Roll);
+  }
+
+  actionMetaString += ";";
 
   return actionMetaString;
 }

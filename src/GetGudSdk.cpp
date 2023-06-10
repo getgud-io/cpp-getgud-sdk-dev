@@ -37,14 +37,18 @@ bool Init() {
     }
     else
     {
+      sdkConfig.logToFile = true;
       logger.Log(LogType::_ERROR,
         "Config can not be loaded, exit");
+      sdkConfig.logToFile = false;
     }
   } catch (std::exception& _error) {
+    sdkConfig.logToFile = true;
     logger.Log(
         LogType::FATAL,
         std::string("GetGudSdk::Init->Couldn't initialize Getgud SDK: ") +
             std::string(_error.what()));
+    sdkConfig.logToFile = false;
   }
 
   return init_result;
