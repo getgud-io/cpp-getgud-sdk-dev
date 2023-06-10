@@ -27,10 +27,14 @@ class MatchData {
   std::string m_mapName;
   bool m_throttleChecked = false;
   bool m_isInteresting = false;
-  std::set<std::string> m_playerGuids;
+  std::set<std::string> m_playerGuids; //TODO make map and add m_lastOrientation
   unsigned int m_actionsCount = 0;
   unsigned int m_sizeInBytes = 0;
   long long m_lastActionTimeEpoch = 0;
+  struct {
+    PositionF position = { 0.0f };
+    RotationF rotation = { 0.0f };
+  } m_lastOrientation;
 
  public:
   MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
