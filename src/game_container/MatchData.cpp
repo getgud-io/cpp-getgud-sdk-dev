@@ -339,10 +339,10 @@ void MatchData::MatchToString(std::string& matchOut) {
   // find max amount of leading zeros in deltas for x,y,z,pitch,yaw,roll
   // separately.
   // save it for this match
-  // pass it to action.ToString() to multiply action values accordingly
+  // pass it to action.ToStringScaled() to multiply action values accordingly
   // To let us know the scale you will need to pass very first position action
   // twice!!! Unscaled first, and then scaled
-  // m_actionVector[0]->ToString(1,1,1,1,1,1) + "," // scale_x, y,..yaw
+  // m_actionVector[0]->ToString() + "," // scale_x, y,..yaw
   // m_actionVector[0]->ToString(scale_x,scale_y,scale_z, ...) + ","
   // by doing this we will  be able to reconstruct scale for each item on getgud
   // if you will not do that we will understand and assume the scale is real
