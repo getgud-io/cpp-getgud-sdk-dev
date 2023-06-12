@@ -126,13 +126,17 @@ void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector) {
     // TODO: complete
     // get action player guid, get last position action for player guid
     // get delta between x,y,z,yaw,pitch, roll
-    // multiply each number by 10^K, where K is max number of leading zeros after .
-    // save into action
     // rewrite original action as last
     // only first position action for every player should be full!!
     // for each player, all other actions will be deltas
     // we do not have to change anything in Slice like with 
     // timestamps for example
+    if (actionPtr->m_actionType == ActionType::POSITION) {
+      PositionActionData* positionAction =
+          static_cast<PositionActionData*>(actionPtr);
+      m_lastPositionActionVector[positionAction->m_playerGuid] = positionAction;
+      // TODO write deltas into action ptr
+    }
 
     m_actionVector.push_back(actionPtr);
     // store unique player guids of the match
