@@ -100,23 +100,26 @@ std::string ShortenDecimalNumber(std::string decimalIn) {
   std::string decimalOut = decimalIn;
   bool dotFound = false;
   bool stopCut = false;
-  int leaveDot = 0;
+  int leaveDotFlag = 0;
   int numbersToDelete = 0;
   int numbersAfterDot = 0;
+  // iterate over each char of the number from end
   for (int i = decimalOut.size() - 1; i >= 0; i--) {
     if (decimalOut[i] == '.') {
       dotFound = true;
       break;
-    } else if (!stopCut && decimalOut[i] == '0') {
+    } else if (!stopCut && decimalOut[i] == '0') { // delete not needed 0s
       numbersToDelete++;
     }
     else if (decimalOut[i] != '0') {
+      // if we found any non zero number before dot we stop
+      // counting how many numbers to delete
       stopCut = true;
     }
     numbersAfterDot++;
   }
   
-  int maxNumbersToDelete = numbersAfterDot - leaveDot;
+  int maxNumbersToDelete = numbersAfterDot - leaveDotFlag;
   // left minimum number and cat zeros as it's possible
   for (int i = 0; i < maxNumbersToDelete && i < numbersToDelete; i++) {
     decimalOut.pop_back();
@@ -145,8 +148,7 @@ std::string ShortenDecimalNumber(std::string decimalIn) {
     }
 
     return decimalOut;
-  } else {
-    return decimalIn; 
-  }
+  } 
+   return decimalIn; 
 }
 }  // namespace GetGudSdk
