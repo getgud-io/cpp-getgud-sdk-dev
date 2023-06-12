@@ -13,10 +13,9 @@
 
 namespace GetGudSdk {
 unsigned int GetPositionActionSize();
-
 class PositionActionData : public BaseActionData {
-  PositionF m_position;
-  RotationF m_rotation;
+private:
+  Orientation m_orientation;
   unsigned int m_size = 0;
 
  public:
@@ -32,5 +31,6 @@ class PositionActionData : public BaseActionData {
   GETGUDSDK_API std::string ToString() override;
   GETGUDSDK_API std::string ToStringMeta() override;
   GETGUDSDK_API PositionActionData* Clone() override;
+  GETGUDSDK_API Orientation& getOrientation();
 };
 }  // namespace GetGudSdk

@@ -100,7 +100,7 @@ std::string CutDecimalNumber(std::string decimalIn) {
   std::string decimalOut = decimalIn;
   bool dotFound = false;
   bool stopCut = false;
-  int leaveDot = 3;
+  int leaveDot = 0;
   int numbersToDelete = 0;
   int numbersAfterDot = 0;
   for (int i = decimalOut.size() - 1; i >= 0; i--) {
@@ -122,6 +122,28 @@ std::string CutDecimalNumber(std::string decimalIn) {
     decimalOut.pop_back();
   }
   if (dotFound) {
+    if (decimalOut.size() > 6)
+    {
+      int firstNumId = -1;
+      int leftNumbers = 6;// Cut 6 numerics in float
+      for (int i = 0; i < decimalOut.size(); i++)
+      {
+        if (decimalOut[i] != '-' && decimalOut[i] != '.' && decimalOut[i] != '0' && firstNumId == -1)
+        {
+          firstNumId = i;
+        }
+        else if (decimalOut[i] == '.' || decimalOut[i] == '-')
+        {
+          leftNumbers++;
+        }
+        else if (firstNumId != -1 && i - firstNumId >= leftNumbers)
+        {
+          decimalOut.pop_back();
+          i--;
+        }
+      }
+    }
+
     return decimalOut;
   } else {
     return decimalIn; 

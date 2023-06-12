@@ -31,11 +31,8 @@ class MatchData {
   unsigned int m_actionsCount = 0;
   unsigned int m_sizeInBytes = 0;
   long long m_lastActionTimeEpoch = 0;
-  struct {
-    PositionF position = { 0.0f };
-    RotationF rotation = { 0.0f };
-  } m_lastOrientation;
 
+  std::map<std::string, Orientation> m_lastPositionActionVector;
   // TODO: complete
   // We need a struct here to store last x,y,z,pitch,yaw, roll
   // for every player, initially they are initialized to 0
@@ -57,6 +54,7 @@ class MatchData {
   bool AddChatMessage(ChatMessageInfo chatInfo);
   bool AddInMatchReport(ReportData* reportData);
   bool AddChatMessage(ChatMessageData* chatMessageData);
+  std::map<std::string, Orientation> CorrectMatchActionsDeltas();
   void MatchToString(std::string& match_out);
   unsigned int GetMatchSizeInBytes();
   unsigned int GetNumberOfMatchReportsAndMessages();
@@ -68,6 +66,7 @@ class MatchData {
   std::set<std::string> GetPlayerGuids();
   std::string GetMatchMode();
   std::string GetMapName();
+  void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
   void Dispose();
   bool IsValid();
 };

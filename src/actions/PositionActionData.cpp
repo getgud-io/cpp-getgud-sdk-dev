@@ -34,15 +34,14 @@ PositionActionData::PositionActionData(std::string matchGuid,
                                        RotationF rotation)
     : BaseActionData(
           {Actions::Position, actionTimeEpoch, playerGuid, matchGuid}),
-      m_position(position),
-      m_rotation(rotation) {}
+  m_orientation({ position, rotation }) {}
 
 /**
  * PositionActionData:
  *
  **/
 PositionActionData::PositionActionData(const PositionActionData& data)
-    : BaseActionData(data), m_position(data.m_position), m_rotation(data.m_rotation) {}
+    : BaseActionData(data), m_orientation(data.m_orientation) {}
 
 /**
  * ~PositionActionData:
@@ -71,14 +70,14 @@ std::string PositionActionData::ToString() {
   actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "P,";
   actionString += m_playerGuid + ",";
-  actionString += CutDecimalNumber(std::to_string(m_position.X)) + "~" +
-                  CutDecimalNumber(std::to_string(m_position.Y)) + "~" +
-                  CutDecimalNumber(std::to_string(m_position.Z)) + "~";
-  actionString += CutDecimalNumber(std::to_string(m_rotation.Yaw)) + "~" +
-    CutDecimalNumber(std::to_string(m_rotation.Pitch));
-  if (m_rotation.Roll != -1000.f)
+  actionString += CutDecimalNumber(std::to_string(m_orientation.position.X)) + "~" +
+                  CutDecimalNumber(std::to_string(m_orientation.position.Y)) + "~" +
+                  CutDecimalNumber(std::to_string(m_orientation.position.Z)) + "~";
+  actionString += CutDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) + "~" +
+    CutDecimalNumber(std::to_string(m_orientation.rotation.Pitch));
+  if (m_orientation.rotation.Roll != -1000.f)
   {
-    actionString += "~" + CutDecimalNumber(std::to_string(m_rotation.Roll));
+    actionString += "~" + CutDecimalNumber(std::to_string(m_orientation.rotation.Roll));
   }
 
   return actionString;
@@ -92,15 +91,15 @@ std::string PositionActionData::ToString() {
 std::string PositionActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Position:" + std::to_string(m_position.X) + ", " +
-                      std::to_string(m_position.Y) + "," +
-                      std::to_string(m_position.Z) + ";";
-  actionMetaString += "Rotation:" + std::to_string(m_rotation.Yaw) + "," +
-    std::to_string(m_rotation.Pitch);
+  actionMetaString += "Position:" + std::to_string(m_orientation.position.X) + ", " +
+                      std::to_string(m_orientation.position.Y) + "," +
+                      std::to_string(m_orientation.position.Z) + ";";
+  actionMetaString += "Rotation:" + std::to_string(m_orientation.rotation.Yaw) + "," +
+    std::to_string(m_orientation.rotation.Pitch);
 
-  if (m_rotation.Roll != -1000.f)
+  if (m_orientation.rotation.Roll != -1000.f)
   {
-    actionMetaString += "," +std::to_string(m_rotation.Roll);
+    actionMetaString += "," +std::to_string(m_orientation.rotation.Roll);
   }
   
   actionMetaString += ";";
@@ -115,4 +114,10 @@ std::string PositionActionData::ToStringMeta() {
 PositionActionData* PositionActionData::Clone() {
   return new PositionActionData(*this);
 }
+
+Orientation& PositionActionData::getOrientation()
+{
+  return m_orientation;
+}
+
 }  // namespace GetGudSdk

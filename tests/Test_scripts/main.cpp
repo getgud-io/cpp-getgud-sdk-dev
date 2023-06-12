@@ -10,6 +10,8 @@ std::random_device
 std::uniform_int_distribution<int> actionTypeDist(0, 5);
 std::uniform_int_distribution<int> actionOrNotDist(0, 1000);
 
+int randomActionIterator = 0;
+
 GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
                                             long long curTimeEpoch) {
   int actionType = actionTypeDist(rdMain);
@@ -35,8 +37,8 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
     case 4:
       outAction = new GetGudSdk::PositionActionData(
           matchGuid, curTimeEpoch, "player-5",
-          GetGudSdk::PositionF{20.32000f, 50.001421f, 0.30021f},
-          GetGudSdk::RotationF{10, 20, 30});
+          GetGudSdk::PositionF{20.32000f + randomActionIterator, 50.001421f - randomActionIterator, 0.30021f / randomActionIterator },
+          GetGudSdk::RotationF{10.f + randomActionIterator, 20.f - randomActionIterator, 30.f / randomActionIterator});
       break;
     case 5:
       outAction = new GetGudSdk::SpawnActionData(
@@ -44,6 +46,8 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
           GetGudSdk::PositionF{1, 2, 3}, GetGudSdk::RotationF{10, 20, 30});
       break;
   }
+
+  randomActionIterator++;
 
   return outAction;
 }

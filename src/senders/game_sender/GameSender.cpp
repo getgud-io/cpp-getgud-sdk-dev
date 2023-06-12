@@ -98,6 +98,8 @@ void GameSender::SendNextGame() {
   // api request.
   ThrottleCheckGameMatches(gameDataToSend);
 
+  ReduceMatchActionsSize(gameDataToSend);
+
   // convert the game to a sendable string and send it to Getgud.io's cloud
   // using curl
   std::string gameOut;
@@ -311,6 +313,21 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   }
 
   return result;
+}
+
+void GameSender::ReduceMatchActionsSize(GameData* gameDataToSend)
+{
+  for (auto matchData : gameDataToSend->GetMatchMap())
+  {
+    auto lastPositionsVector = matchData.second->CorrectMatchActionsDeltas();
+    if (lastPositionsVector.empty())
+      continue;
+    auto conatinerMatchIt = gameContainer.GetMatchMap().find(matchData.first);
+    if (conatinerMatchIt != gameContainer.GetMatchMap().end())
+    {
+      conatinerMatchIt->second->SetLastPlayersPosition(lastPositionsVector);
+    }
+  }
 }
 
 /**

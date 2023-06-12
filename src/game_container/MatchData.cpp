@@ -123,21 +123,6 @@ void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector) {
     actionPtr->m_actionTimeEpoch -= m_lastActionTimeEpoch;
     m_lastActionTimeEpoch += actionPtr->m_actionTimeEpoch;
 
-    // TODO: complete
-    // get action player guid, get last position action for player guid
-    // get delta between x,y,z,yaw,pitch, roll
-    // rewrite original action as last
-    // only first position action for every player should be full!!
-    // for each player, all other actions will be deltas
-    // we do not have to change anything in Slice like with 
-    // timestamps for example
-    if (actionPtr->m_actionType == ActionType::POSITION) {
-      PositionActionData* positionAction =
-          static_cast<PositionActionData*>(actionPtr);
-      m_lastPositionActionVector[positionAction->m_playerGuid] = positionAction;
-      // TODO write deltas into action ptr
-    }
-
     m_actionVector.push_back(actionPtr);
     // store unique player guids of the match
     m_playerGuids.insert(actionPtr->m_playerGuid);
@@ -312,7 +297,38 @@ bool MatchData::AddChatMessage(ChatMessageData* chatMessageData) {
   return true;
 }
 
-
+std::map<std::string, Orientation> MatchData::CorrectMatchActionsDeltas()
+{
+  std::map<std::string, Orientation> lastPostionActionVector = m_lastPositionActionVector;
+  for (int index = 0; index < m_actionVector.size(); index++) {
+    // TODO: complete
+    // get action player guid, get last position action for player guid
+    // get delta between x,y,z,yaw,pitch, roll
+    // rewrite original action as last
+    // only first position action for every player should be full!!
+    // for each player, all other actions will be deltas
+    // we do not have to change anything in Slice like with 
+    // timestamps for example
+    if (m_actionVector[index]->m_actionType == Actions::Position) {
+      PositionActionData* positionAction =
+        static_cast<PositionActionData*>(m_actionVector[index]);
+      //TODO doesn't works because its a copy
+      auto orientation_it = lastPostionActionVector.find(positionAction->m_playerGuid);
+      if (orientation_it != lastPostionActionVector.end())
+      {
+        auto tempOrientation = positionAction->getOrientation();
+        positionAction->getOrientation() = positionAction->getOrientation() - orientation_it->second;
+        orientation_it->second = tempOrientation;
+      }
+      else
+      {
+        lastPostionActionVector[positionAction->m_playerGuid] = positionAction->getOrientation();
+      }
+    }
+  }
+  m_lastPositionActionVector = lastPostionActionVector;
+  return m_lastPositionActionVector;
+}
 
 /**
  * MatchToString:
@@ -337,26 +353,11 @@ void MatchData::MatchToString(std::string& matchOut) {
   matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
   matchOut += "\"matchActionStream\":\"";
 
-  // TODO: complete
-  // IF we do not know match K yet 
-  // iterate over all actions of the match that are available
-  // find max amount of leading zeros in deltas for x,y,z,pitch,yaw,roll
-  // separately.
-  // save it for this match
-  // pass it to action.ToStringScaled() to multiply action values accordingly
-  // To let us know the scale you will need to pass very first position action
-  // twice!!! Unscaled first, and then scaled
-  // m_actionVector[0]->ToString() + "," // scale_x, y,..yaw
-  // m_actionVector[0]->ToString(scale_x,scale_y,scale_z, ...) + ","
-  // by doing this we will  be able to reconstruct scale for each item on getgud
-  // if you will not do that we will understand and assume the scale is real
-
-  // run through all the actions and append them as strings - creating the
-  // action stream
   for (int index = 0; index < m_actionVector.size(); index++) {
     actionStream += m_actionVector[index]->ToString() + ",";
   }
-  if (actionStream.size() > 1) {
+
+  if (actionStream.size() > 0) {
     actionStream.pop_back();  // pop the last delimiter
     zipper.CompressString(actionStream, compressedActionStream);
   }
@@ -446,6 +447,11 @@ std::string MatchData::GetMapName() {
   return m_mapName;
 }
 
+void MatchData::SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector)
+{
+  m_lastPositionActionVector = lastPositionVector;
+}
+
 /**
  * GetNumberOfMatchReportsAndMessages:
  *
@@ -510,4 +516,5 @@ bool MatchData::IsValid() {
   isActionValid &= Validator::ValidateStringChars(m_matchMode);
   return isActionValid;
 }
+
 }  // namespace GetGudSdk

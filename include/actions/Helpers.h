@@ -112,6 +112,23 @@ struct RotationF {
   float Roll = -1000.f; // optional
 };
 
+struct Orientation {
+  PositionF position = { 0.0f };
+  RotationF rotation = { 0.0f };
+  Orientation operator-(Orientation& rhs)
+  {
+    Orientation outOrientation;
+    outOrientation.position.X = position.X - rhs.position.X;
+    outOrientation.position.Y = position.Y - rhs.position.Y;
+    outOrientation.position.Z = position.Z - rhs.position.Z;
+
+    outOrientation.rotation.Yaw = rotation.Yaw - rhs.rotation.Yaw;
+    outOrientation.rotation.Pitch = rotation.Pitch - rhs.rotation.Pitch;
+    outOrientation.rotation.Roll = rotation.Roll - rhs.rotation.Roll;
+    return outOrientation;
+  }
+};
+
 /**
  * ReportInfo:
  *
