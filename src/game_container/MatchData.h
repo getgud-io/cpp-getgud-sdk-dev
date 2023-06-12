@@ -36,6 +36,10 @@ class MatchData {
     RotationF rotation = { 0.0f };
   } m_lastOrientation;
 
+  // TODO: complete
+  // We need a struct here to store last x,y,z,pitch,yaw, roll
+  // for every player, initially they are initialized to 0
+
  public:
   MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
   MatchData(const MatchData& data);
