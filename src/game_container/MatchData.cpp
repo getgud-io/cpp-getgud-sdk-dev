@@ -297,18 +297,16 @@ bool MatchData::AddChatMessage(ChatMessageData* chatMessageData) {
   return true;
 }
 
-std::map<std::string, Orientation> MatchData::CorrectMatchActionsDeltas()
+/**
+ * ConvertActionsToDeltas:
+ *
+ * Convert all actions (except first one) of the match 
+ * to action deltas
+ **/
+std::map<std::string, Orientation> MatchData::ConvertActionsToDeltas()
 {
   std::map<std::string, Orientation> lastPostionActionVector = m_lastPositionActionVector;
   for (int index = 0; index < m_actionVector.size(); index++) {
-    // TODO: complete
-    // get action player guid, get last position action for player guid
-    // get delta between x,y,z,yaw,pitch, roll
-    // rewrite original action as last
-    // only first position action for every player should be full!!
-    // for each player, all other actions will be deltas
-    // we do not have to change anything in Slice like with 
-    // timestamps for example
     if (m_actionVector[index]->m_actionType == Actions::Position) {
       PositionActionData* positionAction =
         static_cast<PositionActionData*>(m_actionVector[index]);

@@ -98,6 +98,10 @@ void GameSender::SendNextGame() {
   // api request.
   ThrottleCheckGameMatches(gameDataToSend);
 
+
+  // We reduce action size of the match by applying our
+  // dynamic programming to match actions
+  // similar to how we dynamically encode timestamps
   ReduceMatchActionsSize(gameDataToSend);
 
   // convert the game to a sendable string and send it to Getgud.io's cloud
@@ -315,13 +319,22 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   return result;
 }
 
+/**
+ * ReduceMatchActionsSize:
+ *
+ * Reduce action size of the match by applying our dynamic 
+ * programming algo to match actions similar to how 
+ * we dynamically encode timestamps
+ **/
 void GameSender::ReduceMatchActionsSize(GameData* gameDataToSend)
 {
   for (auto matchData : gameDataToSend->GetMatchMap())
   {
-    auto lastPositionsVector = matchData.second->CorrectMatchActionsDeltas();
+    auto lastPositionsVector = matchData.second->ConvertActionsToDeltas();
     if (lastPositionsVector.empty())
       continue;
+    // when we convert actions to deltas we do this on the copy
+    // of game data. Now we need to do it for original data too!
     auto conatinerMatchIt = gameContainer.GetMatchMap().find(matchData.first);
     if (conatinerMatchIt != gameContainer.GetMatchMap().end())
     {

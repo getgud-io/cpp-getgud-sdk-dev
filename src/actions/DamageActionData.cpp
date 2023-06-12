@@ -68,7 +68,7 @@ std::string DamageActionData::ToString() {
   actionString += "D,";
   actionString += m_playerGuid + ",";
   actionString += m_victimPlayerGuid + ",";
-  actionString += CutDecimalNumber(std::to_string(m_damageDone)) + ",";
+  actionString += ShortenDecimalNumber(std::to_string(m_damageDone)) + ",";
   actionString += m_weaponGuid;
 
   return actionString;

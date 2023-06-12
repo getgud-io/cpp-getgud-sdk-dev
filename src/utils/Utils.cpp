@@ -92,11 +92,11 @@ std::string GetCurrentTimeString() {
 }
 
 /**
- * CutDecimalNumber:
+ * ShortenDecimalNumber:
  *
- * Cut a number string and left 3 zeros after the dot
+ * Trim trailing zeros and shorten incoming decimal number
  **/
-std::string CutDecimalNumber(std::string decimalIn) {
+std::string ShortenDecimalNumber(std::string decimalIn) {
   std::string decimalOut = decimalIn;
   bool dotFound = false;
   bool stopCut = false;

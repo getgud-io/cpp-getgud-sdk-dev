@@ -70,14 +70,14 @@ std::string PositionActionData::ToString() {
   actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "P,";
   actionString += m_playerGuid + ",";
-  actionString += CutDecimalNumber(std::to_string(m_orientation.position.X)) + "~" +
-                  CutDecimalNumber(std::to_string(m_orientation.position.Y)) + "~" +
-                  CutDecimalNumber(std::to_string(m_orientation.position.Z)) + "~";
-  actionString += CutDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) + "~" +
-    CutDecimalNumber(std::to_string(m_orientation.rotation.Pitch));
+  actionString += ShortenDecimalNumber(std::to_string(m_orientation.position.X)) + "~" +
+                  ShortenDecimalNumber(std::to_string(m_orientation.position.Y)) + "~" +
+                  ShortenDecimalNumber(std::to_string(m_orientation.position.Z)) + "~";
+  actionString += ShortenDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) + "~" +
+    ShortenDecimalNumber(std::to_string(m_orientation.rotation.Pitch));
   if (m_orientation.rotation.Roll != -1000.f)
   {
-    actionString += "~" + CutDecimalNumber(std::to_string(m_orientation.rotation.Roll));
+    actionString += "~" + ShortenDecimalNumber(std::to_string(m_orientation.rotation.Roll));
   }
 
   return actionString;

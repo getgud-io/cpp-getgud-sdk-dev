@@ -55,7 +55,7 @@ std::string HealActionData::ToString() {
   actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "H,";
   actionString += m_playerGuid + ",";
-  actionString += CutDecimalNumber(std::to_string(m_healthGained));
+  actionString += ShortenDecimalNumber(std::to_string(m_healthGained));
 
   return actionString;
 }

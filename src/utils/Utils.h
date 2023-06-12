@@ -24,5 +24,5 @@ struct FilledAverage {
 };
 std::string GenerateGuid();
 std::string GetCurrentTimeString();
-std::string CutDecimalNumber(std::string decimalIn);
+std::string ShortenDecimalNumber(std::string decimalIn);
 }  // namespace GetGudSdk

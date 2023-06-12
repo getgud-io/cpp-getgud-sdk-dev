@@ -54,7 +54,7 @@ class MatchData {
   bool AddChatMessage(ChatMessageInfo chatInfo);
   bool AddInMatchReport(ReportData* reportData);
   bool AddChatMessage(ChatMessageData* chatMessageData);
-  std::map<std::string, Orientation> CorrectMatchActionsDeltas();
+  std::map<std::string, Orientation> ConvertActionsToDeltas();
   void MatchToString(std::string& match_out);
   unsigned int GetMatchSizeInBytes();
   unsigned int GetNumberOfMatchReportsAndMessages();
