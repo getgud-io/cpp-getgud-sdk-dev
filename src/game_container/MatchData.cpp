@@ -310,7 +310,6 @@ std::map<std::string, Orientation> MatchData::ConvertActionsToDeltas()
     if (m_actionVector[index]->m_actionType == Actions::Position) {
       PositionActionData* positionAction =
         static_cast<PositionActionData*>(m_actionVector[index]);
-      //TODO doesn't works because its a copy
       auto orientation_it = lastPostionActionVector.find(positionAction->m_playerGuid);
       if (orientation_it != lastPostionActionVector.end())
       {
