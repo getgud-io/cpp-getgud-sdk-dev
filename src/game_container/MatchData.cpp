@@ -77,6 +77,7 @@ MatchData* MatchData::Clone(bool isWithActions) {
   cloneMatchData->m_mapName = m_mapName;
   cloneMatchData->m_isInteresting = m_isInteresting;
   cloneMatchData->m_throttleChecked = m_throttleChecked;
+  cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
 
   // Clone actions, reports and chat if needed
   if (isWithActions == true) {
