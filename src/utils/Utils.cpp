@@ -135,7 +135,7 @@ std::string ShortenDecimalNumber(std::string decimalIn) {
         {
           firstNumId = i;
         }
-        else if (decimalOut[i] == '.' || decimalOut[i] == '-')
+        else if (decimalOut[i] == '.')
         {
           leftNumbers++;
         }
