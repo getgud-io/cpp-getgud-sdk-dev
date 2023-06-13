@@ -36,7 +36,7 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
       break;
     case 4:
       outAction = new GetGudSdk::PositionActionData(
-          matchGuid, curTimeEpoch, "player-5",
+          matchGuid, curTimeEpoch, "player" + std::to_string(randomActionIterator % 2),
           GetGudSdk::PositionF{20.32000f + randomActionIterator, 50.001421f - randomActionIterator, 0.30021f / randomActionIterator },
           GetGudSdk::RotationF{10.f + randomActionIterator, 20.f - randomActionIterator, 30.f / randomActionIterator});
       break;
@@ -91,6 +91,7 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
         //  messageInfo.playerGuid = "player1";
         //  GetGudSdk::SendChatMessage(matchGuid, messageInfo);
         //}
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
       }
     }
   }
@@ -202,7 +203,7 @@ int main() {
   {
     std::uniform_int_distribution<int> gamesAmount(1, 1);
     std::uniform_int_distribution<int> matchesAmount(1, 1);
-    std::uniform_int_distribution<int> actionsAmount(1000, 1000);
+    std::uniform_int_distribution<int> actionsAmount(3000, 3000);
     std::uniform_int_distribution<int> reportsAmount(300, 300);
     std::uniform_int_distribution<int> playerUpdatesAmount(1, 1);
 
@@ -210,7 +211,7 @@ int main() {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     std::vector<std::thread> testThreads;
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 1; i++) {
       testThreads.push_back(std::thread([&]() {
         CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
                      actionsAmount(rdMain));
