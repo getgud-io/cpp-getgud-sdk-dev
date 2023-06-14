@@ -88,7 +88,7 @@ struct ReportInfo {
 extern "C" {
 #endif
 
-GETGUDSDK_API bool init();
+GETGUDSDK_API int init();
 GETGUDSDK_API int StartGame(struct StartGameInfo gameInfo, char* gameGuidOut);
 GETGUDSDK_API int StartMatch(struct StartMatchInfo matchInfo, char* matchGuidOut);
 GETGUDSDK_API int MarkEndGame(char* gameGuid, int guidSize);
