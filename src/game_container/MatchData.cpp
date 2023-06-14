@@ -446,7 +446,10 @@ std::string MatchData::GetMapName() {
 
 void MatchData::SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector)
 {
-  m_lastPositionActionVector = lastPositionVector;
+  for (auto& playerPos : lastPositionVector)
+  {
+    m_lastPositionActionVector[playerPos.first] = playerPos.second;
+  }
 }
 
 /**
