@@ -61,6 +61,8 @@ class MatchData {
   void SetThrottleCheckResults(bool inThrottleChecked, bool inIsInteresting);
   bool GetThrottleChecked();
   std::set<std::string> GetPlayerGuids();
+  std::vector<ReportData*> GetReportVector();
+  std::vector<ChatMessageData*> GetChatMessageVector();
   std::string GetMatchMode();
   std::string GetMapName();
   void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);

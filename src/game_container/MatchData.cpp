@@ -430,6 +430,22 @@ std::set<std::string> MatchData::GetPlayerGuids() {
 }
 
 /**
+ * GetReportVector:
+ *
+ **/
+std::vector<ReportData*> MatchData::GetReportVector() {
+  return m_reportVector;
+}
+
+/**
+ * GetChatMessageVector:
+ *
+ **/
+std::vector<ChatMessageData*> MatchData::GetChatMessageVector() {
+  return m_chatMessageVector;
+}
+
+/**
  * GetMatchMode:
  *
  **/

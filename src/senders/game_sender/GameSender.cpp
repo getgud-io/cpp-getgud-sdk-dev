@@ -215,7 +215,9 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
       // check if match has players at all, in other words if the match has
       // actions
       auto playerGuids = match.second->GetPlayerGuids();
-      if (playerGuids.empty()) {
+      auto reportVector = match.second->GetReportVector();
+      auto chatMessageVector = match.second->GetChatMessageVector();
+      if (playerGuids.empty() && reportVector.size() == 0 && chatMessageVector.size()==0) {
         // in this case we will consider match not interesting yet
         continue;
       }
