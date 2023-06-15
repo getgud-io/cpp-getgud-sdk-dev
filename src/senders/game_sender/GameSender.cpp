@@ -88,6 +88,7 @@ void GameSender::SendNextGame() {
                "GameSender::SendNextGame->Failed to add actions to "
                "GameContainer");
   {
+    //TODO refactor this part, games must be updated as non-block
     std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
     // get the next game we need to send. might be that there are no games to send
     GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
@@ -98,7 +99,7 @@ void GameSender::SendNextGame() {
     // check if it is interesting for Getgud or no with a thtrottle check
     // api request.
     ThrottleCheckGameMatches(gameDataToSend);
-
+    //TODO return if game is not interesting
 
     // We reduce action size of the match by applying our
     // dynamic programming to match actions
