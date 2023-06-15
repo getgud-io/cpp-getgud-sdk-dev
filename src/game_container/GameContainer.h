@@ -21,8 +21,10 @@ class GameContainer {
 
   // helpers and data holders
   unsigned int m_gameContainerSizeInBytes = 0;
-  std::mutex m_gameContainerMutex;
   FilledAverage m_averageSize;
+
+public:
+  std::mutex m_gameContainerMutex;
 
  public:
   std::string AddGame(int titleId,
@@ -42,6 +44,7 @@ class GameContainer {
   bool DeleteGame(std::string gameGuid, bool externalCall);
   void Dispose();
   std::unordered_map<std::string, MatchData*>& GetMatchMap();
+  bool SendThrottleCheckForMatch(std::string& packet);
 
  private:
   bool DeleteGame(std::string gameGuid,

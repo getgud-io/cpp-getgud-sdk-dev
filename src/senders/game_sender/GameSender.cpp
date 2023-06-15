@@ -87,36 +87,38 @@ void GameSender::SendNextGame() {
     logger.Log(LogType::WARN,
                "GameSender::SendNextGame->Failed to add actions to "
                "GameContainer");
+  {
+    std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
+    // get the next game we need to send. might be that there are no games to send
+    GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
+    if (gameDataToSend == nullptr)
+      return;
 
-  // get the next game we need to send. might be that there are no games to send
-  GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
-  if (gameDataToSend == nullptr)
-    return;
-
-  // If there is a game packet to send go through each match of the packet
-  // check if it is interesting for Getgud or no with a thtrottle check
-  // api request.
-  ThrottleCheckGameMatches(gameDataToSend);
+    // If there is a game packet to send go through each match of the packet
+    // check if it is interesting for Getgud or no with a thtrottle check
+    // api request.
+    ThrottleCheckGameMatches(gameDataToSend);
 
 
-  // We reduce action size of the match by applying our
-  // dynamic programming to match actions
-  // similar to how we dynamically encode timestamps
-  ReduceMatchActionsSize(gameDataToSend);
+    // We reduce action size of the match by applying our
+    // dynamic programming to match actions
+    // similar to how we dynamically encode timestamps
+    ReduceMatchActionsSize(gameDataToSend);
 
-  // convert the game to a sendable string and send it to Getgud.io's cloud
-  // using curl
-  std::string gameOut;
-  gameDataToSend->GameToString(gameOut);
-  if (!gameOut.empty()) {
-    logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " +
-                                   gameDataToSend->GetGameGuid());
-    SendGamePacket(gameOut);
+    // convert the game to a sendable string and send it to Getgud.io's cloud
+    // using curl
+    std::string gameOut;
+    gameDataToSend->GameToString(gameOut);
+    if (!gameOut.empty()) {
+      logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " +
+        gameDataToSend->GetGameGuid());
+      SendGamePacket(gameOut);
+    }
+
+    // Dispose actions
+    gameDataToSend->Dispose();
+    delete gameDataToSend;
   }
-
-  // Dispose actions
-  gameDataToSend->Dispose();
-  delete gameDataToSend;
 }
 
 /**

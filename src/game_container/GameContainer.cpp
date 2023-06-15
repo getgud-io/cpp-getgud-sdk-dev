@@ -275,7 +275,7 @@ GameData* GameContainer::PopNextGameToProcess() {
   std::string gameGuid;
   unsigned gameDataSizeInBytes;
 
-  m_gameContainerMutex.lock();
+  //m_gameContainerMutex.lock();
 
   // traverse through all the live games and find the first eligible game to be
   // processed and pop it.
@@ -348,7 +348,7 @@ GameData* GameContainer::PopNextGameToProcess() {
     }
   }
 
-  m_gameContainerMutex.unlock();
+  //m_gameContainerMutex.unlock();
 
   // make sure a none empty game was found elidible and return it (even an empty
   // game has to go through the logic above) note that an empty game (with no
