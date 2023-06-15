@@ -137,10 +137,10 @@ struct Orientation {
 struct ReportInfo {
   std::string MatchGuid; //36 + SQL // required
   std::string ReporterName;  // SQL, size <=10.000
-  ReporterType ReporterType = ReporterType::None; // >= 1, < max
+  GetGudSdk::ReporterType ReporterType = ReporterType::None; // >= 1, < max
   ReporterSubtype ReporterSubType = ReporterSubtype::None; // >= 1, < max
   std::string SuspectedPlayerGuid;  // 36 + SQL //required
-  TbType TbType = TbType::None; //>=1, <max
+  GetGudSdk::TbType TbType = TbType::None; //>=1, <max
   long long TbTimeEpoch = -1; //>=time.min, <= time.max
   int SuggestedToxicityScore = -1; //>=0, <=100
   long long ReportedTimeEpoch = -1; //>=time.min, <=time.max

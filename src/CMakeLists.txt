@@ -40,18 +40,47 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 						${UTILS_HEADERS} ${UTILS_SOURCES}
 						${SENDERS_DATA_SOURCES} ${SENDERS_DATA_HEADERS}
 						)
+
+add_compile_options(-fPIC)
+
+file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
+list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
+file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
+list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
+file(GLOB zlib_lib "../libs/zlib/lib/")
+
 if (DLL_BUILD)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_library(GetGudSdk SHARED ${project_files} ${DLLMAIN_SOURCE})
 source_group("Source Files\\C" FILES ${DLLMAIN_SOURCE})
 else() 
 if (SO_BUILD)
+link_directories(
+	/usr/lib/x86_64-linux-gnu/
+	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
+	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
+	${zlib_lib}
+)
 add_library(GetGudSdk SHARED ${project_files})
 target_precompile_headers(GetGudSdk PRIVATE pch.h)
 else()
+if (UNIX)
+link_directories(
+	/usr/lib/x86_64-linux-gnu/
+	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
+	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
+	${zlib_lib}
+)
+endif()
 add_library(GetGudSdk STATIC ${project_files})
 endif()
 endif()
+
+target_include_directories(GetGudSdk PRIVATE source)
+set_target_properties(GetGudSdk PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(GetGudSdk PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+set_target_properties(GetGudSdk PROPERTIES PUBLIC_HEADER ../include/GetGudSdk.h PUBLIC_HEADER ../include/GetGudSdk_C.h)
+
 
 source_group("Header Files\\" FILES ${MAIN_HEADER})
 source_group("Source Files\\" FILES ${MAIN_SOURCE})
@@ -80,12 +109,6 @@ source_group("Source Files\\logger" FILES ${LOGGER_SOURCES})
 source_group("Header Files\\utils" FILES ${UTILS_HEADERS})
 source_group("Source Files\\utils" FILES ${UTILS_SOURCES})
 
-file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*x64-debug*/")
-list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
-file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*x64-release*/")
-list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
-file(GLOB zlib_lib "../libs/zlib/zlib.lib")
-
 target_include_directories(GetGudSdk
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
@@ -94,19 +117,21 @@ target_include_directories(GetGudSdk
 		../src/
 )
 
-if (SO_BUILD)
+if (SO_BUILD OR UNIX)
+set_property(TARGET GetGudSdk PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(GetGudSdk
     PRIVATE
-        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl.a>
-        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl.a>
-		${zlib_lib}
+        libcurl.so
+		-L${zlib_lib}libz.so
+		libssl.a
+		libcrypto.a
 )
 else()
 target_link_libraries(GetGudSdk
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
-		${zlib_lib}
+		${zlib_lib}/zlib.lib
 )
 endif()
 if (DLL_BUILD)
