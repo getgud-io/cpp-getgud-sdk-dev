@@ -61,10 +61,6 @@ bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
     for (auto& action : actions)
       actionToSend.push_back(action->Clone());
   }
-  // TODO: delete this for prod
-  /*for (auto& action : actions) {
-    logger.WriteActionToFile(action->m_matchGuid, action->ToString() + ",");
-  }*/
   m_actionsBufferLocker.lock();
 
   // return size that calculated in the code

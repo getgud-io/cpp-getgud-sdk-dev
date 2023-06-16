@@ -461,6 +461,12 @@ std::string MatchData::GetMapName() {
   return m_mapName;
 }
 
+/**
+ * SetLastPlayersPosition:
+ * 
+ * Set last position for each player of the match, we use it in
+ * our dynamic algorithm
+ **/
 void MatchData::SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector)
 {
   for (auto& playerPos : lastPositionVector)

@@ -22,6 +22,12 @@ long Logger::GetFileSize() {
   return rc == 0 ? stat_buf.st_size : -1;
 }
 
+/**
+ * ManageConfigFileSize:
+ *
+ * Make sure that config file size doesn't overcome limits
+ * put in config
+ **/
 void Logger::ManageConfigFileSize() {
   long fileSize = GetFileSize();
   if (fileSize != -1 && fileSize < sdkConfig.logFileSizeInBytes) {

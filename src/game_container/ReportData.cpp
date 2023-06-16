@@ -76,6 +76,10 @@ std::string ReportData::ToString(bool isOutsideMatch) {
   return reportString;
 }
 
+/**
+ * IsValid:
+ *
+ **/
 bool ReportData::IsValid() {
   bool isActionValid =
     Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);

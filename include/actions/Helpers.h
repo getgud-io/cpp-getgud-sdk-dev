@@ -38,6 +38,11 @@ enum class Actions : unsigned int {
   Spawn
 };
 
+/**
+ * TbType:
+ *
+ * Toxic behaviour types you can send in reports
+ **/
 enum class TbType : int {
   None = -1,
   Aimbot = 0,
@@ -60,6 +65,12 @@ enum class TbType : int {
   Ragequit
 };
 
+
+/**
+ * ReporterType:
+ *
+ * Reporter types you can send to Getgud with reports
+ **/
 enum class ReporterType : int {
   None = -1,
   Other = 0,
@@ -70,6 +81,11 @@ enum class ReporterType : int {
   Custom
 };
 
+/**
+ * ReporterSubtype:
+ *
+ * Reporter subtypes you can send to Getgud with reports
+ **/
 enum class ReporterSubtype : int {
   None = -1,
   Other = 0,
@@ -112,6 +128,12 @@ struct RotationF {
   float Roll = -1000.f; // optional
 };
 
+/**
+ * Orientation:
+ *
+ * Represents overall position of the player, also helps us
+ * apply our delta algorithm
+ **/
 struct Orientation {
   PositionF position = { 0.0f };
   RotationF rotation = { 0.0f };
