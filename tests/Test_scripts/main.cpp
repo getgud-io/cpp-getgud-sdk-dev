@@ -57,7 +57,7 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
         GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-                             "hypermode_tester", "random_actions");
+                             "tests_round", "default_create_game");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < numberOfMatches; matchNum++) {
@@ -106,7 +106,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
       GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-        "hypermode_tester", "random_actions");
+        "tests_round", "games_with_reports_messages");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
@@ -237,13 +237,13 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
       invalid_games--;
       gameGuid =
         GetGudSdk::StartGame(0, "28482640-f571-11ed-8460-89c45273f291",
-          "Fesa252", "random_actions");
+          "tests_round", "invalid_guid");
     }
     else
     {
       gameGuid =
         GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-          "hypermode_tester", "random_actions");
+          "tests_round", "random_actions");
     }
 
     gameGuidMap.push_back(gameGuid);
@@ -253,12 +253,12 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
       if (matchNum > matches / 2 && invalid_matches)
       {
         matchGuid =
-          GetGudSdk::StartMatch(gameGuid + "\12\42\200", "hypermode_tester", "empty_map");
+          GetGudSdk::StartMatch(gameGuid + "\12\42\200", "dasdads", "empty_map");
       }
       else
       {
         matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+          GetGudSdk::StartMatch(gameGuid, "dsadasdasds", "empty_map");
       }
 
       for (int actionNum = 0; actionNum < actions; actionNum++) {
@@ -295,7 +295,7 @@ void InvalidPacket(int games, int matches, int actions)
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
       GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-        "hypermode_tester", "random_actions");
+        "tests_round", "invalid_packet");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
@@ -328,7 +328,8 @@ void InvalidPacket(int games, int matches, int actions)
 
 void GamePerTitle(int games, int matches, int actions)
 {
-  int title_id = 2;
+  int title_id = 28;
+  std::string server_guid = "28482640-f571-11ed-8460-89c45273f291";
   /*
   Push 10 games for 2 different titles at the same time,
   make sure the behavior is correct and games reach MW.
@@ -337,13 +338,13 @@ void GamePerTitle(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
-        "hypermode_tester", "random_actions");
+      GetGudSdk::StartGame(title_id, server_guid,
+        "tests_round", "GamePerTitle");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetGudSdk::StartMatch(gameGuid, "dsafsafes", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
         if (actionOrNot > 3) {
@@ -355,8 +356,11 @@ void GamePerTitle(int games, int matches, int actions)
         }
       }
     }
-    if (gameNum > games / 2 && title_id > 1)
-      title_id--;
+    if (gameNum > games / 2 && title_id == 28)
+    {
+      title_id = 30;
+      server_guid = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
+    }
   }
 
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -368,7 +372,8 @@ void GamePerTitle(int games, int matches, int actions)
 
 void GamePositions(int games, int matches, int actions)
 {
-  int title_id = 2;
+  int title_id = 28;
+  std::string server_guid = "28482640-f571-11ed-8460-89c45273f291";
   /*
   Push 10 games for 2 different titles at the same time,
   make sure the behavior is correct and games reach MW.
@@ -377,13 +382,13 @@ void GamePositions(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
-        "hypermode_tester", "random_actions");
+      GetGudSdk::StartGame(title_id, server_guid,
+        "tests_round", "positions");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetGudSdk::StartMatch(gameGuid, "ewqewdafe", "empty_map");
       for (int actionNum = 0; actionNum < actions / 10; actionNum++) {
 
         for (int i = 0; i < 10; i++)
@@ -398,8 +403,6 @@ void GamePositions(int games, int matches, int actions)
         }
       }
     }
-    if (gameNum > games / 2 && title_id > 1)
-      title_id--;
   }
 
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -411,7 +414,7 @@ void GamePositions(int games, int matches, int actions)
 
 void GamePositionsInvalid(int games, int matches, int actions)
 {
-  int title_id = 2;
+  int title_id = 28;
   /*
   Push 10 games for 2 different titles at the same time,
   make sure the behavior is correct and games reach MW.
@@ -421,7 +424,7 @@ void GamePositionsInvalid(int games, int matches, int actions)
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
       GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
-        "hypermode_tester", "random_actions");
+        "tests_round", "positionsInvalid");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
@@ -451,8 +454,6 @@ void GamePositionsInvalid(int games, int matches, int actions)
         //}
       }
     }
-    if (gameNum > games / 2 && title_id > 1)
-      title_id--;
   }
 
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -498,7 +499,7 @@ int main() {
   //InvalidGuid(int games, int matches, int actions, int invalid_games, int invalid_matches);
   //InvalidPacket(int games, int matches, int actions); //Wrong test, because should be tested from the GameSender::SendPacket(...)
   //GamePerTitle(int games, int matches, int actions);
-
+  GamePerTitle(2, 2, 100);
 
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to
