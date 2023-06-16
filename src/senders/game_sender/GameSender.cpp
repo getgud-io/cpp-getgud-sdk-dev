@@ -245,6 +245,7 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
 
       // send throttle check request
       bool result = SendThrottleCheckForMatch(packet);
+      result = true;
       // save throttle check result for the match
       match.second->SetThrottleCheckResults(true, result);
 
@@ -381,12 +382,23 @@ void GameSender::SendGamePacket(std::string& packet) {
       std::string outMessage(m_streamCurlReadBuffer.begin() + 2,
           m_streamCurlReadBuffer.begin() + m_streamCurlReadBuffer.size() - 3);
       logger.Log(LogType::DEBUG,
-                 "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " +
+                 "GameSender::SendGamePacket->Failed to send throttle request: " +
                      outMessage);
     } else {
       logger.Log(LogType::_ERROR,
                  "GameSender::SendGamePacket->Failed to send packet: " +
                      std::string(curl_easy_strerror(sendCode)));
+    }
+  }
+  else
+  {
+    if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+      // skip brackets and spaces
+      std::string outMessage(m_streamCurlReadBuffer.begin() + 2,
+        m_streamCurlReadBuffer.begin() + m_streamCurlReadBuffer.size() - 3);
+      logger.Log(LogType::DEBUG,
+        "GameSender::SendGamePacket->Failed to send throttle request: " +
+        outMessage);
     }
   }
 }

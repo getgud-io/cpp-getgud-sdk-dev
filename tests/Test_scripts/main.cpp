@@ -56,7 +56,7 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
-        GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+        GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
                              "tests_round", "default_create_game");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
@@ -105,7 +105,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+      GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
         "tests_round", "games_with_reports_messages");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
@@ -164,7 +164,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
 
 void CreateReports(int numberOfReports) {
   std::deque<GetGudSdk::ReportInfo> reports;
-  std::string privateKey = "28482640-f571-11ed-8460-89c45273f291";
+  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
   for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
     GetGudSdk::ReportInfo reportInfo;
     reportInfo.MatchGuid = "28482640-f571-11ed-8460-89c45273f291";
@@ -180,12 +180,12 @@ void CreateReports(int numberOfReports) {
     reports.push_back(reportInfo);
   }
 
-  GetGudSdk::SendReports(28, privateKey, reports);
+  GetGudSdk::SendReports(30, privateKey, reports);
 }
 
 void CreatePlayerUpdates(int numberOfPlayerUpdates) {
   std::deque<GetGudSdk::PlayerInfo> playerInfos;
-  std::string privateKey = "28482640-f571-11ed-8460-89c45273f291";
+  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
   for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
        playerUpdateNum++) {
     GetGudSdk::PlayerInfo playerInfo;
@@ -197,7 +197,7 @@ void CreatePlayerUpdates(int numberOfPlayerUpdates) {
     playerInfos.push_back(playerInfo);
   }
 
-  GetGudSdk::UpdatePlayers(28, privateKey, playerInfos);
+  GetGudSdk::UpdatePlayers(30, privateKey, playerInfos);
 }
 
 void RunSenders(int reports, int players, int games, int matches, int actions)
@@ -232,17 +232,17 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid;
-    if (gameNum > games / 2 && invalid_games)
+    if (invalid_games)
     {
       invalid_games--;
       gameGuid =
-        GetGudSdk::StartGame(0, "28482640-f571-11ed-8460-89c45273f291",
+        GetGudSdk::StartGame(0, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
           "tests_round", "invalid_guid");
     }
     else
     {
       gameGuid =
-        GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+        GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
           "tests_round", "random_actions");
     }
 
@@ -250,10 +250,11 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid;
-      if (matchNum > matches / 2 && invalid_matches)
+      if (invalid_matches)
       {
+        invalid_matches--;
         matchGuid =
-          GetGudSdk::StartMatch(gameGuid + "\12\42\200", "dasdads", "empty_map");
+          GetGudSdk::StartMatch(gameGuid, "dasdads\2dasdsaf", "empty_map");
       }
       else
       {
@@ -294,7 +295,7 @@ void InvalidPacket(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+      GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
         "tests_round", "invalid_packet");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
@@ -328,8 +329,8 @@ void InvalidPacket(int games, int matches, int actions)
 
 void GamePerTitle(int games, int matches, int actions)
 {
-  int title_id = 28;
-  std::string server_guid = "28482640-f571-11ed-8460-89c45273f291";
+  int title_id = 30;
+  std::string server_guid = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
   /*
   Push 10 games for 2 different titles at the same time,
   make sure the behavior is correct and games reach MW.
@@ -358,8 +359,8 @@ void GamePerTitle(int games, int matches, int actions)
     }
     if (gameNum > games / 2 && title_id == 28)
     {
-      title_id = 30;
-      server_guid = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
+      title_id = 28;
+      server_guid = "28482640-f571-11ed-8460-89c45273f291";
     }
   }
 
@@ -493,13 +494,16 @@ void general_test()
 }
 
 int main() {
-
+  GetGudSdk::Init();
   //RunSenders(int reports, int players, int games, int matches, int actions);
   //FeedGameWithMessagesAndReports(int games, int matches, int actions, int reports, int messages);
   //InvalidGuid(int games, int matches, int actions, int invalid_games, int invalid_matches);
   //InvalidPacket(int games, int matches, int actions); //Wrong test, because should be tested from the GameSender::SendPacket(...)
   //GamePerTitle(int games, int matches, int actions);
-  GamePerTitle(2, 2, 100);
+  
+  //GamePerTitle(2, 2, 100);
+  //general_test();
+  InvalidGuid(2, 2, 100, 0, 1);
 
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to
