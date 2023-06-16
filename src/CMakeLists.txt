@@ -43,16 +43,15 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 
 add_compile_options(-fPIC)
 
-file(GLOB ZLIB_LIB "../libs/*zlib/")
 file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
 list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
 list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
-#if (UNIX)
-#file(GLOB ZLIB_LIB "../libs/zlib/lib/")
-#else()
-#set(ZLIB_LIB "../libs/zlib")
-#endif()
+if (UNIX)
+file(GLOB ZLIB_LIB "../libs/*zlib/lib/")
+else()
+file(GLOB ZLIB_LIB "../libs/*zlib/")
+endif()
 
 if (DLL_BUILD)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
