@@ -177,8 +177,6 @@ void ReportSender::SendNextReportBatch() {
   reportsPacket += +"]}";
 
   // Send new reports to Getgud
-  // TODO: delete this log for prod
-  logger.Log(LogType::DEBUG, reportsPacket);
   SendReportPacket(reportsPacket);
 }
 

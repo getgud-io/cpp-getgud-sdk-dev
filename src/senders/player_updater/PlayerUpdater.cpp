@@ -166,8 +166,6 @@ void PlayerUpdater::SendNextPlayerBatch() {
   playersPacket += +"]\n}";
 
   // Send players update to Getgud
-  // TODO: delete this log for prod
-  logger.Log(LogType::DEBUG, playersPacket);
   SendUpdatePlayerPacket(playersPacket);
 }
 
