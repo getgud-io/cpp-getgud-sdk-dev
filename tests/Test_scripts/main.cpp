@@ -366,6 +366,102 @@ void GamePerTitle(int games, int matches, int actions)
   }
 }
 
+void GamePositions(int games, int matches, int actions)
+{
+  int title_id = 2;
+  /*
+  Push 10 games for 2 different titles at the same time,
+  make sure the behavior is correct and games reach MW.
+  */
+
+  std::vector<std::string> gameGuidMap;
+  for (int gameNum = 0; gameNum < games; gameNum++) {
+    std::string gameGuid =
+      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
+        "hypermode_tester", "random_actions");
+    gameGuidMap.push_back(gameGuid);
+    long long curEpochTime = 1684059337532;
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      std::string matchGuid =
+        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      for (int actionNum = 0; actionNum < actions / 10; actionNum++) {
+
+        for (int i = 0; i < 10; i++)
+        {
+          GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+            matchGuid, curEpochTime, "player" + std::to_string(i),
+            GetGudSdk::PositionF{ 20.32000f + (actionNum / 100.f), 20.32000f - (actionNum / 100.f), 50.001421f - ((actionNum / 100.f) / actionNum) },
+            GetGudSdk::RotationF{ 10.f + (actionNum / 100.f), 20.f - (actionNum / 100.f), 30.f - ((actionNum / 100.f) / actionNum) });
+          curEpochTime += 2;
+          GetGudSdk::SendAction(outAction);
+          delete outAction;
+        }
+      }
+    }
+    if (gameNum > games / 2 && title_id > 1)
+      title_id--;
+  }
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+  for (int i = 0; i < gameGuidMap.size(); i++) {
+    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+  }
+}
+
+void GamePositionsInvalid(int games, int matches, int actions)
+{
+  int title_id = 2;
+  /*
+  Push 10 games for 2 different titles at the same time,
+  make sure the behavior is correct and games reach MW.
+  */
+
+  std::vector<std::string> gameGuidMap;
+  for (int gameNum = 0; gameNum < games; gameNum++) {
+    std::string gameGuid =
+      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
+        "hypermode_tester", "random_actions");
+    gameGuidMap.push_back(gameGuid);
+    long long curEpochTime = 1684059337532;
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      std::string matchGuid =
+        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      for (int actionNum = 0; actionNum < actions / 10; actionNum++) {
+
+        for (int i = 0; i < 10; i++)
+        {
+          GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+            matchGuid, curEpochTime, "player" + std::to_string(i),
+            GetGudSdk::PositionF{ FLT_MIN, FLT_MAX, actionNum * 0.00000001f },
+            GetGudSdk::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
+          curEpochTime += 2;
+          GetGudSdk::SendAction(outAction);
+          delete outAction;
+        }
+        //Uncomment this if you want test float overload
+        //{
+        //  GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+        //    matchGuid, curEpochTime, "player" + std::to_string(i),
+        //    GetGudSdk::PositionF{ FLT_MIN - 1, FLT_MAX + 1, actionNum * 0.00000001f },
+        //    GetGudSdk::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
+        //  curEpochTime += 2;
+        //  GetGudSdk::SendAction(outAction);
+        //  delete outAction;
+        //}
+      }
+    }
+    if (gameNum > games / 2 && title_id > 1)
+      title_id--;
+  }
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+  for (int i = 0; i < gameGuidMap.size(); i++) {
+    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+  }
+}
+
 void general_test()
 {
   std::uniform_int_distribution<int> gamesAmount(1, 1);
