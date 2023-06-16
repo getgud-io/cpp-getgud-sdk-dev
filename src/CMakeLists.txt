@@ -43,11 +43,16 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 
 add_compile_options(-fPIC)
 
+file(GLOB ZLIB_LIB "../libs/*zlib/")
 file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
 list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
 list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
-file(GLOB zlib_lib "../libs/zlib/lib/")
+#if (UNIX)
+#file(GLOB ZLIB_LIB "../libs/zlib/lib/")
+#else()
+#set(ZLIB_LIB "../libs/zlib")
+#endif()
 
 if (DLL_BUILD)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
@@ -59,7 +64,7 @@ link_directories(
 	/usr/lib/x86_64-linux-gnu/
 	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
 	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
-	${zlib_lib}
+	${ZLIB_LIB}
 )
 add_library(GetGudSdk SHARED ${project_files})
 target_precompile_headers(GetGudSdk PRIVATE pch.h)
@@ -69,7 +74,7 @@ link_directories(
 	/usr/lib/x86_64-linux-gnu/
 	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
 	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
-	${zlib_lib}
+	${ZLIB_LIB}
 )
 endif()
 add_library(GetGudSdk STATIC ${project_files})
@@ -122,16 +127,18 @@ set_property(TARGET GetGudSdk PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(GetGudSdk
     PRIVATE
         libcurl.so
-		-L${zlib_lib}libz.so
+		-L${ZLIB_LIB}libz.so
 		libssl.a
 		libcrypto.a
 )
 else()
+message(${ZLIB_LIB}/zlib.lib)
+message(${LIBCURL_RELEASE})
 target_link_libraries(GetGudSdk
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
-		${zlib_lib}/zlib.lib
+		${ZLIB_LIB}/zlib.lib
 )
 endif()
 if (DLL_BUILD)
