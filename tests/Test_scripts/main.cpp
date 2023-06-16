@@ -53,7 +53,6 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
 }
 
 void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
-  int actions_pushed = 0;
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
@@ -91,7 +90,6 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
         //  messageInfo.playerGuid = "player1";
         //  GetGudSdk::SendChatMessage(matchGuid, messageInfo);
         //}
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
       }
     }
   }
@@ -101,64 +99,67 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
   for (int i = 0; i < gameGuidMap.size(); i++) {
     GetGudSdk::MarkEndGame(gameGuidMap[i]);
   }
-  gameGuidMap.erase(gameGuidMap.begin());
 }
 
-void CreateGamesDelayed(int numberOfGames,
-                        int numberOfMatches,
-                        int numberOfItems) {
-  int actions_pushed = 0;
+void CreateGames(int games, int matches, int actions, int reports, int messages) {
   std::vector<std::string> gameGuidMap;
-  for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
+  for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-        GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
-                             "hypermode_tester", "random_actions");
+      GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+        "hypermode_tester", "random_actions");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
-    for (int matchNum = 0; matchNum < numberOfMatches; matchNum++) {
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      int matchReports = reports;
+      int matchMessages = messages;
       std::string matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
-      for (int actionNum = 0; actionNum < numberOfItems; actionNum++) {
+        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      for (int actionNum = 0; actionNum < actions; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
-        if (actionOrNot > 10) {
+        curEpochTime += 1;
+        if (actionOrNot > 3) {
           GetGudSdk::BaseActionData* outAction =
-              MakeRandomAction(matchGuid, curEpochTime);
+            MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
           GetGudSdk::SendAction(outAction);
+
+          if (matchReports)
+          {
+            matchReports--;
+
+            GetGudSdk::ReportInfo reportInfo;
+            reportInfo.MatchGuid = matchGuid;
+            reportInfo.ReportedTimeEpoch = curEpochTime;
+            reportInfo.ReporterName = "reporter_name";
+            reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
+            reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
+            reportInfo.SuggestedToxicityScore = 100;
+            reportInfo.SuspectedPlayerGuid = outAction->m_playerGuid;
+            reportInfo.TbTimeEpoch = curEpochTime;
+            reportInfo.TbType = GetGudSdk::TbType::Laghack;
+            GetGudSdk::SendInMatchReport(reportInfo);
+          }
+          if (matchMessages)
+          {
+            matchMessages--;
+
+            GetGudSdk::ChatMessageInfo messageInfo;
+            messageInfo.message = outAction->ToString();
+            messageInfo.messageTimeEpoch = curEpochTime;
+            messageInfo.playerGuid = outAction->m_playerGuid;
+            GetGudSdk::SendChatMessage(matchGuid, messageInfo);
+          }
           delete outAction;
-        } else if (actionOrNot <= 5) {
-          GetGudSdk::ReportInfo reportInfo;
-          reportInfo.MatchGuid = matchGuid;
-          reportInfo.ReportedTimeEpoch = 1684059337532;
-          reportInfo.ReporterName = "reporter_name";
-          reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
-          reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
-          reportInfo.SuggestedToxicityScore = 100;
-          reportInfo.SuspectedPlayerGuid = "suspected_player_guid";
-          reportInfo.TbTimeEpoch = 1684059337532;
-          reportInfo.TbType = GetGudSdk::TbType::Laghack;
-          GetGudSdk::SendInMatchReport(reportInfo);
-        } else {
-          GetGudSdk::ChatMessageInfo messageInfo;
-          messageInfo.message = "hi there";
-          messageInfo.messageTimeEpoch = curEpochTime;
-          messageInfo.playerGuid = "player1";
-          GetGudSdk::SendChatMessage(matchGuid, messageInfo);
-        }
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        } 
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
-  // std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
-  // endGame as soon as possible
   for (int i = 0; i < gameGuidMap.size(); i++) {
     GetGudSdk::MarkEndGame(gameGuidMap[i]);
   }
-  gameGuidMap.erase(gameGuidMap.begin(), gameGuidMap.end());
 }
 
 void CreateReports(int numberOfReports) {
@@ -199,34 +200,210 @@ void CreatePlayerUpdates(int numberOfPlayerUpdates) {
   GetGudSdk::UpdatePlayers(28, privateKey, playerInfos);
 }
 
-int main() {
-  {
-    std::uniform_int_distribution<int> gamesAmount(1, 1);
-    std::uniform_int_distribution<int> matchesAmount(1, 1);
-    std::uniform_int_distribution<int> actionsAmount(3000, 3000);
-    std::uniform_int_distribution<int> reportsAmount(300, 300);
-    std::uniform_int_distribution<int> playerUpdatesAmount(1, 1);
+void RunSenders(int reports, int players, int games, int matches, int actions)
+{
+  /*Run Report Sender, Player Updater, Game Sender at the same time.
+  Push 10, 100, 1000 reports to report sender, 10, 100, 1000 player updates
+  to player updater and 1,5,10 games with 10 matches each with 20,000 
+  actions each. Make sure everything reaches MW
+*/
+  CreateReports(reports);
+  CreatePlayerUpdates(players);
+  CreateGames(games, matches, actions);
 
-    GetGudSdk::Init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    std::vector<std::thread> testThreads;
+}
 
-    for (int i = 0; i < 1; i++) {
-      testThreads.push_back(std::thread([&]() {
-        CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
-                     actionsAmount(rdMain));
-        //CreateReports(reportsAmount(rdMain));
-        //CreatePlayerUpdates(playerUpdatesAmount(rdMain));
-      }));
+void FeedGameWithMessagesAndReports(int games, int matches, int actions, int reports, int messages)
+{
+  /*Push a game with 2-3 reports per match and 
+  with 10-20 chat messages per match, make sure 
+  reports and messages reach MW
+*/
+  CreateGames(games, matches, actions, reports, messages);
+}
+
+void InvalidGuid(int games, int matches, int actions, int invalid_games, int invalid_matches)
+{
+  /*Inject invalid match id,
+  game id to any method which 
+  accepts it - should get warning logs
+  */
+
+  std::vector<std::string> gameGuidMap;
+  for (int gameNum = 0; gameNum < games; gameNum++) {
+    std::string gameGuid;
+    if (gameNum > games / 2 && invalid_games)
+    {
+      invalid_games--;
+      gameGuid =
+        GetGudSdk::StartGame(0, "28482640-f571-11ed-8460-89c45273f291",
+          "Fesa252", "random_actions");
+    }
+    else
+    {
+      gameGuid =
+        GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+          "hypermode_tester", "random_actions");
     }
 
-    for (auto& thread : testThreads) {
-      thread.join();
+    gameGuidMap.push_back(gameGuid);
+    long long curEpochTime = 1684059337532;
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      std::string matchGuid;
+      if (matchNum > matches / 2 && invalid_matches)
+      {
+        matchGuid =
+          GetGudSdk::StartMatch(gameGuid + "\12\42\200", "hypermode_tester", "empty_map");
+      }
+      else
+      {
+        matchGuid =
+          GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      }
+
+      for (int actionNum = 0; actionNum < actions; actionNum++) {
+        int actionOrNot = actionOrNotDist(rdMain);
+        if (actionOrNot > 3) {
+          GetGudSdk::BaseActionData* outAction =
+            MakeRandomAction(matchGuid, curEpochTime);
+          curEpochTime += 2;
+          GetGudSdk::SendAction(outAction);
+          delete outAction;
+        }
+      }
     }
-    testThreads.clear();
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000));
-    // GetGudSdk::Dispose();
   }
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+  for (int i = 0; i < gameGuidMap.size(); i++) {
+    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+  }
+
+}
+
+void InvalidPacket(int games, int matches, int actions)
+{
+  /*Try to send invalid JSON packet to MW,
+  make sure 400-405 error for that is printed
+  in the log file 
+  */
+
+  //TODO must be changed from the SDK, because have no ways to do it externaly
+
+  std::vector<std::string> gameGuidMap;
+  for (int gameNum = 0; gameNum < games; gameNum++) {
+    std::string gameGuid =
+      GetGudSdk::StartGame(28, "28482640-f571-11ed-8460-89c45273f291",
+        "hypermode_tester", "random_actions");
+    gameGuidMap.push_back(gameGuid);
+    long long curEpochTime = 1684059337532;
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      std::string matchGuid =
+        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      for (int actionNum = 0; actionNum < actions; actionNum++) {
+        int actionOrNot = actionOrNotDist(rdMain);
+        if (actionOrNot > 3) {
+          GetGudSdk::BaseActionData* outAction =
+            MakeRandomAction(matchGuid, curEpochTime);
+          curEpochTime += 2;
+          GetGudSdk::SendAction(outAction);
+          delete outAction;
+        }
+      }
+      GetGudSdk::BaseData invalidData = { GetGudSdk::Actions::Attack, 1684059337532, "123", matchGuid };
+      GetGudSdk::BaseActionData* invalidAction = new GetGudSdk::BaseActionData(invalidData);
+      GetGudSdk::SendAction(invalidAction);
+      delete invalidAction;
+    }
+  }
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+  for (int i = 0; i < gameGuidMap.size(); i++) {
+    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+  }
+
+}
+
+void GamePerTitle(int games, int matches, int actions)
+{
+  int title_id = 2;
+  /*
+  Push 10 games for 2 different titles at the same time,
+  make sure the behavior is correct and games reach MW.
+  */
+
+  std::vector<std::string> gameGuidMap;
+  for (int gameNum = 0; gameNum < games; gameNum++) {
+    std::string gameGuid =
+      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
+        "hypermode_tester", "random_actions");
+    gameGuidMap.push_back(gameGuid);
+    long long curEpochTime = 1684059337532;
+    for (int matchNum = 0; matchNum < matches; matchNum++) {
+      std::string matchGuid =
+        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      for (int actionNum = 0; actionNum < actions; actionNum++) {
+        int actionOrNot = actionOrNotDist(rdMain);
+        if (actionOrNot > 3) {
+          GetGudSdk::BaseActionData* outAction =
+            MakeRandomAction(matchGuid, curEpochTime);
+          curEpochTime += 2;
+          GetGudSdk::SendAction(outAction);
+          delete outAction;
+        }
+      }
+    }
+    if (gameNum > games / 2 && title_id > 1)
+      title_id--;
+  }
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+  for (int i = 0; i < gameGuidMap.size(); i++) {
+    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+  }
+}
+
+void general_test()
+{
+  std::uniform_int_distribution<int> gamesAmount(1, 1);
+  std::uniform_int_distribution<int> matchesAmount(1, 1);
+  std::uniform_int_distribution<int> actionsAmount(3000, 3000);
+  std::uniform_int_distribution<int> reportsAmount(300, 300);
+  std::uniform_int_distribution<int> playerUpdatesAmount(1, 1);
+
+  GetGudSdk::Init();
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  std::vector<std::thread> testThreads;
+
+  for (int i = 0; i < 1; i++) {
+    testThreads.push_back(std::thread([&]() {
+      CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
+      actionsAmount(rdMain));
+    //CreateReports(reportsAmount(rdMain));
+    //CreatePlayerUpdates(playerUpdatesAmount(rdMain));
+      }));
+  }
+
+  for (auto& thread : testThreads) {
+    thread.join();
+  }
+  testThreads.clear();
+  std::this_thread::sleep_for(std::chrono::milliseconds(15000));
+  // GetGudSdk::Dispose();
+}
+
+int main() {
+
+  //RunSenders(int reports, int players, int games, int matches, int actions);
+  //FeedGameWithMessagesAndReports(int games, int matches, int actions, int reports, int messages);
+  //InvalidGuid(int games, int matches, int actions, int invalid_games, int invalid_matches);
+  //InvalidPacket(int games, int matches, int actions); //Wrong test, because should be tested from the GameSender::SendPacket(...)
+  //GamePerTitle(int games, int matches, int actions);
+
+
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to
       // see the behavior
