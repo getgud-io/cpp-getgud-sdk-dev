@@ -75,7 +75,7 @@ std::string GameContainer::AddMatch(std::string gameGuid,
     logger.Log(
         LogType::WARN,
         std::string(
-            "GameContainer::AddMatch->Can't find game to push match into"));
+            "GameContainer::AddMatch->Can't find game with guid \"" + gameGuid + "\" to push match into"));
     m_gameContainerMutex.unlock();
     return retValue;
   }
@@ -150,11 +150,13 @@ bool GameContainer::AddActions(std::deque<BaseActionData*>& actionVector) {
 
   // cluster all new actions according to their match guid and place them in a
   // dedicated vector per match guid
+  bool failedToPushSomeActions = false;
   for (auto& nextAction : actionVector) {
     // find the match that belongs to the action we are now iterating
     auto match_it = m_matchMap.find(nextAction->m_matchGuid);
     if (match_it == m_matchMap.end() || match_it->second == nullptr) {
       delete nextAction;
+      failedToPushSomeActions = true;
       continue;  // if a match with the passed guid was not found, just
                  // ignore the action
     }
@@ -194,6 +196,11 @@ bool GameContainer::AddActions(std::deque<BaseActionData*>& actionVector) {
       matchActions_it->second.push_back(nextAction);
     }
   }
+
+  if (failedToPushSomeActions)
+    logger.Log(LogType::WARN,
+               "GameContainer::AddActions->Failed to push some actions to "
+               "GameContainer because no matching guid was found!");
 
   // now run through all the matches that have new actions and insert the new
   // action vector to the match all at once while doing it, need to make sure
