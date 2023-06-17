@@ -27,7 +27,7 @@ class MatchData {
   std::string m_mapName;
   bool m_throttleChecked = false;
   bool m_isInteresting = false;
-  std::set<std::string> m_playerGuids; //TODO make map and add m_lastOrientation
+  std::set<std::string> m_playerGuids;
   unsigned int m_actionsCount = 0;
   unsigned int m_sizeInBytes = 0;
   long long m_lastActionTimeEpoch = 0;

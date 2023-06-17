@@ -67,7 +67,7 @@ void GameSender::Start(int sleepIntervalMilli) {
       ManageHyperMode();
       SendNextGame();
     }
-    // TODO: For future: we shouldn't be self destructing
+    // TODO LATER: For future: we shouldn't be self destructing
     // this is a long term task
     this->~GameSender();
   });
@@ -88,7 +88,7 @@ void GameSender::SendNextGame() {
                "GameSender::SendNextGame->Failed to add actions to "
                "GameContainer");
   {
-    //TODO refactor this part, games must be updated as non-block
+    //TODO LATER refactor this part, games must be updated as non-block
     std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
     // get the next game we need to send. might be that there are no games to send
     GameData* gameDataToSend = gameContainer.PopNextGameToProcess();

@@ -294,8 +294,6 @@ void InvalidPacket(int games, int matches, int actions)
   in the log file 
   */
 
-  //TODO must be changed from the SDK, because have no ways to do it externaly
-
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
@@ -507,7 +505,8 @@ int main() {
   
   //GamePerTitle(2, 2, 100);
   //general_test();
-  InvalidGuid(2, 2, 100, 0, 1);
+  // InvalidGuid(2, 2, 100, 0, 1);
+  RunSenders(0, 0, 1, 1, 10000);
 
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to

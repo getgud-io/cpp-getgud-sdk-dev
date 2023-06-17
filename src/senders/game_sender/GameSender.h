@@ -6,7 +6,7 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
-//TODO remove back patch moves by additional dirs
+//TODO remove back path moves by additional dirs
 #include "../../../include/actions/Helpers.h"
 #include "../../actions_buffer/ActionsBuffer.h"
 #include "../../game_container/GameContainer.h"
