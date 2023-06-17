@@ -101,7 +101,12 @@ enum class ReporterSubtype : int {
   PunkBuster,
   VAC,
   VACNet,
-  FairFight
+  FairFight,
+  AbilityAbuse,
+  Griefing,
+  Slurring,
+  VoipAbuse,
+  ChatAbuse
 };
 
 /**

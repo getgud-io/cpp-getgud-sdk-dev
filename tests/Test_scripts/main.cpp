@@ -117,9 +117,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
       std::string matchGuid =
         GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
-        int actionOrNot = actionOrNotDist(rdMain);
         curEpochTime += 1;
-        if (actionOrNot > 3) {
           GetGudSdk::BaseActionData* outAction =
             MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
@@ -152,7 +150,6 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
             GetGudSdk::SendChatMessage(matchGuid, messageInfo);
           }
           delete outAction;
-        } 
       }
     }
   }
@@ -506,7 +503,9 @@ int main() {
   //GamePerTitle(2, 2, 100);
   //general_test();
   // InvalidGuid(2, 2, 100, 0, 1);
-  RunSenders(0, 0, 1, 1, 10000);
+  //RunSenders(10, 10, 1, 1, 100);
+
+  FeedGameWithMessagesAndReports(5, 1, 1000, 100, 100);
 
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to
