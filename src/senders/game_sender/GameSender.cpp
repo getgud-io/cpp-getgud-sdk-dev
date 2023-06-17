@@ -302,10 +302,19 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   }
 
   if (sendCode == CURLcode::CURLE_OK) {
-    // check what response we got from Getgud
-    if (m_throttleCurlReadBuffer == "true" ||
-        m_throttleCurlReadBuffer == "TRUE")
+    if (m_throttleCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+      //skip brackets and spaces
+      std::string outMessage(m_throttleCurlReadBuffer.begin() + 2,
+        m_throttleCurlReadBuffer.begin() + m_throttleCurlReadBuffer.size() - 3);
+      logger.Log(LogType::DEBUG, "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " +
+        outMessage);
+    }
+    else if (m_throttleCurlReadBuffer == "true" ||
+      m_throttleCurlReadBuffer == "TRUE")
+    {
       result = true;
+    }// check what response we got from Getgud
+
   } else {
     if (m_throttleCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       //skip brackets and spaces

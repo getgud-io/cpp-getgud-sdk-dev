@@ -53,6 +53,7 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
 }
 
 void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
+  if (numberOfItems == 0) return;
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
@@ -102,6 +103,7 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
 }
 
 void CreateGames(int games, int matches, int actions, int reports, int messages) {
+  if (actions == 0) return;
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
@@ -163,6 +165,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
 }
 
 void CreateReports(int numberOfReports) {
+  if (numberOfReports == 0) return;
   std::deque<GetGudSdk::ReportInfo> reports;
   std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
   for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
@@ -184,6 +187,7 @@ void CreateReports(int numberOfReports) {
 }
 
 void CreatePlayerUpdates(int numberOfPlayerUpdates) {
+  if (numberOfPlayerUpdates == 0) return;
   std::deque<GetGudSdk::PlayerInfo> playerInfos;
   std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
   for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
@@ -196,7 +200,7 @@ void CreatePlayerUpdates(int numberOfPlayerUpdates) {
     playerInfo.PlayerJoinDateEpoch = 1684059337532;
     playerInfos.push_back(playerInfo);
   }
-
+  
   GetGudSdk::UpdatePlayers(30, privateKey, playerInfos);
 }
 
