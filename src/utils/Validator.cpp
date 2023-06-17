@@ -102,8 +102,7 @@ bool ValidateStringCharsSpecial(std::string& sdkString) {
   for (auto& symbol : sdkString) {
     if (symbol < ' ' && symbol > '~')
       return false;
-    if (symbol == '$' || symbol == '\'' || symbol == '\"' || symbol == '%' ||
-      symbol == '@')
+    if (symbol == '$' || symbol == '\'' || symbol == '\"' || symbol == '%')
       return false;
   }
   return true;
