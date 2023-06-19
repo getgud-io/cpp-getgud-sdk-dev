@@ -101,9 +101,7 @@ bool BaseActionData::IsValid() {
  * For sending action stream to Getgud
  **/
 std::string BaseActionData::ToString() {
-  std::string actionString;
-
-  return actionString;
+  return std::string();
 }
 
 /**

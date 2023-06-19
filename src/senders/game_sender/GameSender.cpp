@@ -303,11 +303,8 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
 
   if (sendCode == CURLcode::CURLE_OK) {
     if (m_throttleCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      //skip brackets and spaces
-      std::string outMessage(m_throttleCurlReadBuffer.begin() + 2,
-        m_throttleCurlReadBuffer.begin() + m_throttleCurlReadBuffer.size() - 3);
       logger.Log(LogType::DEBUG, "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " +
-        outMessage);
+        m_throttleCurlReadBuffer);
     }
     else if (m_throttleCurlReadBuffer == "true" ||
       m_throttleCurlReadBuffer == "TRUE")
@@ -317,11 +314,8 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
 
   } else {
     if (m_throttleCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      //skip brackets and spaces
-      std::string outMessage(m_throttleCurlReadBuffer.begin() + 2,
-        m_throttleCurlReadBuffer.begin() + m_throttleCurlReadBuffer.size() - 3);
       logger.Log(LogType::DEBUG, "GameSender::SendThrottleCheckForMatch->Failed to send throttle request: " + 
-        outMessage);
+        m_throttleCurlReadBuffer);
     } else {
       logger.Log(
           LogType::_ERROR,
@@ -387,12 +381,9 @@ void GameSender::SendGamePacket(std::string& packet) {
 
   if (sendCode != CURLcode::CURLE_OK) {
     if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      // skip brackets and spaces
-      std::string outMessage(m_streamCurlReadBuffer.begin() + 2,
-          m_streamCurlReadBuffer.begin() + m_streamCurlReadBuffer.size() - 3);
       logger.Log(LogType::DEBUG,
                  "GameSender::SendGamePacket->Failed to send throttle request: " +
-                     outMessage);
+        m_streamCurlReadBuffer);
     } else {
       logger.Log(LogType::_ERROR,
                  "GameSender::SendGamePacket->Failed to send packet: " +
@@ -402,12 +393,9 @@ void GameSender::SendGamePacket(std::string& packet) {
   else
   {
     if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      // skip brackets and spaces
-      std::string outMessage(m_streamCurlReadBuffer.begin() + 2,
-        m_streamCurlReadBuffer.begin() + m_streamCurlReadBuffer.size() - 3);
       logger.Log(LogType::DEBUG,
         "GameSender::SendGamePacket->Failed to send throttle request: " +
-        outMessage);
+        m_streamCurlReadBuffer);
     }
   }
 }
