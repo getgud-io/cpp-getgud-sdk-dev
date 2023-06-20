@@ -70,38 +70,6 @@ int MarkEndGame(char* gameGuid, int guidSize) {
 }
 
 /**
- * SendInMatchReport:
- *
- * Send a report which belongs to specifc match which is now live
- **/
-int SendInMatchReport(ReportInfo reportInfo) {
-
-  return GetGudSdk::SendInMatchReport(GetGudSdk::ReportInfo{
-      std::string(reportInfo.matchGuid, reportInfo.matchGuidSize),
-      std::string(reportInfo.reporterName, reportInfo.reporterNameSize),
-      static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType), static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType),
-      std::string(reportInfo.suspectedPlayerGuid,
-                  reportInfo.suspectedPlayerGuidSize),
-      static_cast<GetGudSdk::TbType>(reportInfo.tbType), reportInfo.tbTimeEpoch,
-      reportInfo.suggestedToxicityScore, reportInfo.reportedTimeEpoch});
-}
-
-/**
- * SendChatMessage:
- *
- *  Send a message which belongs to specifc match which is now live
- **/
-int SendChatMessage(ChatMessageInfo messageInfo) {
-
-  return GetGudSdk::SendChatMessage(
-      std::string(messageInfo.matchGuid, messageInfo.matchGuidSize),
-      GetGudSdk::ChatMessageInfo{
-          messageInfo.messageTimeEpoch,
-          std::string(messageInfo.playerGuid, messageInfo.playerGuidSize),
-          std::string(messageInfo.message, messageInfo.messageSize)});
-}
-
-/**
  * SendAttackAction:
  *
  **/
@@ -213,6 +181,92 @@ int SendPositionAction(BaseActionData baseData,
   delete positionAction;
   return sendResult;
   ;
+}
+
+/**
+ * SendInMatchReport:
+ *
+ * Send a report which belongs to specifc match which is now live
+ **/
+int SendInMatchReport(ReportInfo reportInfo)
+{
+  GetGudSdk::ReportInfo reportInfoOut;
+
+  reportInfoOut.MatchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+  reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
+  reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
+  reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
+  reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+  reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
+  reportInfoOut.SuspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
+  reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
+  reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+
+  return GetGudSdk::SendInMatchReport(reportInfoOut);
+}
+
+/**
+ * SendChatMessage:
+ *
+ *  Send a message which belongs to specifc match which is now live
+ **/
+int SendChatMessage(ChatMessageInfo messageInfo)
+{
+  GetGudSdk::ChatMessageInfo messageInfoOut;
+
+  messageInfoOut.message = std::string(messageInfo.message, messageInfo.messageSize);
+  messageInfoOut.messageTimeEpoch = messageInfo.messageTimeEpoch;
+  messageInfoOut.playerGuid = std::string(messageInfo.playerGuid, messageInfo.playerGuidSize);
+
+  return GetGudSdk::SendChatMessage(std::string(messageInfo.matchGuid, messageInfo.matchGuidSize), messageInfoOut);
+
+}
+
+/**
+ * SendReport:
+ *
+ * Send report which are outside of the live match
+ **/
+int SendReport(int titleId,
+  char* privateKey, int privateKeySize, ReportInfo reportInfo)
+{
+  GetGudSdk::ReportInfo reportInfoOut;
+  reportInfoOut.MatchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+  reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
+  reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
+  reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
+  reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+  reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
+  reportInfoOut.SuspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
+  reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
+  reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+
+  std::deque<GetGudSdk::ReportInfo> reports;
+  reports.push_back(reportInfoOut);
+
+  return GetGudSdk::SendReports(reports);
+}
+
+/**
+ * UpdatePlayer:
+ *
+ * Update player info outside of the live match
+ **/
+int UpdatePlayer(int titleId,
+  char* privateKey, int privateKeySize, PlayerInfo player)
+{
+  GetGudSdk::PlayerInfo playerOut;
+
+  playerOut.PlayerEmail = std::string(player.playerEmail, player.playerEmailSize);
+  playerOut.PlayerGuid = std::string(player.playerGuid, player.playerGuidSize);
+  playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
+  playerOut.PlayerNickname = std::string(player.playerNickname, player.playerNicknameSize);
+  playerOut.PlayerRank = player.playerRank;
+
+  std::deque<GetGudSdk::PlayerInfo> players;
+  players.push_back(playerOut);
+
+  return UpdatePlayers(titleId, std::string(privateKey,privateKeySize), players);
 }
 
 /**
