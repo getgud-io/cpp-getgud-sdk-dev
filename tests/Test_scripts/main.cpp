@@ -12,6 +12,8 @@ std::uniform_int_distribution<int> actionOrNotDist(0, 1000);
 
 int randomActionIterator = 0;
 
+std::string g_matchGuid;
+
 GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
                                             long long curTimeEpoch) {
   int actionType = actionTypeDist(rdMain);
@@ -52,7 +54,29 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
   return outAction;
 }
 
-void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
+void CreateReports(int numberOfReports, std::string match_guid) {
+  if (numberOfReports == 0) return;
+  std::deque<GetGudSdk::ReportInfo> reports;
+  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
+  for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
+    GetGudSdk::ReportInfo reportInfo;
+    reportInfo.MatchGuid = match_guid;
+    reportInfo.ReportedTimeEpoch = 1684059337532;
+    reportInfo.ReporterName = "reporter_name";
+    reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
+    reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
+    reportInfo.SuggestedToxicityScore = 99;
+    reportInfo.SuspectedPlayerGuid = "player-5";
+    reportInfo.TbTimeEpoch = 1684059337532;
+    reportInfo.TbType = GetGudSdk::TbType::Laghack;
+
+    reports.push_back(reportInfo);
+  }
+
+  GetGudSdk::SendReports(30, privateKey, reports);
+}
+
+void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems, int reports) {
   if (numberOfItems == 0) return;
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
@@ -64,33 +88,13 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems) {
     for (int matchNum = 0; matchNum < numberOfMatches; matchNum++) {
       std::string matchGuid =
           GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+      g_matchGuid = matchGuid;
       for (int actionNum = 0; actionNum < numberOfItems; actionNum++) {
-        int actionOrNot = actionOrNotDist(rdMain);
-        if (actionOrNot > 3) {
           GetGudSdk::BaseActionData* outAction =
               MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
           GetGudSdk::SendAction(outAction);
           delete outAction;
-        }// else if (actionOrNot <= 1) {
-        //  GetGudSdk::ReportInfo reportInfo;
-        //  reportInfo.MatchGuid = matchGuid;
-        //  reportInfo.ReportedTimeEpoch = 1684059337532;
-        //  reportInfo.ReporterName = "reporter_name";
-        //  reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
-        //  reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
-        //  reportInfo.SuggestedToxicityScore = 100;
-        //  reportInfo.SuspectedPlayerGuid = "suspected_player_guid";
-        //  reportInfo.TbTimeEpoch = 1684059337532;
-        //  reportInfo.TbType = GetGudSdk::TbType::Laghack;
-        //  GetGudSdk::SendInMatchReport(reportInfo);
-        //} else {
-        //  GetGudSdk::ChatMessageInfo messageInfo;
-        //  messageInfo.message = "hi there";
-        //  messageInfo.messageTimeEpoch = curEpochTime;
-        //  messageInfo.playerGuid = "player1";
-        //  GetGudSdk::SendChatMessage(matchGuid, messageInfo);
-        //}
       }
     }
   }
@@ -161,28 +165,6 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
   }
 }
 
-void CreateReports(int numberOfReports) {
-  if (numberOfReports == 0) return;
-  std::deque<GetGudSdk::ReportInfo> reports;
-  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
-  for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
-    GetGudSdk::ReportInfo reportInfo;
-    reportInfo.MatchGuid = "28482640-f571-11ed-8460-89c45273f291";
-    reportInfo.ReportedTimeEpoch = 1684059337532;
-    reportInfo.ReporterName = "reporter_name";
-    reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
-    reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
-    reportInfo.SuggestedToxicityScore = 100;
-    reportInfo.SuspectedPlayerGuid = "suspected_player_guid";
-    reportInfo.TbTimeEpoch = 1684059337532;
-    reportInfo.TbType = GetGudSdk::TbType::Laghack;
-
-    reports.push_back(reportInfo);
-  }
-
-  GetGudSdk::SendReports(30, privateKey, reports);
-}
-
 void CreatePlayerUpdates(int numberOfPlayerUpdates) {
   if (numberOfPlayerUpdates == 0) return;
   std::deque<GetGudSdk::PlayerInfo> playerInfos;
@@ -190,10 +172,10 @@ void CreatePlayerUpdates(int numberOfPlayerUpdates) {
   for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
        playerUpdateNum++) {
     GetGudSdk::PlayerInfo playerInfo;
-    playerInfo.PlayerGuid = "player-5";
+    playerInfo.PlayerGuid = "player-" + std::to_string(playerUpdateNum);
     playerInfo.PlayerNickname = "test";
     playerInfo.PlayerEmail = "test@test.com";
-    playerInfo.PlayerRank = 10;
+    playerInfo.PlayerRank = 99;
     playerInfo.PlayerJoinDateEpoch = 1684059337532;
     playerInfos.push_back(playerInfo);
   }
@@ -208,9 +190,7 @@ void RunSenders(int reports, int players, int games, int matches, int actions)
   to player updater and 1,5,10 games with 10 matches each with 20,000 
   actions each. Make sure everything reaches MW
 */
-  CreateReports(reports);
-  CreatePlayerUpdates(players);
-  CreateGames(games, matches, actions);
+  CreateGames(games, matches, actions, reports);
 
 }
 
@@ -356,7 +336,7 @@ void GamePerTitle(int games, int matches, int actions)
         }
       }
     }
-    if (gameNum > games / 2 && title_id == 28)
+    if (title_id == 30)
     {
       title_id = 28;
       server_guid = "28482640-f571-11ed-8460-89c45273f291";
@@ -478,7 +458,7 @@ void general_test()
   for (int i = 0; i < 1; i++) {
     testThreads.push_back(std::thread([&]() {
       CreateGames(gamesAmount(rdMain), matchesAmount(rdMain),
-      actionsAmount(rdMain));
+      actionsAmount(rdMain), 0);
     //CreateReports(reportsAmount(rdMain));
     //CreatePlayerUpdates(playerUpdatesAmount(rdMain));
       }));
@@ -503,9 +483,17 @@ int main() {
   //GamePerTitle(2, 2, 100);
   //general_test();
   // InvalidGuid(2, 2, 100, 0, 1);
-  //RunSenders(10, 10, 1, 1, 100);
+  std::thread t1([](){
+    RunSenders(1000, 1000, 10, 10, 20000); });
 
-  FeedGameWithMessagesAndReports(5, 1, 1000, 100, 100);
+  //FeedGameWithMessagesAndReports(1, 1, 100, 0, 0);
+
+  std::thread t2([]() {CreatePlayerUpdates(1000); });
+  std::thread t3([]() {CreateReports(1000, "e7863816-8764-fa8b-ee31-fc5da7fe11f9"); });
+
+  t1.join();
+  t2.join();
+  t3.join();
 
   while (true) {
   };  // let SDK run in background separetly from the main thread, in order to

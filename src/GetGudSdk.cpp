@@ -433,15 +433,6 @@ bool UpdatePlayers(int titleId,
             sdkConfig.gameSenderSleepIntervalMilliseconds);
       }
     }
-
-        if (sharedReportSenders.reportSendersCount == 0) {
-      std::lock_guard<std::mutex> locker(
-          sharedReportSenders.reportSendersMutex);
-      if (sharedReportSenders.reportSendersCount == 0)  // double check in mutex
-      {
-        sharedReportSenders.reportSender = new ReportSender();
-      }
-    }
         return sharedPlayerUpdaters.playerUpdater->AddPlayers(
             titleId, privateKey, players);
   } catch (std::exception& _error) {
