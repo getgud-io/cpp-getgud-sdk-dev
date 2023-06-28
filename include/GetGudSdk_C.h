@@ -78,7 +78,6 @@ struct ReportInfo {
   char* suspectedPlayerGuid;
   int suspectedPlayerGuidSize;
   int tbType;
-  int tbSubType;
   long long tbTimeEpoch;
   int suggestedToxicityScore;
   long long reportedTimeEpoch;

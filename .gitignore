@@ -15,6 +15,9 @@ CMake*
 Makefile
 cmake*
 tests\*\build\
+**obj
+**bin
+**Properties
 
 # Custom
 .editorconfig
