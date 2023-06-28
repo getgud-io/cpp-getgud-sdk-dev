@@ -33,10 +33,20 @@ By following this version naming convention, you will provide clear information 
 
 ## Build for Linux
 
+### Requirements:
+- CMake 3.18
+- make
+- gcc and g++
+- libcurl development tools
+- libssl
+- libcrypto
+- zlib
+- openssl development tools
+
 First we need to build libcurl and zlib which are used inside SDK
 
 ### libcurl
-```bash
+```bash *Debian*
 sudo apt-get install binutils make csh g++ sed gawk autoconf automake autotools-dev shtool libtool curl cmake
 cd libs/libcurl/
 ./buildconf
@@ -46,7 +56,7 @@ cd libs/libcurl/
 If you do not need release build you can remove the last ./configure command
 Replace `FULL_PATH_TO_SDK` to your full system path to `cpp-getgud-sdk-dev` folder!
 
-Next do 
+Next do from the each building folder
 ```bash
 make
 make install
@@ -88,3 +98,45 @@ Replace `FULL_PATH_TO_SDK` with your full system path to SDK. Example: `/home/ad
 Congrats, SDK is built! You will mostly need `getgudsdk.a` and `getguddsk.so` files for Linux. Sometime you will also need to use build files for zlib and libcurl that we created
  
 ## Build for Windows
+
+### Requirements:
+- CMake 3.18
+- libcurl
+- zlib
+
+First we need to build libcurl and zlib which are used inside SDK
+
+### libcurl
+From the root directroty of libcurl
+```bash
+set RTLIBCFG=static
+call .\buildconf.bat
+cd .\winbuild
+call nmake /f Makefile.vc mode=static vc=17 debug=yes
+call nmake /f Makefile.vc mode=static vc=17 debug=no
+```
+
+### zlib
+From the root directroty of zlib
+```bash
+	call nmake /f win32/Makefile.msc
+```
+
+Now that we have build libraries that we need, let's build SDK itself.
+This build sdk .lib file
+```bash
+cmake -DDLL_BUILD:STRING=False ..
+cmake --build .
+cmake --build . --config Release
+```
+
+And this builds sdk .dll file
+Rm all from build folder except _build
+
+```bash
+cmake -DDLL_BUILD:STRING=True ..
+cmake --build .
+cmake --build . --config Release
+```
+
+Congrats, SDK is built! You will mostly need `getgudsdk.a` and `getguddsk.so` files for Linux. Sometime you will also need to use build files for zlib and libcurl that we created
