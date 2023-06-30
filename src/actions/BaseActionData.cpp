@@ -118,6 +118,8 @@ std::string BaseActionData::ToStringMeta() {
     case Actions::None:
       actionTypeStr = "None";
       break;
+    case Actions::Affect:
+      actionTypeStr = "Affect";
     case Actions::Attack:
       actionTypeStr = "Attack";
       break;

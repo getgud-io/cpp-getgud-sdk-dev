@@ -8,7 +8,8 @@
 #define GETGUDSDK_API
 #endif
 
-enum Actions { None, Attack, Damage, Death, Heal, Position, Spawn };
+enum Actions { None, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+enum AffectState { Attach, Activate, Deactivate, Detach };
 
 struct PositionF {
   float X;
@@ -115,6 +116,15 @@ GETGUDSDK_API int StartMatch(struct StartMatchInfo matchInfo, char* matchGuidOut
  * Mark started game as finished
  **/
 GETGUDSDK_API int MarkEndGame(char* gameGuid, int guidSize);
+
+/**
+ * SendAffectAction:
+ *
+ **/
+GETGUDSDK_API int SendAffectAction(struct BaseActionData baseData,
+  char* affectGuid,
+  int affectGuidSize,
+  AffectState affectState);
 
 /**
  * SendAttackAction:

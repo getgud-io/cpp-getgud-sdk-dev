@@ -242,6 +242,23 @@ bool SendAction(BaseActionData* action) {
 }
 
 /**
+ * SendAffectAction:
+ *
+ **/
+bool SendAffectAction(std::string matchGuid,
+  long long actionTimeEpoch,
+  std::string playerGuid,
+  std::string affectGuid,
+  AffectState affectState) {
+  AffectActionData* affectAction =
+    new AffectActionData(matchGuid, actionTimeEpoch, playerGuid, affectGuid, affectState);
+  std::deque<BaseActionData*> actions = { affectAction };
+  bool sendResult = SendActions(actions);
+  delete affectAction;
+  return sendResult;
+}
+
+/**
  * SendAttackAction:
  *
  **/

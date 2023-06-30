@@ -13,6 +13,12 @@ namespace GetGudSdk
         public string matchGuid;
         public string playerGuid;
     };
+    public struct SendAffectActionInfo
+    {
+        public BaseActionData baseData;
+        public string affectGuid;
+        public AffectState affectState;
+    };
     public struct SendAttackActionInfo
     {
         public BaseActionData baseData;
@@ -197,6 +203,31 @@ namespace GetGudSdk
             var result = GetGudSdk_calls.GetGudSdk_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedGameGuid);
+
+            return result;
+        }
+
+        /**
+         * SendAffectAction:
+         *
+         **/
+        static public int SendAffectkAction(SendAffectActionInfo info)
+        {
+            var unmanagedWeaponGuid = Marshal.StringToHGlobalAnsi(info.affectGuid);
+            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            {
+                actionTimeEpoch = info.baseData.actionTimeEpoch,
+                matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
+                matchGuidSize = info.baseData.matchGuid.Length,
+                playerGuid = Marshal.StringToHGlobalAnsi(info.baseData.playerGuid),
+                playerGuidSize = info.baseData.playerGuid.Length
+            };
+
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendAffectAction(ref unmanagedBaseData, unmanagedWeaponGuid, info.affectGuid.Length, info.affectState);
+
+            Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
+            Marshal.FreeHGlobal(unmanagedWeaponGuid);
 
             return result;
         }

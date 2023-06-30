@@ -30,6 +30,7 @@ enum class LogType : unsigned int { DEBUG = 0, WARN, _ERROR, FATAL };
  **/
 enum class Actions : unsigned int {
   None = 0,
+  Affect,
   Attack,
   Damage,
   Death,

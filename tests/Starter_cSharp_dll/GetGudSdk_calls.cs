@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace GetGudSdk
 {
-    public enum Actions { None, Attack, Damage, Death, Heal, Position, Spawn };
+    public enum Actions { None, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+    public enum AffectState { Attach, Activate, Deactivate, Detach };
 
     public struct PositionF
     {
@@ -100,6 +101,13 @@ namespace GetGudSdk_calls
             public IntPtr playerGuid;
             public int playerGuidSize;
         }
+        public struct SendAffectActionWrapper
+        {
+            public BaseActionDataWrapper baseData;
+            public IntPtr affectGuid;
+            public int affectGuidSize;
+            public AffectState affectState;
+        }
         public struct SendAttackActionWrapper
         {
             public BaseActionDataWrapper baseData;
@@ -161,6 +169,9 @@ namespace GetGudSdk_calls
 
         [DllImport(dllPath)]
         public static extern int MarkEndGame(IntPtr matchGuid, int matchGuidSize);
+
+        [DllImport(dllPath)]
+        public static extern int SendAffectAction(ref BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);
 
         [DllImport(dllPath)]
         public static extern int SendAttackAction(ref BaseActionDataWrapper matchInfo, IntPtr weaponGuid, int weaponGuidSize);

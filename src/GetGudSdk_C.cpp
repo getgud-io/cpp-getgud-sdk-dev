@@ -70,6 +70,27 @@ int MarkEndGame(char* gameGuid, int guidSize) {
 }
 
 /**
+ * SendAffectAction:
+ *
+ **/
+int SendAffectAction(struct BaseActionData baseData,
+  char* affectGuid,
+  int affectGuidSize,
+  AffectState affectState)
+{
+  GetGudSdk::AffectActionData* affectAction = new GetGudSdk::AffectActionData(
+    std::string(baseData.matchGuid, baseData.matchGuidSize),
+    baseData.actionTimeEpoch,
+    std::string(baseData.playerGuid, baseData.playerGuidSize),
+    std::string(affectGuid, affectGuidSize),
+    static_cast<GetGudSdk::AffectState>(affectState));
+  std::deque<GetGudSdk::BaseActionData*> actions = { affectAction };
+  bool sendResult = GetGudSdk::SendActions(actions);
+  delete affectAction;
+  return sendResult;
+}
+
+/**
  * SendAttackAction:
  *
  **/
