@@ -83,6 +83,18 @@ namespace GetGudSdk
         public string playerEmail;
         public int playerRank;
         public long playerJoinDateEpoch;
+        public PlayerInfo(string playerGuid,
+                          string playerNickname = "",
+                          string playerEmail = "",
+                          int playerRank = -1,
+                          long playerJoinDateEpoch = -1)
+        {
+            this.playerGuid = playerGuid;
+            this.playerNickname = playerNickname;
+            this.playerEmail = playerEmail;
+            this.playerRank = playerRank;
+            this.playerJoinDateEpoch = playerJoinDateEpoch;
+        }
     };
 
     public struct ReportInfo
@@ -96,6 +108,29 @@ namespace GetGudSdk
         public long tbTimeEpoch;
         public int suggestedToxicityScore;
         public long reportedTimeEpoch;
+        public ReportInfo(
+            string matchGuid,
+            long reportedTimeEpoch,
+            string suspectedPlayerGuid,
+            string reporterName = "",
+            int reporterType = -1,
+            int reporterSubType = -1,
+            int tbType = -1,
+            long tbTimeEpoch = -1,
+            int suggestedToxicityScore = -1
+            )
+        {
+            this.matchGuid = matchGuid;
+            this.reporterName = reporterName;
+            this.reporterType = reporterType;
+            this.reporterSubType = reporterSubType;
+            this.suspectedPlayerGuid = suspectedPlayerGuid;
+            this.tbType = tbType;
+            this.tbTimeEpoch = tbTimeEpoch;
+            this.suggestedToxicityScore = suggestedToxicityScore;
+            this.reportedTimeEpoch = reportedTimeEpoch;
+
+        }
     };
 
     static internal class Methods

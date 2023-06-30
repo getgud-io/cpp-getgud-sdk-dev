@@ -252,15 +252,24 @@ int SendReport(int titleId,
   char* privateKey, int privateKeySize, ReportInfo reportInfo)
 {
   GetGudSdk::ReportInfo reportInfoOut;
+  //required
   reportInfoOut.MatchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+  //required
   reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
-  reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
-  reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
-  reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
-  reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
+  if (reportInfo.reporterNameSize > 0)
+    reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
+  if (reportInfo.reporterSubType != -1)
+    reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
+  if (reportInfo.reporterType != -1)
+    reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+  if (reportInfo.suggestedToxicityScore != -1)
+    reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
+  //required
   reportInfoOut.SuspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
-  reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
-  reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+  if (reportInfo.tbTimeEpoch != -1)
+    reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
+  if (reportInfo.tbType != -1)
+    reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
 
   std::deque<GetGudSdk::ReportInfo> reports;
   reports.push_back(reportInfoOut);
@@ -277,11 +286,15 @@ int UpdatePlayer(int titleId,
   char* privateKey, int privateKeySize, PlayerInfo player)
 {
   GetGudSdk::PlayerInfo playerOut;
-
-  playerOut.PlayerEmail = std::string(player.playerEmail, player.playerEmailSize);
+  if (player.playerEmailSize > 0)
+    playerOut.PlayerEmail = std::string(player.playerEmail, player.playerEmailSize);
+  //required
   playerOut.PlayerGuid = std::string(player.playerGuid, player.playerGuidSize);
+  if (player.playerJoinDateEpoch != -1)
   playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
+  if (player.playerNicknameSize > 0)
   playerOut.PlayerNickname = std::string(player.playerNickname, player.playerNicknameSize);
+  if (player.playerRank != -1)
   playerOut.PlayerRank = player.playerRank;
 
   std::deque<GetGudSdk::PlayerInfo> players;

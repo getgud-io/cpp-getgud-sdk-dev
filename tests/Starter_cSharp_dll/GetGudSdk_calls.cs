@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GetGudSdk
 {
-    public enum Actions { None, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+    public enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
     public enum AffectState { Attach, Activate, Deactivate, Detach };
 
     public struct PositionF

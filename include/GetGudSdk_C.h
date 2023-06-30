@@ -8,7 +8,7 @@
 #define GETGUDSDK_API
 #endif
 
-enum Actions { None, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
 enum AffectState { Attach, Activate, Deactivate, Detach };
 
 struct PositionF {
