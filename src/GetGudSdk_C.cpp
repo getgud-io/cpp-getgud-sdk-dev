@@ -274,7 +274,14 @@ int SendReport(int titleId,
   std::deque<GetGudSdk::ReportInfo> reports;
   reports.push_back(reportInfoOut);
 
-  return GetGudSdk::SendReports(reports);
+  if (privateKeySize > 0)
+  {
+    return GetGudSdk::SendReports(titleId, std::string(privateKey, privateKeySize), reports);
+  }
+  else
+  {
+    return GetGudSdk::SendReports(reports);
+  }
 }
 
 /**
@@ -299,8 +306,14 @@ int UpdatePlayer(int titleId,
 
   std::deque<GetGudSdk::PlayerInfo> players;
   players.push_back(playerOut);
-
-  return UpdatePlayers(titleId, std::string(privateKey,privateKeySize), players);
+  if (privateKeySize > 0)
+  {
+    return UpdatePlayers(titleId, std::string(privateKey, privateKeySize), players);
+  }
+  else
+  {
+    return UpdatePlayers(players);
+  }
 }
 
 /**

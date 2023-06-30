@@ -61,6 +61,13 @@ class Program
         DeathInfo.actionTimeEpoch = 1684059337532;
         GetGudSdk.Methods.SendDeathAction(DeathInfo);
 
+        GetGudSdk.ReportInfo reportInfo = new GetGudSdk.ReportInfo(matchGuid, 1684059337532, "player-2");
+
+        GetGudSdk.Methods.SendReport(0, "", reportInfo);
+
+        GetGudSdk.PlayerInfo playerInfo = new PlayerInfo("player-2");
+        GetGudSdk.Methods.UpdatePlayer(0, "", playerInfo);
+
         GetGudSdk.Methods.MarkEndGame(gameGuid);
 
         while(true)

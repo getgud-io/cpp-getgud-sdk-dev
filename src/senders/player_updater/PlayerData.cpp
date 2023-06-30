@@ -31,16 +31,16 @@ PlayerData::PlayerData(int titleId,
 std::string PlayerData::ToString() {
   std::string playerString;
   playerString += "{";
-  playerString += "\"playerGuid\": \"" + m_playerInfo.PlayerGuid + "\",";
+  playerString += "\"playerGuid\":\"" + m_playerInfo.PlayerGuid + "\",";
   if (!m_playerInfo.PlayerNickname.empty())
-    playerString += "\"playerNickname\": \"" + m_playerInfo.PlayerNickname + "\",";
+    playerString += "\"playerNickname\":\"" + m_playerInfo.PlayerNickname + "\",";
   if (!m_playerInfo.PlayerEmail.empty())
-    playerString += "\"playerEmail\": \"" + m_playerInfo.PlayerEmail + "\",";
+    playerString += "\"playerEmail\":\"" + m_playerInfo.PlayerEmail + "\",";
   if (m_playerInfo.PlayerRank != -1)
     playerString +=
-        "\"playerRank\": " + std::to_string(m_playerInfo.PlayerRank) + ",";
+        "\"playerRank\":" + std::to_string(m_playerInfo.PlayerRank) + ",";
   if (m_playerInfo.PlayerJoinDateEpoch != -1)
-    playerString += "\"playerJoinDateEpoch\": " +
+    playerString += "\"playerJoinDateEpoch\":" +
                     std::to_string(m_playerInfo.PlayerJoinDateEpoch) + ",";
   playerString.pop_back(); // remove last comma
   playerString += "}";

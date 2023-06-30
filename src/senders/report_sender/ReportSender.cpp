@@ -165,9 +165,9 @@ void ReportSender::SendNextReportBatch() {
 
   // Convert the reportsBatch into reports packet
   std::string reportsPacket;
-  reportsPacket += "{ \n";
-  reportsPacket += "	\"privateKey\": \"" + packetPrivateKey + "\",\n";
-  reportsPacket += "	\"titleId\": " + std::to_string(packetTitleId) + ",\n";
+  reportsPacket += "{";
+  reportsPacket += "\"privateKey\":\"" + packetPrivateKey + "\",";
+  reportsPacket += "\"titleId\":" + std::to_string(packetTitleId) + ",";
   reportsPacket += +"\"reports\":[";
   for (auto& report : reportsBatch) {
     reportsPacket += report->ToString(true) + ",";  // report is outside match

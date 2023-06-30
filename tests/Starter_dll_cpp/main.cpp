@@ -69,13 +69,12 @@ void CreateReports(std::string matchGuid, int numberOfReports) {
     reportInfo.MatchGuid = matchGuid;
     reportInfo.ReportedTimeEpoch = 1684059337532;
     reportInfo.ReporterName = "reporter_name";
-    reportInfo.ReporterSubType = 1;
-    reportInfo.ReporterType = 1;
+    reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::VAC;
+    reportInfo.ReporterType = GetGudSdk::ReporterType::AntiCheat;
     reportInfo.SuggestedToxicityScore = 100;
     reportInfo.SuspectedPlayerGuid = "suspected_player_guid";
-    reportInfo.TbSubType = 1;
     reportInfo.TbTimeEpoch = 1684059337532;
-    reportInfo.TbType = 1;
+    reportInfo.TbType = GetGudSdk::TbType::Aimbot;
 
     reports.push_back(reportInfo);
   }

@@ -47,28 +47,28 @@ std::string ReportData::ToString(bool isOutsideMatch) {
   std::string reportString;
   reportString += "{";
   if (isOutsideMatch)
-    reportString += "	\"matchGuid\": \"" + m_reportInfo.MatchGuid + "\",";
+    reportString += "\"matchGuid\":\"" + m_reportInfo.MatchGuid + "\",";
   if (!m_reportInfo.ReporterName.empty())
-  reportString += "	\"reporterName\": \"" + m_reportInfo.ReporterName + "\",";
+  reportString += "\"reporterName\":\"" + m_reportInfo.ReporterName + "\",";
   if (m_reportInfo.ReporterType != ReporterType::None)
     reportString +=
-        "	\"reporterType\": " + std::to_string(static_cast<int>(m_reportInfo.ReporterType)) + ",";
+        "\"reporterType\":" + std::to_string(static_cast<int>(m_reportInfo.ReporterType)) + ",";
   if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
     reportString +=
-        "	\"reporterSubType\": " + std::to_string(static_cast<int>(m_reportInfo.ReporterSubType)) +
+        "\"reporterSubType\":" + std::to_string(static_cast<int>(m_reportInfo.ReporterSubType)) +
         ",";
   reportString +=
-      "	\"suspectedPlayerGuid\": \"" + m_reportInfo.SuspectedPlayerGuid + "\",";
+      "\"suspectedPlayerGuid\":\"" + m_reportInfo.SuspectedPlayerGuid + "\",";
   if (m_reportInfo.TbType != TbType::None)
-    reportString += "	\"TBType\": " + std::to_string(static_cast<int>(m_reportInfo.TbType)) + ",";
+    reportString += "\"TBType\":" + std::to_string(static_cast<int>(m_reportInfo.TbType)) + ",";
   if (m_reportInfo.TbTimeEpoch != -1)
     reportString +=
-        "	\"TBTimeEpoch\": " + std::to_string(m_reportInfo.TbTimeEpoch) + ",";
+        "\"TBTimeEpoch\":" + std::to_string(m_reportInfo.TbTimeEpoch) + ",";
   if (m_reportInfo.SuggestedToxicityScore != -1)
-    reportString += "	\"suggestedToxicityScore\": " +
+    reportString += "\"suggestedToxicityScore\":" +
                     std::to_string(m_reportInfo.SuggestedToxicityScore) + ",";
   if (m_reportInfo.ReportedTimeEpoch != -1)
-    reportString += "	\"reportedTimeEpoch\": " +
+    reportString += "\"reportedTimeEpoch\":" +
                     std::to_string(m_reportInfo.ReportedTimeEpoch) + ",";
   reportString.pop_back(); // remove last comma
   reportString += "}";

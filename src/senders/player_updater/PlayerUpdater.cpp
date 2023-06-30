@@ -154,16 +154,16 @@ void PlayerUpdater::SendNextPlayerBatch() {
                          " Player Updates for sending"));
   // Convert the playersBatch into players packet
   std::string playersPacket;
-  playersPacket += "{\n";
-  playersPacket += "	\"privateKey\": \"" + packetPrivateKey + "\",\n";
-  playersPacket += "	\"titleId\": " + std::to_string(packetTitleId) + ",\n";
-  playersPacket += "	\"players\":[";
+  playersPacket += "{";
+  playersPacket += "\"privateKey\":\"" + packetPrivateKey + "\",";
+  playersPacket += "\"titleId\":" + std::to_string(packetTitleId) + ",";
+  playersPacket += "\"players\":[";
   for (PlayerData* player : playersBatch) {
     playersPacket += player->ToString() + ',';
     delete player;
   }
   playersPacket.pop_back();
-  playersPacket += +"]\n}";
+  playersPacket += +"]}";
 
   // Send players update to Getgud
   SendUpdatePlayerPacket(playersPacket);
