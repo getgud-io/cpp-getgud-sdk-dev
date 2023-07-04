@@ -154,7 +154,8 @@ namespace GetGudSdk_calls
         //cSharp-production\examples\Starter_cSharp_dll\bin\Debug\net6.0\Starter_cSharp_dll.exe
         //const string dllPath = "..\\..\\..\\..\\..\\lib\\GetGudSdk.dll";
         //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net6.0
-        const string dllPath = "..\\..\\..\\..\\..\\build\\_build\\Debug\\GetGudSdk.dll";
+        //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net7.0\linux-64\
+        const string dllPath = "../../../../../../build/_build/libGetGudSdk.so.0.1";
         //const string dllPath = "..\\..\\..\\..\\..\\build\\_build\\Release\\GetGudSdk.dll";
 
 
@@ -162,50 +163,50 @@ namespace GetGudSdk_calls
         public static extern int init();
 
         [DllImport(dllPath)]
-        public static extern int StartGame(ref StartGameInfoWrapper gameInfo, IntPtr gameGuidOut);
+        public static extern int StartGame(StartGameInfoWrapper gameInfo, IntPtr gameGuidOut);
 
         [DllImport(dllPath)]
-        public static extern int StartMatch(ref StartMatchInfoWrapper matchInfo, IntPtr matchGuidOut);
+        public static extern int StartMatch(StartMatchInfoWrapper matchInfo, IntPtr matchGuidOut);
 
         [DllImport(dllPath)]
         public static extern int MarkEndGame(IntPtr matchGuid, int matchGuidSize);
 
         [DllImport(dllPath)]
-        public static extern int SendAffectAction(ref BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);
+        public static extern int SendAffectAction(BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);
 
         [DllImport(dllPath)]
-        public static extern int SendAttackAction(ref BaseActionDataWrapper matchInfo, IntPtr weaponGuid, int weaponGuidSize);
+        public static extern int SendAttackAction(BaseActionDataWrapper matchInfo, IntPtr weaponGuid, int weaponGuidSize);
 
         [DllImport(dllPath)]
-        public static extern int SendDamageAction(ref BaseActionDataWrapper matchInfo, IntPtr victimPlayerGuid, int victimPlayerGuidSize,
+        public static extern int SendDamageAction(BaseActionDataWrapper matchInfo, IntPtr victimPlayerGuid, int victimPlayerGuidSize,
             float damageDone, IntPtr weaponGuid, int weaponGuidSize);
 
         [DllImport(dllPath)]
-        public static extern int SendHealAction(ref BaseActionDataWrapper matchInfo, float healthGained);
+        public static extern int SendHealAction(BaseActionDataWrapper matchInfo, float healthGained);
 
         [DllImport(dllPath)]
-        public static extern int SendSpawnAction(ref BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidGuidSize,
+        public static extern int SendSpawnAction(BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidGuidSize,
             int teamId, float initialHealth, PositionF position, RotationF rotation);
 
         [DllImport(dllPath)]
-        public static extern int SendDeathAction(ref BaseActionDataWrapper matchInfo);
+        public static extern int SendDeathAction(BaseActionDataWrapper matchInfo);
 
         [DllImport(dllPath)]
-        public static extern int SendPositionAction(ref BaseActionDataWrapper matchInfo, PositionF position, RotationF rotation);
+        public static extern int SendPositionAction(BaseActionDataWrapper matchInfo, PositionF position, RotationF rotation);
 
         [DllImport(dllPath)]
-        public static extern int SendInMatchReport(ref ReportInfoWrapper reportInfo);
+        public static extern int SendInMatchReport(ReportInfoWrapper reportInfo);
 
         [DllImport(dllPath)]
-        public static extern int SendChatMessage(ref ChatMessageWrapper messageInfo);
+        public static extern int SendChatMessage(ChatMessageWrapper messageInfo);
 
         [DllImport(dllPath)]
         public static extern int SendReport(int titleId,
-        IntPtr privateKey, int privateKeySize, ref ReportInfoWrapper report);
+        IntPtr privateKey, int privateKeySize, ReportInfoWrapper report);
 
         [DllImport(dllPath)]
         public static extern int UpdatePlayer(int titleId,
-        IntPtr privateKey, int privateKeySize, ref PlayerInfoWrapper report);
+        IntPtr privateKey, int privateKeySize, PlayerInfoWrapper report);
 
         [DllImport(dllPath)]
         public static extern void dispose();

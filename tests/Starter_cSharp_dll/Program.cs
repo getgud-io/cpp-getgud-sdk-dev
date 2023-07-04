@@ -5,6 +5,7 @@ class Program
 {
     static void Main(string[] args)
     {
+        Console.WriteLine("The C Sharp example started");
         // Initialize the SDK:
         int status = GetGudSdk.Methods.Init();
         Console.WriteLine(status);
@@ -95,7 +96,7 @@ class Program
 
         // Wait until packets will be sent.
         // The wait timeout is based on the config parameters
-        Thread.Sleep(4000);
+        Thread.Sleep(20000);
 
         // Close and Dispose of the SDK:
         GetGudSdk.Methods.dispose();

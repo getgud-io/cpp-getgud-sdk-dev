@@ -48,7 +48,7 @@ list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
 list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
 if (UNIX)
-file(GLOB ZLIB_LIB "../libs/*zlib/lib/")
+file(GLOB ZLIB_LIB "../libs/*zlib/")
 else()
 file(GLOB ZLIB_LIB "../libs/*zlib/")
 endif()
@@ -67,6 +67,8 @@ link_directories(
 )
 add_library(GetGudSdk SHARED ${project_files})
 target_precompile_headers(GetGudSdk PRIVATE pch.h)
+set(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
+set_target_properties(GetGudSdk PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 else()
 if (UNIX)
 link_directories(
@@ -126,7 +128,7 @@ set_property(TARGET GetGudSdk PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(GetGudSdk
     PRIVATE
         libcurl.so
-		-L${ZLIB_LIB}libz.so
+		libz.a
 		libssl.a
 		libcrypto.a
 )

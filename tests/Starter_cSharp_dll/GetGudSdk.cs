@@ -168,7 +168,7 @@ namespace GetGudSdk
 
             // call unmanaged function
             IntPtr gameGuidOutPtr = Marshal.AllocHGlobal(36);
-            var result = GetGudSdk_calls.GetGudSdk_calls.StartGame(ref unmanagedInfo, gameGuidOutPtr);
+            var result = GetGudSdk_calls.GetGudSdk_calls.StartGame(unmanagedInfo, gameGuidOutPtr);
 
             if (gameGuidOutPtr == IntPtr.Zero || result == 0)
             {
@@ -207,7 +207,7 @@ namespace GetGudSdk
 
             // call unmanaged function
             IntPtr matchGuidOutPtr = Marshal.AllocHGlobal(36);
-            var result = GetGudSdk_calls.GetGudSdk_calls.StartMatch(ref unmanagedInfo, matchGuidOutPtr);
+            var result = GetGudSdk_calls.GetGudSdk_calls.StartMatch(unmanagedInfo, matchGuidOutPtr);
 
             if (matchGuidOutPtr == IntPtr.Zero || result == 0)
             {
@@ -258,7 +258,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendAffectAction(ref unmanagedBaseData, unmanagedWeaponGuid, info.affectGuid.Length, info.affectState);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendAffectAction(unmanagedBaseData, unmanagedWeaponGuid, info.affectGuid.Length, info.affectState);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -283,7 +283,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendAttackAction(ref unmanagedBaseData, unmanagedWeaponGuid, info.weaponGuid.Length);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendAttackAction(unmanagedBaseData, unmanagedWeaponGuid, info.weaponGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -314,7 +314,7 @@ namespace GetGudSdk
             IntPtr weaponGuid = Marshal.StringToHGlobalAnsi(info.weaponGuid);
             int weaponGuidSize = info.weaponGuid.Length;
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendDamageAction(ref unmanagedBaseData, victimPlayerGuid, victimPlayerGuidSize, info.damageDone, weaponGuid, weaponGuidSize);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendDamageAction(unmanagedBaseData, victimPlayerGuid, victimPlayerGuidSize, info.damageDone, weaponGuid, weaponGuidSize);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -339,7 +339,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendHealAction(ref unmanagedBaseData, info.healthGained);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendHealAction(unmanagedBaseData, info.healthGained);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -365,7 +365,7 @@ namespace GetGudSdk
             IntPtr characterGuid = Marshal.StringToHGlobalAnsi(info.characterGuid);
             int characterGuidSize = info.characterGuid.Length;
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendSpawnAction(ref unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
                 info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
@@ -390,7 +390,7 @@ namespace GetGudSdk
                 playerGuidSize = info.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendDeathAction(ref unmanagedBaseData);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendDeathAction(unmanagedBaseData);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -413,7 +413,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendPositionAction(ref unmanagedBaseData, info.position, info.rotation);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendPositionAction(unmanagedBaseData, info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -443,7 +443,7 @@ namespace GetGudSdk
                 reportedTimeEpoch = info.reportedTimeEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendInMatchReport(ref unmanagedBaseData);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendInMatchReport(unmanagedBaseData);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.reporterName);
@@ -470,7 +470,7 @@ namespace GetGudSdk
                 messageSize = info.message.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendChatMessage(ref unmanagedBaseData);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendChatMessage(unmanagedBaseData);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -507,7 +507,7 @@ namespace GetGudSdk
                 reportedTimeEpoch = report.reportedTimeEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendReport(titleId, privateKeyPtr, privateKeySize, ref unmanagedBaseData);
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendReport(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
 
             Marshal.FreeHGlobal(privateKeyPtr);
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
@@ -542,7 +542,7 @@ namespace GetGudSdk
                 playerJoinDateEpoch = player.playerJoinDateEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.UpdatePlayer(titleId, privateKeyPtr, privateKeySize, ref unmanagedBaseData);
+            var result = GetGudSdk_calls.GetGudSdk_calls.UpdatePlayer(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
 
             Marshal.FreeHGlobal(privateKeyPtr);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
