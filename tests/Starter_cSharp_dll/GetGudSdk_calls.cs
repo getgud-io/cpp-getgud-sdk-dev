@@ -150,13 +150,14 @@ namespace GetGudSdk_calls
 
 #pragma warning restore CS8601, CS0649
 
-
-        //cSharp-production\examples\Starter_cSharp_dll\bin\Debug\net6.0\Starter_cSharp_dll.exe
-        //const string dllPath = "..\\..\\..\\..\\..\\lib\\GetGudSdk.dll";
+		// Windows build path
         //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net6.0
-        //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net7.0\linux-64\
-        const string dllPath = "../../../../../../build/_build/libGetGudSdk.so.0.1";
-        //const string dllPath = "..\\..\\..\\..\\..\\build\\_build\\Release\\GetGudSdk.dll";
+		// Linux build path
+        //sdk_project\tests\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
+		//
+		// Linux deploy path
+		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
+        const string dllPath = "../../../../../../lib/libGetGudSdk.so";
 
 
         [DllImport(dllPath)]
