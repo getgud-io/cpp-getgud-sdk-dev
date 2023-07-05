@@ -140,3 +140,33 @@ cmake --build . --config Release
 ```
 
 Congrats, SDK is built! You will mostly need `getgudsdk.a` and `getguddsk.so` files for Linux. Sometime you will also need to use build files for zlib and libcurl that we created
+
+## C# build for Linux (the test project only)
+
+The SDK is ready to use on C# with the shared library build only, no more required.
+
+### Requirements:
+- dotnet >= 6.0.
+- dotnet runtime.
+- the requirements for C language build on Linux.
+
+### Building process:
+Would be better to use Visual Studio Code with extensions:
+- C# Dev Kit.
+- C/C++ extension pack.
+- CMake.
+
+1. Build the C GetGudSdk shared library.
+2. Make sure that the path of the dllPath variable of the GetGudSdk_calls.cs is correct.
+3. Make generated the project's files (obj, bin)
+4. Build the test project.
+
+### Recomendations:
+The test project shouldn't show any runtime error.
+
+dotnet could be installed using offical instructions:
+https://learn.microsoft.com/en-us/dotnet/core/install/linux
+
+Mono and mono-complete isn't recommended, but could be used to.
+
+The test project can be build using csc or msc commands.
