@@ -30,7 +30,8 @@ public:
   std::string AddGame(int titleId,
                       std::string privateKey,
                       std::string serverGuid,
-                      std::string gameMode);
+                      std::string gameMode,
+                      std::string serverLocation);
   std::string AddMatch(std::string gameGuid,
                        std::string matchMode,
                        std::string mapName);

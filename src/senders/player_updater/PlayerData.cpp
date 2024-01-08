@@ -42,6 +42,43 @@ std::string PlayerData::ToString() {
   if (m_playerInfo.PlayerJoinDateEpoch != -1)
     playerString += "\"playerJoinDateEpoch\":" +
                     std::to_string(m_playerInfo.PlayerJoinDateEpoch) + ",";
+  if (!m_playerInfo.PlayerSuspectScore.empty())
+      playerString += "\"playerSuspectScore\":\"" + m_playerInfo.PlayerSuspectScore + "\",";
+  if (!m_playerInfo.PlayerReputation.empty())
+      playerString += "\"playerReputation\":\"" + m_playerInfo.PlayerReputation + "\",";
+  if (!m_playerInfo.PlayerStatus.empty())
+      playerString += "\"playerStatus\":\"" + m_playerInfo.PlayerStatus + "\",";
+  if (!m_playerInfo.PlayerCompaign.empty())
+      playerString += "\"playerCompaign\":\"" + m_playerInfo.PlayerCompaign + "\",";
+  if (!m_playerInfo.PlayerNotes.empty())
+      playerString += "\"playerNotes\":\"" + m_playerInfo.PlayerNotes + "\",";
+  if (!m_playerInfo.PlayerDevice.empty())
+      playerString += "\"playerDevice\":\"" + m_playerInfo.PlayerDevice + "\",";
+  if (!m_playerInfo.PlayerOS.empty())
+      playerString += "\"playerOS\":\"" + m_playerInfo.PlayerOS + "\",";
+  if (m_playerInfo.PlayerAge != -1)
+      playerString += "\"playerAge\":" + std::to_string(m_playerInfo.PlayerAge) + ",";
+  if (!m_playerInfo.PlayerGender.empty())
+      playerString += "\"playerGender\":\"" + m_playerInfo.PlayerGender + "\",";
+  if (!m_playerInfo.PlayerLocation.empty())
+      playerString += "\"playerLocation\":\"" + m_playerInfo.PlayerLocation + "\",";
+
+  if (m_playerInfo.Transactions.size() != 0)
+  {
+      playerString += "\"playerTransactions\":[";
+      for (auto& playerTransaction : m_playerInfo.Transactions)
+      {
+          playerString += "{";
+          playerString += "\"transactionGuid\":\"" + playerTransaction.TransactionGuid + "\",";
+          playerString += "\"transactionName\":\"" + playerTransaction.TransactionName + "\",";
+          playerString += "\"transactionDateEpoch\":\"" + std::to_string(playerTransaction.TransactionDateEpoch) + "\",";
+          playerString += "\"transactionValueUSD\":\"" + ShortenDecimalNumber(std::to_string(playerTransaction.TransactionValueUSD)) + "\"";
+          playerString += "},";
+      }
+      playerString.pop_back(); // remove last comma
+      playerString += "]";
+  }
+
   playerString.pop_back(); // remove last comma
   playerString += "}";
 
@@ -94,6 +131,87 @@ bool PlayerData::IsValid() {
       sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
       sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
   }
+  if (!m_playerInfo.PlayerSuspectScore.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerSuspectScore, 0, 100);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerSuspectScore);
+  }
+  if (!m_playerInfo.PlayerReputation.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerReputation, 0, 36);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerReputation);
+  }
+  if (!m_playerInfo.PlayerStatus.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerStatus, 0, 36);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerStatus);
+  }
+  if (!m_playerInfo.PlayerCompaign.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerCompaign, 0, 256);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerCompaign);
+  }
+  if (!m_playerInfo.PlayerNotes.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerNotes, 0, 256);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNotes);
+  }
+  if (!m_playerInfo.PlayerDevice.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerDevice, 0, 36);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerDevice);
+  }
+  if (!m_playerInfo.PlayerOS.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerOS, 0, 36);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerOS);
+  }
+  if (m_playerInfo.PlayerAge != -1)
+  {
+      isActionValid &=
+          Validator::ValidateItemValue(m_playerInfo.PlayerAge, 0, INT_MAX);
+  }
+  if (!m_playerInfo.PlayerGender.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerGender, 0, 16);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerGender);
+  }
+  if (!m_playerInfo.PlayerLocation.empty())
+  {
+      isActionValid &=
+          Validator::ValidateStringLength(m_playerInfo.PlayerLocation, 0, 16);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerLocation);
+  }
+  if (!m_playerInfo.Transactions.empty())
+  {
+      for (auto& playerTransaction : m_playerInfo.Transactions)
+      {
+          isActionValid &=
+              Validator::ValidateStringLength(playerTransaction.TransactionGuid, 0, 36);
+          isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionGuid);
+
+          isActionValid &=
+              Validator::ValidateStringLength(playerTransaction.TransactionName, 0, 100);
+          isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionName);
+
+          isActionValid &= Validator::ValidateItemValue(
+              playerTransaction.TransactionDateEpoch,
+              sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
+              sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+
+          isActionValid &=
+              Validator::ValidateItemValue(playerTransaction.TransactionValueUSD, 0.f, FLT_MAX);
+      }
+  }
+
   return isActionValid;
 }
 }  // namespace GetGudSdk

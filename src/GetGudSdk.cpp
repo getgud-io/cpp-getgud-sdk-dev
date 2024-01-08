@@ -61,7 +61,8 @@ bool Init() {
 std::string StartGame(int titleId,
                       std::string privateKey,
                       std::string serverGuid,
-                      std::string gameMode) {
+                      std::string gameMode,
+                      std::string serverLocation) {
   std::string gameGuid;
 
   try {
@@ -76,7 +77,7 @@ std::string StartGame(int titleId,
       // Start all services
       gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
     }
-    gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode);
+    gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode, serverLocation);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
                std::string("GetGudSdk::StartGame->Couldn't start new game: ") +
@@ -91,7 +92,7 @@ std::string StartGame(int titleId,
  *
  * Start new game
  **/
-std::string StartGame(std::string serverGuid, std::string gameMode) {
+std::string StartGame(std::string serverGuid, std::string gameMode, std::string serverLocation) {
   std::string gameGuid;
 
   try {
@@ -121,7 +122,7 @@ std::string StartGame(std::string serverGuid, std::string gameMode) {
     std::string privateKey(privateKeyHolder);
 
     gameGuid = gameContainer.AddGame(std::stoi(titleId.c_str()), privateKey,
-                                     serverGuid, gameMode);
+                                     serverGuid, gameMode, serverLocation);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
                std::string("GetGudSdk::StartGame->Couldn't start new game") +
@@ -336,9 +337,10 @@ bool SendSpawnAction(std::string matchGuid,
  **/
 bool SendDeathAction(std::string matchGuid,
                      long long actionTimeEpoch,
-                     std::string playerGuid) {
+                     std::string playerGuid,
+                     std::string attackerGuid) {
   DeathActionData* deathAction =
-      new DeathActionData(matchGuid, actionTimeEpoch, playerGuid);
+      new DeathActionData(matchGuid, actionTimeEpoch, playerGuid, attackerGuid);
   std::deque<BaseActionData*> actions = {deathAction};
   bool sendResult = SendActions(actions);
   delete deathAction;

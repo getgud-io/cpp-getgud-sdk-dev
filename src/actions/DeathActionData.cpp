@@ -13,8 +13,11 @@ extern Config sdkConfig;
  **/
 DeathActionData::DeathActionData(std::string matchGuid,
                                  long long actionTimeEpoch,
-                                 std::string playerGuid)
-    : BaseActionData({Actions::Death, actionTimeEpoch, playerGuid, matchGuid}) {
+                                 std::string playerGuid,
+                                 std::string attackerGuid)
+    : BaseActionData({Actions::Death, actionTimeEpoch, playerGuid, matchGuid}),
+      m_attackerGuid(attackerGuid){
+
 }
 
 /**
@@ -53,7 +56,8 @@ std::string DeathActionData::ToString() {
   std::string actionString;
   actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "DD,";
-  actionString += m_playerGuid;
+  actionString += m_playerGuid + ",";
+  actionString += m_attackerGuid;
 
   return actionString;
 }

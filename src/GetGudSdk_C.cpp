@@ -31,11 +31,13 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
         GetGudSdk::StartGame(gameInfo.titleId,
                   std::string(gameInfo.privateKey, gameInfo.privateKeySize),
                   std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
-                  std::string(gameInfo.gameMode, gameInfo.gameModeSize));
+                  std::string(gameInfo.gameMode, gameInfo.gameModeSize),
+                  std::string(gameInfo.serverLocation, gameInfo.serverLocationSize));
   } else {
     gameGuid = GetGudSdk::StartGame(
-        std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
-                  std::string(gameInfo.gameMode, gameInfo.gameModeSize));
+                  std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
+                  std::string(gameInfo.gameMode, gameInfo.gameModeSize),
+                  std::string(gameInfo.serverLocation, gameInfo.serverLocationSize));
   }
   strcpy(gameGuidOut, gameGuid.c_str());
   return gameGuid.size();
@@ -173,11 +175,14 @@ int SendSpawnAction(BaseActionData baseData,
  * SendDeathAction:
  *
  **/
-int SendDeathAction(BaseActionData baseData) {
+int SendDeathAction(BaseActionData baseData,
+                    char* attackerGuid,
+                    int attackerGuidSize) {
   GetGudSdk::DeathActionData* deathAction = new GetGudSdk::DeathActionData(
       std::string(baseData.matchGuid, baseData.matchGuidSize),
       baseData.actionTimeEpoch,
-      std::string(baseData.playerGuid, baseData.playerGuidSize));
+      std::string(baseData.playerGuid, baseData.playerGuidSize),
+      std::string(attackerGuid, attackerGuidSize));
   std::deque<GetGudSdk::BaseActionData*> actions = {deathAction};
   bool sendResult = GetGudSdk::SendActions(actions);
   delete deathAction;
@@ -298,11 +303,48 @@ int UpdatePlayer(int titleId,
   //required
   playerOut.PlayerGuid = std::string(player.playerGuid, player.playerGuidSize);
   if (player.playerJoinDateEpoch != -1)
-  playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
+    playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
   if (player.playerNicknameSize > 0)
-  playerOut.PlayerNickname = std::string(player.playerNickname, player.playerNicknameSize);
+    playerOut.PlayerNickname = std::string(player.playerNickname, player.playerNicknameSize);
   if (player.playerRank != -1)
-  playerOut.PlayerRank = player.playerRank;
+    playerOut.PlayerRank = player.playerRank;
+  if (player.playerSuspectScoreSize > 0)
+    playerOut.PlayerSuspectScore = std::string(player.playerSuspectScore, player.playerSuspectScoreSize);
+  if (player.playerReputationSize > 0)
+      playerOut.PlayerReputation = std::string(player.playerReputation, player.playerReputationSize);
+  if (player.playerStatusSize > 0)
+      playerOut.PlayerStatus = std::string(player.playerStatus, player.playerStatusSize);
+  if (player.playerCompaignSize > 0)
+      playerOut.PlayerCompaign = std::string(player.playerCompaign, player.playerCompaignSize);
+  if (player.playerNotesSize > 0)
+      playerOut.PlayerNotes = std::string(player.playerNotes, player.playerNotesSize);
+  if (player.playerDeviceSize > 0)
+      playerOut.PlayerDevice = std::string(player.playerDevice, player.playerDeviceSize);
+  if (player.playerOSSize > 0)
+      playerOut.PlayerOS = std::string(player.playerOS, player.playerOSSize);
+  if (player.playerAge != -1)
+      playerOut.PlayerAge = player.playerAge;
+  if (player.playerGenderSize > 0)
+      playerOut.PlayerGender = std::string(player.playerGender, player.playerGenderSize);
+  if (player.playerLocationSize > 0)
+      playerOut.PlayerLocation = std::string(player.playerLocation, player.playerLocationSize);
+  if (player.transactionsSize > 0)
+  {
+      std::vector<GetGudSdk::PlayerTransactions> transactions;
+      for (int i = 0; i < player.transactionsSize; i++)
+      {
+          PlayerTransactions& transaction_ref = player.transactions[i];
+          GetGudSdk::PlayerTransactions playerTransaction =
+          {
+              std::string(transaction_ref.TransactionGuid, transaction_ref.TransactionGuidSize),
+              std::string(transaction_ref.TransactionName, transaction_ref.TransactionNameSize),
+              transaction_ref.TransactionDateEpoch,
+              transaction_ref.TransactionValueUSD
+          };
+          transactions.push_back(playerTransaction);
+      }
+      playerOut.Transactions = transactions;
+  }
 
   std::deque<GetGudSdk::PlayerInfo> players;
   players.push_back(playerOut);
