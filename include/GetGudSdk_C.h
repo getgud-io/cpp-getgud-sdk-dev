@@ -99,7 +99,7 @@ struct PlayerInfo {
   int playerGenderSize;
   char* playerLocation;
   int playerLocationSize;
-  PlayerTransactions* transactions;
+  struct PlayerTransactions* transactions;
   int transactionsSize;
 };
 
@@ -158,7 +158,7 @@ GETGUDSDK_API int MarkEndGame(char* gameGuid, int guidSize);
 GETGUDSDK_API int SendAffectAction(struct BaseActionData baseData,
   char* affectGuid,
   int affectGuidSize,
-  AffectState affectState);
+  enum AffectState affectState);
 
 /**
  * SendAttackAction:

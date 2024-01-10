@@ -17,6 +17,8 @@ int main() {
   gameInfo.serverGuid = "serverGuid";
   gameInfo.serverGuidSize = 10;
   gameInfo.titleId = 1;
+  gameInfo.serverLocation = "UK";
+  gameInfo.serverLocationSize = 2;
   //Start the Game
   gameGuidSize = StartGame(gameInfo, gameGuid);
 
@@ -42,7 +44,7 @@ int main() {
 
   SendAttackAction(baseData, "W_G", 3);
 
-  SendDeathAction(baseData);
+  SendDeathAction(baseData, "attacker_guid", 13);
 
   MarkEndGame(gameGuid, 36);
 
