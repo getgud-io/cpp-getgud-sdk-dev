@@ -4,9 +4,18 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace GetGudSdk
 {
+    public struct PlayerTransactionsData
+    {
+        public string TransactionGuid;
+        public string TransactionName;
+        public long TransactionDateEpoch;
+        public float TransactionValueUSD;
+    };
+
     public struct BaseActionData
     {
         public long actionTimeEpoch;
@@ -31,7 +40,11 @@ namespace GetGudSdk
         public float damageDone;
         public string weaponGuid;
     };
-
+    public struct SendDeathActionInfo
+    {
+        public BaseActionData baseData;
+        public string attackerGuid;
+    };
     public struct SendHealActionInfo
     {
         public BaseActionData baseData;
@@ -61,6 +74,7 @@ namespace GetGudSdk
         public string PrivateKey;
         public string ServerGuid;
         public string GameMode;
+        public string ServerLocation;
     };
     public struct StartMatchInfo
     {
@@ -83,17 +97,50 @@ namespace GetGudSdk
         public string playerEmail;
         public int playerRank;
         public long playerJoinDateEpoch;
+        public string playerSuspectScore;
+        public string playerReputation;
+        public string playerStatus;
+        public string playerCompaign;
+        public string playerNotes;
+        public string playerDevice;
+        public string playerOS;
+        public int playerAge;
+        public string playerGender;
+        public string playerLocation;
+        public List<PlayerTransactionsData> transactions;
         public PlayerInfo(string playerGuid,
                           string playerNickname = "",
                           string playerEmail = "",
                           int playerRank = -1,
-                          long playerJoinDateEpoch = -1)
+                          long playerJoinDateEpoch = -1,
+                          string playerSuspectScore = "",
+                          string playerReputation = "",
+                          string playerStatus = "",
+                          string playerCompaign = "",
+                          string playerNotes = "",
+                          string playerDevice = "",
+                          string playerOS = "",
+                          int playerAge = -1,
+                          string playerGender = "",
+                          string playerLocation = "",
+                          List<PlayerTransactionsData>? transactions = null)
         {
             this.playerGuid = playerGuid;
             this.playerNickname = playerNickname;
             this.playerEmail = playerEmail;
             this.playerRank = playerRank;
             this.playerJoinDateEpoch = playerJoinDateEpoch;
+            this.playerSuspectScore = playerSuspectScore;
+            this.playerReputation = playerReputation;
+            this.playerStatus = playerStatus;
+            this.playerCompaign = playerCompaign;
+            this.playerNotes = playerNotes;
+            this.playerDevice = playerDevice;
+            this.playerOS = playerOS;
+            this.playerAge = playerAge;
+            this.playerGender = playerGender;
+            this.playerLocation = playerLocation;
+            this.transactions = transactions ?? new List<PlayerTransactionsData>();
         }
     };
 
@@ -163,7 +210,9 @@ namespace GetGudSdk
                 serverGuid = Marshal.StringToHGlobalAnsi(info.ServerGuid),
                 serverGuidSize = info.ServerGuid.Length,
                 gameMode = Marshal.StringToHGlobalAnsi(info.GameMode),
-                gameModeSize = info.GameMode.Length
+                gameModeSize = info.GameMode.Length,
+                serverLocation = Marshal.StringToHGlobalAnsi(info.ServerLocation),
+                serverLocationSize = info.ServerLocation.Length
             };
 
             // call unmanaged function
@@ -379,18 +428,21 @@ namespace GetGudSdk
          * SendDeathAction:
          *
          **/
-        static public int SendDeathAction(BaseActionData info)
+        static public int SendDeathAction(SendDeathActionInfo info)
         {
             var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
             {
-                actionTimeEpoch = info.actionTimeEpoch,
-                matchGuid = Marshal.StringToHGlobalAnsi(info.matchGuid),
-                matchGuidSize = info.matchGuid.Length,
-                playerGuid = Marshal.StringToHGlobalAnsi(info.playerGuid),
-                playerGuidSize = info.playerGuid.Length
+                actionTimeEpoch = info.baseData.actionTimeEpoch,
+                matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
+                matchGuidSize = info.baseData.matchGuid.Length,
+                playerGuid = Marshal.StringToHGlobalAnsi(info.baseData.playerGuid),
+                playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendDeathAction(unmanagedBaseData);
+            IntPtr attackerGuid = Marshal.StringToHGlobalAnsi(info.attackerGuid);
+            int attackerGuidSize = info.attackerGuid.Length;
+
+            var result = GetGudSdk_calls.GetGudSdk_calls.SendDeathAction(unmanagedBaseData, attackerGuid, attackerGuidSize);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);

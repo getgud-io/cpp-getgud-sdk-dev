@@ -18,6 +18,7 @@ class Program
         gameInfo.PrivateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
         gameInfo.TitleId = 30;
         gameInfo.GameMode = "gameMode";
+        gameInfo.ServerLocation = "UK";
 
         // Start a Game:
         status = GetGudSdk.Methods.StartGame(gameInfo, out gameGuid);
@@ -69,10 +70,11 @@ class Program
         AttackInfo.weaponGuid = "G2";
         GetGudSdk.Methods.SendAttackAction(AttackInfo);
 
-        GetGudSdk.BaseActionData DeathInfo;
-        DeathInfo.matchGuid = matchGuid;
-        DeathInfo.playerGuid = "player-2";
-        DeathInfo.actionTimeEpoch = 1684059337532;
+        GetGudSdk.SendDeathActionInfo DeathInfo;
+        DeathInfo.baseData.matchGuid = matchGuid;
+        DeathInfo.baseData.playerGuid = "player-2";
+        DeathInfo.baseData.actionTimeEpoch = 1684059337532;
+        DeathInfo.attackerGuid = "player-3";
         GetGudSdk.Methods.SendDeathAction(DeathInfo);
 
         GetGudSdk.ReportInfo reportInfo = new GetGudSdk.ReportInfo(matchGuid, 1684059337532, "player-2");
