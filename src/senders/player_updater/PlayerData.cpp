@@ -152,13 +152,13 @@ bool PlayerData::IsValid() {
   if (!m_playerInfo.PlayerCompaign.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerCompaign, 0, 256);
+          Validator::ValidateStringLength(m_playerInfo.PlayerCompaign, 0, 128);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerCompaign);
   }
   if (!m_playerInfo.PlayerNotes.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerNotes, 0, 256);
+          Validator::ValidateStringLength(m_playerInfo.PlayerNotes, 0, 128);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNotes);
   }
   if (!m_playerInfo.PlayerDevice.empty())
