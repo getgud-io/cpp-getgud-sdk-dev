@@ -45,6 +45,7 @@ class GameData {
   std::string GetPrivateKey();
   std::string GetServerGuid();
   std::string GetGameMode();
+  std::string GetServerLocation();
   void GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut);
   MatchData* GetGameMatch(std::string matchGuid);
   void GameToString(std::string& gameOut);

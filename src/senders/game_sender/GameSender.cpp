@@ -234,6 +234,8 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
       packet +=
           "\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
       packet +=
+          "\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
+      packet +=
           "\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
       packet += "\"mapName\":\"" + match.second->GetMapName() + "\",";
       packet += "\"playerGuids\":[";

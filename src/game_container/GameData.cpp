@@ -452,6 +452,14 @@ std::string GameData::GetGameMode() {
 }
 
 /**
+ * GetServerLocation:
+ *
+ **/
+std::string GameData::GetServerLocation() {
+    return m_serverLocation;
+}
+
+/**
  * Dispose:
  *
  **/
