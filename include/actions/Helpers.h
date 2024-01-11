@@ -108,7 +108,8 @@ enum class ReporterSubtype : int {
   Griefing,
   Slurring,
   VoipAbuse,
-  ChatAbuse
+  ChatAbuse,
+  AFK
 };
 
 /**

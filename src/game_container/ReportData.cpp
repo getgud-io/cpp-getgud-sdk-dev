@@ -98,7 +98,7 @@ bool ReportData::IsValid() {
   if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::FairFight));
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::AFK));
   }
   isActionValid &= Validator::ValidateStringLength(
     m_reportInfo.SuspectedPlayerGuid, 1, 36);
