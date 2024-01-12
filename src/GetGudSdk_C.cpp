@@ -314,8 +314,8 @@ int UpdatePlayer(int titleId,
       playerOut.PlayerReputation = std::string(player.playerReputation, player.playerReputationSize);
   if (player.playerStatusSize > 0)
       playerOut.PlayerStatus = std::string(player.playerStatus, player.playerStatusSize);
-  if (player.playerCompaignSize > 0)
-      playerOut.PlayerCompaign = std::string(player.playerCompaign, player.playerCompaignSize);
+  if (player.PlayerCampaignSize > 0)
+      playerOut.PlayerCampaign = std::string(player.PlayerCampaign, player.PlayerCampaignSize);
   if (player.playerNotesSize > 0)
       playerOut.PlayerNotes = std::string(player.playerNotes, player.playerNotesSize);
   if (player.playerDeviceSize > 0)

@@ -198,7 +198,7 @@ struct PlayerInfo {
   std::string PlayerSuspectScore; //SQL, size <=100
   std::string PlayerReputation; //SQL, <=36
   std::string PlayerStatus; //SQL, <=36
-  std::string PlayerCompaign; //SQL, <=128
+  std::string PlayerCampaign; //SQL, <=128
   std::string PlayerNotes; //SQL, <=128
   std::string PlayerDevice; //SQL, <=36
   std::string PlayerOS; //SQL, <=36

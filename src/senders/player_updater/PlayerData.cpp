@@ -48,8 +48,8 @@ std::string PlayerData::ToString() {
       playerString += "\"playerReputation\":\"" + m_playerInfo.PlayerReputation + "\",";
   if (!m_playerInfo.PlayerStatus.empty())
       playerString += "\"playerStatus\":\"" + m_playerInfo.PlayerStatus + "\",";
-  if (!m_playerInfo.PlayerCompaign.empty())
-      playerString += "\"playerCompaign\":\"" + m_playerInfo.PlayerCompaign + "\",";
+  if (!m_playerInfo.PlayerCampaign.empty())
+      playerString += "\"playerCampaign\":\"" + m_playerInfo.PlayerCampaign + "\",";
   if (!m_playerInfo.PlayerNotes.empty())
       playerString += "\"playerNotes\":\"" + m_playerInfo.PlayerNotes + "\",";
   if (!m_playerInfo.PlayerDevice.empty())
@@ -148,12 +148,12 @@ bool PlayerData::IsValid() {
       isActionValid &=
           Validator::ValidateStringLength(m_playerInfo.PlayerStatus, 0, 36);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerStatus);
-  }
-  if (!m_playerInfo.PlayerCompaign.empty())
+  } 
+  if (!m_playerInfo.PlayerCampaign.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerCompaign, 0, 128);
-      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerCompaign);
+          Validator::ValidateStringLength(m_playerInfo.PlayerCampaign, 0, 128);
+      isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerCampaign);
   }
   if (!m_playerInfo.PlayerNotes.empty())
   {

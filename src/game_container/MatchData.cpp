@@ -535,8 +535,8 @@ bool MatchData::IsValid() {
   isActionValid &= Validator::ValidateStringChars(m_gameGuid);
   isActionValid = Validator::ValidateStringLength(m_matchMode, 1, 100);
   isActionValid &= Validator::ValidateStringChars(m_matchMode);
-  isActionValid = Validator::ValidateStringLength(m_matchMode, 1, 100);
-  isActionValid &= Validator::ValidateStringChars(m_matchMode);
+  isActionValid = Validator::ValidateStringLength(m_mapName, 1, 100);
+  isActionValid &= Validator::ValidateStringChars(m_mapName);
   return isActionValid;
 }
 
