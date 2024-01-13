@@ -110,13 +110,13 @@ bool PlayerData::IsValid() {
   if (!m_playerInfo.PlayerNickname.empty())
   {
     isActionValid &=
-      Validator::ValidateStringLength(m_playerInfo.PlayerNickname, 0, 10000);
+      Validator::ValidateStringLength(m_playerInfo.PlayerNickname, 0, 36);
     isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNickname);
   }
   if (!m_playerInfo.PlayerEmail.empty())
   {
     isActionValid &=
-      Validator::ValidateStringLength(m_playerInfo.PlayerEmail, 0, 10000);
+      Validator::ValidateStringLength(m_playerInfo.PlayerEmail, 0, 64);
     isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerEmail);
   }
   if (m_playerInfo.PlayerRank != -1)
@@ -164,30 +164,30 @@ bool PlayerData::IsValid() {
   if (!m_playerInfo.PlayerDevice.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerDevice, 0, 36);
+          Validator::ValidateStringLength(m_playerInfo.PlayerDevice, 0, 8);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerDevice);
   }
   if (!m_playerInfo.PlayerOS.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerOS, 0, 36);
+          Validator::ValidateStringLength(m_playerInfo.PlayerOS, 0, 8);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerOS);
   }
   if (m_playerInfo.PlayerAge != -1)
   {
       isActionValid &=
-          Validator::ValidateItemValue(m_playerInfo.PlayerAge, 0, INT_MAX);
+          Validator::ValidateItemValue(m_playerInfo.PlayerAge, 0, 128);
   }
   if (!m_playerInfo.PlayerGender.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerGender, 0, 16);
+          Validator::ValidateStringLength(m_playerInfo.PlayerGender, 0, 8);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerGender);
   }
   if (!m_playerInfo.PlayerLocation.empty())
   {
       isActionValid &=
-          Validator::ValidateStringLength(m_playerInfo.PlayerLocation, 0, 16);
+          Validator::ValidateStringLength(m_playerInfo.PlayerLocation, 0, 36);
       isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerLocation);
   }
   if (!m_playerInfo.Transactions.empty())
@@ -199,7 +199,7 @@ bool PlayerData::IsValid() {
           isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionGuid);
 
           isActionValid &=
-              Validator::ValidateStringLength(playerTransaction.TransactionName, 0, 100);
+              Validator::ValidateStringLength(playerTransaction.TransactionName, 0, 36);
           isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionName);
 
           isActionValid &= Validator::ValidateItemValue(

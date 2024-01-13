@@ -39,7 +39,7 @@ bool ChatMessageData::IsValid() {
       Validator::ValidateStringLength(m_playerGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_playerGuid);
   isActionValid &=
-      Validator::ValidateStringLength(m_message, 1, 10000);
+      Validator::ValidateStringLength(m_message, 1, 256);
   isActionValid &= Validator::ValidateStringChars(m_message);
   isActionValid &= Validator::ValidateItemValue(
       m_messageTimeEpoch,

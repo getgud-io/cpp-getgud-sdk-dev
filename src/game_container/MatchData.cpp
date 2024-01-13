@@ -348,7 +348,8 @@ void MatchData::MatchToString(std::string& matchOut) {
   matchOut += "{";
   matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
   matchOut += "\"mapName\":\"" + m_mapName + "\",";
-  matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+  if (m_matchMode.size() > 0)
+    matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
   matchOut += "\"matchActionStream\":\"";
 
   for (int index = 0; index < m_actionVector.size(); index++) {
@@ -533,9 +534,9 @@ void MatchData::Dispose() {
 bool MatchData::IsValid() {
   bool isActionValid = Validator::ValidateStringLength(m_gameGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_gameGuid);
-  isActionValid = Validator::ValidateStringLength(m_matchMode, 1, 100);
+  isActionValid &= Validator::ValidateStringLength(m_matchMode, 0, 36);
   isActionValid &= Validator::ValidateStringChars(m_matchMode);
-  isActionValid = Validator::ValidateStringLength(m_mapName, 1, 100);
+  isActionValid &= Validator::ValidateStringLength(m_mapName, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_mapName);
   return isActionValid;
 }

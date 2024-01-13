@@ -35,7 +35,7 @@ CredentialsReportData::CredentialsReportData(int titleId,
 
 bool CredentialsReportData::IsValid() {
   bool isActionValid = ReportData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(m_privateKey, 1, 10000);
+  isActionValid &= Validator::ValidateStringLength(m_privateKey, 1, 100);
   isActionValid &= Validator::ValidateStringChars(m_privateKey);
   isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
   return isActionValid;

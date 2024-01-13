@@ -80,6 +80,10 @@ bool PlayerUpdater::AddPlayers(int titleId,
                "cannot add more players");
     return false;
   }
+  
+  //privateKey and titleId validations
+  if (titleId < 1 || titleId > INT_MAX || privateKey.size() == 0 || privateKey.size() > 100)
+      return false;
 
   m_playerUpdaterMutex.lock();
 

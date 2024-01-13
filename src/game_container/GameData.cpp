@@ -482,7 +482,7 @@ bool GameData::IsValid() {
   isActionValid &= Validator::ValidateStringChars(m_privateKey);
   isActionValid &= Validator::ValidateStringLength(m_serverGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_serverGuid);
-  isActionValid &= Validator::ValidateStringLength(m_gameMode, 1, 100);
+  isActionValid &= Validator::ValidateStringLength(m_gameMode, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_gameMode);
   isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
   isActionValid &= Validator::ValidateStringLength(m_serverLocation, 0, 36);
