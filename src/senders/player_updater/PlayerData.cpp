@@ -8,6 +8,7 @@
 
 #ifdef __linux__
 #include <limits.h>
+#include <cfloat>
 #include <stdio.h>
 #endif
 
