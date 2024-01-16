@@ -34,7 +34,7 @@ cd ${LIBS_DIR}zlib/
 if ! test ${LIBS_DIR}zlib/zlib.h; then
 ./configure -prefix=${LIBS_DIR}zlib/ --enable-shared
 
-make make CFLAGS="-fPIC"
+make CFLAGS="-fPIC"
 make install
 fi
 
