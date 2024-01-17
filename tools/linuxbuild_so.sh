@@ -31,7 +31,7 @@ fi
 
 cd ${LIBS_DIR}zlib/
 
-if ! test ${LIBS_DIR}zlib/zlib.h; then
+if [ ! -f "${LIBS_DIR}zlib/libz.so" ]; then
 ./configure -prefix=${LIBS_DIR}zlib/ --enable-shared
 
 make CFLAGS="-fPIC"
