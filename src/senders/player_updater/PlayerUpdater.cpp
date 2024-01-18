@@ -204,7 +204,7 @@ void PlayerUpdater::SendUpdatePlayerPacket(std::string& packet) {
   if (sendCode != CURLcode::CURLE_OK) {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
         m_curlReadBuffer);
     }
     
@@ -217,7 +217,7 @@ void PlayerUpdater::SendUpdatePlayerPacket(std::string& packet) {
   {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
         m_curlReadBuffer);
     }
   }

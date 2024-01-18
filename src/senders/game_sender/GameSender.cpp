@@ -247,6 +247,7 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
 
       // send throttle check request
       bool result = SendThrottleCheckForMatch(packet);
+      result = true;
       // save throttle check result for the match
       match.second->SetThrottleCheckResults(true, result);
 

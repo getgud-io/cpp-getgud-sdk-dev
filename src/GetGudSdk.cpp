@@ -238,8 +238,18 @@ bool SendActions(std::deque<BaseActionData*> actions) {
  * Send a single action to an action buffer
  **/
 bool SendAction(BaseActionData* action) {
-  std::deque<BaseActionData*> actions = {action};
-  return SendActions(actions);
+  bool sendResult = false;
+  std::deque<BaseActionData*> actions;
+  try {
+    actions = { action };
+    sendResult = SendActions(actions);
+  } catch (std::exception& _error)
+  {
+      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAction->Couldn't "
+          "send actions to Action Buffer: ") +
+          std::string(_error.what()));
+  }
+  return sendResult;
 }
 
 /**
@@ -251,11 +261,19 @@ bool SendAffectAction(std::string matchGuid,
   std::string playerGuid,
   std::string affectGuid,
   AffectState affectState) {
-  AffectActionData* affectAction =
-    new AffectActionData(matchGuid, actionTimeEpoch, playerGuid, affectGuid, affectState);
-  std::deque<BaseActionData*> actions = { affectAction };
-  bool sendResult = SendActions(actions);
-  delete affectAction;
+  bool sendResult = false;
+  try {
+    AffectActionData* affectAction =
+      new AffectActionData(matchGuid, actionTimeEpoch, playerGuid, affectGuid, affectState);
+    std::deque<BaseActionData*> actions = { affectAction };
+    sendResult = SendActions(actions);
+    delete affectAction;
+  } catch (std::exception& _error)
+  {
+      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAffectAction->Couldn't "
+          "send actions to Action Buffer: ") +
+          std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -267,11 +285,19 @@ bool SendAttackAction(std::string matchGuid,
                       long long actionTimeEpoch,
                       std::string playerGuid,
                       std::string weaponGuid) {
-  AttackActionData* attackAction =
-      new AttackActionData(matchGuid, actionTimeEpoch, playerGuid, weaponGuid);
-  std::deque<BaseActionData*> actions = {attackAction};
-  bool sendResult = SendActions(actions);
-  delete attackAction;
+  bool sendResult = false;
+  try {
+    AttackActionData* attackAction =
+        new AttackActionData(matchGuid, actionTimeEpoch, playerGuid, weaponGuid);
+    std::deque<BaseActionData*> actions = { attackAction };
+    sendResult = SendActions(actions);
+    delete attackAction;
+  } catch (std::exception& _error)
+  {
+    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAttackAction->Couldn't "
+        "send actions to Action Buffer: ") +
+        std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -285,12 +311,20 @@ bool SendDamageAction(std::string matchGuid,
                       std::string victimPlayerGuid,
                       float damageDone,
                       std::string weaponGuid) {
-  DamageActionData* damageAction =
-      new DamageActionData(matchGuid, actionTimeEpoch, playerGuid,
-                           victimPlayerGuid, damageDone, weaponGuid);
-  std::deque<BaseActionData*> actions = {damageAction};
-  bool sendResult = SendActions(actions);
-  delete damageAction;
+  bool sendResult = false;
+  try {
+    DamageActionData* damageAction =
+        new DamageActionData(matchGuid, actionTimeEpoch, playerGuid,
+                             victimPlayerGuid, damageDone, weaponGuid);
+    std::deque<BaseActionData*> actions = {damageAction};
+    sendResult = SendActions(actions);
+    delete damageAction;
+  } catch (std::exception& _error)
+  {
+    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendDamageAction->Couldn't "
+        "send actions to Action Buffer: ") +
+        std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -302,11 +336,19 @@ bool SendHealAction(std::string matchGuid,
                     long long actionTimeEpoch,
                     std::string playerGuid,
                     float healthGained) {
-  HealActionData* healAction =
-      new HealActionData(matchGuid, actionTimeEpoch, playerGuid, healthGained);
-  std::deque<BaseActionData*> actions = {healAction};
-  bool sendResult = SendActions(actions);
-  delete healAction;
+  bool sendResult = false;
+  try {
+    HealActionData* healAction =
+        new HealActionData(matchGuid, actionTimeEpoch, playerGuid, healthGained);
+    std::deque<BaseActionData*> actions = {healAction};
+    sendResult = SendActions(actions);
+    delete healAction;
+  } catch (std::exception& _error)
+  {
+    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendHealAction->Couldn't "
+        "send actions to Action Buffer: ") +
+        std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -322,12 +364,20 @@ bool SendSpawnAction(std::string matchGuid,
                      float initialHealth,
                      PositionF position,
                      RotationF rotation) {
-  SpawnActionData* spawnAction =
-      new SpawnActionData(matchGuid, actionTimeEpoch, playerGuid, characterGuid,
-                          teamId, initialHealth, position, rotation);
-  std::deque<BaseActionData*> actions = {spawnAction};
-  bool sendResult = SendActions(actions);
-  delete spawnAction;
+  bool sendResult = false;
+  try {
+    SpawnActionData* spawnAction =
+        new SpawnActionData(matchGuid, actionTimeEpoch, playerGuid, characterGuid,
+                            teamId, initialHealth, position, rotation);
+    std::deque<BaseActionData*> actions = {spawnAction};
+    sendResult = SendActions(actions);
+    delete spawnAction;
+  } catch (std::exception& _error)
+  {
+    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendSpawnAction->Couldn't "
+        "send actions to Action Buffer: ") +
+        std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -339,11 +389,19 @@ bool SendDeathAction(std::string matchGuid,
                      long long actionTimeEpoch,
                      std::string playerGuid,
                      std::string attackerGuid) {
-  DeathActionData* deathAction =
-      new DeathActionData(matchGuid, actionTimeEpoch, playerGuid, attackerGuid);
-  std::deque<BaseActionData*> actions = {deathAction};
-  bool sendResult = SendActions(actions);
-  delete deathAction;
+  bool sendResult = false;
+  try {
+    DeathActionData* deathAction =
+        new DeathActionData(matchGuid, actionTimeEpoch, playerGuid, attackerGuid);
+    std::deque<BaseActionData*> actions = {deathAction};
+    sendResult = SendActions(actions);
+    delete deathAction;
+  } catch (std::exception& _error)
+  {
+      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendDeathAction->Couldn't "
+          "send actions to Action Buffer: ") +
+          std::string(_error.what()));
+  }
   return sendResult;
 }
 
@@ -356,13 +414,20 @@ bool SendPositionAction(std::string matchGuid,
                         std::string playerGuid,
                         PositionF position,
                         RotationF rotation) {
+  bool sendResult = false;
+  try {
   PositionActionData* positionAction = new PositionActionData(
       matchGuid, actionTimeEpoch, playerGuid, position, rotation);
   std::deque<BaseActionData*> actions = {positionAction};
-  bool sendResult = SendActions(actions);
+  sendResult = SendActions(actions);
   delete positionAction;
+  } catch (std::exception& _error)
+  {
+      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendPositionAction->Couldn't "
+          "send actions to Action Buffer: ") +
+          std::string(_error.what()));
+  }
   return sendResult;
-  ;
 }
 
 /**
@@ -404,6 +469,7 @@ bool SendReports(int titleId,
 bool SendReports(std::deque<ReportInfo>& reports) {
   std::string titleId;
   std::string privateKey;
+  bool result = false;
   try {
 
     const char* titleIdVar = std::getenv("GETGUD_TITLE_ID");
@@ -420,6 +486,7 @@ bool SendReports(std::deque<ReportInfo>& reports) {
 
     titleId = std::string(titleIdVar);
     privateKey = std::string(privateKeyVar);
+    result = SendReports(std::stoi(titleId.c_str()), privateKey, reports);
   } catch (std::exception& _error) {
     logger.Log(
         LogType::FATAL,
@@ -429,7 +496,7 @@ bool SendReports(std::deque<ReportInfo>& reports) {
     return false;
   }
 
-  return SendReports(std::stoi(titleId.c_str()), privateKey, reports);
+  return result;
   
 }
 
@@ -441,6 +508,7 @@ bool SendReports(std::deque<ReportInfo>& reports) {
 bool UpdatePlayers(int titleId,
                    std::string privateKey,
                    std::deque<PlayerInfo>& players) {
+  bool result = false;
   try {
     if (sharedPlayerUpdaters.playerUpdatersCount == 0) {
       std::lock_guard<std::mutex> locker(
@@ -452,15 +520,15 @@ bool UpdatePlayers(int titleId,
             sdkConfig.gameSenderSleepIntervalMilliseconds);
       }
     }
-        return sharedPlayerUpdaters.playerUpdater->AddPlayers(
-            titleId, privateKey, players);
+    result = sharedPlayerUpdaters.playerUpdater->AddPlayers(
+        titleId, privateKey, players);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
                std::string("GetGudSdk::UpdatePlayers->Player data "
                            "can not be updated: ") +
                    std::string(_error.what()));
-    return false;
   }
+  return result;
 }
 
 /**
@@ -471,6 +539,7 @@ bool UpdatePlayers(int titleId,
 bool UpdatePlayers(std::deque<PlayerInfo>& players) {
   std::string titleId;
   std::string privateKey;
+  bool result = false;
   try {
     const char* titleIdVar = std::getenv("GETGUD_TITLE_ID");
     const char* privateKeyVar = std::getenv("GETGUD_PRIVATE_KEY");
@@ -486,15 +555,15 @@ bool UpdatePlayers(std::deque<PlayerInfo>& players) {
 
     titleId = std::string(titleIdVar);
     privateKey = std::string(privateKeyVar);
+    result = UpdatePlayers(std::stoi(titleId), privateKey, players);
   }
   catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
                std::string("GetGudSdk::UpdatePlayers->Player data "
                            "can not be updated: ") +
                    std::string(_error.what()));
-    return false;
   }
-  return UpdatePlayers(std::stoi(titleId), privateKey, players);
+  return result;
 }
 
 /**

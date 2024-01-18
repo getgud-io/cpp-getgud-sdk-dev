@@ -5,6 +5,7 @@
 #endif
 
 int main() {
+  system("pause");
   init();
   //Fill the Game info
   char gameGuid[37] = { 0 }; //guid + \0

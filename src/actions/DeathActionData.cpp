@@ -25,7 +25,7 @@ DeathActionData::DeathActionData(std::string matchGuid,
  *
  **/
 DeathActionData::DeathActionData(const DeathActionData& data)
-    : BaseActionData(data) {}
+    : BaseActionData(data), m_attackerGuid(data.m_attackerGuid) {}
 
 /**
  * ~DeathActionData:
@@ -69,6 +69,8 @@ std::string DeathActionData::ToString() {
  **/
 std::string DeathActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
+
+  actionMetaString += "Attacker GUID:" + m_attackerGuid + ";";
 
   return actionMetaString;
 }
