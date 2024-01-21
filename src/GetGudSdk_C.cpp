@@ -39,18 +39,47 @@ int init() {
 int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
   std::string gameGuid;
   try {
+    std::string privateKey;
+    std::string serverGuid;
+    std::string gameMode;
+    std::string serverLocation;
+
+    if (gameInfo.privateKey != NULL &&
+        strlen(gameInfo.privateKey) == gameInfo.privateKeySize) 
+    {
+        privateKey = std::string(gameInfo.privateKey, gameInfo.privateKeySize);
+    }
+
+    if (gameInfo.serverGuid != NULL &&
+        strlen(gameInfo.serverGuid) == gameInfo.serverGuidSize)
+    {
+        serverGuid = std::string(gameInfo.serverGuid, gameInfo.serverGuidSize);
+    }
+
+    if (gameInfo.gameMode != NULL &&
+        strlen(gameInfo.gameMode) == gameInfo.gameModeSize)
+    {
+        gameMode = std::string(gameInfo.gameMode, gameInfo.gameModeSize);
+    }
+
+    if (gameInfo.serverLocation != NULL &&
+        strlen(gameInfo.serverLocation) == gameInfo.serverLocationSize)
+    {
+        serverLocation = std::string(gameInfo.serverLocation, gameInfo.serverLocationSize);
+    }
+
     if (gameInfo.privateKeySize != 0) {
       gameGuid =
           GetGudSdk::StartGame(gameInfo.titleId,
-                    std::string(gameInfo.privateKey, gameInfo.privateKeySize),
-                    std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
-                    std::string(gameInfo.gameMode, gameInfo.gameModeSize),
-                    std::string(gameInfo.serverLocation, gameInfo.serverLocationSize));
+                    privateKey,
+                    serverGuid,
+                    gameMode,
+                    serverLocation);
     } else {
       gameGuid = GetGudSdk::StartGame(
-                    std::string(gameInfo.serverGuid, gameInfo.serverGuidSize),
-                    std::string(gameInfo.gameMode, gameInfo.gameModeSize),
-                    std::string(gameInfo.serverLocation, gameInfo.serverLocationSize));
+                    serverGuid,
+                    gameMode,
+                    serverLocation);
     }
     strcpy(gameGuidOut, gameGuid.c_str());
   } catch (std::exception& _error) {
@@ -68,15 +97,36 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
  * Start a new match for an existing game
  **/
 int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
-
   std::string matchGuid;
   try {
-  matchGuid = GetGudSdk::StartMatch(
-      std::string(matchInfo.gameGuid, matchInfo.gameGuidSize),
-                 std::string(matchInfo.matchMode, matchInfo.matchModeSize),
-                 std::string(matchInfo.mapName, matchInfo.mapNameSize));
+    std::string gameGuid;
+    std::string matchMode;
+    std::string mapName;
 
-  strcpy(matchGuidOut, matchGuid.c_str());
+    if (matchInfo.gameGuid != NULL &&
+        strlen(matchInfo.gameGuid) == matchInfo.gameGuidSize)
+    {
+        gameGuid = std::string(matchInfo.gameGuid, matchInfo.gameGuidSize);
+    }
+
+    if (matchInfo.matchMode != NULL &&
+        strlen(matchInfo.matchMode) == matchInfo.matchModeSize)
+    {
+        matchMode = strlen(matchInfo.matchMode) != matchInfo.matchModeSize;
+    }
+
+    if (matchInfo.mapName != NULL &&
+        strlen(matchInfo.mapName) == matchInfo.mapNameSize)
+    {
+        mapName = std::string(matchInfo.mapName, matchInfo.mapNameSize);
+    }
+
+    matchGuid = GetGudSdk::StartMatch(
+                   gameGuid,
+                   matchMode,
+                   mapName);
+
+    strcpy(matchGuidOut, matchGuid.c_str());
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::StartMatch "
@@ -94,8 +144,15 @@ int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
 int MarkEndGame(char* gameGuid, int guidSize) {
   bool result = false;
   try {
-    result = GetGudSdk::MarkEndGame(std::string(gameGuid, guidSize));
-  }catch (std::exception& _error) {
+    std::string endGameGuid;
+    if (gameGuid != NULL && 
+        strlen(gameGuid) == guidSize)
+    {
+        endGameGuid = std::string(gameGuid, guidSize);
+    }
+
+    result = GetGudSdk::MarkEndGame(endGameGuid);
+  } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::MarkEndGame "
               "can not be sent: ") +
@@ -115,11 +172,33 @@ int SendAffectAction(struct BaseActionData baseData,
 {
   bool sendResult = false;
   try {
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string inAffectGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    if (affectGuid != NULL &&
+        strlen(affectGuid) == affectGuidSize)
+    {
+        inAffectGuid = std::string(affectGuid, affectGuidSize);
+    }
+
     GetGudSdk::AffectActionData* affectAction = new GetGudSdk::AffectActionData(
-      std::string(baseData.matchGuid, baseData.matchGuidSize),
+      matchGuid,
       baseData.actionTimeEpoch,
-      std::string(baseData.playerGuid, baseData.playerGuidSize),
-      std::string(affectGuid, affectGuidSize),
+      playerGuid,
+      inAffectGuid,
       static_cast<GetGudSdk::AffectState>(affectState));
     std::deque<GetGudSdk::BaseActionData*> actions = { affectAction };
     sendResult = GetGudSdk::SendActions(actions);
@@ -142,11 +221,33 @@ int SendAttackAction(BaseActionData baseData,
                      int weaponGuidSize) {
   bool sendResult = false;
   try {
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string inWeaponGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    if (weaponGuid != NULL &&
+        strlen(weaponGuid) == weaponGuidSize)
+    {
+        inWeaponGuid = std::string(weaponGuid, weaponGuidSize);
+    }
+
     GetGudSdk::AttackActionData* attackAction = new GetGudSdk::AttackActionData(
-        std::string(baseData.matchGuid, baseData.matchGuidSize),
+        matchGuid,
         baseData.actionTimeEpoch,
-        std::string(baseData.playerGuid, baseData.playerGuidSize),
-        std::string(weaponGuid, weaponGuidSize));
+        playerGuid,
+        inWeaponGuid);
     std::deque<GetGudSdk::BaseActionData*> actions = {attackAction};
     sendResult = GetGudSdk::SendActions(actions);
     delete attackAction;
@@ -171,13 +272,42 @@ int SendDamageAction(BaseActionData baseData,
                       int weaponGuidSize) {
   bool sendResult = false;
   try {
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string inVictimPlayerGuid;
+    std::string inWeaponGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    if (victimPlayerGuid != NULL &&
+        strlen(victimPlayerGuid) == victimPlayerGuidSize)
+    {
+        inVictimPlayerGuid = std::string(victimPlayerGuid, victimPlayerGuidSize);
+    }
+
+    if (weaponGuid != NULL &&
+        strlen(weaponGuid) == weaponGuidSize)
+    {
+        inWeaponGuid = std::string(weaponGuid, weaponGuidSize);
+    }
+
     GetGudSdk::DamageActionData* damageAction = new GetGudSdk::DamageActionData(
-        std::string(baseData.matchGuid, baseData.matchGuidSize),
+        matchGuid,
         baseData.actionTimeEpoch,
-        std::string(baseData.playerGuid, baseData.playerGuidSize),
-        std::string(victimPlayerGuid, victimPlayerGuidSize), 
+        playerGuid,
+        inVictimPlayerGuid,
         damageDone, 
-        std::string(weaponGuid, weaponGuidSize));
+        inWeaponGuid);
     std::deque<GetGudSdk::BaseActionData*> actions = {damageAction};
     sendResult = GetGudSdk::SendActions(actions);
     delete damageAction;
@@ -197,13 +327,29 @@ int SendDamageAction(BaseActionData baseData,
 int SendHealAction(BaseActionData baseData, float healthGained) {
   bool sendResult = false;
   try {
-  GetGudSdk::HealActionData* healAction = new GetGudSdk::HealActionData(
-      std::string(baseData.matchGuid, baseData.matchGuidSize),
-      baseData.actionTimeEpoch,
-      std::string(baseData.playerGuid, baseData.playerGuidSize), healthGained);
-  std::deque<GetGudSdk::BaseActionData*> actions = {healAction};
-  sendResult = GetGudSdk::SendActions(actions);
-  delete healAction;
+    std::string matchGuid;
+    std::string playerGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    GetGudSdk::HealActionData* healAction = new GetGudSdk::HealActionData(
+        matchGuid,
+        baseData.actionTimeEpoch,
+        playerGuid,
+        healthGained);
+    std::deque<GetGudSdk::BaseActionData*> actions = {healAction};
+    sendResult = GetGudSdk::SendActions(actions);
+    delete healAction;
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::SendDamageAction "
@@ -226,11 +372,33 @@ int SendSpawnAction(BaseActionData baseData,
                      RotationF rotation) {
   bool sendResult = false;
   try {
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string inCharacterGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    if (characterGuid != NULL &&
+        strlen(characterGuid) == characterGuidSize)
+    {
+        inCharacterGuid = std::string(characterGuid, characterGuidSize);
+    }
+
     GetGudSdk::SpawnActionData* spawnAction = new GetGudSdk::SpawnActionData(
-        std::string(baseData.matchGuid, baseData.matchGuidSize),
+        matchGuid,
         baseData.actionTimeEpoch,
-        std::string(baseData.playerGuid, baseData.playerGuidSize),
-        std::string(characterGuid, characterGuidSize), teamId, initialHealth,
+        playerGuid,
+        inCharacterGuid, teamId, initialHealth,
         *(GetGudSdk::PositionF*)&position, *(GetGudSdk::RotationF*)&rotation);
     std::deque<GetGudSdk::BaseActionData*> actions = {spawnAction};
     sendResult = GetGudSdk::SendActions(actions);
@@ -253,14 +421,36 @@ int SendDeathAction(BaseActionData baseData,
                     int attackerGuidSize) {
   bool sendResult = false;
   try {
-  GetGudSdk::DeathActionData* deathAction = new GetGudSdk::DeathActionData(
-      std::string(baseData.matchGuid, baseData.matchGuidSize),
-      baseData.actionTimeEpoch,
-      std::string(baseData.playerGuid, baseData.playerGuidSize),
-      std::string(attackerGuid, attackerGuidSize));
-  std::deque<GetGudSdk::BaseActionData*> actions = {deathAction};
-  sendResult = GetGudSdk::SendActions(actions);
-  delete deathAction;
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string inAttackerGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    if (attackerGuid != NULL &&
+        strlen(attackerGuid) == attackerGuidSize)
+    {
+        inAttackerGuid = std::string(attackerGuid, attackerGuidSize);
+    }
+
+    GetGudSdk::DeathActionData* deathAction = new GetGudSdk::DeathActionData(
+        matchGuid,
+        baseData.actionTimeEpoch,
+        playerGuid,
+        inAttackerGuid);
+    std::deque<GetGudSdk::BaseActionData*> actions = {deathAction};
+    sendResult = GetGudSdk::SendActions(actions);
+    delete deathAction;
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::SendDeathAction "
@@ -279,15 +469,30 @@ int SendPositionAction(BaseActionData baseData,
                         RotationF rotation) {
   bool sendResult = false;
   try {
-  GetGudSdk::PositionActionData* positionAction =
-      new GetGudSdk::PositionActionData(
-      std::string(baseData.matchGuid, baseData.matchGuidSize),
-      baseData.actionTimeEpoch,
-      std::string(baseData.playerGuid, baseData.playerGuidSize),
-          *(GetGudSdk::PositionF*)&position, *(GetGudSdk::RotationF*)&rotation);
-  std::deque<GetGudSdk::BaseActionData*> actions = {positionAction};
-  sendResult = GetGudSdk::SendActions(actions);
-  delete positionAction;
+    std::string matchGuid;
+    std::string playerGuid;
+
+    if (baseData.matchGuid != NULL &&
+        strlen(baseData.matchGuid) == baseData.matchGuidSize)
+    {
+        matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+    }
+
+    if (baseData.playerGuid != NULL &&
+        strlen(baseData.playerGuid) == baseData.playerGuidSize)
+    {
+        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+    }
+
+    GetGudSdk::PositionActionData* positionAction =
+        new GetGudSdk::PositionActionData(
+        matchGuid,
+        baseData.actionTimeEpoch,
+        playerGuid,
+            *(GetGudSdk::PositionF*)&position, *(GetGudSdk::RotationF*)&rotation);
+    std::deque<GetGudSdk::BaseActionData*> actions = {positionAction};
+    sendResult = GetGudSdk::SendActions(actions);
+    delete positionAction;
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::SendDeathAction "
@@ -306,19 +511,41 @@ int SendInMatchReport(ReportInfo reportInfo)
 {
   bool sendResult = false;
   try {
-  GetGudSdk::ReportInfo reportInfoOut;
+    std::string matchGuid;
+    std::string reporterName;
+    std::string suspectedPlayerGuid;
 
-  reportInfoOut.MatchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
-  reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
-  reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
-  reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
-  reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
-  reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
-  reportInfoOut.SuspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
-  reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
-  reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+    if (reportInfo.matchGuid != NULL &&
+        strlen(reportInfo.matchGuid) == reportInfo.matchGuidSize)
+    {
+        matchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+    }
 
-  sendResult = GetGudSdk::SendInMatchReport(reportInfoOut);
+    if (reportInfo.reporterName != NULL &&
+        strlen(reportInfo.reporterName) == reportInfo.reporterNameSize)
+    {
+        reporterName = strlen(reportInfo.reporterName) != reportInfo.reporterNameSize;
+    }
+
+    if (reportInfo.suspectedPlayerGuid != NULL &&
+        strlen(reportInfo.suspectedPlayerGuid) == reportInfo.suspectedPlayerGuidSize)
+    {
+        suspectedPlayerGuid = strlen(reportInfo.suspectedPlayerGuid) != reportInfo.suspectedPlayerGuidSize;
+    }
+
+    GetGudSdk::ReportInfo reportInfoOut;
+
+    reportInfoOut.MatchGuid = matchGuid;
+    reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
+    reportInfoOut.ReporterName = reporterName;
+    reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
+    reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+    reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
+    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid;
+    reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
+    reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+
+    sendResult = GetGudSdk::SendInMatchReport(reportInfoOut);
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::SendDeathAction "
@@ -337,13 +564,35 @@ int SendChatMessage(ChatMessageInfo messageInfo)
 {
   bool sendResult = false;
   try {
-  GetGudSdk::ChatMessageInfo messageInfoOut;
+    std::string matchGuid;
+    std::string playerGuid;
+    std::string message;
 
-  messageInfoOut.message = std::string(messageInfo.message, messageInfo.messageSize);
-  messageInfoOut.messageTimeEpoch = messageInfo.messageTimeEpoch;
-  messageInfoOut.playerGuid = std::string(messageInfo.playerGuid, messageInfo.playerGuidSize);
-  
-  sendResult = GetGudSdk::SendChatMessage(std::string(messageInfo.matchGuid, messageInfo.matchGuidSize), messageInfoOut);
+    if (messageInfo.matchGuid != NULL &&
+        strlen(messageInfo.matchGuid) == messageInfo.matchGuidSize)
+    {
+        matchGuid = std::string(messageInfo.matchGuid, messageInfo.matchGuidSize);
+    }
+
+    if (messageInfo.playerGuid != NULL &&
+        strlen(messageInfo.playerGuid) == messageInfo.playerGuidSize)
+    {
+        playerGuid = strlen(messageInfo.playerGuid) != messageInfo.playerGuidSize;
+    }
+
+    if (messageInfo.message != NULL &&
+        strlen(messageInfo.message) == messageInfo.messageSize)
+    {
+        message = strlen(messageInfo.message) != messageInfo.messageSize;
+    }
+
+    GetGudSdk::ChatMessageInfo messageInfoOut;
+
+    messageInfoOut.message = message;
+    messageInfoOut.messageTimeEpoch = messageInfo.messageTimeEpoch;
+    messageInfoOut.playerGuid = playerGuid;
+    
+    sendResult = GetGudSdk::SendChatMessage(matchGuid, messageInfoOut);
   } catch (std::exception& _error) {
       GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
           std::string("GetGudSdk::SendDeathAction "
@@ -364,13 +613,43 @@ int SendReport(int titleId,
 {
   bool sendResult = false;
   try {
+
+    std::string inPrivateKey;
+    std::string matchGuid;
+    std::string reporterName;
+    std::string suspectedPlayerGuid;
+
+    if (privateKey != NULL &&
+        strlen(privateKey) == privateKeySize)
+    {
+        inPrivateKey = std::string(privateKey, privateKeySize);
+    }
+
+    if (reportInfo.matchGuid != NULL &&
+        strlen(reportInfo.matchGuid) == reportInfo.matchGuidSize)
+    {
+        matchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+    }
+
+    if (reportInfo.reporterName != NULL &&
+        strlen(reportInfo.reporterName) == reportInfo.reporterNameSize)
+    {
+        reporterName = strlen(reportInfo.reporterName) != reportInfo.reporterNameSize;
+    }
+
+    if (reportInfo.suspectedPlayerGuid != NULL &&
+        strlen(reportInfo.suspectedPlayerGuid) == reportInfo.suspectedPlayerGuidSize)
+    {
+        suspectedPlayerGuid = strlen(reportInfo.suspectedPlayerGuid) != reportInfo.suspectedPlayerGuidSize;
+    }
+
     GetGudSdk::ReportInfo reportInfoOut;
     //required
-    reportInfoOut.MatchGuid = std::string(reportInfo.matchGuid, reportInfo.matchGuidSize);
+    reportInfoOut.MatchGuid = matchGuid;
     //required
     reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
     if (reportInfo.reporterNameSize > 0)
-      reportInfoOut.ReporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
+      reportInfoOut.ReporterName = reporterName;
     if (reportInfo.reporterSubType != -1)
       reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
     if (reportInfo.reporterType != -1)
@@ -378,7 +657,7 @@ int SendReport(int titleId,
     if (reportInfo.suggestedToxicityScore != -1)
       reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
     //required
-    reportInfoOut.SuspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
+    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid;
     if (reportInfo.tbTimeEpoch != -1)
       reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
     if (reportInfo.tbType != -1)
@@ -389,7 +668,7 @@ int SendReport(int titleId,
 
     if (privateKeySize > 0)
     {
-      sendResult = GetGudSdk::SendReports(titleId, std::string(privateKey, privateKeySize), reports);
+      sendResult = GetGudSdk::SendReports(titleId, inPrivateKey, reports);
     }
     else
     {
@@ -414,48 +693,123 @@ int UpdatePlayer(int titleId,
   char* privateKey, int privateKeySize, PlayerInfo player)
 {
   bool sendResult = false;
+  GetGudSdk::PlayerInfo playerOut;
+
   try {
-    GetGudSdk::PlayerInfo playerOut;
+    std::string inPrivateKey;
+    std::string playerEmail;
+    std::string playerGuid;
+    std::string PlayerCampaign;
+    std::string playerDevice;
+    std::string playerSuspectScore;
+    std::string playerGender;
+    std::string playerLocation;
+    std::string playerNickname;
+    std::string playerNotes;
+    std::string playerOS;
+    std::string playerReputation;
+    std::string playerStatus;
+
+    if (privateKey != NULL && strlen(privateKey) == privateKeySize) {
+        inPrivateKey = std::string(privateKey, privateKeySize);
+    }
+
+    if (player.playerEmail != NULL && strlen(player.playerEmail) == player.playerEmailSize) {
+        playerEmail = std::string(player.playerEmail, player.playerEmailSize);
+    }
+
+    if (player.playerGuid != NULL && strlen(player.playerGuid) == player.playerGuidSize) {
+        playerGuid = std::string(player.playerGuid, player.playerGuidSize);
+    }
+
+    if (player.PlayerCampaign != NULL && strlen(player.PlayerCampaign) == player.PlayerCampaignSize) {
+        PlayerCampaign = std::string(player.PlayerCampaign, player.PlayerCampaignSize);
+    }
+
+    if (player.playerDevice != NULL && strlen(player.playerDevice) == player.playerDeviceSize) {
+        playerDevice = std::string(player.playerDevice, player.playerDeviceSize);
+    }
+
+    if (player.playerSuspectScore != NULL && strlen(player.playerSuspectScore) == player.playerSuspectScoreSize) {
+        playerSuspectScore = std::string(player.playerSuspectScore, player.playerSuspectScoreSize);
+    }
+
+    if (player.playerGender != NULL && strlen(player.playerGender) == player.playerGenderSize) {
+        playerGender = std::string(player.playerGender, player.playerGenderSize);
+    }
+
+    if (player.playerLocation != NULL && strlen(player.playerLocation) == player.playerLocationSize) {
+        playerLocation = std::string(player.playerLocation, player.playerLocationSize);
+    }
+
+    if (player.playerNickname != NULL && strlen(player.playerNickname) == player.playerNicknameSize) {
+        playerNickname = std::string(player.playerNickname, player.playerNicknameSize);
+    }
+
+    if (player.playerNotes != NULL && strlen(player.playerNotes) == player.playerNotesSize) {
+        playerNotes = std::string(player.playerNotes, player.playerNotesSize);
+    }
+
+    if (player.playerOS != NULL && strlen(player.playerOS) == player.playerOSSize) {
+        playerOS = std::string(player.playerOS, player.playerOSSize);
+    }
+
+    if (player.playerReputation != NULL && strlen(player.playerReputation) == player.playerReputationSize) {
+        playerReputation = std::string(player.playerReputation, player.playerReputationSize);
+    }
+
+    if (player.playerStatus != NULL && strlen(player.playerStatus) == player.playerStatusSize) {
+        playerStatus = std::string(player.playerStatus, player.playerStatusSize);
+    }
+
     if (player.playerEmailSize > 0)
-      playerOut.PlayerEmail = std::string(player.playerEmail, player.playerEmailSize);
+      playerOut.PlayerEmail = playerEmail;
     //required
-    playerOut.PlayerGuid = std::string(player.playerGuid, player.playerGuidSize);
+    playerOut.PlayerGuid = playerGuid;
     if (player.playerJoinDateEpoch != -1)
       playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
     if (player.playerNicknameSize > 0)
-      playerOut.PlayerNickname = std::string(player.playerNickname, player.playerNicknameSize);
+      playerOut.PlayerNickname = player.playerNickname;
     if (player.playerRank != -1)
       playerOut.PlayerRank = player.playerRank;
     if (player.playerSuspectScoreSize > 0)
-      playerOut.PlayerSuspectScore = std::string(player.playerSuspectScore, player.playerSuspectScoreSize);
+      playerOut.PlayerSuspectScore = player.playerSuspectScore;
     if (player.playerReputationSize > 0)
-        playerOut.PlayerReputation = std::string(player.playerReputation, player.playerReputationSize);
+        playerOut.PlayerReputation = player.playerReputation;
     if (player.playerStatusSize > 0)
-        playerOut.PlayerStatus = std::string(player.playerStatus, player.playerStatusSize);
+        playerOut.PlayerStatus = player.playerStatus;
     if (player.PlayerCampaignSize > 0)
-        playerOut.PlayerCampaign = std::string(player.PlayerCampaign, player.PlayerCampaignSize);
+        playerOut.PlayerCampaign = player.PlayerCampaign;
     if (player.playerNotesSize > 0)
-        playerOut.PlayerNotes = std::string(player.playerNotes, player.playerNotesSize);
+        playerOut.PlayerNotes = player.playerNotes;
     if (player.playerDeviceSize > 0)
-        playerOut.PlayerDevice = std::string(player.playerDevice, player.playerDeviceSize);
+        playerOut.PlayerDevice = playerDevice;
     if (player.playerOSSize > 0)
-        playerOut.PlayerOS = std::string(player.playerOS, player.playerOSSize);
+        playerOut.PlayerOS = playerOS;
     if (player.playerAge != -1)
         playerOut.PlayerAge = player.playerAge;
     if (player.playerGenderSize > 0)
-        playerOut.PlayerGender = std::string(player.playerGender, player.playerGenderSize);
+        playerOut.PlayerGender = playerGender;
     if (player.playerLocationSize > 0)
-        playerOut.PlayerLocation = std::string(player.playerLocation, player.playerLocationSize);
-    if (player.transactionsSize > 0)
+        playerOut.PlayerLocation = playerLocation;
+    if (player.transactions != NULL && player.transactionsSize > 0)
     {
         std::vector<GetGudSdk::PlayerTransactions> transactions;
         for (int i = 0; i < player.transactionsSize; i++)
         {
+            std::string transactionGuid;
+            std::string transactionName;
             PlayerTransactions& transaction_ref = player.transactions[i];
+            if (transaction_ref.TransactionGuid != NULL && strlen(transaction_ref.TransactionGuid) == transaction_ref.TransactionGuidSize) {
+                transactionGuid = std::string(transaction_ref.TransactionGuid, transaction_ref.TransactionGuidSize);
+            }
+            if (transaction_ref.TransactionName != NULL && strlen(transaction_ref.TransactionName) == transaction_ref.TransactionNameSize) {
+                transactionName = std::string(transaction_ref.TransactionName, transaction_ref.TransactionNameSize);
+            }
             GetGudSdk::PlayerTransactions playerTransaction =
             {
-                std::string(transaction_ref.TransactionGuid, transaction_ref.TransactionGuidSize),
-                std::string(transaction_ref.TransactionName, transaction_ref.TransactionNameSize),
+                transactionGuid,
+                transactionName,
                 transaction_ref.TransactionDateEpoch,
                 transaction_ref.TransactionValueUSD
             };
@@ -468,7 +822,7 @@ int UpdatePlayer(int titleId,
     players.push_back(playerOut);
     if (privateKeySize > 0)
     {
-      sendResult = UpdatePlayers(titleId, std::string(privateKey, privateKeySize), players);
+      sendResult = UpdatePlayers(titleId, inPrivateKey, players);
     }
     else
     {
