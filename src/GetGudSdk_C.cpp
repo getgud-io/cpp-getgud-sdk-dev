@@ -112,7 +112,7 @@ int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
     if (matchInfo.matchMode != NULL &&
         strlen(matchInfo.matchMode) == matchInfo.matchModeSize)
     {
-        matchMode = strlen(matchInfo.matchMode) != matchInfo.matchModeSize;
+        matchMode = std::string(matchInfo.matchMode, matchInfo.matchModeSize);
     }
 
     if (matchInfo.mapName != NULL &&
@@ -185,7 +185,7 @@ int SendAffectAction(struct BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     if (affectGuid != NULL &&
@@ -234,7 +234,7 @@ int SendAttackAction(BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     if (weaponGuid != NULL &&
@@ -286,7 +286,7 @@ int SendDamageAction(BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     if (victimPlayerGuid != NULL &&
@@ -339,7 +339,7 @@ int SendHealAction(BaseActionData baseData, float healthGained) {
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     GetGudSdk::HealActionData* healAction = new GetGudSdk::HealActionData(
@@ -385,7 +385,7 @@ int SendSpawnAction(BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     if (characterGuid != NULL &&
@@ -434,7 +434,7 @@ int SendDeathAction(BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     if (attackerGuid != NULL &&
@@ -481,7 +481,7 @@ int SendPositionAction(BaseActionData baseData,
     if (baseData.playerGuid != NULL &&
         strlen(baseData.playerGuid) == baseData.playerGuidSize)
     {
-        playerGuid = strlen(baseData.playerGuid) != baseData.playerGuidSize;
+        playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
     GetGudSdk::PositionActionData* positionAction =
@@ -524,13 +524,13 @@ int SendInMatchReport(ReportInfo reportInfo)
     if (reportInfo.reporterName != NULL &&
         strlen(reportInfo.reporterName) == reportInfo.reporterNameSize)
     {
-        reporterName = strlen(reportInfo.reporterName) != reportInfo.reporterNameSize;
+        reporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
     }
 
     if (reportInfo.suspectedPlayerGuid != NULL &&
         strlen(reportInfo.suspectedPlayerGuid) == reportInfo.suspectedPlayerGuidSize)
     {
-        suspectedPlayerGuid = strlen(reportInfo.suspectedPlayerGuid) != reportInfo.suspectedPlayerGuidSize;
+        suspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
     }
 
     GetGudSdk::ReportInfo reportInfoOut;
@@ -577,13 +577,13 @@ int SendChatMessage(ChatMessageInfo messageInfo)
     if (messageInfo.playerGuid != NULL &&
         strlen(messageInfo.playerGuid) == messageInfo.playerGuidSize)
     {
-        playerGuid = strlen(messageInfo.playerGuid) != messageInfo.playerGuidSize;
+        playerGuid = std::string(messageInfo.playerGuid, messageInfo.playerGuidSize);
     }
 
     if (messageInfo.message != NULL &&
         strlen(messageInfo.message) == messageInfo.messageSize)
     {
-        message = strlen(messageInfo.message) != messageInfo.messageSize;
+        message = std::string(messageInfo.message, messageInfo.messageSize);
     }
 
     GetGudSdk::ChatMessageInfo messageInfoOut;
@@ -634,13 +634,13 @@ int SendReport(int titleId,
     if (reportInfo.reporterName != NULL &&
         strlen(reportInfo.reporterName) == reportInfo.reporterNameSize)
     {
-        reporterName = strlen(reportInfo.reporterName) != reportInfo.reporterNameSize;
+        reporterName = std::string(reportInfo.reporterName, reportInfo.reporterNameSize);
     }
 
     if (reportInfo.suspectedPlayerGuid != NULL &&
         strlen(reportInfo.suspectedPlayerGuid) == reportInfo.suspectedPlayerGuidSize)
     {
-        suspectedPlayerGuid = strlen(reportInfo.suspectedPlayerGuid) != reportInfo.suspectedPlayerGuidSize;
+        suspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
     }
 
     GetGudSdk::ReportInfo reportInfoOut;
