@@ -25,7 +25,7 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
       break;
     case 2:
       outAction =
-          new GetGudSdk::DeathActionData(matchGuid, curTimeEpoch, "player-0");
+          new GetGudSdk::DeathActionData(matchGuid, curTimeEpoch, "player-0", "attacker_guid");
       break;
     case 3:
       outAction = new GetGudSdk::HealActionData(matchGuid, curTimeEpoch,
@@ -109,7 +109,8 @@ int main() {
   // Start a Game:
   std::string gameGuid = GetGudSdk::StartGame(1, "private_key",
                                               serverGuid,  // serverGuid
-                                              gameMode     // gameMode
+                                              gameMode,     // gameMode
+					      "UL"
   );
 
   std::string matchGuid = GetGudSdk::StartMatch(gameGuid,
