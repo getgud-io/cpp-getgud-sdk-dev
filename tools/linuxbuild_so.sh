@@ -31,10 +31,10 @@ fi
 
 cd ${LIBS_DIR}zlib/
 
-if [ ! -e "${LIBS_DIR}zlib/zlib.h" ]; then
+if [ ! -e "${LIBS_DIR}zlib/include/zlib.h" ]; then
 ./configure -prefix=${LIBS_DIR}zlib/ --enable-shared
 
-make make CFLAGS="-fPIC"
+make CFLAGS="-fPIC"
 make install
 fi
 
