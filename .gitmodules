@@ -3,4 +3,4 @@
 	url = https://github.com/madler/zlib.git
 [submodule "libs/libcurl"]
 	path = libs/libcurl
-	url = git@github.com:curl/curl.git
+	url = https://github.com/curl/curl.git
