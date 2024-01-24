@@ -43,10 +43,13 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 
 add_compile_options(-fPIC)
 
+if ((UNIX AND LIBCURL) OR NOT UNIX)
 file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
 list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
 list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
+endif()
+
 if (UNIX)
 file(GLOB ZLIB_LIB "../libs/*zlib/")
 else()
