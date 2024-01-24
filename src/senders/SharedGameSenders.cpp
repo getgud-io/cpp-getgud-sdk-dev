@@ -1,5 +1,5 @@
 #include "SharedGameSenders.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 SharedGameSenders sharedGameSenders;
 }

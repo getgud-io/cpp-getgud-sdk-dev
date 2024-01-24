@@ -1,13 +1,13 @@
-﻿using GetGudSdk;
+﻿using GetgudSDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-//using static GetGudSdk.SDKWrapper;
+//using static GetgudSDK.SDKWrapper;
 
-namespace GetGudSdk
+namespace GetgudSDK
 {
     public enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
     public enum AffectState { Attach, Activate, Deactivate, Detach };
@@ -37,9 +37,9 @@ namespace GetGudSdk
     };
 }
 
-namespace GetGudSdk_calls
+namespace GetgudSDK_calls
 {
-    static class GetGudSdk_calls
+    static class GetgudSDK_calls
     {
 #pragma warning disable CS8601, CS0649
 
@@ -196,7 +196,7 @@ namespace GetGudSdk_calls
 		//
 		// Linux deploy path
 		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-        const string dllPath = "../../../../../../lib/libGetGudSdk.so";
+        const string dllPath = "../../../../../../lib/libGetgudSDK.so";
 
 
         [DllImport(dllPath)]

@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "../include/GetGudSdk.h"
-#include "../include/GetGudSdk_C.h"
+#include "../include/GetgudSDK.h"
+#include "../include/GetgudSDK_C.h"
 #include "logger/Logger.h"
 #ifdef __linux__
 #include <cstring>
 #endif
 
-namespace GetGudSdk {
-    extern GetGudSdk::Logger logger;
+namespace GetgudSDK {
+    extern GetgudSDK::Logger logger;
 }
 
 //C functions header
@@ -20,10 +20,10 @@ extern "C" {
 int init() {
   bool result = false;
   try {
-      result = GetGudSdk::Init();
+      result = GetgudSDK::Init();
   }catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::init() "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::init() "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -70,21 +70,21 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
 
     if (gameInfo.privateKeySize != 0) {
       gameGuid =
-          GetGudSdk::StartGame(gameInfo.titleId,
+          GetgudSDK::StartGame(gameInfo.titleId,
                     privateKey,
                     serverGuid,
                     gameMode,
                     serverLocation);
     } else {
-      gameGuid = GetGudSdk::StartGame(
+      gameGuid = GetgudSDK::StartGame(
                     serverGuid,
                     gameMode,
                     serverLocation);
     }
     strcpy(gameGuidOut, gameGuid.c_str());
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::StartGame-> "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::StartGame-> "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -121,15 +121,15 @@ int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
         mapName = std::string(matchInfo.mapName, matchInfo.mapNameSize);
     }
 
-    matchGuid = GetGudSdk::StartMatch(
+    matchGuid = GetgudSDK::StartMatch(
                    gameGuid,
                    matchMode,
                    mapName);
 
     strcpy(matchGuidOut, matchGuid.c_str());
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::StartMatch "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::StartMatch "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -151,10 +151,10 @@ int MarkEndGame(char* gameGuid, int guidSize) {
         endGameGuid = std::string(gameGuid, guidSize);
     }
 
-    result = GetGudSdk::MarkEndGame(endGameGuid);
+    result = GetgudSDK::MarkEndGame(endGameGuid);
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::MarkEndGame "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::MarkEndGame "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -194,18 +194,18 @@ int SendAffectAction(struct BaseActionData baseData,
         inAffectGuid = std::string(affectGuid, affectGuidSize);
     }
 
-    GetGudSdk::AffectActionData* affectAction = new GetGudSdk::AffectActionData(
+    GetgudSDK::AffectActionData* affectAction = new GetgudSDK::AffectActionData(
       matchGuid,
       baseData.actionTimeEpoch,
       playerGuid,
       inAffectGuid,
-      static_cast<GetGudSdk::AffectState>(affectState));
-    std::deque<GetGudSdk::BaseActionData*> actions = { affectAction };
-    sendResult = GetGudSdk::SendActions(actions);
+      static_cast<GetgudSDK::AffectState>(affectState));
+    std::deque<GetgudSDK::BaseActionData*> actions = { affectAction };
+    sendResult = GetgudSDK::SendActions(actions);
     delete affectAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendAffectAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendAffectAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -243,17 +243,17 @@ int SendAttackAction(BaseActionData baseData,
         inWeaponGuid = std::string(weaponGuid, weaponGuidSize);
     }
 
-    GetGudSdk::AttackActionData* attackAction = new GetGudSdk::AttackActionData(
+    GetgudSDK::AttackActionData* attackAction = new GetgudSDK::AttackActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
         inWeaponGuid);
-    std::deque<GetGudSdk::BaseActionData*> actions = {attackAction};
-    sendResult = GetGudSdk::SendActions(actions);
+    std::deque<GetgudSDK::BaseActionData*> actions = {attackAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete attackAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendAttackAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendAttackAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -301,19 +301,19 @@ int SendDamageAction(BaseActionData baseData,
         inWeaponGuid = std::string(weaponGuid, weaponGuidSize);
     }
 
-    GetGudSdk::DamageActionData* damageAction = new GetGudSdk::DamageActionData(
+    GetgudSDK::DamageActionData* damageAction = new GetgudSDK::DamageActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
         inVictimPlayerGuid,
         damageDone, 
         inWeaponGuid);
-    std::deque<GetGudSdk::BaseActionData*> actions = {damageAction};
-    sendResult = GetGudSdk::SendActions(actions);
+    std::deque<GetgudSDK::BaseActionData*> actions = {damageAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete damageAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDamageAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDamageAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -342,17 +342,17 @@ int SendHealAction(BaseActionData baseData, float healthGained) {
         playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
-    GetGudSdk::HealActionData* healAction = new GetGudSdk::HealActionData(
+    GetgudSDK::HealActionData* healAction = new GetgudSDK::HealActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
         healthGained);
-    std::deque<GetGudSdk::BaseActionData*> actions = {healAction};
-    sendResult = GetGudSdk::SendActions(actions);
+    std::deque<GetgudSDK::BaseActionData*> actions = {healAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete healAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDamageAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDamageAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -394,18 +394,18 @@ int SendSpawnAction(BaseActionData baseData,
         inCharacterGuid = std::string(characterGuid, characterGuidSize);
     }
 
-    GetGudSdk::SpawnActionData* spawnAction = new GetGudSdk::SpawnActionData(
+    GetgudSDK::SpawnActionData* spawnAction = new GetgudSDK::SpawnActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
         inCharacterGuid, teamId, initialHealth,
-        *(GetGudSdk::PositionF*)&position, *(GetGudSdk::RotationF*)&rotation);
-    std::deque<GetGudSdk::BaseActionData*> actions = {spawnAction};
-    sendResult = GetGudSdk::SendActions(actions);
+        *(GetgudSDK::PositionF*)&position, *(GetgudSDK::RotationF*)&rotation);
+    std::deque<GetgudSDK::BaseActionData*> actions = {spawnAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete spawnAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDamageAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDamageAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -443,17 +443,17 @@ int SendDeathAction(BaseActionData baseData,
         inAttackerGuid = std::string(attackerGuid, attackerGuidSize);
     }
 
-    GetGudSdk::DeathActionData* deathAction = new GetGudSdk::DeathActionData(
+    GetgudSDK::DeathActionData* deathAction = new GetgudSDK::DeathActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
         inAttackerGuid);
-    std::deque<GetGudSdk::BaseActionData*> actions = {deathAction};
-    sendResult = GetGudSdk::SendActions(actions);
+    std::deque<GetgudSDK::BaseActionData*> actions = {deathAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete deathAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDeathAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDeathAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -484,18 +484,18 @@ int SendPositionAction(BaseActionData baseData,
         playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
     }
 
-    GetGudSdk::PositionActionData* positionAction =
-        new GetGudSdk::PositionActionData(
+    GetgudSDK::PositionActionData* positionAction =
+        new GetgudSDK::PositionActionData(
         matchGuid,
         baseData.actionTimeEpoch,
         playerGuid,
-            *(GetGudSdk::PositionF*)&position, *(GetGudSdk::RotationF*)&rotation);
-    std::deque<GetGudSdk::BaseActionData*> actions = {positionAction};
-    sendResult = GetGudSdk::SendActions(actions);
+            *(GetgudSDK::PositionF*)&position, *(GetgudSDK::RotationF*)&rotation);
+    std::deque<GetgudSDK::BaseActionData*> actions = {positionAction};
+    sendResult = GetgudSDK::SendActions(actions);
     delete positionAction;
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDeathAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDeathAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -533,22 +533,22 @@ int SendInMatchReport(ReportInfo reportInfo)
         suspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
     }
 
-    GetGudSdk::ReportInfo reportInfoOut;
+    GetgudSDK::ReportInfo reportInfoOut;
 
     reportInfoOut.MatchGuid = matchGuid;
     reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
     reportInfoOut.ReporterName = reporterName;
-    reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
-    reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+    reportInfoOut.ReporterSubType = static_cast<GetgudSDK::ReporterSubtype>(reportInfo.reporterSubType);
+    reportInfoOut.ReporterType = static_cast<GetgudSDK::ReporterType>(reportInfo.reporterType);
     reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
     reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid;
     reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
-    reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+    reportInfoOut.TbType = static_cast<GetgudSDK::TbType>(reportInfo.tbType);
 
-    sendResult = GetGudSdk::SendInMatchReport(reportInfoOut);
+    sendResult = GetgudSDK::SendInMatchReport(reportInfoOut);
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDeathAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDeathAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -586,16 +586,16 @@ int SendChatMessage(ChatMessageInfo messageInfo)
         message = std::string(messageInfo.message, messageInfo.messageSize);
     }
 
-    GetGudSdk::ChatMessageInfo messageInfoOut;
+    GetgudSDK::ChatMessageInfo messageInfoOut;
 
     messageInfoOut.message = message;
     messageInfoOut.messageTimeEpoch = messageInfo.messageTimeEpoch;
     messageInfoOut.playerGuid = playerGuid;
     
-    sendResult = GetGudSdk::SendChatMessage(matchGuid, messageInfoOut);
+    sendResult = GetgudSDK::SendChatMessage(matchGuid, messageInfoOut);
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDeathAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDeathAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -643,7 +643,7 @@ int SendReport(int titleId,
         suspectedPlayerGuid = std::string(reportInfo.suspectedPlayerGuid, reportInfo.suspectedPlayerGuidSize);
     }
 
-    GetGudSdk::ReportInfo reportInfoOut;
+    GetgudSDK::ReportInfo reportInfoOut;
     //required
     reportInfoOut.MatchGuid = matchGuid;
     //required
@@ -651,9 +651,9 @@ int SendReport(int titleId,
     if (reportInfo.reporterNameSize > 0)
       reportInfoOut.ReporterName = reporterName;
     if (reportInfo.reporterSubType != -1)
-      reportInfoOut.ReporterSubType = static_cast<GetGudSdk::ReporterSubtype>(reportInfo.reporterSubType);
+      reportInfoOut.ReporterSubType = static_cast<GetgudSDK::ReporterSubtype>(reportInfo.reporterSubType);
     if (reportInfo.reporterType != -1)
-      reportInfoOut.ReporterType = static_cast<GetGudSdk::ReporterType>(reportInfo.reporterType);
+      reportInfoOut.ReporterType = static_cast<GetgudSDK::ReporterType>(reportInfo.reporterType);
     if (reportInfo.suggestedToxicityScore != -1)
       reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
     //required
@@ -661,22 +661,22 @@ int SendReport(int titleId,
     if (reportInfo.tbTimeEpoch != -1)
       reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
     if (reportInfo.tbType != -1)
-      reportInfoOut.TbType = static_cast<GetGudSdk::TbType>(reportInfo.tbType);
+      reportInfoOut.TbType = static_cast<GetgudSDK::TbType>(reportInfo.tbType);
 
-    std::deque<GetGudSdk::ReportInfo> reports;
+    std::deque<GetgudSDK::ReportInfo> reports;
     reports.push_back(reportInfoOut);
 
     if (privateKeySize > 0)
     {
-      sendResult = GetGudSdk::SendReports(titleId, inPrivateKey, reports);
+      sendResult = GetgudSDK::SendReports(titleId, inPrivateKey, reports);
     }
     else
     {
-      sendResult = GetGudSdk::SendReports(reports);
+      sendResult = GetgudSDK::SendReports(reports);
     }
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::SendDeathAction "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::SendDeathAction "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -693,7 +693,7 @@ int UpdatePlayer(int titleId,
   char* privateKey, int privateKeySize, PlayerInfo player)
 {
   bool sendResult = false;
-  GetGudSdk::PlayerInfo playerOut;
+  GetgudSDK::PlayerInfo playerOut;
 
   try {
     std::string inPrivateKey;
@@ -794,7 +794,7 @@ int UpdatePlayer(int titleId,
         playerOut.PlayerLocation = playerLocation;
     if (player.transactions != NULL && player.transactionsSize > 0)
     {
-        std::vector<GetGudSdk::PlayerTransactions> transactions;
+        std::vector<GetgudSDK::PlayerTransactions> transactions;
         for (int i = 0; i < player.transactionsSize; i++)
         {
             std::string transactionGuid;
@@ -806,7 +806,7 @@ int UpdatePlayer(int titleId,
             if (transaction_ref.TransactionName != NULL && strlen(transaction_ref.TransactionName) == transaction_ref.TransactionNameSize) {
                 transactionName = std::string(transaction_ref.TransactionName, transaction_ref.TransactionNameSize);
             }
-            GetGudSdk::PlayerTransactions playerTransaction =
+            GetgudSDK::PlayerTransactions playerTransaction =
             {
                 transactionGuid,
                 transactionName,
@@ -818,7 +818,7 @@ int UpdatePlayer(int titleId,
         playerOut.Transactions = transactions;
     }
 
-    std::deque<GetGudSdk::PlayerInfo> players;
+    std::deque<GetgudSDK::PlayerInfo> players;
     players.push_back(playerOut);
     if (privateKeySize > 0)
     {
@@ -829,8 +829,8 @@ int UpdatePlayer(int titleId,
       sendResult = UpdatePlayers(players);
     }
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::UpdatePlayer "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::UpdatePlayer "
               "can not be sent: ") +
           std::string(_error.what()));
   }
@@ -843,10 +843,10 @@ int UpdatePlayer(int titleId,
  **/
 void dispose() {
   try {
-  GetGudSdk::Dispose();
+  GetgudSDK::Dispose();
   } catch (std::exception& _error) {
-      GetGudSdk::logger.Log(GetGudSdk::LogType::FATAL,
-          std::string("GetGudSdk::Dispose "
+      GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+          std::string("GetgudSDK::Dispose "
               "can not be called: ") +
           std::string(_error.what()));
   }

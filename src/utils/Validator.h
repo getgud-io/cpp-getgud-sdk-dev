@@ -1,6 +1,6 @@
 #include <string>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 namespace Validator {
 bool ValidateItemValue(int sdkValue, int minAllowedValue, int maxAllowedValue);
 bool ValidateItemValue(unsigned int sdkValue,
@@ -20,4 +20,4 @@ bool ValidateStringCharsSpecial(std::string& sdkString);
 bool ValidateGuid(std::string& guid);
 bool ValidateActionType(unsigned int actionType);
 }  // namespace Validator
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

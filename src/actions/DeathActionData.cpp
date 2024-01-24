@@ -3,7 +3,7 @@
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 extern Config sdkConfig;
 
@@ -81,4 +81,4 @@ std::string DeathActionData::ToStringMeta() {
 DeathActionData* DeathActionData::Clone() {
   return new DeathActionData(*this);
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

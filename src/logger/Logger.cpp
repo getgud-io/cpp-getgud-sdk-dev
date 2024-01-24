@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 Logger logger;  // const initialization at this stage
 
 extern Config sdkConfig;
@@ -139,4 +139,4 @@ void Logger::Log(LogType logType, std::string logString) {
     WriteToFile(current_time + messageTag + logString + messageEnd);
   }
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

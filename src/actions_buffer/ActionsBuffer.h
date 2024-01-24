@@ -7,7 +7,7 @@
 #include "../../include/actions/BaseActionData.h"
 #include "../utils/Utils.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 class ActionsBuffer {
  private:
@@ -23,4 +23,4 @@ class ActionsBuffer {
   unsigned int GetAverageSizeInBytes();
   void Dispose();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

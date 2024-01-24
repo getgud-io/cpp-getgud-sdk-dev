@@ -28,7 +28,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern ActionsBuffer actionsBuffer;
 extern GameContainer gameContainer;
@@ -476,4 +476,4 @@ GameSender::~GameSender() {
     curl_slist_free_all(m_throttleHeaders);
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

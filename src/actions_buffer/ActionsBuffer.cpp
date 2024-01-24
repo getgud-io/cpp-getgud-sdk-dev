@@ -7,7 +7,7 @@
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 extern Logger logger;
 
@@ -111,4 +111,4 @@ void ActionsBuffer::Dispose() {
   m_actionsBufferLocker.unlock();
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

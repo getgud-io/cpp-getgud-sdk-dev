@@ -11,7 +11,7 @@
 #include <stdio.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 
 /**
@@ -214,4 +214,4 @@ bool PlayerData::IsValid() {
 
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

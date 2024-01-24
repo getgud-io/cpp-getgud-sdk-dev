@@ -3,7 +3,7 @@
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 GameContainer gameContainer;
 
@@ -514,4 +514,4 @@ void GameContainer::Dispose() {
   m_gameContainerMutex.unlock();
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

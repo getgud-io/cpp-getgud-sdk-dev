@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "MatchData.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class GameData {
  private:
   //  holds pointers to matches of the game which you can get by matchGuid
@@ -56,4 +56,4 @@ class GameData {
   void Dispose();
   bool IsValid();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

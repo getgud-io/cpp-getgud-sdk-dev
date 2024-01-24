@@ -5,7 +5,7 @@
 
 #include "../../include/actions/Helpers.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class Logger {
  private:
   std::mutex m_writeMutex;
@@ -19,4 +19,4 @@ class Logger {
   void Log(LogType logType, std::string logString);
   void WriteActionToFile(std::string fileName, std::string outString);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

@@ -9,7 +9,7 @@
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 extern Zipper zipper;
 extern Logger logger;
@@ -541,4 +541,4 @@ bool MatchData::IsValid() {
   return isActionValid;
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

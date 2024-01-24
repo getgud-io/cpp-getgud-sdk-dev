@@ -3,7 +3,7 @@
 #include "../../include/actions/Helpers.h"
 #include "../config/Config.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 
 namespace Validator {
@@ -140,4 +140,4 @@ bool ValidateActionType(unsigned int actionType) {
 }
 
 }  // namespace Validator
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

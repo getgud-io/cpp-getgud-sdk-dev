@@ -4,7 +4,7 @@
 #include "../utils/Validator.h"
 #include "../utils/Utils.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 extern Config sdkConfig;
 
@@ -96,4 +96,4 @@ std::string DamageActionData::ToStringMeta() {
 DamageActionData* DamageActionData::Clone() {
   return new DamageActionData(*this);
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

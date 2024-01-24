@@ -2,7 +2,7 @@
 #include "Zip.h"
 #include "../../pch.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 Zipper zipper;
 
 // Only this chars are used in base64 encoding
@@ -97,4 +97,4 @@ bool Zipper::CompressString(std::string& inString,
 
   return compressedSuccess;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

@@ -11,7 +11,7 @@
 std::random_device rd;
 std::uniform_int_distribution<int> dist(0, 15);
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 
 /**
@@ -151,4 +151,4 @@ std::string ShortenDecimalNumber(std::string decimalIn) {
   } 
    return decimalIn; 
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

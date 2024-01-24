@@ -24,7 +24,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern Config sdkConfig;
 extern SharedPlayerUpdaters sharedPlayerUpdaters;
@@ -284,4 +284,4 @@ void PlayerUpdater::Dispose() {
   }
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

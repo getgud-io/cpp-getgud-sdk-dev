@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "../include/GetGudSdk.h"
+#include "../include/GetgudSDK.h"
 #include <exception>
 #include <string>
 #include "config/Config.h"
@@ -10,7 +10,7 @@
 #include "senders/report_sender/ReportSender.h"
 #include "utils/Utils.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern SharedGameSenders sharedGameSenders;
 extern SharedPlayerUpdaters sharedPlayerUpdaters;
 extern SharedReportSenders sharedReportSenders;
@@ -46,7 +46,7 @@ bool Init() {
     sdkConfig.logToFile = true;
     logger.Log(
         LogType::FATAL,
-        std::string("GetGudSdk::Init->Couldn't initialize Getgud SDK: ") +
+        std::string("GetgudSDK::Init->Couldn't initialize Getgud SDK: ") +
             std::string(_error.what()));
     sdkConfig.logToFile = false;
   }
@@ -67,7 +67,7 @@ std::string StartGame(int titleId,
 
   try {
     if (sharedGameSenders.gameSenders.empty()) {
-      GetGudSdk::GameSender* gameSender = nullptr;
+      GetgudSDK::GameSender* gameSender = nullptr;
       {  // lock_guard scope
         // Create first Game Sender, if hypermode is on there will be more than
         // 1
@@ -80,7 +80,7 @@ std::string StartGame(int titleId,
     gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode, serverLocation);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::StartGame->Couldn't start new game: ") +
+               std::string("GetgudSDK::StartGame->Couldn't start new game: ") +
                    std::string(_error.what()));
   }
 
@@ -97,7 +97,7 @@ std::string StartGame(std::string serverGuid, std::string gameMode, std::string 
 
   try {
      if (sharedGameSenders.gameSenders.empty()) {
-      GetGudSdk::GameSender* gameSender = nullptr;
+      GetgudSDK::GameSender* gameSender = nullptr;
       {  // lock_guard scope
         // Create first Game Sender, if hypermode is on there will be more than
         // 1
@@ -114,7 +114,7 @@ std::string StartGame(std::string serverGuid, std::string gameMode, std::string 
     if (titleIdHolder == nullptr || privateKeyHolder == nullptr) {
       logger.Log(LogType::FATAL,
                  std::string(
-                     "GetGudSdk::StartGame->Environment variables GETGUD_TITLE_ID and "
+                     "GetgudSDK::StartGame->Environment variables GETGUD_TITLE_ID and "
                      "GETGUD_PRIVATE_KEY are required"));
     }
 
@@ -125,7 +125,7 @@ std::string StartGame(std::string serverGuid, std::string gameMode, std::string 
                                      serverGuid, gameMode, serverLocation);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::StartGame->Couldn't start new game") +
+               std::string("GetgudSDK::StartGame->Couldn't start new game") +
                    std::string(_error.what()));
   }
 
@@ -147,7 +147,7 @@ std::string StartMatch(std::string gameGuid,
   } catch (std::exception& _error) {
     logger.Log(
         LogType::FATAL,
-        std::string("GetGudSdk::StartMatch->Couldn't start new match: ") +
+        std::string("GetgudSDK::StartMatch->Couldn't start new match: ") +
             std::string(_error.what()));
   }
 
@@ -165,7 +165,7 @@ bool MarkEndGame(std::string gameGuid) {
     gameEnded = gameContainer.MarkEndGame(gameGuid);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::MarkEndGame->Couldn't end game: ") +
+               std::string("GetgudSDK::MarkEndGame->Couldn't end game: ") +
                    std::string(_error.what()));
   }
 
@@ -185,7 +185,7 @@ bool SendInMatchReport(ReportInfo reportInfo) {
     logger.Log(
         LogType::FATAL,
         std::string(
-            "GetGudSdk::SendInMatchReport->Couldn't add in match report: ") +
+            "GetgudSDK::SendInMatchReport->Couldn't add in match report: ") +
             std::string(_error.what()));
   }
 
@@ -205,7 +205,7 @@ bool SendChatMessage(std::string matchGuid, ChatMessageInfo messageInfo) {
     logger.Log(
         LogType::FATAL,
         std::string(
-            "GetGudSdk::SendChatMessage->Couldn't send match chat message: ") +
+            "GetgudSDK::SendChatMessage->Couldn't send match chat message: ") +
             std::string(_error.what()));
   }
 
@@ -224,7 +224,7 @@ bool SendActions(std::deque<BaseActionData*> actions) {
     actionsSize = actions.size();
     actionsSent = actionsBuffer.AddActions(actions);
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendActions->Couldn't "
+    logger.Log(LogType::FATAL, std::string("GetgudSDK::SendActions->Couldn't "
                                            "send actions to Action Buffer: ") +
                                    std::string(_error.what()));
   }
@@ -245,7 +245,7 @@ bool SendAction(BaseActionData* action) {
     sendResult = SendActions(actions);
   } catch (std::exception& _error)
   {
-      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAction->Couldn't "
+      logger.Log(LogType::FATAL, std::string("GetgudSDK::SendAction->Couldn't "
           "send actions to Action Buffer: ") +
           std::string(_error.what()));
   }
@@ -270,7 +270,7 @@ bool SendAffectAction(std::string matchGuid,
     delete affectAction;
   } catch (std::exception& _error)
   {
-      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAffectAction->Couldn't "
+      logger.Log(LogType::FATAL, std::string("GetgudSDK::SendAffectAction->Couldn't "
           "send actions to Action Buffer: ") +
           std::string(_error.what()));
   }
@@ -294,7 +294,7 @@ bool SendAttackAction(std::string matchGuid,
     delete attackAction;
   } catch (std::exception& _error)
   {
-    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendAttackAction->Couldn't "
+    logger.Log(LogType::FATAL, std::string("GetgudSDK::SendAttackAction->Couldn't "
         "send actions to Action Buffer: ") +
         std::string(_error.what()));
   }
@@ -321,7 +321,7 @@ bool SendDamageAction(std::string matchGuid,
     delete damageAction;
   } catch (std::exception& _error)
   {
-    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendDamageAction->Couldn't "
+    logger.Log(LogType::FATAL, std::string("GetgudSDK::SendDamageAction->Couldn't "
         "send actions to Action Buffer: ") +
         std::string(_error.what()));
   }
@@ -345,7 +345,7 @@ bool SendHealAction(std::string matchGuid,
     delete healAction;
   } catch (std::exception& _error)
   {
-    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendHealAction->Couldn't "
+    logger.Log(LogType::FATAL, std::string("GetgudSDK::SendHealAction->Couldn't "
         "send actions to Action Buffer: ") +
         std::string(_error.what()));
   }
@@ -374,7 +374,7 @@ bool SendSpawnAction(std::string matchGuid,
     delete spawnAction;
   } catch (std::exception& _error)
   {
-    logger.Log(LogType::FATAL, std::string("GetGudSdk::SendSpawnAction->Couldn't "
+    logger.Log(LogType::FATAL, std::string("GetgudSDK::SendSpawnAction->Couldn't "
         "send actions to Action Buffer: ") +
         std::string(_error.what()));
   }
@@ -398,7 +398,7 @@ bool SendDeathAction(std::string matchGuid,
     delete deathAction;
   } catch (std::exception& _error)
   {
-      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendDeathAction->Couldn't "
+      logger.Log(LogType::FATAL, std::string("GetgudSDK::SendDeathAction->Couldn't "
           "send actions to Action Buffer: ") +
           std::string(_error.what()));
   }
@@ -423,7 +423,7 @@ bool SendPositionAction(std::string matchGuid,
   delete positionAction;
   } catch (std::exception& _error)
   {
-      logger.Log(LogType::FATAL, std::string("GetGudSdk::SendPositionAction->Couldn't "
+      logger.Log(LogType::FATAL, std::string("GetgudSDK::SendPositionAction->Couldn't "
           "send actions to Action Buffer: ") +
           std::string(_error.what()));
   }
@@ -455,7 +455,7 @@ bool SendReports(int titleId,
     logger.Log(
         LogType::FATAL,
         std::string(
-            "GetGudSdk::SendReports->Failed, reports can not be sent: ") +
+            "GetgudSDK::SendReports->Failed, reports can not be sent: ") +
             std::string(_error.what()));
     return false;
   }
@@ -479,7 +479,7 @@ bool SendReports(std::deque<ReportInfo>& reports) {
       logger.Log(
           LogType::FATAL,
           std::string(
-              "GetGudSdk::SendReports->Environment variables GETGUD_TITLE_ID and "
+              "GetgudSDK::SendReports->Environment variables GETGUD_TITLE_ID and "
               "GETGUD_PRIVATE_KEY are required"));
       return false;
     }
@@ -491,7 +491,7 @@ bool SendReports(std::deque<ReportInfo>& reports) {
     logger.Log(
         LogType::FATAL,
         std::string(
-            "GetGudSdk::SendReports->Failed, reports can not be sent: ") +
+            "GetgudSDK::SendReports->Failed, reports can not be sent: ") +
             std::string(_error.what()));
     return false;
   }
@@ -524,7 +524,7 @@ bool UpdatePlayers(int titleId,
         titleId, privateKey, players);
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::UpdatePlayers->Player data "
+               std::string("GetgudSDK::UpdatePlayers->Player data "
                            "can not be updated: ") +
                    std::string(_error.what()));
   }
@@ -548,7 +548,7 @@ bool UpdatePlayers(std::deque<PlayerInfo>& players) {
       logger.Log(
           LogType::FATAL,
           std::string(
-              "GetGudSdk::UpdatePlayers->Environment variables GETGUD_TITLE_ID and "
+              "GetgudSDK::UpdatePlayers->Environment variables GETGUD_TITLE_ID and "
               "GETGUD_PRIVATE_KEY are required"));
       return false;
     }
@@ -559,7 +559,7 @@ bool UpdatePlayers(std::deque<PlayerInfo>& players) {
   }
   catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::UpdatePlayers->Player data "
+               std::string("GetgudSDK::UpdatePlayers->Player data "
                            "can not be updated: ") +
                    std::string(_error.what()));
   }
@@ -608,8 +608,8 @@ void Dispose() {
     logger.Log(LogType::DEBUG, std::string("SDK stopped.."));
   } catch (std::exception& _error) {
     logger.Log(LogType::FATAL,
-               std::string("GetGudSdk::Dispose->Couldn't dispose SDK: ") + std::string(_error.what()));
+               std::string("GetgudSDK::Dispose->Couldn't dispose SDK: ") + std::string(_error.what()));
   }
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

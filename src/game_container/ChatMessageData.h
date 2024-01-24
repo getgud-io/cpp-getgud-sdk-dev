@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class ChatMessageData {
  private:
   std::string m_playerGuid;
@@ -17,4 +17,4 @@ class ChatMessageData {
   bool IsValid();
 };
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

@@ -2,7 +2,7 @@
 #include <mutex>
 #include <vector>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 class PlayerUpdater;
 
@@ -15,4 +15,4 @@ struct SharedPlayerUpdaters {
   PlayerUpdater* playerUpdater;
   std::mutex playerUpdatersMutex;
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

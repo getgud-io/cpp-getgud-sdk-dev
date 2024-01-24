@@ -7,7 +7,7 @@
 
 #include "../../include/actions/Helpers.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 /**
  * FilledAverage:
  *
@@ -25,4 +25,4 @@ struct FilledAverage {
 std::string GenerateGuid();
 std::string GetCurrentTimeString();
 std::string ShortenDecimalNumber(std::string decimalIn);
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

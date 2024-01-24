@@ -1,4 +1,4 @@
-#include <GetGudSdk.h>
+#include <GetgudSDK.h>
 #include <iostream>
 
 #include <chrono>
@@ -14,38 +14,40 @@ int randomActionIterator = 0;
 
 std::string g_matchGuid;
 
-GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
+void CreatePlayerUpdates(int numberOfPlayerUpdates, std::string playerGuid);
+
+GetgudSDK::BaseActionData* MakeRandomAction(std::string matchGuid,
                                             long long curTimeEpoch) {
   int actionType = actionTypeDist(rdMain);
 
-  GetGudSdk::BaseActionData* outAction = nullptr;
+  GetgudSDK::BaseActionData* outAction = nullptr;
   switch (actionType) {
     case 0:
-      outAction = new GetGudSdk::AttackActionData(matchGuid, curTimeEpoch,
+      outAction = new GetgudSDK::AttackActionData(matchGuid, curTimeEpoch,
                                                   "player-5", "abc");
       break;
     case 1:
-      outAction = new GetGudSdk::DamageActionData(
+      outAction = new GetgudSDK::DamageActionData(
           matchGuid, curTimeEpoch, "player-5", "player-0", 50.001421f, "glc");
       break;
     case 2:
       outAction =
-          new GetGudSdk::DeathActionData(matchGuid, curTimeEpoch, "player-0");
+          new GetgudSDK::DeathActionData(matchGuid, curTimeEpoch, "player-0", "attackerGuid");
       break;
     case 3:
-      outAction = new GetGudSdk::HealActionData(matchGuid, curTimeEpoch,
+      outAction = new GetgudSDK::HealActionData(matchGuid, curTimeEpoch,
                                                 ":plkayer-5", 20.32100F);
       break;
     case 4:
-      outAction = new GetGudSdk::PositionActionData(
+      outAction = new GetgudSDK::PositionActionData(
           matchGuid, curTimeEpoch, "player" + std::to_string(randomActionIterator % 2),
-          GetGudSdk::PositionF{20.32000f + randomActionIterator, 50.001421f - randomActionIterator, 0.30021f / randomActionIterator },
-          GetGudSdk::RotationF{10.f + randomActionIterator, 20.f - randomActionIterator, 30.f / randomActionIterator});
+          GetgudSDK::PositionF{20.32000f + randomActionIterator, 50.001421f - randomActionIterator, 0.30021f / randomActionIterator },
+          GetgudSDK::RotationF{10.f + randomActionIterator, 20.f - randomActionIterator, 30.f / randomActionIterator});
       break;
     case 5:
-      outAction = new GetGudSdk::SpawnActionData(
+      outAction = new GetgudSDK::SpawnActionData(
           matchGuid, curTimeEpoch, "player-10", "ttr", 0, 100.f,
-          GetGudSdk::PositionF{1, 2, 3}, GetGudSdk::RotationF{10, 20, 30});
+          GetgudSDK::PositionF{1, 2, 3}, GetgudSDK::RotationF{10, 20, 30});
       break;
   }
 
@@ -56,24 +58,24 @@ GetGudSdk::BaseActionData* MakeRandomAction(std::string matchGuid,
 
 void CreateReports(int numberOfReports, std::string match_guid) {
   if (numberOfReports == 0) return;
-  std::deque<GetGudSdk::ReportInfo> reports;
-  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
+  std::deque<GetgudSDK::ReportInfo> reports;
+  std::string privateKey = "41e99370-b12f-11ee-89f0-4b4e9fccc950";
   for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
-    GetGudSdk::ReportInfo reportInfo;
+    GetgudSDK::ReportInfo reportInfo;
     reportInfo.MatchGuid = match_guid;
-    reportInfo.ReportedTimeEpoch = 1684059337532;
+    reportInfo.ReportedTimeEpoch = 1705332732077;
     reportInfo.ReporterName = "reporter_name";
-    reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
-    reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
+    reportInfo.ReporterSubType = GetgudSDK::ReporterSubtype::Custom;
+    reportInfo.ReporterType = GetgudSDK::ReporterType::Custom;
     reportInfo.SuggestedToxicityScore = 99;
-    reportInfo.SuspectedPlayerGuid = "player-5";
-    reportInfo.TbTimeEpoch = 1684059337532;
-    reportInfo.TbType = GetGudSdk::TbType::Laghack;
+    reportInfo.SuspectedPlayerGuid = "76561197990301053";
+    reportInfo.TbTimeEpoch = 1705332732077;
+    reportInfo.TbType = GetgudSDK::TbType::Laghack;
 
     reports.push_back(reportInfo);
   }
 
-  GetGudSdk::SendReports(30, privateKey, reports);
+  GetgudSDK::SendReports(132, privateKey, reports);
 }
 
 void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems, int reports) {
@@ -81,19 +83,19 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems, int 
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < numberOfGames; gameNum++) {
     std::string gameGuid =
-        GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-                             "tests_round", "default_create_game");
+        GetgudSDK::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
+                             "tests_round", "default_create_game", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < numberOfMatches; matchNum++) {
       std::string matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+          GetgudSDK::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       g_matchGuid = matchGuid;
       for (int actionNum = 0; actionNum < numberOfItems; actionNum++) {
-          GetGudSdk::BaseActionData* outAction =
+          GetgudSDK::BaseActionData* outAction =
               MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
       }
     }
@@ -102,7 +104,7 @@ void CreateGames(int numberOfGames, int numberOfMatches, int numberOfItems, int 
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 }
 
@@ -111,48 +113,50 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-        "tests_round", "games_with_reports_messages");
+      GetgudSDK::StartGame(132, "41e99370-b12f-11ee-89f0-4b4e9fccc950",
+        "tests_round", "games_with_reports_messages", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       int matchReports = reports;
       int matchMessages = messages;
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         curEpochTime += 1;
-          GetGudSdk::BaseActionData* outAction =
+          GetgudSDK::BaseActionData* outAction =
             MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
 
           if (matchReports)
           {
             matchReports--;
 
-            GetGudSdk::ReportInfo reportInfo;
+            GetgudSDK::ReportInfo reportInfo;
             reportInfo.MatchGuid = matchGuid;
             reportInfo.ReportedTimeEpoch = curEpochTime;
             reportInfo.ReporterName = "reporter_name";
-            reportInfo.ReporterSubType = GetGudSdk::ReporterSubtype::Custom;
-            reportInfo.ReporterType = GetGudSdk::ReporterType::Custom;
+            reportInfo.ReporterSubType = GetgudSDK::ReporterSubtype::Custom;
+            reportInfo.ReporterType = GetgudSDK::ReporterType::Custom;
             reportInfo.SuggestedToxicityScore = 100;
             reportInfo.SuspectedPlayerGuid = outAction->m_playerGuid;
             reportInfo.TbTimeEpoch = curEpochTime;
-            reportInfo.TbType = GetGudSdk::TbType::Laghack;
-            GetGudSdk::SendInMatchReport(reportInfo);
+            reportInfo.TbType = GetgudSDK::TbType::Laghack;
+            GetgudSDK::SendInMatchReport(reportInfo);
           }
           if (matchMessages)
           {
             matchMessages--;
 
-            GetGudSdk::ChatMessageInfo messageInfo;
+            GetgudSDK::ChatMessageInfo messageInfo;
             messageInfo.message = outAction->ToString();
             messageInfo.messageTimeEpoch = curEpochTime;
             messageInfo.playerGuid = outAction->m_playerGuid;
-            GetGudSdk::SendChatMessage(matchGuid, messageInfo);
+            GetgudSDK::SendChatMessage(matchGuid, messageInfo);
           }
+
+          CreatePlayerUpdates(1, outAction->m_playerGuid);
           delete outAction;
       }
     }
@@ -161,7 +165,7 @@ void CreateGames(int games, int matches, int actions, int reports, int messages)
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 }
 
@@ -170,20 +174,20 @@ void CreateGamesSingleAction(int games, int matches, int actions) {
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-        "tests_round", "games_with_reports_messages");
+      GetgudSDK::StartGame(132, "41e99370-b12f-11ee-89f0-4b4e9fccc950",
+        "tests_round", "games_with_reports_messages", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         curEpochTime += 1;
-        GetGudSdk::BaseActionData* outAction =
-          new GetGudSdk::AffectActionData(matchGuid, curEpochTime,
-            "player-5", "abc", GetGudSdk::AffectState::Activate);
+        GetgudSDK::BaseActionData* outAction =
+          new GetgudSDK::AffectActionData(matchGuid, curEpochTime,
+            "player-5", "abc", GetgudSDK::AffectState::Activate);
         curEpochTime += 2;
-        GetGudSdk::SendAction(outAction);
+        GetgudSDK::SendAction(outAction);
         delete outAction;
       }
     }
@@ -192,26 +196,46 @@ void CreateGamesSingleAction(int games, int matches, int actions) {
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
+}
+
+void CreatePlayerUpdates(int numberOfPlayerUpdates, std::string playerGuid) {
+    if (numberOfPlayerUpdates == 0) return;
+    std::deque<GetgudSDK::PlayerInfo> playerInfos;
+    std::string privateKey = "41e99370-b12f-11ee-89f0-4b4e9fccc950";
+    for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
+        playerUpdateNum++) {
+        GetgudSDK::PlayerInfo playerInfo;
+        playerInfo.PlayerGuid = playerGuid;
+        playerInfo.PlayerNickname = "test";
+        playerInfo.PlayerEmail = "test@test.com";
+        playerInfo.PlayerRank = 99;
+        playerInfo.PlayerJoinDateEpoch = 1684059337532;
+        playerInfo.PlayerStatus = "status_1";
+        playerInfos.push_back(playerInfo);
+    }
+
+    GetgudSDK::UpdatePlayers(132, privateKey, playerInfos);
 }
 
 void CreatePlayerUpdates(int numberOfPlayerUpdates) {
   if (numberOfPlayerUpdates == 0) return;
-  std::deque<GetGudSdk::PlayerInfo> playerInfos;
-  std::string privateKey = "8526b010-0c56-11ee-bc1d-9f343a78df6b";
+  std::deque<GetgudSDK::PlayerInfo> playerInfos;
+  std::string privateKey = "41e99370-b12f-11ee-89f0-4b4e9fccc950";
   for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
        playerUpdateNum++) {
-    GetGudSdk::PlayerInfo playerInfo;
-    playerInfo.PlayerGuid = "player-" + std::to_string(playerUpdateNum);
+    GetgudSDK::PlayerInfo playerInfo;
+    playerInfo.PlayerGuid = "76561197990301053" + std::to_string(playerUpdateNum);
     playerInfo.PlayerNickname = "test";
     playerInfo.PlayerEmail = "test@test.com";
     playerInfo.PlayerRank = 99;
     playerInfo.PlayerJoinDateEpoch = 1684059337532;
+    playerInfo.PlayerStatus = "status_1";
     playerInfos.push_back(playerInfo);
   }
   
-  GetGudSdk::UpdatePlayers(30, privateKey, playerInfos);
+  GetgudSDK::UpdatePlayers(132, privateKey, playerInfos);
 }
 
 void RunSenders(int reports, int players, int games, int matches, int actions)
@@ -248,14 +272,14 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
     {
       invalid_games--;
       gameGuid =
-        GetGudSdk::StartGame(0, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-          "tests_round", "invalid_guid");
+        GetgudSDK::StartGame(0, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
+          "tests_round", "invalid_guid", "UK");
     }
     else
     {
       gameGuid =
-        GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-          "tests_round", "random_actions");
+        GetgudSDK::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
+          "tests_round", "random_actions", "UK");
     }
 
     gameGuidMap.push_back(gameGuid);
@@ -266,21 +290,21 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
       {
         invalid_matches--;
         matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "dasdads\2dasdsaf", "empty_map");
+          GetgudSDK::StartMatch(gameGuid, "dasdads\2dasdsaf", "empty_map");
       }
       else
       {
         matchGuid =
-          GetGudSdk::StartMatch(gameGuid, "dsadasdasds", "empty_map");
+          GetgudSDK::StartMatch(gameGuid, "dsadasdasds", "empty_map");
       }
 
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
         if (actionOrNot > 3) {
-          GetGudSdk::BaseActionData* outAction =
+          GetgudSDK::BaseActionData* outAction =
             MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
         }
       }
@@ -290,7 +314,7 @@ void InvalidGuid(int games, int matches, int actions, int invalid_games, int inv
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 
 }
@@ -305,26 +329,26 @@ void InvalidPacket(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
-        "tests_round", "invalid_packet");
+      GetgudSDK::StartGame(30, "8526b010-0c56-11ee-bc1d-9f343a78df6b",
+        "tests_round", "invalid_packet", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
         if (actionOrNot > 3) {
-          GetGudSdk::BaseActionData* outAction =
+          GetgudSDK::BaseActionData* outAction =
             MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
         }
       }
-      GetGudSdk::BaseData invalidData = { GetGudSdk::Actions::Attack, 1684059337532, "123", matchGuid };
-      GetGudSdk::BaseActionData* invalidAction = new GetGudSdk::BaseActionData(invalidData);
-      GetGudSdk::SendAction(invalidAction);
+      GetgudSDK::BaseData invalidData = { GetgudSDK::Actions::Attack, 1684059337532, "123", matchGuid };
+      GetgudSDK::BaseActionData* invalidAction = new GetgudSDK::BaseActionData(invalidData);
+      GetgudSDK::SendAction(invalidAction);
       delete invalidAction;
     }
   }
@@ -332,7 +356,7 @@ void InvalidPacket(int games, int matches, int actions)
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 
 }
@@ -349,20 +373,20 @@ void GamePerTitle(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(title_id, server_guid,
-        "tests_round", "GamePerTitle");
+      GetgudSDK::StartGame(title_id, server_guid,
+        "tests_round", "GamePerTitle", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "dsafsafes", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "dsafsafes", "empty_map");
       for (int actionNum = 0; actionNum < actions; actionNum++) {
         int actionOrNot = actionOrNotDist(rdMain);
         if (actionOrNot > 3) {
-          GetGudSdk::BaseActionData* outAction =
+          GetgudSDK::BaseActionData* outAction =
             MakeRandomAction(matchGuid, curEpochTime);
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
         }
       }
@@ -377,7 +401,7 @@ void GamePerTitle(int games, int matches, int actions)
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 }
 
@@ -393,23 +417,23 @@ void GamePositions(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(title_id, server_guid,
-        "tests_round", "positions");
+      GetgudSDK::StartGame(title_id, server_guid,
+        "tests_round", "positions", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "ewqewdafe", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "ewqewdafe", "empty_map");
       for (int actionNum = 0; actionNum < actions / 10; actionNum++) {
 
         for (int i = 0; i < 10; i++)
         {
-          GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+          GetgudSDK::BaseActionData* outAction = new GetgudSDK::PositionActionData(
             matchGuid, curEpochTime, "player" + std::to_string(i),
-            GetGudSdk::PositionF{ 20.32000f + (actionNum / 100.f), 20.32000f - (actionNum / 100.f), 50.001421f - ((actionNum / 100.f) / actionNum) },
-            GetGudSdk::RotationF{ 10.f + (actionNum / 100.f), 20.f - (actionNum / 100.f), 30.f - ((actionNum / 100.f) / actionNum) });
+            GetgudSDK::PositionF{ 20.32000f + (actionNum / 100.f), 20.32000f - (actionNum / 100.f), 50.001421f - ((actionNum / 100.f) / actionNum) },
+            GetgudSDK::RotationF{ 10.f + (actionNum / 100.f), 20.f - (actionNum / 100.f), 30.f - ((actionNum / 100.f) / actionNum) });
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
         }
       }
@@ -419,7 +443,7 @@ void GamePositions(int games, int matches, int actions)
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 }
 
@@ -434,33 +458,33 @@ void GamePositionsInvalid(int games, int matches, int actions)
   std::vector<std::string> gameGuidMap;
   for (int gameNum = 0; gameNum < games; gameNum++) {
     std::string gameGuid =
-      GetGudSdk::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
-        "tests_round", "positionsInvalid");
+      GetgudSDK::StartGame(title_id, "28482640-f571-11ed-8460-89c45273f291",
+        "tests_round", "positionsInvalid", "UK");
     gameGuidMap.push_back(gameGuid);
     long long curEpochTime = 1684059337532;
     for (int matchNum = 0; matchNum < matches; matchNum++) {
       std::string matchGuid =
-        GetGudSdk::StartMatch(gameGuid, "hypermode_tester", "empty_map");
+        GetgudSDK::StartMatch(gameGuid, "hypermode_tester", "empty_map");
       for (int actionNum = 0; actionNum < actions / 10; actionNum++) {
 
         for (int i = 0; i < 10; i++)
         {
-          GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+          GetgudSDK::BaseActionData* outAction = new GetgudSDK::PositionActionData(
             matchGuid, curEpochTime, "player" + std::to_string(i),
-            GetGudSdk::PositionF{ FLT_MIN, FLT_MAX, actionNum * 0.00000001f },
-            GetGudSdk::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
+            GetgudSDK::PositionF{ FLT_MIN, FLT_MAX, actionNum * 0.00000001f },
+            GetgudSDK::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
           curEpochTime += 2;
-          GetGudSdk::SendAction(outAction);
+          GetgudSDK::SendAction(outAction);
           delete outAction;
         }
         //Uncomment this if you want test float overload
         //{
-        //  GetGudSdk::BaseActionData* outAction = new GetGudSdk::PositionActionData(
+        //  GetgudSDK::BaseActionData* outAction = new GetgudSDK::PositionActionData(
         //    matchGuid, curEpochTime, "player" + std::to_string(i),
-        //    GetGudSdk::PositionF{ FLT_MIN - 1, FLT_MAX + 1, actionNum * 0.00000001f },
-        //    GetGudSdk::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
+        //    GetgudSDK::PositionF{ FLT_MIN - 1, FLT_MAX + 1, actionNum * 0.00000001f },
+        //    GetgudSDK::RotationF{ 10.f + (i / 100.f), 20.f - (i / 100.f), 30.f - ((i / 100.f) / i) });
         //  curEpochTime += 2;
-        //  GetGudSdk::SendAction(outAction);
+        //  GetgudSDK::SendAction(outAction);
         //  delete outAction;
         //}
       }
@@ -470,7 +494,7 @@ void GamePositionsInvalid(int games, int matches, int actions)
   // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
   for (int i = 0; i < gameGuidMap.size(); i++) {
-    GetGudSdk::MarkEndGame(gameGuidMap[i]);
+    GetgudSDK::MarkEndGame(gameGuidMap[i]);
   }
 }
 
@@ -482,7 +506,7 @@ void general_test()
   std::uniform_int_distribution<int> reportsAmount(300, 300);
   std::uniform_int_distribution<int> playerUpdatesAmount(1, 1);
 
-  GetGudSdk::Init();
+  GetgudSDK::Init();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   std::vector<std::thread> testThreads;
 
@@ -500,11 +524,11 @@ void general_test()
   }
   testThreads.clear();
   std::this_thread::sleep_for(std::chrono::milliseconds(15000));
-  // GetGudSdk::Dispose();
+  // GetgudSDK::Dispose();
 }
 
 int main() {
-  GetGudSdk::Init();
+  GetgudSDK::Init();
   //RunSenders(int reports, int players, int games, int matches, int actions);
   //FeedGameWithMessagesAndReports(int games, int matches, int actions, int reports, int messages);
   //InvalidGuid(int games, int matches, int actions, int invalid_games, int invalid_matches);
@@ -516,11 +540,14 @@ int main() {
   // InvalidGuid(2, 2, 100, 0, 1);
   //std::thread t1([](){
   //  RunSenders(0, 0, 1, 1, 200); });
-  CreateGamesSingleAction(1, 1, 10);
-  //FeedGameWithMessagesAndReports(1, 1, 100, 0, 0);
+  //CreateGamesSingleAction(1, 1, 100);
+  FeedGameWithMessagesAndReports(1, 1, 1, 1, 1);
 
   //std::thread t2([]() {CreatePlayerUpdates(1000); });
   //std::thread t3([]() {CreateReports(1000, "e7863816-8764-fa8b-ee31-fc5da7fe11f9"); });
+
+  //CreatePlayerUpdates(4);
+  //CreateReports(4, "ebf5a926-ae7c-09bc-e25e-25b9f56c61e4");
 
   //t1.join();
   //t2.join();

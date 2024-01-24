@@ -8,7 +8,7 @@
 #include <stdio.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 /**
  * GetReportDataSize:
@@ -127,4 +127,4 @@ bool ReportData::IsValid() {
   }
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

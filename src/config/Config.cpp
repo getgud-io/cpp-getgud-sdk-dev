@@ -18,7 +18,7 @@
 #include <iostream>
 #include <memory>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 Config sdkConfig;
 extern Logger logger;
 
@@ -531,4 +531,4 @@ std::string Config::ToString() {
   return configString;
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

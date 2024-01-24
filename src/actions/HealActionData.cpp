@@ -4,7 +4,7 @@
 #include "../utils/Validator.h"
 #include "../utils/Utils.h"
 
-using namespace GetGudSdk;
+using namespace GetgudSDK;
 
 extern Config sdkConfig;
 

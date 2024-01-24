@@ -15,7 +15,7 @@
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 class GameSender {
  public:
@@ -48,4 +48,4 @@ class GameSender {
   void SendGamePacket(std::string& packet);
   void ReduceMatchActionsSize(GameData* gameDataToSend);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

@@ -3,7 +3,7 @@
 #include "../utils/Validator.h"
 #include "../config/Config.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 
 /**
@@ -47,4 +47,4 @@ bool ChatMessageData::IsValid() {
       sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

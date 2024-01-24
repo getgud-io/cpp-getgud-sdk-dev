@@ -9,7 +9,7 @@
 #include <stdio.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 extern Logger logger;
 
@@ -489,4 +489,4 @@ bool GameData::IsValid() {
   isActionValid &= Validator::ValidateStringChars(m_serverLocation);
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

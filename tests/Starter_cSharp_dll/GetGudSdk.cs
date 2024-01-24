@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
-namespace GetGudSdk
+namespace GetgudSDK
 {
     public struct PlayerTransactionsData
     {
@@ -190,7 +190,7 @@ namespace GetGudSdk
         **/
         static public int Init()
         {
-            return GetGudSdk_calls.GetGudSdk_calls.init();
+            return GetgudSDK_calls.GetgudSDK_calls.init();
         }
 
         /**
@@ -202,7 +202,7 @@ namespace GetGudSdk
         static public int StartGame(StartGameInfo info, out string gameGuidOut)
         {
             // convert managed struct to unmanaged struct
-            var unmanagedInfo = new GetGudSdk_calls.GetGudSdk_calls.StartGameInfoWrapper
+            var unmanagedInfo = new GetgudSDK_calls.GetgudSDK_calls.StartGameInfoWrapper
             {
                 titleId = info.TitleId,
                 privateKey = Marshal.StringToHGlobalAnsi(info.PrivateKey),
@@ -217,7 +217,7 @@ namespace GetGudSdk
 
             // call unmanaged function
             IntPtr gameGuidOutPtr = Marshal.AllocHGlobal(36);
-            var result = GetGudSdk_calls.GetGudSdk_calls.StartGame(unmanagedInfo, gameGuidOutPtr);
+            var result = GetgudSDK_calls.GetgudSDK_calls.StartGame(unmanagedInfo, gameGuidOutPtr);
 
             if (gameGuidOutPtr == IntPtr.Zero || result == 0)
             {
@@ -244,7 +244,7 @@ namespace GetGudSdk
          **/
         static public int StartMatch(StartMatchInfo info, out string matchGuidOut)
         {
-            var unmanagedInfo = new GetGudSdk_calls.GetGudSdk_calls.StartMatchInfoWrapper
+            var unmanagedInfo = new GetgudSDK_calls.GetgudSDK_calls.StartMatchInfoWrapper
             {
                 gameGuid = Marshal.StringToHGlobalAnsi(info.gameGuid),
                 gameGuidSize = info.gameGuid.Length,
@@ -256,7 +256,7 @@ namespace GetGudSdk
 
             // call unmanaged function
             IntPtr matchGuidOutPtr = Marshal.AllocHGlobal(36);
-            var result = GetGudSdk_calls.GetGudSdk_calls.StartMatch(unmanagedInfo, matchGuidOutPtr);
+            var result = GetgudSDK_calls.GetgudSDK_calls.StartMatch(unmanagedInfo, matchGuidOutPtr);
 
             if (matchGuidOutPtr == IntPtr.Zero || result == 0)
             {
@@ -284,7 +284,7 @@ namespace GetGudSdk
         static public int MarkEndGame(string gameGuid)
         {
             var unmanagedGameGuid = Marshal.StringToHGlobalAnsi(gameGuid);
-            var result = GetGudSdk_calls.GetGudSdk_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length);
+            var result = GetgudSDK_calls.GetgudSDK_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedGameGuid);
 
@@ -298,7 +298,7 @@ namespace GetGudSdk
         static public int SendAffectkAction(SendAffectActionInfo info)
         {
             var unmanagedWeaponGuid = Marshal.StringToHGlobalAnsi(info.affectGuid);
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -307,7 +307,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendAffectAction(unmanagedBaseData, unmanagedWeaponGuid, info.affectGuid.Length, info.affectState);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendAffectAction(unmanagedBaseData, unmanagedWeaponGuid, info.affectGuid.Length, info.affectState);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -323,7 +323,7 @@ namespace GetGudSdk
         static public int SendAttackAction(SendAttackActionInfo info)
         {
             var unmanagedWeaponGuid = Marshal.StringToHGlobalAnsi(info.weaponGuid);
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -332,7 +332,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendAttackAction(unmanagedBaseData, unmanagedWeaponGuid, info.weaponGuid.Length);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendAttackAction(unmanagedBaseData, unmanagedWeaponGuid, info.weaponGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -348,7 +348,7 @@ namespace GetGudSdk
         static public int SendDamageAction(SendDamageActionInfo info)
         {
 
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -363,7 +363,7 @@ namespace GetGudSdk
             IntPtr weaponGuid = Marshal.StringToHGlobalAnsi(info.weaponGuid);
             int weaponGuidSize = info.weaponGuid.Length;
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendDamageAction(unmanagedBaseData, victimPlayerGuid, victimPlayerGuidSize, info.damageDone, weaponGuid, weaponGuidSize);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendDamageAction(unmanagedBaseData, victimPlayerGuid, victimPlayerGuidSize, info.damageDone, weaponGuid, weaponGuidSize);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -379,7 +379,7 @@ namespace GetGudSdk
          **/
         static public int SendHealAction(SendHealActionInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -388,7 +388,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendHealAction(unmanagedBaseData, info.healthGained);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendHealAction(unmanagedBaseData, info.healthGained);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -402,7 +402,7 @@ namespace GetGudSdk
          **/
         static public int SendSpawnAction(SendSpawnActionInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -414,7 +414,7 @@ namespace GetGudSdk
             IntPtr characterGuid = Marshal.StringToHGlobalAnsi(info.characterGuid);
             int characterGuidSize = info.characterGuid.Length;
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
                 info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
@@ -430,7 +430,7 @@ namespace GetGudSdk
          **/
         static public int SendDeathAction(SendDeathActionInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -442,7 +442,7 @@ namespace GetGudSdk
             IntPtr attackerGuid = Marshal.StringToHGlobalAnsi(info.attackerGuid);
             int attackerGuidSize = info.attackerGuid.Length;
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendDeathAction(unmanagedBaseData, attackerGuid, attackerGuidSize);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendDeathAction(unmanagedBaseData, attackerGuid, attackerGuidSize);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -456,7 +456,7 @@ namespace GetGudSdk
          **/
         static public int SendPositionAction(SendPositionActionInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.BaseActionDataWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
             {
                 actionTimeEpoch = info.baseData.actionTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
@@ -465,7 +465,7 @@ namespace GetGudSdk
                 playerGuidSize = info.baseData.playerGuid.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendPositionAction(unmanagedBaseData, info.position, info.rotation);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendPositionAction(unmanagedBaseData, info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -479,7 +479,7 @@ namespace GetGudSdk
          **/
         static public int SendInMatchReport(ReportInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.ReportInfoWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.ReportInfoWrapper
             {
                 matchGuid = Marshal.StringToHGlobalAnsi(info.matchGuid),
                 matchGuidSize = info.matchGuid.Length,
@@ -495,7 +495,7 @@ namespace GetGudSdk
                 reportedTimeEpoch = info.reportedTimeEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendInMatchReport(unmanagedBaseData);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendInMatchReport(unmanagedBaseData);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.reporterName);
@@ -511,7 +511,7 @@ namespace GetGudSdk
          **/
         static public int SendChatMessage(ChatMessageInfo info)
         {
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.ChatMessageWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.ChatMessageWrapper
             {
                 messageTimeEpoch = info.messageTimeEpoch,
                 matchGuid = Marshal.StringToHGlobalAnsi(info.matchGuid),
@@ -522,7 +522,7 @@ namespace GetGudSdk
                 messageSize = info.message.Length
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendChatMessage(unmanagedBaseData);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendChatMessage(unmanagedBaseData);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -543,7 +543,7 @@ namespace GetGudSdk
             IntPtr privateKeyPtr = Marshal.StringToHGlobalAnsi(privateKey);
             int privateKeySize = privateKey.Length;
 
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.ReportInfoWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.ReportInfoWrapper
             {
                 matchGuid = Marshal.StringToHGlobalAnsi(report.matchGuid),
                 matchGuidSize = report.matchGuid.Length,
@@ -559,7 +559,7 @@ namespace GetGudSdk
                 reportedTimeEpoch = report.reportedTimeEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.SendReport(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendReport(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
 
             Marshal.FreeHGlobal(privateKeyPtr);
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
@@ -582,7 +582,7 @@ namespace GetGudSdk
             IntPtr privateKeyPtr = Marshal.StringToHGlobalAnsi(privateKey);
             int privateKeySize = privateKey.Length;
 
-            var unmanagedBaseData = new GetGudSdk_calls.GetGudSdk_calls.PlayerInfoWrapper
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.PlayerInfoWrapper
             {
                 playerGuid = Marshal.StringToHGlobalAnsi(player.playerGuid),
                 playerGuidSize = player.playerGuid.Length,
@@ -594,7 +594,7 @@ namespace GetGudSdk
                 playerJoinDateEpoch = player.playerJoinDateEpoch
             };
 
-            var result = GetGudSdk_calls.GetGudSdk_calls.UpdatePlayer(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
+            var result = GetgudSDK_calls.GetgudSDK_calls.UpdatePlayer(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
 
             Marshal.FreeHGlobal(privateKeyPtr);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
@@ -610,7 +610,7 @@ namespace GetGudSdk
          **/
         static public void dispose()
         {
-            GetGudSdk_calls.GetGudSdk_calls.dispose();
+            GetgudSDK_calls.GetgudSDK_calls.dispose();
         }
 
 #pragma warning restore CS8601, CS0649

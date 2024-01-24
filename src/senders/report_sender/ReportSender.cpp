@@ -23,7 +23,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern Config sdkConfig;
 extern SharedReportSenders sharedReportSenders;
@@ -290,4 +290,4 @@ void ReportSender::Dispose() {
   }
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK
