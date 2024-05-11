@@ -23,6 +23,14 @@ Config sdkConfig;
 extern Logger logger;
 
 /**
+ * Config:
+ *
+ * Initialize default constructor
+ **/
+Config::Config() { }
+
+
+/**
  * LoadSettings:
  *
  * Get values of variables from the config file

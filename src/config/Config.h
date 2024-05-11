@@ -150,6 +150,7 @@ class Config {
   unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;
   std::string configFilePath = "./config.json";
 
+  Config();
   bool LoadSettings();
   std::string ToString();
 
