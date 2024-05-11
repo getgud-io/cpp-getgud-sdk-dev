@@ -57,14 +57,16 @@ enum class TbType : int {
   Ammohack,
   Healthhack,
   Spawnhack,
-  Teamkill,
+  FriendlyFire,
   Spawnkill,
   Camping,
   Insulting,
   Boosting,
   Feeding,
   Smurfing,
-  Ragequit
+  Ragequit,
+  Afk,
+  RapidFire
 };
 
 

@@ -104,7 +104,7 @@ bool ReportData::IsValid() {
   if (m_reportInfo.TbType != TbType::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::Ragequit));
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::RapidFire));
   }
   if (m_reportInfo.TbTimeEpoch != -1)
   {
