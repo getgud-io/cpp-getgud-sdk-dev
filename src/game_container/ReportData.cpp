@@ -8,7 +8,7 @@
 #include <stdio.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 /**
  * GetReportDataSize:
@@ -84,12 +84,9 @@ bool ReportData::IsValid() {
   bool isActionValid =
     Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
-  if (!m_reportInfo.ReporterName.empty())
-  {
-    isActionValid &=
-      Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 10000);
-    isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
-  }
+  isActionValid &=
+    Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 36);
+  isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
   if (m_reportInfo.ReporterType != ReporterType::None)
   {
     isActionValid &=
@@ -98,7 +95,7 @@ bool ReportData::IsValid() {
   if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::FairFight));
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::AFK));
   }
   isActionValid &= Validator::ValidateStringLength(
     m_reportInfo.SuspectedPlayerGuid, 1, 36);
@@ -107,7 +104,7 @@ bool ReportData::IsValid() {
   if (m_reportInfo.TbType != TbType::None)
   {
     isActionValid &=
-      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::Ragequit));
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::RapidFire));
   }
   if (m_reportInfo.TbTimeEpoch != -1)
   {
@@ -130,4 +127,4 @@ bool ReportData::IsValid() {
   }
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

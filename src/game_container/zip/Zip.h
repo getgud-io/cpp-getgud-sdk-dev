@@ -2,10 +2,10 @@
 #include <zlib/zlib.h>
 #include <string>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class Zipper {
  public:
   bool CompressString(std::string& inString,
                       std::string& outCompressedString);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

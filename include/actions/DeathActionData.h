@@ -12,12 +12,14 @@
 #define GETGUDSDK_API
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class DeathActionData : public BaseActionData {
+   std::string m_attackerGuid;
  public:
    GETGUDSDK_API DeathActionData(std::string matchGuid,
                   long long actionTimeEpoch,
-                  std::string playerGuid);
+                  std::string playerGuid,
+                  std::string attackerGuid);
   GETGUDSDK_API DeathActionData(const DeathActionData& data);
   GETGUDSDK_API DeathActionData() = delete;
   GETGUDSDK_API ~DeathActionData() override;
@@ -26,4 +28,4 @@ class DeathActionData : public BaseActionData {
   GETGUDSDK_API std::string ToStringMeta() override;
   GETGUDSDK_API DeathActionData* Clone() override;
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

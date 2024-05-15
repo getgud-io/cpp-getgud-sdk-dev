@@ -1,7 +1,7 @@
-file(GLOB MAIN_HEADER "../include/GetGudSdk.h")
-file(GLOB MAIN_SOURCE "GetGudSdk.cpp")
-file(GLOB C_HEADER "../include/GetGudSdk_C.h")
-file(GLOB C_SOURCE "GetGudSdk_C.cpp")
+file(GLOB MAIN_HEADER "../include/GetgudSDK.h")
+file(GLOB MAIN_SOURCE "GetgudSDK.cpp")
+file(GLOB C_HEADER "../include/GetgudSDK_C.h")
+file(GLOB C_SOURCE "GetgudSDK_C.cpp")
 file(GLOB DLLMAIN_SOURCE "dllMain.cpp")
 file(GLOB ACTIONS_HEADERS "../include/actions/*.h")
 file(GLOB ACTIONS_SOURCES "actions/*.cpp")
@@ -43,10 +43,13 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 
 add_compile_options(-fPIC)
 
+if ((UNIX AND LIBCURL) OR NOT UNIX)
 file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
 list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
 file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
 list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
+endif()
+
 if (UNIX)
 file(GLOB ZLIB_LIB "../libs/*zlib/")
 else()
@@ -55,7 +58,7 @@ endif()
 
 if (DLL_BUILD)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-add_library(GetGudSdk SHARED ${project_files} ${DLLMAIN_SOURCE})
+add_library(GetgudSDK SHARED ${project_files} ${DLLMAIN_SOURCE})
 source_group("Source Files\\C" FILES ${DLLMAIN_SOURCE})
 else() 
 if (SO_BUILD)
@@ -65,10 +68,10 @@ link_directories(
 	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
 	${ZLIB_LIB}
 )
-add_library(GetGudSdk SHARED ${project_files})
-target_precompile_headers(GetGudSdk PRIVATE pch.h)
+add_library(GetgudSDK SHARED ${project_files})
+target_precompile_headers(GetgudSDK PRIVATE pch.h)
 set(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
-set_target_properties(GetGudSdk PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+set_target_properties(GetgudSDK PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 else()
 if (UNIX)
 link_directories(
@@ -78,14 +81,14 @@ link_directories(
 	${ZLIB_LIB}
 )
 endif()
-add_library(GetGudSdk STATIC ${project_files})
+add_library(GetgudSDK STATIC ${project_files})
 endif()
 endif()
 
-target_include_directories(GetGudSdk PRIVATE source)
-set_target_properties(GetGudSdk PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(GetGudSdk PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(GetGudSdk PROPERTIES PUBLIC_HEADER ../include/GetGudSdk.h PUBLIC_HEADER ../include/GetGudSdk_C.h)
+target_include_directories(GetgudSDK PRIVATE source)
+set_target_properties(GetgudSDK PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(GetgudSDK PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+set_target_properties(GetgudSDK PROPERTIES PUBLIC_HEADER ../include/GetgudSDK.h PUBLIC_HEADER ../include/GetgudSDK_C.h)
 
 
 source_group("Header Files\\" FILES ${MAIN_HEADER})
@@ -115,7 +118,7 @@ source_group("Source Files\\logger" FILES ${LOGGER_SOURCES})
 source_group("Header Files\\utils" FILES ${UTILS_HEADERS})
 source_group("Source Files\\utils" FILES ${UTILS_SOURCES})
 
-target_include_directories(GetGudSdk
+target_include_directories(GetgudSDK
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
@@ -124,8 +127,8 @@ target_include_directories(GetGudSdk
 )
 
 if (SO_BUILD OR UNIX)
-set_property(TARGET GetGudSdk PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(GetGudSdk
+set_property(TARGET GetgudSDK PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(GetgudSDK
     PRIVATE
         libcurl.so
 		libz.a
@@ -135,7 +138,7 @@ target_link_libraries(GetGudSdk
 else()
 message(${ZLIB_LIB}/zlib.lib)
 message(${LIBCURL_RELEASE})
-target_link_libraries(GetGudSdk
+target_link_libraries(GetgudSDK
     PRIVATE
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
@@ -143,15 +146,15 @@ target_link_libraries(GetGudSdk
 )
 endif()
 if (DLL_BUILD)
-	target_link_libraries(GetGudSdk
+	target_link_libraries(GetgudSDK
 		PRIVATE
 		Normaliz.lib
 		Ws2_32.lib
 		Crypt32.lib
 		wldap32.lib
 	)
-	target_precompile_headers(GetGudSdk PRIVATE pch.h)
-	set_target_properties(GetGudSdk PROPERTIES 
-	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetGudSdk>/C_Starter.exe")
+	target_precompile_headers(GetgudSDK PRIVATE pch.h)
+	set_target_properties(GetgudSDK PROPERTIES 
+	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetgudSDK>/C_Starter.exe")
 
 endif()

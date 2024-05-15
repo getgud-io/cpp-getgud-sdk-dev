@@ -2,8 +2,9 @@
 
 #include <string>
 #include <limits>
+#include <vector>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
   namespace Values {
   const std::string g_Environment = "Environment";
@@ -56,14 +57,16 @@ enum class TbType : int {
   Ammohack,
   Healthhack,
   Spawnhack,
-  Teamkill,
+  FriendlyFire,
   Spawnkill,
   Camping,
   Insulting,
   Boosting,
   Feeding,
   Smurfing,
-  Ragequit
+  Ragequit,
+  Afk,
+  RapidFire
 };
 
 
@@ -107,7 +110,8 @@ enum class ReporterSubtype : int {
   Griefing,
   Slurring,
   VoipAbuse,
-  ChatAbuse
+  ChatAbuse,
+  AFK
 };
 
 /**
@@ -157,6 +161,14 @@ struct Orientation {
   }
 };
 
+struct PlayerTransactions
+{
+    std::string TransactionGuid; //36 + SQL // required
+    std::string TransactionName; //100 + SQL // required
+    long long TransactionDateEpoch = -1;//>=time.min, <=time.max
+    float TransactionValueUSD = -1; //>=0, <=max
+};
+
 /**
  * ReportInfo:
  *
@@ -165,10 +177,10 @@ struct Orientation {
 struct ReportInfo {
   std::string MatchGuid; //36 + SQL // required
   std::string ReporterName;  // SQL, size <=10.000
-  GetGudSdk::ReporterType ReporterType = GetGudSdk::ReporterType::None; // >= 1, < max
-  ReporterSubtype ReporterSubType = GetGudSdk::ReporterSubtype::None; // >= 1, < max
+  GetgudSDK::ReporterType ReporterType = GetgudSDK::ReporterType::None; // >= 1, < max
+  ReporterSubtype ReporterSubType = GetgudSDK::ReporterSubtype::None; // >= 1, < max
   std::string SuspectedPlayerGuid;  // 36 + SQL //required
-  GetGudSdk::TbType TbType = GetGudSdk::TbType::None; //>=1, <max
+  GetgudSDK::TbType TbType = GetgudSDK::TbType::None; //>=1, <max
   long long TbTimeEpoch = -1; //>=time.min, <= time.max
   int SuggestedToxicityScore = -1; //>=0, <=100
   long long ReportedTimeEpoch = -1; //>=time.min, <=time.max
@@ -185,6 +197,17 @@ struct PlayerInfo {
   std::string PlayerEmail;     // SQL, size <=10.000
   int PlayerRank = -1;//>=0, <=max
   long long PlayerJoinDateEpoch = -1;//>=time.min, <=time.max
+  std::string PlayerSuspectScore; //SQL, size <=100
+  std::string PlayerReputation; //SQL, <=36
+  std::string PlayerStatus; //SQL, <=36
+  std::string PlayerCampaign; //SQL, <=128
+  std::string PlayerNotes; //SQL, <=128
+  std::string PlayerDevice; //SQL, <=36
+  std::string PlayerOS; //SQL, <=36
+  int PlayerAge = -1; //>=0, <=100
+  std::string PlayerGender; //SQL, <=16
+  std::string PlayerLocation; //SQL, <=16
+  std::vector<PlayerTransactions> Transactions;
 };
 
 /**
@@ -208,4 +231,4 @@ struct BaseData {
   std::string PlayerGuid;
   std::string MatchGuid;
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

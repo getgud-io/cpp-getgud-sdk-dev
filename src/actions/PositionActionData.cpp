@@ -4,7 +4,7 @@
 #include "../utils/Utils.h"
 #include "../utils/Utils.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 /**
  * GetPositionActionSize:
  *
@@ -120,4 +120,4 @@ Orientation& PositionActionData::getOrientation()
   return m_orientation;
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

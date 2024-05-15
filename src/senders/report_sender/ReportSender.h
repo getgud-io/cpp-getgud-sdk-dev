@@ -11,7 +11,7 @@
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
   class CredentialsReportData : public ReportData {
  public:
@@ -51,4 +51,4 @@ class ReportSender {
   void SendNextReportBatch();
   void SendReportPacket(std::string& packet);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

@@ -2,7 +2,7 @@
 #include <mutex>
 #include <vector>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 class ReportSender;
 
@@ -15,4 +15,4 @@ struct SharedReportSenders {
   ReportSender* reportSender;
   std::mutex reportSendersMutex;
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

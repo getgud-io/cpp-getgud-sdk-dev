@@ -1,10 +1,11 @@
-#include <GetGudSdk_C.h>
+#include <GetgudSDK_C.h>
 #ifdef _WIN32
 #include <Windows.h>
 #include <stdio.h>
 #endif
 
 int main() {
+  //system("pause");
   init();
   //Fill the Game info
   char gameGuid[37] = { 0 }; //guid + \0
@@ -17,6 +18,7 @@ int main() {
   gameInfo.serverGuid = "serverGuid";
   gameInfo.serverGuidSize = 10;
   gameInfo.titleId = 1;
+  gameInfo.serverLocationSize = 1;
   //Start the Game
   gameGuidSize = StartGame(gameInfo, gameGuid);
 
@@ -33,6 +35,8 @@ int main() {
   //Start the Match
   matchGuidSize = StartMatch(matchInfo, matchGuid);
 
+  printf("matchSize: %i\n", matchGuidSize);
+
   struct BaseActionData baseData;
   baseData.actionTimeEpoch = 1684059337532;
   baseData.matchGuid = matchGuid;
@@ -42,9 +46,11 @@ int main() {
 
   SendAttackAction(baseData, "W_G", 3);
 
-  SendDeathAction(baseData);
+  SendDeathAction(baseData, "attacker_guid", 13);
 
-  MarkEndGame(gameGuid, 36);
+  int martResult = MarkEndGame(gameGuid, 36);
+
+  printf("matchSize: %i\n", martResult);
 
   Sleep(6000);
 

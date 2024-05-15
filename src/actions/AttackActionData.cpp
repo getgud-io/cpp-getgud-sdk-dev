@@ -3,7 +3,7 @@
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 extern Config sdkConfig;
 
@@ -87,4 +87,4 @@ AttackActionData* AttackActionData::Clone() {
   return new AttackActionData(*this);
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

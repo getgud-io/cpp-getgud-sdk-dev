@@ -6,7 +6,7 @@
 #include "../../include/actions/Helpers.h"
 #include "../utils/Validator.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 /**
  * SdkValidatorConfig:
@@ -150,6 +150,7 @@ class Config {
   unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;
   std::string configFilePath = "./config.json";
 
+  Config();
   bool LoadSettings();
   std::string ToString();
 
@@ -170,4 +171,4 @@ bool GetConfigValue(
       std::map<std::string, std::string>& configData,
       std::string configKey, LogLevel& outValue);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

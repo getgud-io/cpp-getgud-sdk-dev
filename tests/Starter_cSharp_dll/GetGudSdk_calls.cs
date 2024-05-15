@@ -1,13 +1,13 @@
-﻿using GetGudSdk;
+﻿using GetgudSDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-//using static GetGudSdk.SDKWrapper;
+//using static GetgudSDK.SDKWrapper;
 
-namespace GetGudSdk
+namespace GetgudSDK
 {
     public enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
     public enum AffectState { Attach, Activate, Deactivate, Detach };
@@ -25,11 +25,21 @@ namespace GetGudSdk
         public float Pitch;
         public float Roll;
     };
+
+    public struct PlayerTransactions
+    {
+        public IntPtr TransactionGuid;
+        public int TransactionGuidSize;
+        public IntPtr TransactionName;
+        public int TransactionNameSize;
+        public long TransactionDateEpoch;
+        public float TransactionValueUSD;
+    };
 }
 
-namespace GetGudSdk_calls
+namespace GetgudSDK_calls
 {
-    static class GetGudSdk_calls
+    static class GetgudSDK_calls
     {
 #pragma warning disable CS8601, CS0649
 
@@ -42,6 +52,8 @@ namespace GetGudSdk_calls
             public int serverGuidSize;
             public IntPtr gameMode;
             public int gameModeSize;
+            public IntPtr serverLocation;
+            public int serverLocationSize;
         }
 
         public struct StartMatchInfoWrapper
@@ -75,6 +87,27 @@ namespace GetGudSdk_calls
             public int playerEmailSize;
             public int playerRank;
             public long playerJoinDateEpoch;
+            public IntPtr playerSuspectScore;
+            public int playerSuspectScoreSize;
+            public IntPtr playerReputation;
+            public int playerReputationSize;
+            public IntPtr playerStatus;
+            public int playerStatusSize;
+            public IntPtr playerCompaign;
+            public int playerCompaignSize;
+            public IntPtr playerNotes;
+            public int playerNotesSize;
+            public IntPtr playerDevice;
+            public int playerDeviceSize;
+            public IntPtr playerOS;
+            public int playerOSSize;
+            public int playerAge;
+            public IntPtr playerGender;
+            public int playerGenderSize;
+            public IntPtr playerLocation;
+            public int playerLocationSize;
+            public IntPtr transactions;
+            public int transactionsSize;
         };
 
         public struct ReportInfoWrapper
@@ -123,6 +156,12 @@ namespace GetGudSdk_calls
             public IntPtr weaponGuid;
             public int weaponGuidSize;
         }
+        public struct SendDeathActionWrapper
+        {
+            public BaseActionDataWrapper baseData;
+            public IntPtr attackerGuid;
+            public int attackerGuidSize;
+        }
 
         public struct SendHealActionWrapper
         {
@@ -157,7 +196,7 @@ namespace GetGudSdk_calls
 		//
 		// Linux deploy path
 		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-        const string dllPath = "../../../../../../lib/libGetGudSdk.so";
+        const string dllPath = "../../../../../../lib/libGetgudSDK.so";
 
 
         [DllImport(dllPath)]
@@ -190,7 +229,7 @@ namespace GetGudSdk_calls
             int teamId, float initialHealth, PositionF position, RotationF rotation);
 
         [DllImport(dllPath)]
-        public static extern int SendDeathAction(BaseActionDataWrapper matchInfo);
+        public static extern int SendDeathAction(BaseActionDataWrapper matchInfo, IntPtr attackerGuid, int attackerGuidSize);
 
         [DllImport(dllPath)]
         public static extern int SendPositionAction(BaseActionDataWrapper matchInfo, PositionF position, RotationF rotation);

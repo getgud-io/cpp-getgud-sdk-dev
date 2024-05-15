@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18) # or whatever is suitable/available for you
 
 project(
-  GetGudSdk
+  GetgudSDK
   VERSION 0.1
   DESCRIPTION "The GetGud REST API SDK"
   LANGUAGES CXX)

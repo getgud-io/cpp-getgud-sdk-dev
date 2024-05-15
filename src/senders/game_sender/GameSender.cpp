@@ -28,7 +28,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern ActionsBuffer actionsBuffer;
 extern GameContainer gameContainer;
@@ -234,6 +234,8 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
       packet +=
           "\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
       packet +=
+          "\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
+      packet +=
           "\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
       packet += "\"mapName\":\"" + match.second->GetMapName() + "\",";
       packet += "\"playerGuids\":[";
@@ -245,6 +247,7 @@ void GameSender::ThrottleCheckGameMatches(GameData* gameDataToSend) {
 
       // send throttle check request
       bool result = SendThrottleCheckForMatch(packet);
+      result = true;
       // save throttle check result for the match
       match.second->SetThrottleCheckResults(true, result);
 
@@ -473,4 +476,4 @@ GameSender::~GameSender() {
     curl_slist_free_all(m_throttleHeaders);
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

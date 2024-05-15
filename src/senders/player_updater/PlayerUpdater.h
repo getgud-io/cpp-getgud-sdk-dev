@@ -11,7 +11,7 @@
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class PlayerUpdater {
  public:
   PlayerUpdater();
@@ -40,4 +40,4 @@ class PlayerUpdater {
   void SendNextPlayerBatch();
   void SendUpdatePlayerPacket(std::string& packet);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

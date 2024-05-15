@@ -8,7 +8,7 @@
 std::mutex counterMutex;
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 unsigned int GetEmptyActionSize() {
   int size = 0;
@@ -159,4 +159,4 @@ BaseActionData* BaseActionData::Clone() {
   return new BaseActionData(*this);
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

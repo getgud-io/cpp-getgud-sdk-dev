@@ -18,9 +18,17 @@
 #include <iostream>
 #include <memory>
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 Config sdkConfig;
 extern Logger logger;
+
+/**
+ * Config:
+ *
+ * Initialize default constructor
+ **/
+Config::Config() { }
+
 
 /**
  * LoadSettings:
@@ -531,4 +539,4 @@ std::string Config::ToString() {
   return configString;
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

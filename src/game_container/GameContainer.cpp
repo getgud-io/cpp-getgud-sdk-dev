@@ -3,7 +3,7 @@
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 GameContainer gameContainer;
 
@@ -17,7 +17,8 @@ extern Logger logger;
 std::string GameContainer::AddGame(int titleId,
                                    std::string privateKey,
                                    std::string serverGuid,
-                                   std::string gameMode) {
+                                   std::string gameMode,
+                                   std::string serverLocation) {
   std::string gameGuid;
   // make sure the container has enough room for another game
   if (m_gameVector.size() >= sdkConfig.maxGames) {
@@ -29,7 +30,7 @@ std::string GameContainer::AddGame(int titleId,
 
   // create a GameData and a pointer to it so we can reference the same GameData
   // object from different data structures
-  GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode);
+  GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode, serverLocation);
 
   if (!gameData->IsValid()) {
     delete gameData;
@@ -513,4 +514,4 @@ void GameContainer::Dispose() {
   m_gameContainerMutex.unlock();
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

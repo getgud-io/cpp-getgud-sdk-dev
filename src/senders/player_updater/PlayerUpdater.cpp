@@ -24,7 +24,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern Config sdkConfig;
 extern SharedPlayerUpdaters sharedPlayerUpdaters;
@@ -80,6 +80,10 @@ bool PlayerUpdater::AddPlayers(int titleId,
                "cannot add more players");
     return false;
   }
+  
+  //privateKey and titleId validations
+  if (titleId < 1 || titleId > INT_MAX || privateKey.size() == 0 || privateKey.size() > 100)
+      return false;
 
   m_playerUpdaterMutex.lock();
 
@@ -200,7 +204,7 @@ void PlayerUpdater::SendUpdatePlayerPacket(std::string& packet) {
   if (sendCode != CURLcode::CURLE_OK) {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
         m_curlReadBuffer);
     }
     
@@ -213,7 +217,7 @@ void PlayerUpdater::SendUpdatePlayerPacket(std::string& packet) {
   {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
         m_curlReadBuffer);
     }
   }
@@ -280,4 +284,4 @@ void PlayerUpdater::Dispose() {
   }
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

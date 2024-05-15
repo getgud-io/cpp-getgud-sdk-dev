@@ -8,7 +8,7 @@
 #include "ChatMessageData.h"
 #include "ReportData.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class MatchData {
  private:
   // holds all the actions (in order) that arrived from the client and are
@@ -69,4 +69,4 @@ class MatchData {
   void Dispose();
   bool IsValid();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

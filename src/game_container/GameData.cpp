@@ -9,7 +9,7 @@
 #include <stdio.h>
 #endif
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Config sdkConfig;
 extern Logger logger;
 
@@ -25,11 +25,13 @@ int totalCreatedGames = 0;
 GameData::GameData(int titleId,
                    std::string privateKey,
                    std::string serverGuid,
-                   std::string gameMode)
+                   std::string gameMode,
+                   std::string serverLocation)
     : m_titleId(titleId),
       m_privateKey(privateKey),
       m_serverGuid(serverGuid),
-      m_gameMode(gameMode) {
+      m_gameMode(gameMode),
+      m_serverLocation(serverLocation){
   m_gameGuid = GenerateGuid();
   m_startGameTimer = std::chrono::system_clock::now();
   m_lastUpdateTime = std::chrono::system_clock::now();
@@ -74,7 +76,7 @@ GameData::~GameData() {
 GameData* GameData::Clone(bool isWithActions) {
   // Clone some metadata variables
   GameData* cloneGameData =
-      new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode);
+      new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode, m_serverLocation);
   cloneGameData->m_gameGuid = m_gameGuid;
   cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
@@ -345,6 +347,7 @@ void GameData::GameToString(std::string& gameOut) {
   gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
   gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
   gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
+  gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
   gameOut += "\"gameLastPacket\":" + lastPacket + ",";
   gameOut += "\"matches\":[\n";
 
@@ -449,6 +452,14 @@ std::string GameData::GetGameMode() {
 }
 
 /**
+ * GetServerLocation:
+ *
+ **/
+std::string GameData::GetServerLocation() {
+    return m_serverLocation;
+}
+
+/**
  * Dispose:
  *
  **/
@@ -469,11 +480,13 @@ void GameData::Dispose() {
 bool GameData::IsValid() {
   bool isActionValid = Validator::ValidateStringLength(m_privateKey, 1, 100);
   isActionValid &= Validator::ValidateStringChars(m_privateKey);
-  isActionValid = Validator::ValidateStringLength(m_serverGuid, 1, 36);
+  isActionValid &= Validator::ValidateStringLength(m_serverGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_serverGuid);
-  isActionValid = Validator::ValidateStringLength(m_gameMode, 1, 100);
+  isActionValid &= Validator::ValidateStringLength(m_gameMode, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_gameMode);
   isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
+  isActionValid &= Validator::ValidateStringLength(m_serverLocation, 0, 36);
+  isActionValid &= Validator::ValidateStringChars(m_serverLocation);
   return isActionValid;
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

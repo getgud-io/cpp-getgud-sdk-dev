@@ -4,7 +4,7 @@
 
 #include "../../../include/actions/Helpers.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 unsigned int GetPlayerDataSize();
 class PlayerData {
  public:
@@ -16,4 +16,4 @@ class PlayerData {
   void Dispose();
   bool IsValid();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

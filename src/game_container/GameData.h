@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "MatchData.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class GameData {
  private:
   //  holds pointers to matches of the game which you can get by matchGuid
@@ -18,6 +18,7 @@ class GameData {
   std::string m_gameGuid;
   std::string m_serverGuid;
   std::string m_gameMode;
+  std::string m_serverLocation;
   bool m_isGameMarkedAsEnded = false;
   unsigned int m_sizeInBytes = 0;
   std::chrono::system_clock::time_point m_startGameTimer;
@@ -27,7 +28,8 @@ class GameData {
   GameData(int titleId,
            std::string privateKey,
            std::string serverGuid,
-           std::string gameMode);
+           std::string gameMode,
+           std::string serverLocation);
   GameData() = delete;
   GameData(const GameData& data);
   ~GameData();
@@ -43,6 +45,7 @@ class GameData {
   std::string GetPrivateKey();
   std::string GetServerGuid();
   std::string GetGameMode();
+  std::string GetServerLocation();
   void GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut);
   MatchData* GetGameMatch(std::string matchGuid);
   void GameToString(std::string& gameOut);
@@ -53,4 +56,4 @@ class GameData {
   void Dispose();
   bool IsValid();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

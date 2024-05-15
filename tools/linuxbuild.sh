@@ -13,7 +13,7 @@ fi
 
 cd ${LIBS_DIR}libcurl/
 
-if ! test ${LIBS_DIR}libcurl/builds/libcurl-x64-debug-static; then
+if [ ! -e "${LIBS_DIR}libcurl/builds/libcurl-x64-debug-static/lib/libcurl.a" ]; then
 	./buildconf
 
 	./configure --disable-shared --with-openssl --prefix=${LIBS_DIR}libcurl/builds/libcurl-x64-debug-static --enable-debug
@@ -22,7 +22,7 @@ if ! test ${LIBS_DIR}libcurl/builds/libcurl-x64-debug-static; then
 	make install
 fi
 
-if ! test ${LIBS_DIR}libcurl/builds/libcurl-x64-release-static; then
+if [ ! -e "${LIBS_DIR}libcurl/builds/libcurl-x64-release-static/lib/libcurl.a" ]; then
 	./configure --disable-shared --with-openssl --prefix=${LIBS_DIR}/libcurl/builds/libcurl-x64-release-static
 
 	make
@@ -31,7 +31,7 @@ fi
 
 cd ${LIBS_DIR}zlib/
 
-if ! test ${LIBS_DIR}zlib/zlib.h; then
+if [ ! -e "${LIBS_DIR}zlib/include/zlib.h" ]; then
 ./configure -prefix=${LIBS_DIR}zlib/
 
 make

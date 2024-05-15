@@ -5,7 +5,7 @@
 #include "../utils/Utils.h"
 #include "GameData.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 class GameContainer {
  private:
   // fast access map for when we need the GameData via game guid
@@ -30,7 +30,8 @@ public:
   std::string AddGame(int titleId,
                       std::string privateKey,
                       std::string serverGuid,
-                      std::string gameMode);
+                      std::string gameMode,
+                      std::string serverLocation);
   std::string AddMatch(std::string gameGuid,
                        std::string matchMode,
                        std::string mapName);
@@ -51,4 +52,4 @@ public:
                                  bool externalCall,
                                  std::vector<MatchData*>& matchPtrVector);
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

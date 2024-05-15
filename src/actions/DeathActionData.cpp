@@ -3,7 +3,7 @@
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 
 extern Config sdkConfig;
 
@@ -13,8 +13,11 @@ extern Config sdkConfig;
  **/
 DeathActionData::DeathActionData(std::string matchGuid,
                                  long long actionTimeEpoch,
-                                 std::string playerGuid)
-    : BaseActionData({Actions::Death, actionTimeEpoch, playerGuid, matchGuid}) {
+                                 std::string playerGuid,
+                                 std::string attackerGuid)
+    : BaseActionData({Actions::Death, actionTimeEpoch, playerGuid, matchGuid}),
+      m_attackerGuid(attackerGuid){
+
 }
 
 /**
@@ -22,7 +25,7 @@ DeathActionData::DeathActionData(std::string matchGuid,
  *
  **/
 DeathActionData::DeathActionData(const DeathActionData& data)
-    : BaseActionData(data) {}
+    : BaseActionData(data), m_attackerGuid(data.m_attackerGuid) {}
 
 /**
  * ~DeathActionData:
@@ -53,7 +56,8 @@ std::string DeathActionData::ToString() {
   std::string actionString;
   actionString += std::to_string(m_actionTimeEpoch) + ",";
   actionString += "DD,";
-  actionString += m_playerGuid;
+  actionString += m_playerGuid + ",";
+  actionString += m_attackerGuid;
 
   return actionString;
 }
@@ -66,6 +70,8 @@ std::string DeathActionData::ToString() {
 std::string DeathActionData::ToStringMeta() {
   std::string actionMetaString = BaseActionData::ToStringMeta();
 
+  actionMetaString += "Attacker GUID:" + m_attackerGuid + ";";
+
   return actionMetaString;
 }
 /**
@@ -75,4 +81,4 @@ std::string DeathActionData::ToStringMeta() {
 DeathActionData* DeathActionData::Clone() {
   return new DeathActionData(*this);
 }
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

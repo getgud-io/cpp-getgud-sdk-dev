@@ -4,7 +4,7 @@
 
 #include "../../include/actions/Helpers.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 unsigned int GetReportDataSize();
 
 class ReportData {
@@ -14,4 +14,4 @@ class ReportData {
   std::string ToString(bool isOutsideMatch=false);
   virtual bool IsValid();
 };
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK

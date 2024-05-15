@@ -1,5 +1,5 @@
 #include "SharedReportSenders.h"
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 SharedReportSenders sharedReportSenders;
 }

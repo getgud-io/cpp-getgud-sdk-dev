@@ -23,7 +23,7 @@ size_t CURLWriteCallback(char* contents,
 
 }  // namespace
 
-namespace GetGudSdk {
+namespace GetgudSDK {
 extern Logger logger;
 extern Config sdkConfig;
 extern SharedReportSenders sharedReportSenders;
@@ -35,7 +35,7 @@ CredentialsReportData::CredentialsReportData(int titleId,
 
 bool CredentialsReportData::IsValid() {
   bool isActionValid = ReportData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(m_privateKey, 1, 10000);
+  isActionValid &= Validator::ValidateStringLength(m_privateKey, 1, 100);
   isActionValid &= Validator::ValidateStringChars(m_privateKey);
   isActionValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
   return isActionValid;
@@ -212,7 +212,7 @@ void ReportSender::SendReportPacket(std::string& packet) {
   if (sendCode != CURLcode::CURLE_OK) {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendReportPlayerPacket->Failed to send throttle request: " +
         m_curlReadBuffer);
     }
     logger.Log(LogType::_ERROR, "Failed to send packet: " +
@@ -222,7 +222,7 @@ void ReportSender::SendReportPacket(std::string& packet) {
   {
     if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
       logger.Log(LogType::DEBUG,
-        "GameSender::SendUpdatePlayerPacket->Failed to send throttle request: " +
+        "GameSender::SendReportPlayerPacket->Failed to send throttle request: " +
         m_curlReadBuffer);
     }
   }
@@ -290,4 +290,4 @@ void ReportSender::Dispose() {
   }
 }
 
-}  // namespace GetGudSdk
+}  // namespace GetgudSDK
