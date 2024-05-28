@@ -13,12 +13,13 @@ int main() {
   struct StartGameInfo gameInfo;
   gameInfo.gameMode = "gameMode";
   gameInfo.gameModeSize = 8;
-  gameInfo.privateKey = "4143253";
-  gameInfo.privateKeySize = 7;
+  gameInfo.privateKey = "a6effeb0-b3b6-11ee-a523-25e8feeae2d8";
+  gameInfo.privateKeySize = 36;
   gameInfo.serverGuid = "serverGuid";
   gameInfo.serverGuidSize = 10;
-  gameInfo.titleId = 1;
-  gameInfo.serverLocationSize = 1;
+  gameInfo.titleId = 111;
+  gameInfo.serverLocation = "UK";
+  gameInfo.serverLocationSize = 2;
   //Start the Game
   gameGuidSize = StartGame(gameInfo, gameGuid);
 
@@ -50,7 +51,7 @@ int main() {
 
   int martResult = MarkEndGame(gameGuid, 36);
 
-  printf("matchSize: %i\n", martResult);
+  printf("End Game Result: %i\n", martResult);
 
   Sleep(6000);
 

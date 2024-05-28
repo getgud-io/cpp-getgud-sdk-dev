@@ -25,9 +25,9 @@ struct RotationF {
 
 struct PlayerTransactions
 {
-    char* TransactionGuid;
+    const char* TransactionGuid;
     int TransactionGuidSize;
-    char* TransactionName;
+    const char* TransactionName;
     int TransactionNameSize;
     long long TransactionDateEpoch;
     float TransactionValueUSD;
@@ -35,82 +35,82 @@ struct PlayerTransactions
 
 struct BaseActionData {
   long long actionTimeEpoch;
-  char* matchGuid;
+  const char* matchGuid;
   int matchGuidSize;
-  char* playerGuid;
+  const char* playerGuid;
   int playerGuidSize;
 };
 struct StartGameInfo {
   int titleId;
-  char* privateKey;
+  const char* privateKey;
   int privateKeySize;
-  char* serverGuid;
+  const char* serverGuid;
   int serverGuidSize;
-  char* gameMode;
+  const char* gameMode;
   int gameModeSize;
-  char* serverLocation;
+  const char* serverLocation;
   int serverLocationSize;
 };
 
 struct StartMatchInfo {
-  char* gameGuid;
+  const char* gameGuid;
   int gameGuidSize;
-  char* matchMode;
+  const char* matchMode;
   int matchModeSize;
-  char* mapName;
+  const char* mapName;
   int mapNameSize;
 };
 
 struct ChatMessageInfo {
   long long messageTimeEpoch;
-  char* matchGuid;
+  const char* matchGuid;
   int matchGuidSize;
-  char* playerGuid;
+  const char* playerGuid;
   int playerGuidSize;
-  char* message;
+  const char* message;
   int messageSize;
 };
 
 struct PlayerInfo {
-  char* playerGuid;
+  const char* playerGuid;
   int playerGuidSize;
-  char* playerNickname;
+  const char* playerNickname;
   int playerNicknameSize;
-  char* playerEmail;
+  const char* playerEmail;
   int playerEmailSize;
   int playerRank;
   long long playerJoinDateEpoch;
-  char* playerSuspectScore;
+  const char* playerSuspectScore;
   int playerSuspectScoreSize;
-  char* playerReputation;
+  const char* playerReputation;
   int playerReputationSize;
-  char* playerStatus;
+  const char* playerStatus;
   int playerStatusSize;
-  char* PlayerCampaign;
+  const char* PlayerCampaign;
   int PlayerCampaignSize;
-  char* playerNotes;
+  const char* playerNotes;
   int playerNotesSize;
-  char* playerDevice;
+  const char* playerDevice;
   int playerDeviceSize;
-  char* playerOS;
+  const char* playerOS;
   int playerOSSize;
   int playerAge;
-  char* playerGender;
+  const char* playerGender;
   int playerGenderSize;
-  char* playerLocation;
+  const char* playerLocation;
   int playerLocationSize;
   struct PlayerTransactions* transactions;
   int transactionsSize;
 };
 
 struct ReportInfo {
-  char* matchGuid;
+  const char* matchGuid;
   int matchGuidSize;
-  char* reporterName;
+  const char* reporterName;
   int reporterNameSize;
   int reporterType;
   int reporterSubType;
-  char* suspectedPlayerGuid;
+  const char* suspectedPlayerGuid;
   int suspectedPlayerGuidSize;
   int tbType;
   long long tbTimeEpoch;
@@ -149,14 +149,14 @@ GETGUDSDK_API int StartMatch(struct StartMatchInfo matchInfo, char* matchGuidOut
  *
  * Mark started game as finished
  **/
-GETGUDSDK_API int MarkEndGame(char* gameGuid, int guidSize);
+GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
 
 /**
  * SendAffectAction:
  *
  **/
 GETGUDSDK_API int SendAffectAction(struct BaseActionData baseData,
-  char* affectGuid,
+  const char* affectGuid,
   int affectGuidSize,
   enum AffectState affectState);
 
@@ -165,7 +165,7 @@ GETGUDSDK_API int SendAffectAction(struct BaseActionData baseData,
  *
  **/
 GETGUDSDK_API int SendAttackAction(struct BaseActionData baseData,
-                     char* weaponGuid,
+                     const char* weaponGuid,
                      int weaponGuidSize);
 
 /**
@@ -173,10 +173,10 @@ GETGUDSDK_API int SendAttackAction(struct BaseActionData baseData,
  *
  **/
 GETGUDSDK_API int SendDamageAction(struct BaseActionData baseData,
-                     char* victimPlayerGuid,
+                     const char* victimPlayerGuid,
                      int victimPlayerGuidSize,
                      float damageDone,
-                     char* weaponGuid,
+                     const char* weaponGuid,
                      int weaponGuidSize);
 
 /**
@@ -190,7 +190,7 @@ GETGUDSDK_API int SendHealAction(struct BaseActionData baseData, float healthGai
  *
  **/
 GETGUDSDK_API int SendSpawnAction(struct BaseActionData baseData,
-                    char* characterGuid,
+                    const char* characterGuid,
                     int characterGuidSize,
                     int teamId,
                     float initialHealth,
@@ -202,7 +202,7 @@ GETGUDSDK_API int SendSpawnAction(struct BaseActionData baseData,
  *
  **/
 GETGUDSDK_API int SendDeathAction(struct BaseActionData baseData,
-                                  char* attackerGuid,
+                                  const char* attackerGuid,
                                   int attackerGuidSize);
 
 /**
@@ -232,7 +232,7 @@ GETGUDSDK_API int SendChatMessage(struct ChatMessageInfo messageInfo);
  * Send report which are outside of the live match
  **/
 GETGUDSDK_API int SendReport(int titleId,
-  char* privateKey, int privateKeySize, struct ReportInfo report);
+  const char* privateKey, int privateKeySize, struct ReportInfo report);
 
 /**
  * UpdatePlayer:
@@ -240,7 +240,7 @@ GETGUDSDK_API int SendReport(int titleId,
  * Update player info outside of the live match
  **/
 GETGUDSDK_API int UpdatePlayer(int titleId,
-  char* privateKey, int privateKeySize, struct PlayerInfo player);
+  const char* privateKey, int privateKeySize, struct PlayerInfo player);
 
 /**
  * Dispose:

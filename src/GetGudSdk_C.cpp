@@ -71,15 +71,15 @@ int StartGame(StartGameInfo gameInfo, char* gameGuidOut) {
     if (gameInfo.privateKeySize != 0) {
       gameGuid =
           GetgudSDK::StartGame(gameInfo.titleId,
-                    privateKey,
-                    serverGuid,
-                    gameMode,
-                    serverLocation);
+                    privateKey.c_str(),
+                    serverGuid.c_str(),
+                    gameMode.c_str(),
+                    serverLocation.c_str());
     } else {
       gameGuid = GetgudSDK::StartGame(
-                    serverGuid,
-                    gameMode,
-                    serverLocation);
+                    serverGuid.c_str(),
+                    gameMode.c_str(),
+                    serverLocation.c_str());
     }
     strcpy(gameGuidOut, gameGuid.c_str());
   } catch (std::exception& _error) {
@@ -122,9 +122,9 @@ int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
     }
 
     matchGuid = GetgudSDK::StartMatch(
-                   gameGuid,
-                   matchMode,
-                   mapName);
+                   gameGuid.c_str(),
+                   matchMode.c_str(),
+                   mapName.c_str());
 
     strcpy(matchGuidOut, matchGuid.c_str());
   } catch (std::exception& _error) {
@@ -141,7 +141,7 @@ int StartMatch(StartMatchInfo matchInfo, char* matchGuidOut) {
  *
  * Mark started game as finished
  **/
-int MarkEndGame(char* gameGuid, int guidSize) {
+int MarkEndGame(const char* gameGuid, int guidSize) {
   bool result = false;
   try {
     std::string endGameGuid;
@@ -151,7 +151,7 @@ int MarkEndGame(char* gameGuid, int guidSize) {
         endGameGuid = std::string(gameGuid, guidSize);
     }
 
-    result = GetgudSDK::MarkEndGame(endGameGuid);
+    result = GetgudSDK::MarkEndGame(endGameGuid.c_str());
   } catch (std::exception& _error) {
       GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
           std::string("GetgudSDK::MarkEndGame "
@@ -166,7 +166,7 @@ int MarkEndGame(char* gameGuid, int guidSize) {
  *
  **/
 int SendAffectAction(struct BaseActionData baseData,
-  char* affectGuid,
+  const char* affectGuid,
   int affectGuidSize,
   AffectState affectState)
 {
@@ -195,10 +195,10 @@ int SendAffectAction(struct BaseActionData baseData,
     }
 
     GetgudSDK::AffectActionData* affectAction = new GetgudSDK::AffectActionData(
-      matchGuid,
+      matchGuid.c_str(),
       baseData.actionTimeEpoch,
-      playerGuid,
-      inAffectGuid,
+      playerGuid.c_str(),
+      inAffectGuid.c_str(),
       static_cast<GetgudSDK::AffectState>(affectState));
     std::deque<GetgudSDK::BaseActionData*> actions = { affectAction };
     sendResult = GetgudSDK::SendActions(actions);
@@ -217,7 +217,7 @@ int SendAffectAction(struct BaseActionData baseData,
  *
  **/
 int SendAttackAction(BaseActionData baseData,
-                     char* weaponGuid,
+                     const char* weaponGuid,
                      int weaponGuidSize) {
   bool sendResult = false;
   try {
@@ -244,10 +244,10 @@ int SendAttackAction(BaseActionData baseData,
     }
 
     GetgudSDK::AttackActionData* attackAction = new GetgudSDK::AttackActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
-        inWeaponGuid);
+        playerGuid.c_str(),
+        inWeaponGuid.c_str());
     std::deque<GetgudSDK::BaseActionData*> actions = {attackAction};
     sendResult = GetgudSDK::SendActions(actions);
     delete attackAction;
@@ -265,10 +265,10 @@ int SendAttackAction(BaseActionData baseData,
  *
  **/
 int SendDamageAction(BaseActionData baseData,
-                      char* victimPlayerGuid,
+                      const char* victimPlayerGuid,
                       int victimPlayerGuidSize,
                       float damageDone,
-                      char* weaponGuid,
+                      const char* weaponGuid,
                       int weaponGuidSize) {
   bool sendResult = false;
   try {
@@ -302,12 +302,12 @@ int SendDamageAction(BaseActionData baseData,
     }
 
     GetgudSDK::DamageActionData* damageAction = new GetgudSDK::DamageActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
-        inVictimPlayerGuid,
+        playerGuid.c_str(),
+        inVictimPlayerGuid.c_str(),
         damageDone, 
-        inWeaponGuid);
+        inWeaponGuid.c_str());
     std::deque<GetgudSDK::BaseActionData*> actions = {damageAction};
     sendResult = GetgudSDK::SendActions(actions);
     delete damageAction;
@@ -343,9 +343,9 @@ int SendHealAction(BaseActionData baseData, float healthGained) {
     }
 
     GetgudSDK::HealActionData* healAction = new GetgudSDK::HealActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
+        playerGuid.c_str(),
         healthGained);
     std::deque<GetgudSDK::BaseActionData*> actions = {healAction};
     sendResult = GetgudSDK::SendActions(actions);
@@ -364,7 +364,7 @@ int SendHealAction(BaseActionData baseData, float healthGained) {
  *
  **/
 int SendSpawnAction(BaseActionData baseData,
-                     char* characterGuid,
+                     const char* characterGuid,
                      int characterGuidSize,
                      int teamId,
                      float initialHealth,
@@ -395,10 +395,10 @@ int SendSpawnAction(BaseActionData baseData,
     }
 
     GetgudSDK::SpawnActionData* spawnAction = new GetgudSDK::SpawnActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
-        inCharacterGuid, teamId, initialHealth,
+        playerGuid.c_str(),
+        inCharacterGuid.c_str(), teamId, initialHealth,
         *(GetgudSDK::PositionF*)&position, *(GetgudSDK::RotationF*)&rotation);
     std::deque<GetgudSDK::BaseActionData*> actions = {spawnAction};
     sendResult = GetgudSDK::SendActions(actions);
@@ -417,7 +417,7 @@ int SendSpawnAction(BaseActionData baseData,
  *
  **/
 int SendDeathAction(BaseActionData baseData,
-                    char* attackerGuid,
+                    const char* attackerGuid,
                     int attackerGuidSize) {
   bool sendResult = false;
   try {
@@ -444,10 +444,10 @@ int SendDeathAction(BaseActionData baseData,
     }
 
     GetgudSDK::DeathActionData* deathAction = new GetgudSDK::DeathActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
-        inAttackerGuid);
+        playerGuid.c_str(),
+        inAttackerGuid.c_str());
     std::deque<GetgudSDK::BaseActionData*> actions = {deathAction};
     sendResult = GetgudSDK::SendActions(actions);
     delete deathAction;
@@ -486,9 +486,9 @@ int SendPositionAction(BaseActionData baseData,
 
     GetgudSDK::PositionActionData* positionAction =
         new GetgudSDK::PositionActionData(
-        matchGuid,
+        matchGuid.c_str(),
         baseData.actionTimeEpoch,
-        playerGuid,
+        playerGuid.c_str(),
             *(GetgudSDK::PositionF*)&position, *(GetgudSDK::RotationF*)&rotation);
     std::deque<GetgudSDK::BaseActionData*> actions = {positionAction};
     sendResult = GetgudSDK::SendActions(actions);
@@ -535,13 +535,13 @@ int SendInMatchReport(ReportInfo reportInfo)
 
     GetgudSDK::ReportInfo reportInfoOut;
 
-    reportInfoOut.MatchGuid = matchGuid;
+    reportInfoOut.MatchGuid = matchGuid.c_str();
     reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
-    reportInfoOut.ReporterName = reporterName;
+    reportInfoOut.ReporterName = reporterName.c_str();
     reportInfoOut.ReporterSubType = static_cast<GetgudSDK::ReporterSubtype>(reportInfo.reporterSubType);
     reportInfoOut.ReporterType = static_cast<GetgudSDK::ReporterType>(reportInfo.reporterType);
     reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
-    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid;
+    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid.c_str();
     reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
     reportInfoOut.TbType = static_cast<GetgudSDK::TbType>(reportInfo.tbType);
 
@@ -588,11 +588,11 @@ int SendChatMessage(ChatMessageInfo messageInfo)
 
     GetgudSDK::ChatMessageInfo messageInfoOut;
 
-    messageInfoOut.message = message;
+    messageInfoOut.message = message.c_str();
     messageInfoOut.messageTimeEpoch = messageInfo.messageTimeEpoch;
-    messageInfoOut.playerGuid = playerGuid;
+    messageInfoOut.playerGuid = playerGuid.c_str();
     
-    sendResult = GetgudSDK::SendChatMessage(matchGuid, messageInfoOut);
+    sendResult = GetgudSDK::SendChatMessage(matchGuid.c_str(), messageInfoOut);
   } catch (std::exception& _error) {
       GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
           std::string("GetgudSDK::SendDeathAction "
@@ -609,7 +609,7 @@ int SendChatMessage(ChatMessageInfo messageInfo)
  * Send report which are outside of the live match
  **/
 int SendReport(int titleId,
-  char* privateKey, int privateKeySize, ReportInfo reportInfo)
+  const char* privateKey, int privateKeySize, ReportInfo reportInfo)
 {
   bool sendResult = false;
   try {
@@ -645,11 +645,11 @@ int SendReport(int titleId,
 
     GetgudSDK::ReportInfo reportInfoOut;
     //required
-    reportInfoOut.MatchGuid = matchGuid;
+    reportInfoOut.MatchGuid = matchGuid.c_str();
     //required
     reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
     if (reportInfo.reporterNameSize > 0)
-      reportInfoOut.ReporterName = reporterName;
+      reportInfoOut.ReporterName = reporterName.c_str();
     if (reportInfo.reporterSubType != -1)
       reportInfoOut.ReporterSubType = static_cast<GetgudSDK::ReporterSubtype>(reportInfo.reporterSubType);
     if (reportInfo.reporterType != -1)
@@ -657,7 +657,7 @@ int SendReport(int titleId,
     if (reportInfo.suggestedToxicityScore != -1)
       reportInfoOut.SuggestedToxicityScore = reportInfo.suggestedToxicityScore;
     //required
-    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid;
+    reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid.c_str();
     if (reportInfo.tbTimeEpoch != -1)
       reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
     if (reportInfo.tbType != -1)
@@ -668,7 +668,7 @@ int SendReport(int titleId,
 
     if (privateKeySize > 0)
     {
-      sendResult = GetgudSDK::SendReports(titleId, inPrivateKey, reports);
+      sendResult = GetgudSDK::SendReports(titleId, inPrivateKey.c_str(), reports);
     }
     else
     {
@@ -690,7 +690,7 @@ int SendReport(int titleId,
  * Update player info outside of the live match
  **/
 int UpdatePlayer(int titleId,
-  char* privateKey, int privateKeySize, PlayerInfo player)
+  const char* privateKey, int privateKeySize, PlayerInfo player)
 {
   bool sendResult = false;
   GetgudSDK::PlayerInfo playerOut;
@@ -763,9 +763,9 @@ int UpdatePlayer(int titleId,
     }
 
     if (player.playerEmailSize > 0)
-      playerOut.PlayerEmail = playerEmail;
+      playerOut.PlayerEmail = playerEmail.c_str();
     //required
-    playerOut.PlayerGuid = playerGuid;
+    playerOut.PlayerGuid = playerGuid.c_str();
     if (player.playerJoinDateEpoch != -1)
       playerOut.PlayerJoinDateEpoch = player.playerJoinDateEpoch;
     if (player.playerNicknameSize > 0)
@@ -783,15 +783,15 @@ int UpdatePlayer(int titleId,
     if (player.playerNotesSize > 0)
         playerOut.PlayerNotes = player.playerNotes;
     if (player.playerDeviceSize > 0)
-        playerOut.PlayerDevice = playerDevice;
+        playerOut.PlayerDevice = playerDevice.c_str();
     if (player.playerOSSize > 0)
-        playerOut.PlayerOS = playerOS;
+        playerOut.PlayerOS = playerOS.c_str();
     if (player.playerAge != -1)
         playerOut.PlayerAge = player.playerAge;
     if (player.playerGenderSize > 0)
-        playerOut.PlayerGender = playerGender;
+        playerOut.PlayerGender = playerGender.c_str();
     if (player.playerLocationSize > 0)
-        playerOut.PlayerLocation = playerLocation;
+        playerOut.PlayerLocation = playerLocation.c_str();
     if (player.transactions != NULL && player.transactionsSize > 0)
     {
         std::vector<GetgudSDK::PlayerTransactions> transactions;
@@ -808,8 +808,8 @@ int UpdatePlayer(int titleId,
             }
             GetgudSDK::PlayerTransactions playerTransaction =
             {
-                transactionGuid,
-                transactionName,
+                transactionGuid.c_str(),
+                transactionName.c_str(),
                 transaction_ref.TransactionDateEpoch,
                 transaction_ref.TransactionValueUSD
             };
@@ -822,7 +822,7 @@ int UpdatePlayer(int titleId,
     players.push_back(playerOut);
     if (privateKeySize > 0)
     {
-      sendResult = UpdatePlayers(titleId, inPrivateKey, players);
+      sendResult = UpdatePlayers(titleId, inPrivateKey.c_str(), players);
     }
     else
     {
