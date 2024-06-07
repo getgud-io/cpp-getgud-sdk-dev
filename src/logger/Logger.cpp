@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Logger.h"
 #include <fstream>
 #include <iostream>
@@ -30,7 +29,7 @@ long Logger::GetFileSize() {
  **/
 void Logger::ManageConfigFileSize() {
   long fileSize = GetFileSize();
-  if (fileSize != -1 && fileSize < sdkConfig.logFileSizeInBytes) {
+  if (fileSize != -1 && fileSize < (long)sdkConfig.logFileSizeInBytes) {
     return;
   }
   else if (fileSize != -1) {
@@ -48,7 +47,7 @@ void Logger::ManageConfigFileSize() {
       int linesDeleted = 0;
       while (getline(fin, line)) {
         // write all lines to temp other than the line marked for erasing
-        if (linesDeleted < sdkConfig.linesDeletionAmount) {
+        if (linesDeleted < (long)sdkConfig.linesDeletionAmount) {
           linesDeleted++;
           continue;
         } else {

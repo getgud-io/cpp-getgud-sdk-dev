@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ReportSender.h"
 #include "../../config/Config.h"
 #include "../../logger/Logger.h"
@@ -10,7 +9,7 @@ namespace {
  *
  * Curl custom callback to grab response from Getgud
  **/
-size_t CURLWriteCallback(char* contents,
+size_t CURLWriteCallbackReport(char* contents,
                          size_t size,
                          size_t nmemb,
                          void* userp) {
@@ -250,7 +249,7 @@ void ReportSender::InitCurl() {
   curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.sendReportsURL.c_str());
   curl_easy_setopt(m_curl, CURLOPT_TIMEOUT_MS,
                    sdkConfig.apiTimeoutMilliseconds);
-  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallbackReport);
   curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
 }
 

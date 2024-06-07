@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GameSender.h"
 #include "../../../include/actions/Helpers.h"
 #include "../../actions_buffer/ActionsBuffer.h"
@@ -166,7 +165,7 @@ void GameSender::ManageHyperMode() {
   }
 
   // Clip the numThreadsNeeded to higher thread number bound from Config
-  if (numThreadsNeeded > sdkConfig.hyperModeMaxThreads) {
+  if (numThreadsNeeded > (int)sdkConfig.hyperModeMaxThreads) {
     numThreadsNeeded = sdkConfig.hyperModeMaxThreads;
   }
   // We should always have at least 1 thread

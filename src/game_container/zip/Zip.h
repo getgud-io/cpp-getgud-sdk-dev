@@ -1,5 +1,5 @@
-#include <zlib/zconf.h>
-#include <zlib/zlib.h>
+#include <zconf.h>
+#include <zlib.h>
 #include <string>
 
 namespace GetgudSDK {

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ChatMessageData.h"
 #include "../utils/Validator.h"
 #include "../config/Config.h"

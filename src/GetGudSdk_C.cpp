@@ -692,6 +692,9 @@ int SendReport(int titleId,
 int UpdatePlayer(int titleId,
   const char* privateKey, int privateKeySize, PlayerInfo player)
 {
+    GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+        std::string("GetgudSDK::UpdatePlayer "
+            "validation started"));
   bool sendResult = false;
   GetgudSDK::PlayerInfo playerOut;
 
@@ -818,6 +821,10 @@ int UpdatePlayer(int titleId,
         playerOut.Transactions = transactions;
     }
 
+    GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+        std::string("GetgudSDK::UpdatePlayer "
+            "player validated"));
+
     std::deque<GetgudSDK::PlayerInfo> players;
     players.push_back(playerOut);
     if (privateKeySize > 0)
@@ -834,6 +841,9 @@ int UpdatePlayer(int titleId,
               "can not be sent: ") +
           std::string(_error.what()));
   }
+  GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+      std::string("GetgudSDK::UpdatePlayer "
+          "pushed new player info"));
   return sendResult;
 }
 

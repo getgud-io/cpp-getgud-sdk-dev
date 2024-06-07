@@ -8,7 +8,9 @@
 #include "../../game_container/ReportData.h"
 #include "../SharedReportSenders.h"
 
+#ifndef CURL_STATICLIB
 #define CURL_STATICLIB
+#endif
 #include <curl/curl.h>
 
 namespace GetgudSDK {

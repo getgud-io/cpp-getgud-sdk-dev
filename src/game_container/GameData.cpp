@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GameData.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
@@ -308,7 +307,6 @@ void GameData::UpdateLastUpdateTime() {
  *
  **/
 void GameData::GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut) {
-  MatchData* matchData;
   std::string matchGuid;
 
   for (int index = 0; index < m_matchGuidVector.size(); index++) {

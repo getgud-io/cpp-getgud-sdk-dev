@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GameContainer.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"

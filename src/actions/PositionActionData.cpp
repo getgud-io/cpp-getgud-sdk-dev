@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/PositionActionData.h"
+#include "PositionActionData.h"
 #include "../config/Config.h"
 #include "../utils/Utils.h"
 #include "../utils/Utils.h"

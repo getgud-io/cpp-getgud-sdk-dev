@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../config/Config.h"
+#include "Config.h"
 #include "../logger/Logger.h"
 #include "../utils/Validator.h"
 
@@ -57,13 +56,13 @@ bool Config::LoadSettings() {
   GetConfigValue(configData, sdkConfigFieldNames.logToFile,
                  sdkConfig.logToFile);
 
-  unsigned int logFileSizeInBytes = 0;
+  unsigned int _logFileSizeInBytes = 0;
   valueReadResult = GetConfigValue(
-      configData, sdkConfigFieldNames.logFileSizeInBytes, logFileSizeInBytes);
+      configData, sdkConfigFieldNames.logFileSizeInBytes, _logFileSizeInBytes);
   valueReadResult &=
-      Validator::ValidateItemValue(logFileSizeInBytes, 0U, 100000000U);
+      Validator::ValidateItemValue(_logFileSizeInBytes, 0U, 100000000U);
   if (valueReadResult) {
-    sdkConfig.logFileSizeInBytes = logFileSizeInBytes;
+    sdkConfig.logFileSizeInBytes = _logFileSizeInBytes;
   }
 
   GetConfigValue(configData, sdkConfigFieldNames.circularLogFile,
@@ -80,212 +79,212 @@ bool Config::LoadSettings() {
                  sdkConfig.throttleCheckUrl);
 
   // Read report sender variables
-  unsigned int reportsMaxBufferSizeInBytes = 0;
+  unsigned int _reportsMaxBufferSizeInBytes = 0;
 
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.reportsMaxBufferSizeInBytes,
-      reportsMaxBufferSizeInBytes);
+      _reportsMaxBufferSizeInBytes);
   valueReadResult &=
-      Validator::ValidateItemValue(reportsMaxBufferSizeInBytes, 0U, 10000000U);
+      Validator::ValidateItemValue(_reportsMaxBufferSizeInBytes, 0U, 10000000U);
   if (valueReadResult) {
-    sdkConfig.reportsMaxBufferSizeInBytes = reportsMaxBufferSizeInBytes;
+    sdkConfig.reportsMaxBufferSizeInBytes = _reportsMaxBufferSizeInBytes;
   }
 
-  unsigned int maxReportsToSendAtOnce = 0;
+  unsigned int _maxReportsToSendAtOnce = 0;
   valueReadResult =
       GetConfigValue(configData, sdkConfigFieldNames.maxReportsToSendAtOnce,
-                     maxReportsToSendAtOnce);
+          _maxReportsToSendAtOnce);
   valueReadResult &=
-      Validator::ValidateItemValue(maxReportsToSendAtOnce, 0U, 100U);
+      Validator::ValidateItemValue(_maxReportsToSendAtOnce, 0U, 100U);
   if (valueReadResult) {
-    sdkConfig.maxReportsToSendAtOnce = maxReportsToSendAtOnce;
+    sdkConfig.maxReportsToSendAtOnce = _maxReportsToSendAtOnce;
   }
 
   // Read player updeter variables
-  unsigned int playersMaxBufferSizeInBytes = 0;
+  unsigned int _playersMaxBufferSizeInBytes = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.playersMaxBufferSizeInBytes,
-      playersMaxBufferSizeInBytes);
+      _playersMaxBufferSizeInBytes);
   valueReadResult &=
-      Validator::ValidateItemValue(playersMaxBufferSizeInBytes, 0U, 10000000U);
+      Validator::ValidateItemValue(_playersMaxBufferSizeInBytes, 0U, 10000000U);
   if (valueReadResult) {
-    sdkConfig.playersMaxBufferSizeInBytes = playersMaxBufferSizeInBytes;
+    sdkConfig.playersMaxBufferSizeInBytes = _playersMaxBufferSizeInBytes;
   }
 
-  unsigned int maxPlayerUpdatesToSendAtOnce = 0;
+  unsigned int _maxPlayerUpdatesToSendAtOnce = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.maxPlayerUpdatesToSendAtOnce,
-      maxPlayerUpdatesToSendAtOnce);
+      _maxPlayerUpdatesToSendAtOnce);
   valueReadResult &=
-      Validator::ValidateItemValue(maxPlayerUpdatesToSendAtOnce, 0U, 100U);
+      Validator::ValidateItemValue(_maxPlayerUpdatesToSendAtOnce, 0U, 100U);
   if (valueReadResult) {
-    sdkConfig.maxPlayerUpdatesToSendAtOnce = maxPlayerUpdatesToSendAtOnce;
+    sdkConfig.maxPlayerUpdatesToSendAtOnce = _maxPlayerUpdatesToSendAtOnce;
   }
 
   // Read chat message variables
-  unsigned int maxChatMessagesToSendAtOnce = 0;
+  unsigned int _maxChatMessagesToSendAtOnce = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.maxChatMessagesToSendAtOnce,
-      maxChatMessagesToSendAtOnce);
+      _maxChatMessagesToSendAtOnce);
   valueReadResult &=
-      Validator::ValidateItemValue(maxChatMessagesToSendAtOnce, 0U, 100U);
+      Validator::ValidateItemValue(_maxChatMessagesToSendAtOnce, 0U, 100U);
   if (valueReadResult) {
-    sdkConfig.maxChatMessagesToSendAtOnce = maxChatMessagesToSendAtOnce;
+    sdkConfig.maxChatMessagesToSendAtOnce = _maxChatMessagesToSendAtOnce;
   }
 
   // Read game sender variables
-  unsigned int gameSenderSleepIntervalMilliseconds = 0;
+  unsigned int _gameSenderSleepIntervalMilliseconds = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.gameSenderSleepIntervalMilliseconds,
-      gameSenderSleepIntervalMilliseconds);
+      _gameSenderSleepIntervalMilliseconds);
   valueReadResult &= Validator::ValidateItemValue(
-      gameSenderSleepIntervalMilliseconds, 0U, 5000U);
+      _gameSenderSleepIntervalMilliseconds, 0U, 5000U);
   if (valueReadResult) {
     sdkConfig.gameSenderSleepIntervalMilliseconds =
-        gameSenderSleepIntervalMilliseconds;
+        _gameSenderSleepIntervalMilliseconds;
   }
-  unsigned int apiTimeoutMilliseconds = 0;
+  unsigned int _apiTimeoutMilliseconds = 0;
   valueReadResult =
       GetConfigValue(configData, sdkConfigFieldNames.apiTimeoutMilliseconds,
-                     apiTimeoutMilliseconds);
+          _apiTimeoutMilliseconds);
   valueReadResult &=
-      Validator::ValidateItemValue(apiTimeoutMilliseconds, 0U, 20000U);
+      Validator::ValidateItemValue(_apiTimeoutMilliseconds, 0U, 20000U);
   if (valueReadResult) {
-    sdkConfig.apiTimeoutMilliseconds = apiTimeoutMilliseconds;
+    sdkConfig.apiTimeoutMilliseconds = _apiTimeoutMilliseconds;
   }
-  unsigned int apiWaitTimeMilliseconds = 0;
+  unsigned int _apiWaitTimeMilliseconds = 0;
   valueReadResult =
       GetConfigValue(configData, sdkConfigFieldNames.apiWaitTimeMilliseconds,
-                     apiWaitTimeMilliseconds);
+          _apiWaitTimeMilliseconds);
   valueReadResult &=
-      Validator::ValidateItemValue(apiWaitTimeMilliseconds, 0U, 20000U);
+      Validator::ValidateItemValue(_apiWaitTimeMilliseconds, 0U, 20000U);
   if (valueReadResult) {
-    sdkConfig.apiWaitTimeMilliseconds = apiWaitTimeMilliseconds;
+    sdkConfig.apiWaitTimeMilliseconds = _apiWaitTimeMilliseconds;
   }
-  unsigned int packetMaxSizeInBytes = 0;
+  unsigned int _packetMaxSizeInBytes = 0;
   valueReadResult =
       GetConfigValue(configData, sdkConfigFieldNames.packetMaxSizeInBytes,
-                     packetMaxSizeInBytes);
+          _packetMaxSizeInBytes);
   valueReadResult &=
-      Validator::ValidateItemValue(packetMaxSizeInBytes, 0U, 2000000U);
+      Validator::ValidateItemValue(_packetMaxSizeInBytes, 0U, 2000000U);
   if (valueReadResult) {
-    sdkConfig.packetMaxSizeInBytes = packetMaxSizeInBytes;
+    sdkConfig.packetMaxSizeInBytes = _packetMaxSizeInBytes;
   }
 
   // Read action buffer variables
-  unsigned int actionsBufferMaxSizeInBytes = 0;
+  unsigned int _actionsBufferMaxSizeInBytes = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.actionsBufferMaxSizeInBytes,
-      actionsBufferMaxSizeInBytes);
-  valueReadResult &= Validator::ValidateItemValue(actionsBufferMaxSizeInBytes,
+      _actionsBufferMaxSizeInBytes);
+  valueReadResult &= Validator::ValidateItemValue(_actionsBufferMaxSizeInBytes,
                                                   500U, 100000000U);
   if (valueReadResult) {
-    sdkConfig.actionsBufferMaxSizeInBytes = actionsBufferMaxSizeInBytes;
+    sdkConfig.actionsBufferMaxSizeInBytes = _actionsBufferMaxSizeInBytes;
   }
 
   // Read game container variables
-  unsigned int gameContainerMaxSizeInBytes = 0;
+  unsigned int _gameContainerMaxSizeInBytes = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.gameContainerMaxSizeInBytes,
-      gameContainerMaxSizeInBytes);
-  valueReadResult &= Validator::ValidateItemValue(gameContainerMaxSizeInBytes,
+      _gameContainerMaxSizeInBytes);
+  valueReadResult &= Validator::ValidateItemValue(_gameContainerMaxSizeInBytes,
                                                   500U, 500000000U);
   if (valueReadResult) {
-    sdkConfig.gameContainerMaxSizeInBytes = gameContainerMaxSizeInBytes;
+    sdkConfig.gameContainerMaxSizeInBytes = _gameContainerMaxSizeInBytes;
   }
-  unsigned int maxGames = 0;
+  unsigned int _maxGames = 0;
   valueReadResult =
-      GetConfigValue(configData, sdkConfigFieldNames.maxGames, maxGames);
-  valueReadResult &= Validator::ValidateItemValue(maxGames, 1U, 100U);
+      GetConfigValue(configData, sdkConfigFieldNames.maxGames, _maxGames);
+  valueReadResult &= Validator::ValidateItemValue(_maxGames, 1U, 100U);
   if (valueReadResult) {
-    sdkConfig.maxGames = maxGames;
+    sdkConfig.maxGames = _maxGames;
   }
-  unsigned int maxMatchesPerGame = 0;
+  unsigned int _maxMatchesPerGame = 0;
   valueReadResult = GetConfigValue(
-      configData, sdkConfigFieldNames.maxMatchesPerGame, maxMatchesPerGame);
-  valueReadResult &= Validator::ValidateItemValue(maxMatchesPerGame, 1U, 100U);
+      configData, sdkConfigFieldNames.maxMatchesPerGame, _maxMatchesPerGame);
+  valueReadResult &= Validator::ValidateItemValue(_maxMatchesPerGame, 1U, 100U);
   if (valueReadResult) {
-    sdkConfig.maxMatchesPerGame = maxMatchesPerGame;
+    sdkConfig.maxMatchesPerGame = _maxMatchesPerGame;
   }
-  unsigned int minPacketSizeForSendingInBytes = 0;
+  unsigned int _minPacketSizeForSendingInBytes = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.minPacketSizeForSendingInBytes,
-      minPacketSizeForSendingInBytes);
+      _minPacketSizeForSendingInBytes);
   valueReadResult &= Validator::ValidateItemValue(
-      minPacketSizeForSendingInBytes, 500U, 1500000U);
+      _minPacketSizeForSendingInBytes, 500U, 1500000U);
   if (valueReadResult) {
-    sdkConfig.minPacketSizeForSendingInBytes = minPacketSizeForSendingInBytes;
+    sdkConfig.minPacketSizeForSendingInBytes = _minPacketSizeForSendingInBytes;
   }
-  unsigned int packetTimeoutInMilliseconds = 0;
+  unsigned int _packetTimeoutInMilliseconds = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.packetTimeoutInMilliseconds,
-      packetTimeoutInMilliseconds);
+      _packetTimeoutInMilliseconds);
   valueReadResult &=
-      Validator::ValidateItemValue(packetTimeoutInMilliseconds, 500U, 100000U);
+      Validator::ValidateItemValue(_packetTimeoutInMilliseconds, 500U, 100000U);
   if (valueReadResult) {
-    sdkConfig.packetTimeoutInMilliseconds = packetTimeoutInMilliseconds;
+    sdkConfig.packetTimeoutInMilliseconds = _packetTimeoutInMilliseconds;
   }
-  unsigned int gameCloseGraceAfterMarkEndInMilliseconds = 0;
+  unsigned int _gameCloseGraceAfterMarkEndInMilliseconds = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.gameCloseGraceAfterMarkEndInMilliseconds,
-      gameCloseGraceAfterMarkEndInMilliseconds);
+      _gameCloseGraceAfterMarkEndInMilliseconds);
   valueReadResult &= Validator::ValidateItemValue(
-      gameCloseGraceAfterMarkEndInMilliseconds, 0U, 200000U);
+      _gameCloseGraceAfterMarkEndInMilliseconds, 0U, 200000U);
   if (valueReadResult) {
     sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds =
-        gameCloseGraceAfterMarkEndInMilliseconds;
+        _gameCloseGraceAfterMarkEndInMilliseconds;
   }
-  unsigned int liveGameTimeoutInMilliseconds = 0;
+  unsigned int _liveGameTimeoutInMilliseconds = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.liveGameTimeoutInMilliseconds,
-      liveGameTimeoutInMilliseconds);
+      _liveGameTimeoutInMilliseconds);
   valueReadResult &=
-      Validator::ValidateItemValue(liveGameTimeoutInMilliseconds, 0U, 300000U);
+      Validator::ValidateItemValue(_liveGameTimeoutInMilliseconds, 0U, 300000U);
   if (valueReadResult) {
-    sdkConfig.liveGameTimeoutInMilliseconds = liveGameTimeoutInMilliseconds;
+    sdkConfig.liveGameTimeoutInMilliseconds = _liveGameTimeoutInMilliseconds;
   }
 
   // Read hyper mode variables
   GetConfigValue(configData, sdkConfigFieldNames.hyperModeFeatureEnabled,
                  sdkConfig.hyperModeFeatureEnabled);
 
-  unsigned int hyperModeMaxThreads = 0;
+  unsigned int _hyperModeMaxThreads = 0;
   valueReadResult = GetConfigValue(
-      configData, sdkConfigFieldNames.hyperModeMaxThreads, hyperModeMaxThreads);
-  valueReadResult &= Validator::ValidateItemValue(hyperModeMaxThreads, 1U, 20U);
+      configData, sdkConfigFieldNames.hyperModeMaxThreads, _hyperModeMaxThreads);
+  valueReadResult &= Validator::ValidateItemValue(_hyperModeMaxThreads, 1U, 20U);
   if (valueReadResult) {
-    sdkConfig.hyperModeMaxThreads = hyperModeMaxThreads;
+    sdkConfig.hyperModeMaxThreads = _hyperModeMaxThreads;
   }
-  unsigned int hyperModeAtBufferPercentage = 0;
+  unsigned int _hyperModeAtBufferPercentage = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.hyperModeAtBufferPercentage,
-      hyperModeAtBufferPercentage);
+      _hyperModeAtBufferPercentage);
   valueReadResult &=
-      Validator::ValidateItemValue(hyperModeAtBufferPercentage, 10U, 90U);
+      Validator::ValidateItemValue(_hyperModeAtBufferPercentage, 10U, 90U);
   if (valueReadResult) {
-    sdkConfig.hyperModeAtBufferPercentage = hyperModeAtBufferPercentage;
+    sdkConfig.hyperModeAtBufferPercentage = _hyperModeAtBufferPercentage;
   }
-  unsigned int hyperModeUpperPercentageBound = 0;
+  unsigned int _hyperModeUpperPercentageBound = 0;
   valueReadResult = GetConfigValue(
       configData, sdkConfigFieldNames.hyperModeUpperPercentageBound,
-      hyperModeUpperPercentageBound);
+      _hyperModeUpperPercentageBound);
   valueReadResult &=
-      Validator::ValidateItemValue(hyperModeUpperPercentageBound, 30U, 90U);
+      Validator::ValidateItemValue(_hyperModeUpperPercentageBound, 30U, 90U);
   valueReadResult &=
-      sdkConfig.hyperModeAtBufferPercentage < hyperModeUpperPercentageBound;
+      sdkConfig.hyperModeAtBufferPercentage < _hyperModeUpperPercentageBound;
   if (valueReadResult) {
-    sdkConfig.hyperModeUpperPercentageBound = hyperModeUpperPercentageBound;
+    sdkConfig.hyperModeUpperPercentageBound = _hyperModeUpperPercentageBound;
   }
-  unsigned int hyperModeThreadCreationStaggerMilliseconds = 0;
+  unsigned int _hyperModeThreadCreationStaggerMilliseconds = 0;
   valueReadResult = GetConfigValue(
       configData,
       sdkConfigFieldNames.hyperModeThreadCreationStaggerMilliseconds,
-      hyperModeThreadCreationStaggerMilliseconds);
+      _hyperModeThreadCreationStaggerMilliseconds);
   valueReadResult &= Validator::ValidateItemValue(
-      hyperModeThreadCreationStaggerMilliseconds, 0U, 10000U);
+      _hyperModeThreadCreationStaggerMilliseconds, 0U, 10000U);
   if (valueReadResult) {
     sdkConfig.hyperModeThreadCreationStaggerMilliseconds =
-        hyperModeThreadCreationStaggerMilliseconds;
+        _hyperModeThreadCreationStaggerMilliseconds;
   }
 
   GetConfigValue(configData, sdkConfigFieldNames.logLevel, sdkConfig.logLevel);

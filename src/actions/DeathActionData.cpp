@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/DeathActionData.h"
+#include "DeathActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 

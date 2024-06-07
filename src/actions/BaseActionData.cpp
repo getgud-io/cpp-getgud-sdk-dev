@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/BaseActionData.h"
+#include "BaseActionData.h"
 #include <mutex>
 #include "../config/Config.h"
 #include "../utils/Validator.h"

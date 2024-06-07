@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../utils/Validator.h"
+#include "Validator.h"
 #include "../../include/actions/Helpers.h"
 #include "../config/Config.h"
 

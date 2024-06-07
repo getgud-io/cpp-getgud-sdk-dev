@@ -85,7 +85,7 @@ add_library(GetgudSDK STATIC ${project_files})
 endif()
 endif()
 
-target_include_directories(GetgudSDK PRIVATE source)
+target_include_directories(GetgudSDK PRIVATE source ../include/actions)
 set_target_properties(GetgudSDK PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(GetgudSDK PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(GetgudSDK PROPERTIES PUBLIC_HEADER ../include/GetgudSDK.h PUBLIC_HEADER ../include/GetgudSDK_C.h)
@@ -123,6 +123,7 @@ target_include_directories(GetgudSDK
         $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
         $<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
 		../libs/ #zlib builds into root
+		../libs/zlib
 		../src/
 )
 

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/HealActionData.h"
+#include "HealActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 #include "../utils/Utils.h"

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "MatchData.h"
 #include <algorithm>
 #include "../../include/actions/DamageActionData.h"
@@ -11,7 +10,7 @@
 
 namespace GetgudSDK {
 extern Config sdkConfig;
-extern Zipper zipper;
+extern class Zipper zipper;
 extern Logger logger;
 
 namespace {

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/SpawnActionData.h"
+#include "SpawnActionData.h"
 #include "../config/Config.h"
 #include "../utils/Utils.h"
 

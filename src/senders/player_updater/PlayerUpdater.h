@@ -8,7 +8,11 @@
 #include <unordered_map>
 #include "PlayerData.h"
 #include "../SharedPlayerUpdaters.h"
+
+#ifndef CURL_STATICLIB
 #define CURL_STATICLIB
+#endif
+
 #include <curl/curl.h>
 
 namespace GetgudSDK {

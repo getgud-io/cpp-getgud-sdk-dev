@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "PlayerUpdater.h"
 #include "../../config/Config.h"
 #include "../../logger/Logger.h"
@@ -11,7 +10,7 @@ namespace {
  *
  * Curl custom callback to grab response from Getgud
  **/
-size_t CURLWriteCallback(char* contents,
+size_t CURLWriteCallbackPlayer(char* contents,
                          size_t size,
                          size_t nmemb,
                          void* userp) {
@@ -245,7 +244,7 @@ void PlayerUpdater::InitCurl() {
   curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.updatePlayersURL.c_str());
   curl_easy_setopt(m_curl, CURLOPT_TIMEOUT_MS,
                    sdkConfig.apiTimeoutMilliseconds);
-  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
+  curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallbackPlayer);
   curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
 }
 

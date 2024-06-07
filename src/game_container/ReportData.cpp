@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ReportData.h"
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/AffectActionData.h"
+#include "AffectActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 

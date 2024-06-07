@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../../include/actions/AttackActionData.h"
+#include "AttackActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 
