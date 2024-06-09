@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "../include/GetgudSDK.h"
 #include "../include/GetgudSDK_C.h"
 #include "logger/Logger.h"

@@ -69,7 +69,6 @@ link_directories(
 	${ZLIB_LIB}
 )
 add_library(GetgudSDK SHARED ${project_files})
-target_precompile_headers(GetgudSDK PRIVATE pch.h)
 set(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
 set_target_properties(GetgudSDK PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 else()
@@ -154,7 +153,6 @@ if (DLL_BUILD)
 		Crypt32.lib
 		wldap32.lib
 	)
-	target_precompile_headers(GetgudSDK PRIVATE pch.h)
 	set_target_properties(GetgudSDK PROPERTIES 
 	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetgudSDK>/C_Starter.exe")
 

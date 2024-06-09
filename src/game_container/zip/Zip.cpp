@@ -1,5 +1,4 @@
 #include "Zip.h"
-#include "../../pch.h"
 
 namespace GetgudSDK {
 Zipper zipper;
