@@ -46,8 +46,8 @@ enum class Actions : unsigned int {
  * Toxic behaviour types you can send in reports
  **/
 enum class TbType : int {
-  None = -1,
-  Aimbot = 0,
+  None = 0,
+  Aimbot = 1,
   Wallhack,
   Laghack,
   Godmode,
@@ -76,8 +76,8 @@ enum class TbType : int {
  * Reporter types you can send to Getgud with reports
  **/
 enum class ReporterType : int {
-  None = -1,
-  Other = 0,
+  None = 0,
+  Other = 1,
   Player,
   Moderator,
   Client,
@@ -91,8 +91,8 @@ enum class ReporterType : int {
  * Reporter subtypes you can send to Getgud with reports
  **/
 enum class ReporterSubtype : int {
-  None = -1,
-  Other = 0,
+  None = 0,
+  Other = 1,
   CommunityManager,
   LiveOps,
   Support,
