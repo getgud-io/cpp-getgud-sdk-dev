@@ -29,9 +29,9 @@ enum class LogType : unsigned int { DEBUG = 0, WARN, _ERROR, FATAL };
  *
  * Our primal 6, action types you can send to Getgud
  **/
-enum class Actions : unsigned int {
-  None = 0,
-  Affect,
+enum class Actions : int {
+  None = -1,
+  Affect = 1,
   Attack,
   Damage,
   Death,
@@ -47,7 +47,7 @@ enum class Actions : unsigned int {
  **/
 enum class TbType : int {
   None = -1,
-  Aimbot = 0,
+  Aimbot = 1,
   Wallhack,
   Laghack,
   Godmode,
@@ -77,7 +77,7 @@ enum class TbType : int {
  **/
 enum class ReporterType : int {
   None = -1,
-  Other = 0,
+  Other = 1,
   Player,
   Moderator,
   Client,
@@ -92,7 +92,7 @@ enum class ReporterType : int {
  **/
 enum class ReporterSubtype : int {
   None = -1,
-  Other = 0,
+  Other = 1,
   CommunityManager,
   LiveOps,
   Support,
