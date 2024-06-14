@@ -45,7 +45,7 @@ AffectActionData::~AffectActionData(){
 bool AffectActionData::IsValid() {
   // basic validations are done in the base class first
   bool isActionValid = BaseActionData::IsValid();
-  isActionValid &= Validator::ValidateStringLength(m_affectGuid, 1, 20);
+  isActionValid &= Validator::ValidateStringLength(m_affectGuid, 1, 36);
   isActionValid &= Validator::ValidateStringChars(m_affectGuid);
   isActionValid &= Validator::ValidateItemValue(static_cast<int>(m_affectState), 0, 3);
 
