@@ -24,6 +24,8 @@
 namespace GetgudSDK {
 
 GETGUDSDK_API bool Init();
+GETGUDSDK_API bool Init(std::string configFileFullPath);
+GETGUDSDK_API bool Init(std::string configFile, bool passAsContent);
 GETGUDSDK_API std::string StartGame(int titleId,
                       std::string privateKey,
                       std::string serverGuid,

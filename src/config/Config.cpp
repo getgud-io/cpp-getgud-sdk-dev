@@ -34,7 +34,7 @@ Config::Config() { }
  *
  * Get values of variables from the config file
  **/
-bool Config::LoadSettings() {
+bool Config::LoadSettings(std::string configFile, bool passAsContent) {
   char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
   if (logsFilePathHolder == nullptr) {
     // Environment variable LOG_FILE_PATH is required to work
@@ -45,7 +45,7 @@ bool Config::LoadSettings() {
     logsFilePath = std::string(logsFilePathHolder);
   }
 
-  std::map<std::string, std::string> configData = ReadUserConfigFile();
+  std::map<std::string, std::string> configData = ReadUserConfigFile(configFile, passAsContent);
 
   if (configData.empty())
     return false;
@@ -297,21 +297,53 @@ bool Config::LoadSettings() {
  *
  * Read all config values from the file
  **/
-std::map<std::string, std::string> Config::ReadUserConfigFile() {
+std::map<std::string, std::string> Config::ReadUserConfigFile(std::string configFile, bool passAsContent) {
   std::map<std::string, std::string> output_map;
+  
+  std::string contentString;
 
-  char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
-  if (configPathHolder == nullptr) {
-    logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment "
-                                           "variable GETGUD_CONFIG_PATH is empty"));
+  if (passAsContent == false && !configFile.empty())
+  {
+      configFilePath = configFile;
+      logger.Log(LogType::DEBUG,
+          std::string("Loading config file from " + configFilePath + " path"));
+  }
+  else if (passAsContent == true && !configFile.empty())
+  {
+      contentString = configFile;
+      logger.Log(LogType::DEBUG,
+          std::string("Loading config file from a content string"));
   }
   else
   {
-    configFilePath = std::string(configPathHolder);
+
+      char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
+      if (configPathHolder == nullptr) {
+          logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment "
+              "variable GETGUD_CONFIG_PATH is empty"));
+      }
+      else
+      {
+          configFilePath = std::string(configPathHolder);
+          logger.Log(LogType::DEBUG,
+              std::string("Loading config file from " + configFilePath + " path"));
+      }
   }
 
-  logger.Log(LogType::DEBUG,
-             std::string("Loading config file from " + configFilePath + " path"));
+  if (contentString.empty())
+  {
+      std::ifstream file_stream(configFilePath);
+      char next_character = 0;
+
+      if (file_stream.is_open()) {
+          while (file_stream.good()) {
+              file_stream.get(next_character);
+              contentString += next_character;
+          }
+      }
+
+      file_stream.close();
+  }
 
   std::string next_key;
   std::string next_value;
@@ -320,54 +352,47 @@ std::map<std::string, std::string> Config::ReadUserConfigFile() {
   bool key_ended = false;
   bool value_started = false;
 
-  std::ifstream file_stream(configFilePath);
-  char next_character = 0;
+  for (int i = 0; i < contentString.size(); i++) {
+    char next_character = contentString[i];
 
-  if (file_stream.is_open()) {
-    while (file_stream.good()) {
-      file_stream.get(next_character);
+    if (next_character == '\t')
+      continue;
 
-      if (next_character == '\t')
+    if (key_started && next_character != '\"' && next_character != ',' &&
+        next_character != '\n') {
+      next_key += next_character;
+    } else if (value_started && next_character != ' ' &&
+               next_character != '\"' && next_character != ',' &&
+               next_character != '\n' && next_character != '}') {
+      next_value += next_character;
+    }
+
+    if (next_character == '\"' || next_character == ',' ||
+        (next_character == '\n' && key_ended) ||
+        (next_character == ':' && key_ended && !value_started)) {
+      if (value_started && next_character == '\"')
         continue;
 
-      if (key_started && next_character != '\"' && next_character != ',' &&
-          next_character != '\n') {
-        next_key += next_character;
-      } else if (value_started && next_character != ' ' &&
-                 next_character != '\"' && next_character != ',' &&
-                 next_character != '\n' && next_character != '}') {
-        next_value += next_character;
-      }
-
-      if (next_character == '\"' || next_character == ',' ||
-          (next_character == '\n' && key_ended) ||
-          (next_character == ':' && key_ended && !value_started)) {
-        if (value_started && next_character == '\"')
-          continue;
-
-        if (key_ended && !value_started) {
-          value_started = true;
-        } else if (key_ended && value_started) {
-          value_started = false;
-        } else if (!key_ended && !key_started) {
-          key_started = true;
-        } else if (!key_ended && key_started) {
-          key_started = false;
-          key_ended = true;
-        }
-      }
-      if ((next_character == ',' || next_character == '}') && key_ended) {
-        output_map.insert(std::make_pair(next_key, next_value));
-        next_key.clear();
-        next_value.clear();
-        key_started = false;
-        key_ended = false;
+      if (key_ended && !value_started) {
+        value_started = true;
+      } else if (key_ended && value_started) {
         value_started = false;
+      } else if (!key_ended && !key_started) {
+        key_started = true;
+      } else if (!key_ended && key_started) {
+        key_started = false;
+        key_ended = true;
       }
     }
+    if ((next_character == ',' || next_character == '}') && key_ended) {
+      output_map.insert(std::make_pair(next_key, next_value));
+      next_key.clear();
+      next_value.clear();
+      key_started = false;
+      key_ended = false;
+      value_started = false;
+    }
   }
-
-  file_stream.close();
 
   return output_map;
 }

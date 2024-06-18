@@ -151,11 +151,11 @@ class Config {
   std::string configFilePath = "./config.json";
 
   Config();
-  bool LoadSettings();
+  bool LoadSettings(std::string configFile, bool passAsContent);
   std::string ToString();
 
  private:
-  std::map<std::string, std::string> ReadUserConfigFile();
+  std::map<std::string, std::string> ReadUserConfigFile(std::string configFile, bool passAsContent);
 
  bool GetConfigValue(std::map<std::string, std::string>& configData,
                           std::string configKey, unsigned int& outValue);
