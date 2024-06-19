@@ -2,7 +2,7 @@
 
 #include "GetGudSDKModule.h"
 
-#include <GetGudSDK.h>
+#include <GetgudSDK.h>
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogGetGudSDK, Log, All);
