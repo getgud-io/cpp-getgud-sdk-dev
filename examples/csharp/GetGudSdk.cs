@@ -192,6 +192,21 @@ namespace GetgudSDK
         {
             return GetgudSDK_calls.GetgudSDK_calls.init();
         }
+		
+		/**
+        * Init_conf:
+        *
+        * Init Getgud SDK with provided config
+        **/
+        static public int InitConf(string configPath, int isConfigContent)
+        {
+			var unmanagedConfigPath = Marshal.StringToHGlobalAnsi(configPath);
+            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf(unmanagedConfigPath, isConfigContent);
+
+            Marshal.FreeHGlobal(unmanagedConfigPath);
+			
+            return result;
+        }
 
         /**
          * StartGame:

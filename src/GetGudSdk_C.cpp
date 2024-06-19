@@ -30,6 +30,25 @@ int init() {
 }
 
 /**
+ * Init_conf:
+ *
+ * Init Getgud SDK with provided config
+ **/
+int init_conf(const char* configPath, int isConfigContent) {
+    bool result = false;
+    try {
+        result = GetgudSDK::Init(std::string(configPath), isConfigContent);
+    }
+    catch (std::exception& _error) {
+        GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+            std::string("GetgudSDK::init() "
+                "can not be sent: ") +
+            std::string(_error.what()));
+    }
+    return result;
+}
+
+/**
  * StartGame:
  *
  * Start new game

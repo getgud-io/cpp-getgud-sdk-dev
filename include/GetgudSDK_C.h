@@ -130,6 +130,13 @@ extern "C" {
 GETGUDSDK_API int init();
 
 /**
+ * Init_conf:
+ *
+ * Init Getgud SDK with provided config
+ **/
+GETGUDSDK_API int init_conf(const char* configPath, int isConfigContent);
+
+/**
  * StartGame:
  *
  * Start new game

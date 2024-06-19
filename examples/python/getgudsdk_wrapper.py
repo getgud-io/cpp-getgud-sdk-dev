@@ -12,6 +12,9 @@ class GetGudSdk:
         
     def __init__(self):
         getgudsdk.init()
+        
+    def __init_conf__(self, config_path, isConfigContent):
+        getgudsdk.init_conf(config_path.encode('utf-8'), isConfigContent)
 
     def start_game(self, title_id, private_key, server_guid, game_mode, server_location):
         game_info = ffi.new("struct StartGameInfo*")
