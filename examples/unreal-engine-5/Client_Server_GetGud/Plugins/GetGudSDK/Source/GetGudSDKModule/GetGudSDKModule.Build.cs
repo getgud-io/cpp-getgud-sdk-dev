@@ -3,9 +3,9 @@ using UnrealBuildTool;
 
 using System;
 
-public class GetGudSDKModule : ModuleRules
+public class GetgudSDKModule : ModuleRules
 {
-	public GetGudSDKModule(ReadOnlyTargetRules Target) : base(Target)
+	public GetgudSDKModule(ReadOnlyTargetRules Target) : base(Target)
 	{
 		bUseUnity = false;
 		

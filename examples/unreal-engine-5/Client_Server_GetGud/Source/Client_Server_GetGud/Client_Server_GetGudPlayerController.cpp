@@ -1,16 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "Client_Server_GetGudPlayerController.h"
+#include "Client_Server_GetgudPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 
-#include "GetGudSDK.h"
+#include "GetgudSDK.h"
 
 std::string g_gameGuid; //guid + \0
 std::string g_matchGuid; //guid + \0
 
-void AClient_Server_GetGudPlayerController::BeginPlay()
+void AClient_Server_GetgudPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -28,7 +28,7 @@ void AClient_Server_GetGudPlayerController::BeginPlay()
 	}
 }
 
-void AClient_Server_GetGudPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AClient_Server_GetgudPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     Super::EndPlay(EndPlayReason);
 
@@ -40,7 +40,7 @@ void AClient_Server_GetGudPlayerController::EndPlay(const EEndPlayReason::Type E
     }
 }
 
-void AClient_Server_GetGudPlayerController::ServerRemoteGameAndMapStart_Implementation()
+void AClient_Server_GetgudPlayerController::ServerRemoteGameAndMapStart_Implementation()
 {
 
 	std::string serverGuid = "us-west-1";
@@ -61,25 +61,25 @@ void AClient_Server_GetGudPlayerController::ServerRemoteGameAndMapStart_Implemen
 	);
 
 
-	UE_LOG(LogTemp, Warning, TEXT("GetGud SDK Match started."));
+	UE_LOG(LogTemp, Warning, TEXT("Getgud SDK Match started."));
 }
 
-bool AClient_Server_GetGudPlayerController::ServerRemoteGameAndMapStart_Validate()
+bool AClient_Server_GetgudPlayerController::ServerRemoteGameAndMapStart_Validate()
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes
 }
 
 
-void AClient_Server_GetGudPlayerController::ServerRemoteGameEnd_Implementation()
+void AClient_Server_GetgudPlayerController::ServerRemoteGameEnd_Implementation()
 {
 	//int martResult = MarkEndGame(g_gameGuid, 36);
 	GetgudSDK::MarkEndGame(g_gameGuid);
 
-	UE_LOG(LogTemp, Warning, TEXT("GetGud SDK Game finish."));
+	UE_LOG(LogTemp, Warning, TEXT("Getgud SDK Game finish."));
 }
 
-bool AClient_Server_GetGudPlayerController::ServerRemoteGameEnd_Validate()
+bool AClient_Server_GetgudPlayerController::ServerRemoteGameEnd_Validate()
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes

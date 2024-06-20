@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Client_Server_GetGudProjectile.generated.h"
+#include "Client_Server_GetgudProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS(config=Game)
-class AClient_Server_GetGudProjectile : public AActor
+class AClient_Server_GetgudProjectile : public AActor
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ class AClient_Server_GetGudProjectile : public AActor
 	UProjectileMovementComponent* ProjectileMovement;
 
 public:
-	AClient_Server_GetGudProjectile();
+	AClient_Server_GetgudProjectile();
 
 	/** called when projectile hits something */
 	UFUNCTION()

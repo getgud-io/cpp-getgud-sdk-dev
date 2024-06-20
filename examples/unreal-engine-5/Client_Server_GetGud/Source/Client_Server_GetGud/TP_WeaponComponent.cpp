@@ -2,8 +2,8 @@
 
 
 #include "TP_WeaponComponent.h"
-#include "Client_Server_GetGudCharacter.h"
-#include "Client_Server_GetGudProjectile.h"
+#include "Client_Server_GetgudCharacter.h"
+#include "Client_Server_GetgudProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -44,7 +44,7 @@ void UTP_WeaponComponent::Fire()
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	
 			// Spawn the projectile at the muzzle
-			World->SpawnActor<AClient_Server_GetGudProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			World->SpawnActor<AClient_Server_GetgudProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		}
 	}
 	
@@ -66,7 +66,7 @@ void UTP_WeaponComponent::Fire()
 	}
 }
 
-bool UTP_WeaponComponent::AttachWeapon(AClient_Server_GetGudCharacter* TargetCharacter)
+bool UTP_WeaponComponent::AttachWeapon(AClient_Server_GetgudCharacter* TargetCharacter)
 {
 	Character = TargetCharacter;
 

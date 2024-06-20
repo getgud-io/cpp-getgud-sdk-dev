@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Client_Server_GetGudGameMode.generated.h"
+#include "Client_Server_GetgudGameMode.generated.h"
 
 UCLASS(minimalapi)
-class AClient_Server_GetGudGameMode : public AGameModeBase
+class AClient_Server_GetgudGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	AClient_Server_GetGudGameMode();
+	AClient_Server_GetgudGameMode();
 };
 
 

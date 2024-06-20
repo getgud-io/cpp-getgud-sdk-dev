@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Helpers.h"
 
-class GETGUDSDKMODULE_API UGetGudUtils
+class GETGUDSDKMODULE_API UGetgudUtils
 {
 public:
 	static uint64_t NowMs();

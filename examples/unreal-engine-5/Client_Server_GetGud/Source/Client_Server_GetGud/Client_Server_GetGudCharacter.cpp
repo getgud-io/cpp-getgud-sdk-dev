@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Client_Server_GetGudCharacter.h"
+#include "Client_Server_GetgudCharacter.h"
 #include "GetgudSDK.h"
-#include "Client_Server_GetGudProjectile.h"
+#include "Client_Server_GetgudProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -18,9 +18,9 @@ extern std::string g_matchGuid;
 std::string g_playerGuid;
 
 //////////////////////////////////////////////////////////////////////////
-// AClient_Server_GetGudCharacter
+// AClient_Server_GetgudCharacter
 
-AClient_Server_GetGudCharacter::AClient_Server_GetGudCharacter()
+AClient_Server_GetgudCharacter::AClient_Server_GetgudCharacter()
 {
 	//bReplicates = true;
 	//SetReplicatingMovement(true);
@@ -48,7 +48,7 @@ AClient_Server_GetGudCharacter::AClient_Server_GetGudCharacter()
 
 }
 
-void AClient_Server_GetGudCharacter::BeginPlay()
+void AClient_Server_GetgudCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -62,7 +62,7 @@ void AClient_Server_GetGudCharacter::BeginPlay()
 
 //////////////////////////////////////////////////////////////////////////// Input
 
-void AClient_Server_GetGudCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AClient_Server_GetgudCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {	
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
@@ -72,10 +72,10 @@ void AClient_Server_GetGudCharacter::SetupPlayerInputComponent(UInputComponent* 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AClient_Server_GetGudCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AClient_Server_GetgudCharacter::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AClient_Server_GetGudCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AClient_Server_GetgudCharacter::Look);
 	}
 	else
 	{
@@ -84,7 +84,7 @@ void AClient_Server_GetGudCharacter::SetupPlayerInputComponent(UInputComponent* 
 }
 
 
-void AClient_Server_GetGudCharacter::Move(const FInputActionValue& Value)
+void AClient_Server_GetgudCharacter::Move(const FInputActionValue& Value)
 {
 	if (IsLocallyControlled()) // Make sure this is the local client
 	{
@@ -103,7 +103,7 @@ void AClient_Server_GetGudCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AClient_Server_GetGudCharacter::Look(const FInputActionValue& Value)
+void AClient_Server_GetgudCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -116,7 +116,7 @@ void AClient_Server_GetGudCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AClient_Server_GetGudCharacter::ServerRemoteMove_Implementation(const FInputActionValue& Value)
+void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInputActionValue& Value)
 {
 	// Handle the movement on the server
 	//Move(Value); // Call the local move function
@@ -142,13 +142,13 @@ void AClient_Server_GetGudCharacter::ServerRemoteMove_Implementation(const FInpu
 	delete outAction;
 }
 
-bool AClient_Server_GetGudCharacter::ServerRemoteMove_Validate(const FInputActionValue& Value)
+bool AClient_Server_GetgudCharacter::ServerRemoteMove_Validate(const FInputActionValue& Value)
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes
 }
 
-void AClient_Server_GetGudCharacter::ServerRemoteSpawn_Implementation(const FInputActionValue& Value)
+void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInputActionValue& Value)
 {
 	// Handle the movement on the server
 
@@ -171,7 +171,7 @@ void AClient_Server_GetGudCharacter::ServerRemoteSpawn_Implementation(const FInp
 	delete outAction;
 }
 
-bool AClient_Server_GetGudCharacter::ServerRemoteSpawn_Validate(const FInputActionValue& Value)
+bool AClient_Server_GetgudCharacter::ServerRemoteSpawn_Validate(const FInputActionValue& Value)
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes

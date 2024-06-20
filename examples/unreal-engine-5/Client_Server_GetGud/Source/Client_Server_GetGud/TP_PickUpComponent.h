@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
-#include "Client_Server_GetGudCharacter.h"
+#include "Client_Server_GetgudCharacter.h"
 #include "TP_PickUpComponent.generated.h"
 
 // Declaration of the delegate that will be called when someone picks this up
 // The character picking this up is the parameter sent with the notification
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, AClient_Server_GetGudCharacter*, PickUpCharacter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, AClient_Server_GetgudCharacter*, PickUpCharacter);
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CLIENT_SERVER_GETGUD_API UTP_PickUpComponent : public USphereComponent

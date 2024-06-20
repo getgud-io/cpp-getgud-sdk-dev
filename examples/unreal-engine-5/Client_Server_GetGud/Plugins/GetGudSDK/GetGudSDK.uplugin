@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1.0,
 	"FriendlyVersion": "1.0",
-	"FriendlyName": "GetGud SDK Plugin",
+	"FriendlyName": "Getgud SDK Plugin",
 	"Description": "",
 	"Category": "",
 	"CreatedBy": "",
@@ -16,7 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "GetGudSDKModule",
+			"Name": "GetgudSDKModule",
 			"Type": "Runtime",
 			"LoadingPhase": "PostConfigInit",
 			"TargetAllowList": [

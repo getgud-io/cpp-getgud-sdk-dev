@@ -6,7 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "TP_WeaponComponent.generated.h"
 
-class AClient_Server_GetGudCharacter;
+class AClient_Server_GetgudCharacter;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CLIENT_SERVER_GETGUD_API UTP_WeaponComponent : public USkeletalMeshComponent
@@ -16,7 +16,7 @@ class CLIENT_SERVER_GETGUD_API UTP_WeaponComponent : public USkeletalMeshCompone
 public:
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AClient_Server_GetGudProjectile> ProjectileClass;
+	TSubclassOf<class AClient_Server_GetgudProjectile> ProjectileClass;
 
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
@@ -43,7 +43,7 @@ public:
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	bool AttachWeapon(AClient_Server_GetGudCharacter* TargetCharacter);
+	bool AttachWeapon(AClient_Server_GetgudCharacter* TargetCharacter);
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
@@ -56,5 +56,5 @@ protected:
 
 private:
 	/** The Character holding this weapon*/
-	AClient_Server_GetGudCharacter* Character;
+	AClient_Server_GetgudCharacter* Character;
 };

@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "GetGudInstance.generated.h"
+#include "GetgudInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CLIENT_SERVER_GETGUD_API UGetGudInstance : public UGameInstance
+class CLIENT_SERVER_GETGUD_API UGetgudInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
 public:
 	virtual void Init() override;
-	virtual ~UGetGudInstance() noexcept;
+	virtual ~UGetgudInstance() noexcept;
 };

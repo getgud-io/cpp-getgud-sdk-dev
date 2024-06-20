@@ -3,7 +3,7 @@ from getgudsdk import ffi
 import time
 from enum import Enum
 
-class GetGudSdk:
+class GetgudSDK:
     class AffectState(Enum):
         Attach = 0
         Activate = 1

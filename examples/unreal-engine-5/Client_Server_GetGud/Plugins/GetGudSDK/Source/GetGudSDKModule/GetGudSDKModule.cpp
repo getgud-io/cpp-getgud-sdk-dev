@@ -5,16 +5,16 @@
 #include <GetgudSDK.h>
 
 
-DEFINE_LOG_CATEGORY_STATIC(LogGetGudSDK, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogGetgudSDK, Log, All);
 
-int GetGudFilterLogs = 1;
-static FAutoConsoleVariableRef CVar_GetGudFilterLogs(
+int GetgudFilterLogs = 1;
+static FAutoConsoleVariableRef CVar_GetgudFilterLogs(
 	TEXT("getgud.filterLogs"),
-	GetGudFilterLogs,
+	GetgudFilterLogs,
 	TEXT("Filter spam log"),
 	ECVF_Cheat);
 
-class FGetGudSDKModule : public IModuleInterface
+class FGetgudSDKModule : public IModuleInterface
 {
 public:
 	void StartupModule() override
@@ -27,7 +27,7 @@ public:
 		
 		FString ConfDir = TEXT("win64_") + Configuration;
 		
-		auto DllPath = FPaths::ProjectPluginsDir() / TEXT("GetGudSDK") / TEXT("ThirdParty") / TEXT("bin") / ConfDir / TEXT("GetgudSDK.dll");
+		auto DllPath = FPaths::ProjectPluginsDir() / TEXT("GetgudSDK") / TEXT("ThirdParty") / TEXT("bin") / ConfDir / TEXT("GetgudSDK.dll");
 		DllHandle = FPlatformProcess::GetDllHandle(*DllPath);
 	}
 	
@@ -41,21 +41,21 @@ public:
 
 };
 
-IMPLEMENT_MODULE(FGetGudSDKModule, GetGudSDKModule);
+IMPLEMENT_MODULE(FGetgudSDKModule, GetgudSDKModule);
 
-uint64_t UGetGudUtils::NowMs()
+uint64_t UGetgudUtils::NowMs()
 {
 	auto Now = FDateTime::UtcNow();
 	auto Ticks = Now.GetTicks() - FDateTime(1970, 1, 1).GetTicks();
 	return Ticks / ETimespan::TicksPerMillisecond;
 }
 
-GetgudSDK::PositionF UGetGudUtils::UnrealToGetGud(const FVector& Position)
+GetgudSDK::PositionF UGetgudUtils::UnrealToGetGud(const FVector& Position)
 {
 	return { static_cast<float>(Position.X) / 100.0f, -static_cast<float>(Position.Y) / 100.0f, static_cast<float>(Position.Z) / 100.0f };
 }
 
-GetgudSDK::RotationF UGetGudUtils::UnrealToGetGud(const FRotator& Rotation)
+GetgudSDK::RotationF UGetgudUtils::UnrealToGetGud(const FRotator& Rotation)
 {
 	long YawLong = static_cast<long>(Rotation.Yaw);
 	long LongYaw;

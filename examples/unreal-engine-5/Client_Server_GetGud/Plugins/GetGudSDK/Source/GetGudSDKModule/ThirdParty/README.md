@@ -2,22 +2,22 @@
 
 ## Project Setup
 
-### Additional to point 2. Integrate GetGudSDK Files
+### Additional to point 2. Integrate GetgudSDK Files
 
-1. Copy the include and src folder of the GetGudSDK repository to this folder.
+1. Copy the include and src folder of the GetgudSDK repository to this folder.
 2. Replace any existing files when prompted.
 
 ```
-Client_Server_GetGud
+Client_Server_Getgud
 +---Plugins
-|   \---GetGudSDK
-|       |   GetGudSDK.uplugin
+|   \---GetgudSDK
+|       |   GetgudSDK.uplugin
 |       |
 |       \---Source
-|           \---GetGudSDKModule
-|               |   GetGudSDKModule.Build.cs
-|               |   GetGudSDKModule.cpp
-|               |   GetGudSDKModule.h
+|           \---GetgudSDKModule
+|               |   GetgudSDKModule.Build.cs
+|               |   GetgudSDKModule.cpp
+|               |   GetgudSDKModule.h
 |               |
 |               \---ThirdParty
 |                   +---include <----------------
@@ -25,30 +25,30 @@ Client_Server_GetGud
 |                   \---src <----------------
 |
 +---Source
-|   |   Client_Server_GetGud.Target.cs
-|   |   Client_Server_GetGudEditor.Target.cs
-|   |   Client_Server_GetGudServer.Target.cs
+|   |   Client_Server_Getgud.Target.cs
+|   |   Client_Server_GetgudEditor.Target.cs
+|   |   Client_Server_GetgudServer.Target.cs
 |   |
-|   \---Client_Server_GetGud
-|           Client_Server_GetGud.Build.cs
-|           Client_Server_GetGud.cpp
-|           Client_Server_GetGud.h
-|           Client_Server_GetGudCharacter.cpp
-|           Client_Server_GetGudCharacter.h
-|           Client_Server_GetGudGameMode.cpp
-|           Client_Server_GetGudGameMode.h
-|           Client_Server_GetGudPlayerController.cpp
-|           Client_Server_GetGudPlayerController.h
-|           Client_Server_GetGudProjectile.cpp
-|           Client_Server_GetGudProjectile.h
-|           GetGudInstance.cpp
-|           GetGudInstance.h
+|   \---Client_Server_Getgud
+|           Client_Server_Getgud.Build.cs
+|           Client_Server_Getgud.cpp
+|           Client_Server_Getgud.h
+|           Client_Server_GetgudCharacter.cpp
+|           Client_Server_GetgudCharacter.h
+|           Client_Server_GetgudGameMode.cpp
+|           Client_Server_GetgudGameMode.h
+|           Client_Server_GetgudPlayerController.cpp
+|           Client_Server_GetgudPlayerController.h
+|           Client_Server_GetgudProjectile.cpp
+|           Client_Server_GetgudProjectile.h
+|           GetgudInstance.cpp
+|           GetgudInstance.h
 |           TP_PickUpComponent.cpp
 |           TP_PickUpComponent.h
 |           TP_WeaponComponent.cpp
 |           TP_WeaponComponent.h
 |
 \---ThirdParty
-    \---GetGudSDK
+    \---GetgudSDK
         \---include
 ```

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Client_Server_GetGudPlayerController.generated.h"
+#include "Client_Server_GetgudPlayerController.generated.h"
 
 class UInputMappingContext;
 
@@ -12,7 +12,7 @@ class UInputMappingContext;
  *
  */
 UCLASS()
-class CLIENT_SERVER_GETGUD_API AClient_Server_GetGudPlayerController : public APlayerController
+class CLIENT_SERVER_GETGUD_API AClient_Server_GetgudPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	

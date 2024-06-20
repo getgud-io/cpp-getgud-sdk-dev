@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "Client_Server_GetGudCharacter.generated.h"
+#include "Client_Server_GetgudCharacter.generated.h"
 
 class UInputComponent;
 class USkeletalMeshComponent;
@@ -17,7 +17,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AClient_Server_GetGudCharacter : public ACharacter
+class AClient_Server_GetgudCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -46,7 +46,7 @@ class AClient_Server_GetGudCharacter : public ACharacter
 	void ServerRemoteSpawn(const FInputActionValue& Value);
 
 public:
-	AClient_Server_GetGudCharacter();
+	AClient_Server_GetgudCharacter();
 
 protected:
 	virtual void BeginPlay();
