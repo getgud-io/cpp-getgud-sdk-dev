@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 1.0,
+	"FriendlyVersion": "1.0",
+	"FriendlyName": "Getgud SDK Plugin",
+	"Description": "",
+	"Category": "",
+	"CreatedBy": "",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "GetgudSDKModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"TargetAllowList": [
+				"Editor",
+				"Server"
+			],
+			"AdditionalDependencies": [
+			]
+		}
+	],
+	"Plugins": [
+	]
+}

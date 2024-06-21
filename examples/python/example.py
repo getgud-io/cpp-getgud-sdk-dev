@@ -7,7 +7,7 @@ def random_string(length):
     return result
 
 if __name__ == "__main__":
-    sdk = GetGudSdk()
+    sdk = GetgudSDK()
     game_guid = sdk.start_game(1, "pk", "aws", "deathmatch")
     match_guid = sdk.start_match(game_guid, "test_map", "deathmatch")
     
