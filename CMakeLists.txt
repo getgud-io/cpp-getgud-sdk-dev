@@ -7,7 +7,7 @@ project(
   LANGUAGES CXX)
 if (SO_BUILD)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_compile_options(-fPIC -m64)
+add_compile_options(-fPIC -m64 -Wl,-rpath='$ORIGIN')
 endif()
 set(CMAKE_SUPPRESS_REGENERATION true)
 
