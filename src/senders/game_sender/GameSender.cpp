@@ -105,19 +105,33 @@ void GameSender::SendNextGame() {
     // similar to how we dynamically encode timestamps
     ReduceMatchActionsSize(gameDataToSend);
 
+    unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
+    bool sendingEmptyGameMarkedAsEnded = false;
+
+    // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
+    // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
+    if (gameDataSizeInBytes == 0 && gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendEmptyGameMarkedAsEnded() == false) {
+        sendingEmptyGameMarkedAsEnded = true;
+        logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameDataToSend->GetGameGuid());
+    }
+
     // convert the game to a sendable string and send it to Getgud.io's cloud
     // using curl
     std::string gameOut;
     gameDataToSend->GameToString(gameOut);
-    if (!gameOut.empty()) {
-      logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " +
-        gameDataToSend->GetGameGuid());
+    if (!gameOut.empty() || sendingEmptyGameMarkedAsEnded == true) {
+      logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
       SendGamePacket(gameOut);
     }
 
-    // Dispose actions
-    gameDataToSend->Dispose();
-    delete gameDataToSend;
+    // mark the fact that an empty game that was marked as ened was just sended - this is to avoid sending this empty packet again
+    if (sendingEmptyGameMarkedAsEnded == true) gameDataToSend->SendingEmptyGameMarkedAsEnded();
+    
+    if (sendingEmptyGameMarkedAsEnded == false) {
+        // Dispose actions
+        gameDataToSend->Dispose();
+        delete gameDataToSend;
+    }
   }
 }
 

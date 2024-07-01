@@ -111,6 +111,18 @@ void GameData::MarkGameAsEnded() {
              std::string("Mark end game for game guid: " + m_gameGuid));
 }
 
+bool GameData::IsGameMarkedAsEnded() {
+    return m_isGameMarkedAsEnded;
+}
+
+void GameData::SendingEmptyGameMarkedAsEnded() {
+    m_SentEmptyGameMarkedAsEnded = true;
+}
+
+bool GameData::DidSendEmptyGameMarkedAsEnded() {
+    return m_SentEmptyGameMarkedAsEnded;
+}
+
 /**
  * AddMatch:
  *
@@ -363,7 +375,7 @@ void GameData::GameToString(std::string& gameOut) {
       containsMatch = true;
     }
   }
-  if (containsMatch) {
+  if (containsMatch || (m_isGameMarkedAsEnded == true && m_SentEmptyGameMarkedAsEnded == false)) {
     gameOut.pop_back();  // pop the last delimiter
 
     gameOut += "]}";
