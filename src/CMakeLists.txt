@@ -41,51 +41,51 @@ set(project_files ${MAIN_HEADER} ${MAIN_SOURCE}
 						${SENDERS_DATA_SOURCES} ${SENDERS_DATA_HEADERS}
 						)
 
-add_compile_options(-fPIC)
+#add_compile_options(-fPIC)
 
-file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
-list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
-file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
-list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
+#file(GLOB LIBCURL_DEBUG "../libs/libcurl/builds/*debug*/")
+#list(FILTER LIBCURL_DEBUG EXCLUDE REGEX ".*-obj-.*")
+#file(GLOB LIBCURL_RELEASE "../libs/libcurl/builds/*release*/")
+#list(FILTER LIBCURL_RELEASE EXCLUDE REGEX ".*-obj-.*")
 
-if (UNIX)
-file(GLOB ZLIB_LIB "../libs/*zlib/")
-else()
-file(GLOB ZLIB_LIB "../libs/*zlib/")
-endif()
+#if (UNIX)
+#file(GLOB ZLIB_LIB "../libs/*zlib/")
+#else()
+#file(GLOB ZLIB_LIB "../libs/*zlib/")
+#endif()
 
 if (DLL_BUILD)
-add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+#add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_library(GetgudSDK SHARED ${project_files} ${DLLMAIN_SOURCE})
 source_group("Source Files\\C" FILES ${DLLMAIN_SOURCE})
 else() 
-if (SO_BUILD)
-link_directories(
-	/usr/lib/x86_64-linux-gnu/
-	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
-	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
-	${ZLIB_LIB}
-)
-add_library(GetgudSDK SHARED ${project_files})
-set(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
-set_target_properties(GetgudSDK PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-else()
-if (UNIX)
-link_directories(
-	/usr/lib/x86_64-linux-gnu/
-	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
-	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
-	${ZLIB_LIB}
-)
-endif()
+#if (SO_BUILD)
+#link_directories(
+#	/usr/lib/x86_64-linux-gnu/
+#	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
+#	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
+#	${ZLIB_LIB}
+#)
+#add_library(GetgudSDK SHARED ${project_files})
+#set(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
+#set_target_properties(GetgudSDK PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+#else()
+#if (UNIX)
+#link_directories(
+#	/usr/lib/x86_64-linux-gnu/
+#	$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/>
+#	$<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/>
+#	${ZLIB_LIB}
+#)
+#endif()
 add_library(GetgudSDK STATIC ${project_files})
-endif()
+#endif()
 endif()
 
-target_include_directories(GetgudSDK PRIVATE source ../include/actions)
-set_target_properties(GetgudSDK PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(GetgudSDK PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(GetgudSDK PROPERTIES PUBLIC_HEADER ../include/GetgudSDK.h PUBLIC_HEADER ../include/GetgudSDK_C.h)
+#target_include_directories(GetgudSDK PRIVATE source ../include/actions)
+#set_target_properties(GetgudSDK PROPERTIES VERSION ${PROJECT_VERSION})
+#set_target_properties(GetgudSDK PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+#set_target_properties(GetgudSDK PROPERTIES PUBLIC_HEADER ../include/GetgudSDK.h PUBLIC_HEADER ../include/GetgudSDK_C.h)
 
 
 source_group("Header Files\\" FILES ${MAIN_HEADER})
@@ -117,41 +117,41 @@ source_group("Source Files\\utils" FILES ${UTILS_SOURCES})
 
 target_include_directories(GetgudSDK
     PRIVATE
-        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
-        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
-		../libs/ #zlib builds into root
-		../libs/zlib
+        #$<$<CONFIG:Debug>:${LIBCURL_DEBUG}/include/>
+        #$<$<CONFIG:Release>:${LIBCURL_RELEASE}/include/>
+		#../libs/ #zlib builds into root
+		#../libs/zlib
 		../src/
 )
 
-if (SO_BUILD OR UNIX)
-set_property(TARGET GetgudSDK PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(GetgudSDK
-    PRIVATE
-        libcurl.so
-		libz.a
-		libssl.a
-		libcrypto.a
-)
-else()
-message(${ZLIB_LIB}/zlib.lib)
-message(${LIBCURL_RELEASE})
-target_link_libraries(GetgudSDK
-    PRIVATE
-        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
-        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
-		${ZLIB_LIB}/zlib.lib
-)
-endif()
-if (DLL_BUILD)
-	target_link_libraries(GetgudSDK
-		PRIVATE
-		Normaliz.lib
-		Ws2_32.lib
-		Crypt32.lib
-		wldap32.lib
-	)
-	set_target_properties(GetgudSDK PROPERTIES 
-	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetgudSDK>/C_Starter.exe")
-
-endif()
+#if (SO_BUILD OR UNIX)
+#set_property(TARGET GetgudSDK PROPERTY POSITION_INDEPENDENT_CODE ON)
+#target_link_libraries(GetgudSDK
+#    PRIVATE
+#        libcurl.so
+#		libz.a
+#		libssl.a
+#		libcrypto.a
+#)
+#else()
+#message(${ZLIB_LIB}/zlib.lib)
+#message(${LIBCURL_RELEASE})
+#target_link_libraries(GetgudSDK
+#    PRIVATE
+#        $<$<CONFIG:Debug>:${LIBCURL_DEBUG}/lib/libcurl_a_debug.lib>
+#        $<$<CONFIG:Release>:${LIBCURL_RELEASE}/lib/libcurl_a.lib>
+#		${ZLIB_LIB}/zlib.lib
+#)
+#endif()
+#if (DLL_BUILD)
+#	target_link_libraries(GetgudSDK
+#		PRIVATE
+#		Normaliz.lib
+#		Ws2_32.lib
+#		Crypt32.lib
+#		wldap32.lib
+#	)
+#	set_target_properties(GetgudSDK PROPERTIES 
+#	VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:GetgudSDK>/C_Starter.exe")
+#
+#endif()
