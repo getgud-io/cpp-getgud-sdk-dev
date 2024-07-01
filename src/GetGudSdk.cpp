@@ -137,22 +137,28 @@ std::string StartGame(int titleId,
   std::string gameGuid;
 
   try {
-    if (sharedGameSenders.gameSenders.empty()) {
-      GetgudSDK::GameSender* gameSender = nullptr;
-      {  // lock_guard scope
-        // Create first Game Sender, if hypermode is on there will be more than
-        // 1
-        std::lock_guard<std::mutex> locker(sharedGameSenders.gameSendersMutex);
-        gameSender = new GameSender();
+      
+      logger.Log(LogType::DEBUG, std::string("String a new Game with the following parameters: Title ID: " + std::to_string(titleId) + " | serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
+  
+      if (sharedGameSenders.gameSenders.empty()) {
+      
+          GetgudSDK::GameSender* gameSender = nullptr;
+      
+          {  
+              // lock_guard scope
+              // Create first Game Sender, if hypermode is on there will be more than  
+              std::lock_guard<std::mutex> locker(sharedGameSenders.gameSendersMutex);
+              gameSender = new GameSender();
+          }
+      
+          // Start all services
+          gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
       }
-      // Start all services
-      gameSender->Start(sdkConfig.gameSenderSleepIntervalMilliseconds);
-    }
-    gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode, serverLocation);
+  
+      gameGuid = gameContainer.AddGame(titleId, privateKey, serverGuid, gameMode, serverLocation);
+
   } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL,
-               std::string("GetgudSDK::StartGame->Couldn't start new game: ") +
-                   std::string(_error.what()));
+    logger.Log(LogType::FATAL,std::string("GetgudSDK::StartGame->Couldn't start new game: ") + std::string(_error.what()));
   }
 
   return gameGuid;
@@ -167,7 +173,10 @@ std::string StartGame(std::string serverGuid, std::string gameMode, std::string 
   std::string gameGuid;
 
   try {
-     if (sharedGameSenders.gameSenders.empty()) {
+
+      logger.Log(LogType::DEBUG, std::string("String a new Game with the following parameters: serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
+    
+      if (sharedGameSenders.gameSenders.empty()) {
       GetgudSDK::GameSender* gameSender = nullptr;
       {  // lock_guard scope
         // Create first Game Sender, if hypermode is on there will be more than
@@ -211,18 +220,20 @@ std::string StartGame(std::string serverGuid, std::string gameMode, std::string 
 std::string StartMatch(std::string gameGuid,
                        std::string matchMode,
                        std::string mapName) {
-  std::string matchGuid;
-  try {
-    matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName);
+  
+    std::string matchGuid;
+  
+    try {
 
-  } catch (std::exception& _error) {
-    logger.Log(
-        LogType::FATAL,
-        std::string("GetgudSDK::StartMatch->Couldn't start new match: ") +
-            std::string(_error.what()));
-  }
+        logger.Log(LogType::DEBUG, std::string("String a new Match with the following parameters: gameGuid: " + gameGuid + " | matchMode: " + matchMode + " | mapName: " + mapName));
+    
+        matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName);
 
-  return matchGuid;
+    } catch (std::exception& _error) {
+    
+        logger.Log(LogType::FATAL,std::string("GetgudSDK::StartMatch->Couldn't start new match: ") + std::string(_error.what()));
+    }
+    return matchGuid;
 }
 
 /**
@@ -231,15 +242,19 @@ std::string StartMatch(std::string gameGuid,
  * Mark started game as finished
  **/
 bool MarkEndGame(std::string gameGuid) {
-  bool gameEnded = false;
-  try {
-    gameEnded = gameContainer.MarkEndGame(gameGuid);
-  } catch (std::exception& _error) {
-    logger.Log(LogType::FATAL,
-               std::string("GetgudSDK::MarkEndGame->Couldn't end game: ") +
-                   std::string(_error.what()));
-  }
+  
+    bool gameEnded = false;
+  
+    try {
 
+        logger.Log(LogType::DEBUG, std::string("Marking End Game for the following Game Guid: gameGuid: " + gameGuid));
+    
+        gameEnded = gameContainer.MarkEndGame(gameGuid);
+  
+    } catch (std::exception& _error) {
+    
+        logger.Log(LogType::FATAL, std::string("GetgudSDK::MarkEndGame->Couldn't end game: ") + std::string(_error.what()));
+  }
   return gameEnded;
 }
 

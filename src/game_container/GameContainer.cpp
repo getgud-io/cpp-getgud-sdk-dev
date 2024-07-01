@@ -18,42 +18,43 @@ std::string GameContainer::AddGame(int titleId,
                                    std::string serverGuid,
                                    std::string gameMode,
                                    std::string serverLocation) {
-  std::string gameGuid;
-  // make sure the container has enough room for another game
-  if (m_gameVector.size() >= sdkConfig.maxGames) {
-    logger.Log(LogType::WARN,
-               std::string("GameContainer::AddGame->Live game limit reached, "
-                           "cannot add a new game"));
-    return gameGuid;
-  }
+	std::string gameGuid;
 
-  // create a GameData and a pointer to it so we can reference the same GameData
-  // object from different data structures
-  GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode, serverLocation);
+	// make sure the container has enough room for another game
+	if (m_gameVector.size() >= sdkConfig.maxGames) {
+		logger.Log(LogType::WARN,std::string("GameContainer::AddGame->Live game limit reached - cannot add a new game"));
+		return gameGuid;
+	}
 
-  if (!gameData->IsValid()) {
-    delete gameData;
-    return gameGuid;
-  }
+	// create a GameData and a pointer to it so we can reference the same GameData
+	// object from different data structures
+	GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode, serverLocation);
 
-  m_gameContainerMutex.lock();
+	if (!gameData->IsValid()) {
 
-  // insert the game to the game map (for quick access when searching for a game
-  // via guid)
-  auto gameGuidPair = std::make_pair(gameData->GetGameGuid(), gameData);
-  m_gameMap.insert(gameGuidPair);
+        logger.Log(LogType::WARN, std::string("GameContainer::AddGame->One or more of the Game's paraemters are not valid - Game will not start. Game paraemters: Title ID: " + std::to_string(titleId) + " | serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
+		delete gameData;
+		return gameGuid;
+	}
 
-  // insert the game to the game vector, because this is a new game, its place
-  // is at the last of the line (which is the tail of the vector)
-  m_gameVector.push_back(gameData);
-  gameGuid = gameData->GetGameGuid();
-  std::string gameStringMeta = gameData->ToStringMeta();
-  m_gameContainerMutex.unlock();
+	m_gameContainerMutex.lock();
 
-  logger.Log(LogType::DEBUG, std::string("Started a new Game: " + gameGuid));
+	// insert the game to the game map (for quick access when searching for a game
+	// via guid)
+	auto gameGuidPair = std::make_pair(gameData->GetGameGuid(), gameData);
+	m_gameMap.insert(gameGuidPair);
 
-  // return the guid of the match, this acts as it's key to finding it
-  return gameGuid;
+	// insert the game to the game vector, because this is a new game, its place
+	// is at the last of the line (which is the tail of the vector)
+	m_gameVector.push_back(gameData);
+	gameGuid = gameData->GetGameGuid();
+	std::string gameStringMeta = gameData->ToStringMeta();
+	m_gameContainerMutex.unlock();
+
+	logger.Log(LogType::DEBUG, std::string("Started a new Game: " + gameGuid));
+
+	// return the guid of the match, this acts as it's key to finding it
+	return gameGuid;
 }
 
 /**
@@ -63,28 +64,25 @@ std::string GameContainer::AddGame(int titleId,
 std::string GameContainer::AddMatch(std::string gameGuid,
                                     std::string matchMode,
                                     std::string mapName) {
-  std::string retValue;
-  MatchData* matchData = nullptr;
-  std::string matchStringMeta;
+	std::string retValue;
+	MatchData* matchData = nullptr;
+	std::string matchStringMeta;
 
-  m_gameContainerMutex.lock();
+	m_gameContainerMutex.lock();
 
-  //  find the game that this new match is asking to join to
-  auto game_it = m_gameMap.find(gameGuid);
-  if (game_it == m_gameMap.end()) {
-    logger.Log(
-        LogType::WARN,
-        std::string(
-            "GameContainer::AddMatch->Can't find game with guid \"" + gameGuid + "\" to push match into"));
-    m_gameContainerMutex.unlock();
-    return retValue;
-  }
-  // create a new match from the passed parameters and add it to the game we
-  // found above
-  matchData = game_it->second->AddMatch(matchMode, mapName);
-  if (matchData == nullptr) {
-    m_gameContainerMutex.unlock();
-    return retValue;
+	//  find the game that this new match is asking to join to
+	auto game_it = m_gameMap.find(gameGuid);
+	if (game_it == m_gameMap.end()) {
+		logger.Log(LogType::WARN, std::string("GameContainer::AddMatch->Can't find game with guid \"" + gameGuid + "\" to push match into - Match will not start"));
+		m_gameContainerMutex.unlock();
+		return retValue;
+	}
+	// create a new match from the passed parameters and add it to the game we
+	// found above
+	matchData = game_it->second->AddMatch(matchMode, mapName);
+	if (matchData == nullptr) {
+		m_gameContainerMutex.unlock();
+		return retValue;
   }
 
   // insert the match to the match map (for quick access when searching for
