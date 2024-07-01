@@ -185,19 +185,25 @@ void PlayerUpdater::SendUpdatePlayerPacket(std::string& packet) {
   curl_easy_setopt(m_curl, CURLOPT_URL, sdkConfig.updatePlayersURL.c_str());
   curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
 
-  // time when we should stop trying to send packet
-  auto stopWaitingTime =
-      std::chrono::system_clock::now() +
-      std::chrono::milliseconds(sdkConfig.apiWaitTimeMilliseconds);
+  // counter of the number of time trying to send packet
+  auto apiTimeoutRetries = 0;
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
 
-  while (sendCode != CURLE_OK &&
-         stopWaitingTime > std::chrono::system_clock::now()) {
-    // send prepared packet
-    sendCode = curl_easy_perform(m_curl);
-    // make small delay in order to save hardware usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  while (sendCode != CURLE_OK && apiTimeoutRetries < sdkConfig.apiTimeoutRetries) {
+
+      if (apiTimeoutRetries > 0) {
+
+          logger.Log(LogType::WARN, "PlayerUpdater::SendUpdatePlayerPacket->Failed to send packet - Retry number: " + std::to_string(apiTimeoutRetries) + " Error Code: " + std::string(curl_easy_strerror(sendCode)));
+      }
+
+      apiTimeoutRetries++;
+
+	  // send prepared packet
+	  sendCode = curl_easy_perform(m_curl);
+
+	  // make small delay in order to save hardware usage
+	  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   if (sendCode != CURLcode::CURLE_OK) {
