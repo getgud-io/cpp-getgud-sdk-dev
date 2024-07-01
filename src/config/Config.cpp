@@ -152,14 +152,14 @@ bool Config::LoadSettings(std::string configFile, bool passAsContent) {
   if (valueReadResult) {
     sdkConfig.apiTimeoutMilliseconds = _apiTimeoutMilliseconds;
   }
-  unsigned int _apiWaitTimeMilliseconds = 0;
+  unsigned int _apiTimeoutRetries = 3;
   valueReadResult =
-      GetConfigValue(configData, sdkConfigFieldNames.apiWaitTimeMilliseconds,
-          _apiWaitTimeMilliseconds);
+      GetConfigValue(configData, sdkConfigFieldNames.apiTimeoutRetries,
+          _apiTimeoutRetries);
   valueReadResult &=
-      Validator::ValidateItemValue(_apiWaitTimeMilliseconds, 0U, 20000U);
+      Validator::ValidateItemValue(_apiTimeoutRetries, 1U, 20U);
   if (valueReadResult) {
-    sdkConfig.apiWaitTimeMilliseconds = _apiWaitTimeMilliseconds;
+    sdkConfig.apiTimeoutRetries = _apiTimeoutRetries;
   }
   unsigned int _packetMaxSizeInBytes = 0;
   valueReadResult =
@@ -519,8 +519,8 @@ std::string Config::ToString() {
       std::to_string(sdkConfig.gameSenderSleepIntervalMilliseconds) + ",\n";
   configString += "\t" + fieldNames.apiTimeoutMilliseconds + ": " +
                   std::to_string(sdkConfig.apiTimeoutMilliseconds) + ",\n";
-  configString += "\t" + fieldNames.apiWaitTimeMilliseconds + ": " +
-                  std::to_string(sdkConfig.apiWaitTimeMilliseconds) + ",\n";
+  configString += "\t" + fieldNames.apiTimeoutRetries + ": " +
+                  std::to_string(sdkConfig.apiTimeoutRetries) + ",\n";
   configString += "\t" + fieldNames.packetMaxSizeInBytes + ": " +
                   std::to_string(sdkConfig.packetMaxSizeInBytes) + ",\n";
 

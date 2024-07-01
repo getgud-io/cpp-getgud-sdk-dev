@@ -53,7 +53,7 @@ struct SdkConfigFieldNames {
   std::string gameSenderSleepIntervalMilliseconds =
       "gameSenderSleepIntervalMilliseconds";
   std::string apiTimeoutMilliseconds = "apiTimeoutMilliseconds";
-  std::string apiWaitTimeMilliseconds = "apiWaitTimeMilliseconds";
+  std::string apiTimeoutRetries = "apiTimeoutRetries";
   std::string packetMaxSizeInBytes = "packetMaxSizeInBytes";
 
   // Action buffer fields
@@ -124,7 +124,7 @@ class Config {
   // Game sender default values
   unsigned int gameSenderSleepIntervalMilliseconds = 1000;
   unsigned int apiTimeoutMilliseconds = 1000;
-  long long apiWaitTimeMilliseconds = 1000;
+  long long apiTimeoutRetries = 3;
   unsigned int packetMaxSizeInBytes = 1500000;
 
   // Action buffer default values
