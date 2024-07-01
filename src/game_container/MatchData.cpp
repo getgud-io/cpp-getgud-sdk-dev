@@ -334,62 +334,65 @@ std::map<std::string, Orientation> MatchData::ConvertActionsToDeltas()
  * if the match is not interesting
  **/
 void MatchData::MatchToString(std::string& matchOut) {
-  if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0)
-    return;
+	if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0)
+		return;
 
-  // if match is not interesting from throttle check we do not need to send it
-  if (!m_isInteresting)
-    return;
+	std::string actionStream;
+	std::string compressedActionStream;
 
-  std::string actionStream;
-  std::string compressedActionStream;
+	matchOut += "{";
+	matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
+	matchOut += "\"mapName\":\"" + m_mapName + "\",";
+	if (m_matchMode.size() > 0)
+		matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+	matchOut += "\"matchActionStream\":\"";
 
-  matchOut += "{";
-  matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
-  matchOut += "\"mapName\":\"" + m_mapName + "\",";
-  if (m_matchMode.size() > 0)
-    matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
-  matchOut += "\"matchActionStream\":\"";
+	for (int index = 0; index < m_actionVector.size(); index++) {
+		actionStream += m_actionVector[index]->ToString() + ",";
+	}
 
-  for (int index = 0; index < m_actionVector.size(); index++) {
-    actionStream += m_actionVector[index]->ToString() + ",";
-  }
-
-  if (actionStream.size() > 0) {
-    actionStream.pop_back();  // pop the last delimiter
-    zipper.CompressString(actionStream, compressedActionStream);
-  }
-  actionStream.clear();
-  matchOut += compressedActionStream;
-  matchOut += "\"";
-  // convert all reports to json string
-  if (m_reportVector.size() > 0)
-  {
-    matchOut += ",\"reports\":[";
-    for (int index = 0; index < m_reportVector.size(); index++) {
-      matchOut += m_reportVector[index]->ToString() + ",";
+	if (actionStream.size() > 0) {
+		actionStream.pop_back();  // pop the last delimiter
+		zipper.CompressString(actionStream, compressedActionStream);
+	}
+	actionStream.clear();
+	matchOut += compressedActionStream;
+	matchOut += "\"";
+	// convert all reports to json string
+	if (m_reportVector.size() > 0)
+	{
+		matchOut += ",\"reports\":[";
+		for (int index = 0; index < m_reportVector.size(); index++) {
+			matchOut += m_reportVector[index]->ToString() + ",";
 #ifdef _DEBUG
-      sdkConfig.totalReportsSent++;
+			sdkConfig.totalReportsSent++;
 #endif
-    }
-    matchOut.pop_back();       // pop the last delimiter
-    matchOut += "]";  // close the report array
-  }
+		}
+		matchOut.pop_back();       // pop the last delimiter
+		matchOut += "]";  // close the report array
+	}
 
-  if (m_chatMessageVector.size() > 0)
-  {
-    // convert all chat messages to json string
-    matchOut += ",\"chat\":[";
-    for (int index = 0; index < m_chatMessageVector.size(); index++) {
-      matchOut += "" + m_chatMessageVector[index]->ToString() + ",";
+	if (m_chatMessageVector.size() > 0)
+	{
+		// convert all chat messages to json string
+		matchOut += ",\"chat\":[";
+		for (int index = 0; index < m_chatMessageVector.size(); index++) {
+			matchOut += "" + m_chatMessageVector[index]->ToString() + ",";
 #ifdef _DEBUG
-      sdkConfig.totalChatSent++;
+			sdkConfig.totalChatSent++;
 #endif
+		}
+		matchOut.pop_back();         // pop the last delimiter
+		matchOut += "]";  // close the chat array and match
+	}
+	matchOut += "}";
+
+    // if match is not interesting from throttle check we do not need to send it
+    // this check is done here in order to make sure we clean the match's data from buffers
+    if (!m_isInteresting) {
+        matchOut = "";
+        return;
     }
-    matchOut.pop_back();         // pop the last delimiter
-    matchOut += "]";  // close the chat array and match
-  }
-  matchOut += "}";
 }
 
 /**
