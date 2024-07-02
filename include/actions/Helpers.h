@@ -66,6 +66,7 @@ enum class TbType : int {
   Smurfing,
   Ragequit,
   Afk,
+  Teaming,
   RapidFire
 };
 
