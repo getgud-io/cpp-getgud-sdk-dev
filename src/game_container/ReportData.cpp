@@ -58,8 +58,7 @@ std::string ReportData::ToString(bool isOutsideMatch) {
         ",";
   reportString +=
       "\"suspectedPlayerGuid\":\"" + m_reportInfo.SuspectedPlayerGuid + "\",";
-  if (m_reportInfo.TbType != TbType::None)
-    reportString += "\"TBType\":" + std::to_string(static_cast<int>(m_reportInfo.TbType)) + ",";
+  reportString += "\"TBType\":" + std::to_string(static_cast<int>(m_reportInfo.TbType)) + ",";
   if (m_reportInfo.TbTimeEpoch != -1)
     reportString +=
         "\"TBTimeEpoch\":" + std::to_string(m_reportInfo.TbTimeEpoch) + ",";
@@ -100,11 +99,8 @@ bool ReportData::IsValid() {
     m_reportInfo.SuspectedPlayerGuid, 1, 36);
   isActionValid &=
     Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
-  if (m_reportInfo.TbType != TbType::None)
-  {
     isActionValid &=
-      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 0, static_cast<int>(TbType::RapidFire));
-  }
+      Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 1, static_cast<int>(TbType::RapidFire));
   if (m_reportInfo.TbTimeEpoch != -1)
   {
     isActionValid &= Validator::ValidateItemValue(
