@@ -20,7 +20,7 @@ class GameData {
   std::string m_gameMode;
   std::string m_serverLocation;
   bool m_isGameMarkedAsEnded = false;
-  bool m_SentEmptyGameMarkedAsEnded = false;
+  bool m_sentGameMarkedAsEnded = false;
   unsigned int m_sizeInBytes = 0;
   std::chrono::system_clock::time_point m_startGameTimer;
   std::chrono::system_clock::time_point m_lastUpdateTime;
@@ -37,8 +37,7 @@ class GameData {
   GameData* Clone(bool isWithActions);
   void MarkGameAsEnded();
   bool IsGameMarkedAsEnded();
-  void SendingEmptyGameMarkedAsEnded();
-  bool DidSendEmptyGameMarkedAsEnded();
+  bool DidSendGameMarkedAsEnded();
   MatchData* AddMatch(std::string matchMode, std::string mapName);
   bool IsGameEligibleForProcessing();
   GameData* SliceGame(int sizeToSliceInBytes);

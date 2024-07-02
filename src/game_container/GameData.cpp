@@ -77,7 +77,7 @@ GameData* GameData::Clone(bool isWithActions) {
   GameData* cloneGameData =
       new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode, m_serverLocation);
   cloneGameData->m_gameGuid = m_gameGuid;
-  cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
+  cloneGameData->m_sentGameMarkedAsEnded = cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
@@ -115,12 +115,8 @@ bool GameData::IsGameMarkedAsEnded() {
     return m_isGameMarkedAsEnded;
 }
 
-void GameData::SendingEmptyGameMarkedAsEnded() {
-    m_SentEmptyGameMarkedAsEnded = true;
-}
-
-bool GameData::DidSendEmptyGameMarkedAsEnded() {
-    return m_SentEmptyGameMarkedAsEnded;
+bool GameData::DidSendGameMarkedAsEnded() {
+    return m_sentGameMarkedAsEnded;
 }
 
 /**
@@ -375,13 +371,16 @@ void GameData::GameToString(std::string& gameOut) {
       containsMatch = true;
     }
   }
-  if (containsMatch || (m_isGameMarkedAsEnded == true && m_SentEmptyGameMarkedAsEnded == false)) {
+  if (containsMatch || (m_isGameMarkedAsEnded == true && m_sentGameMarkedAsEnded == false)) {
     gameOut.pop_back();  // pop the last delimiter
 
     gameOut += "]}";
   } else {
     gameOut.clear();
   }
+
+  // flag the fact that the MarkEndGame singal is being sent to the server, thus no need to send it again on empty game
+  if (m_isGameMarkedAsEnded == true) m_sentGameMarkedAsEnded = true;
 }
 
 /**

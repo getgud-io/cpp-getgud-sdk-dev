@@ -110,7 +110,7 @@ void GameSender::SendNextGame() {
 
     // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
     // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
-    if (gameDataSizeInBytes == 0 && gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendEmptyGameMarkedAsEnded() == false) {
+    if (gameDataSizeInBytes == 0 && gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
         sendingEmptyGameMarkedAsEnded = true;
         logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameDataToSend->GetGameGuid());
     }
@@ -124,9 +124,6 @@ void GameSender::SendNextGame() {
       SendGamePacket(gameOut);
     }
 
-    // mark the fact that an empty game that was marked as ened was just sended - this is to avoid sending this empty packet again
-    if (sendingEmptyGameMarkedAsEnded == true) gameDataToSend->SendingEmptyGameMarkedAsEnded();
-    
     if (sendingEmptyGameMarkedAsEnded == false) {
         // Dispose actions
         gameDataToSend->Dispose();

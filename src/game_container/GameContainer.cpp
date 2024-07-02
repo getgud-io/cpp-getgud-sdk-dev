@@ -304,7 +304,7 @@ GameData* GameContainer::PopNextGameToProcess() {
 			}
             // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
             // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
-			else if (gameDataSizeInBytes == 0 && gameData->IsGameMarkedAsEnded() == true && gameData->DidSendEmptyGameMarkedAsEnded() == false) {
+			else if (gameDataSizeInBytes == 0 && gameData->IsGameMarkedAsEnded() == true && gameData->DidSendGameMarkedAsEnded() == false) {
                 sendingEmptyGameMarkedAsEnded = true;
 			}
 			else if (gameData->CanDeleteGame() == true) {
