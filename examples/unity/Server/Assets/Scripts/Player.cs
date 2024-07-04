@@ -132,7 +132,7 @@ public class Player : MonoBehaviour
         // Create BaseActionData
         BaseActionData baseActionData = new BaseActionData
         {
-            actionTimeEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            actionTimeEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             matchGuid = NetworkManager.Singleton.MatchGuid,
             playerGuid = "example-player-guid"
         };

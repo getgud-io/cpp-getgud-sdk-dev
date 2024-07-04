@@ -143,7 +143,7 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log($"Getgud: Player {player.Username} moved {transform.position.ToString()} with pitch: {pitch}, yaw: {yaw}, roll: {roll}");
         BaseActionData positionBaseActionData = new BaseActionData
         {
-            actionTimeEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            actionTimeEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             matchGuid = NetworkManager.Singleton.MatchGuid,
             playerGuid = "example-player-guid"
         };

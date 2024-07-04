@@ -130,7 +130,7 @@ public class NetworkManager : MonoBehaviour
     {
         StartGameInfo gameInfo = new StartGameInfo
         {
-            TitleId = 111, // Use your actual TitleId
+            TitleId = 219, // Use your actual TitleId
             PrivateKey = "private-key", // Use your actual private key
             ServerGuid = "example-server-guid",
             GameMode = "example-game-mode",
@@ -140,7 +140,7 @@ public class NetworkManager : MonoBehaviour
         int gameResult = GetgudSDK.Methods.StartGame(gameInfo, out string gameGuid);
         Debug.Log($"StartGame result: {gameResult}, gameGuid: {gameGuid}");
 
-        if (gameResult == 0)
+        if (gameResult > 0)
         {
             GameGuid = gameGuid;
 
@@ -154,7 +154,7 @@ public class NetworkManager : MonoBehaviour
             int matchResult = GetgudSDK.Methods.StartMatch(matchInfo, out string matchGuid);
             Debug.Log($"StartMatch result: {matchResult}, matchGuid: {matchGuid}");
 
-            if (matchResult == 0)
+            if (matchResult > 0)
             {
                 MatchGuid = matchGuid;
             }
