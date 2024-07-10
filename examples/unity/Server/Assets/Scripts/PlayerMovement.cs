@@ -47,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
         Vector2 inputDirection = Vector2.zero;
         if (inputs[0])
             inputDirection.y += 1;
-        
+
         if (inputs[1])
             inputDirection.y -= 1;
 
@@ -139,7 +139,6 @@ public class PlayerMovement : MonoBehaviour
         float pitch = Mathf.Asin(forward.y) * Mathf.Rad2Deg;
         float yaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
         float roll = Mathf.Atan2(right.y, up.y) * Mathf.Rad2Deg;
-
         Debug.Log($"Getgud: Player {player.Username} moved {transform.position.ToString()} with pitch: {pitch}, yaw: {yaw}, roll: {roll}");
         BaseActionData positionBaseActionData = new BaseActionData
         {
@@ -147,6 +146,21 @@ public class PlayerMovement : MonoBehaviour
             matchGuid = NetworkManager.Singleton.MatchGuid,
             playerGuid = "example-player-guid"
         };
+
+
+        // Neccessary adjustments for GetgudSDK around angles
+        // See getgud docs
+        // Swap pitch and yaw if required by the SDK
+        float temp = pitch;
+        pitch = yaw;
+        yaw = temp;
+
+        // Getgud most up yaw is -89, most down point yaw is 89.
+        // we need to change sign in unity
+        yaw = -yaw;
+
+        // same with pitch we need to reverse unity pitch to match Getgud format
+        pitch = -pitch;
 
         // Create PositionF for position action
         PositionF currentPosition = new PositionF { X = transform.position.x, Y = transform.position.y, Z = transform.position.z };
