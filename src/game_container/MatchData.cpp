@@ -334,9 +334,12 @@ std::map<std::string, Orientation> MatchData::ConvertActionsToDeltas()
  * if the match is not interesting
  **/
 void MatchData::MatchToString(std::string& matchOut) {
-	if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0)
-		return;
 
+	if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0) return;
+
+    // if match is not interesting from throttle check we do not need to send it
+    if (!m_isInteresting) return;
+    
 	std::string actionStream;
 	std::string compressedActionStream;
 
@@ -386,13 +389,6 @@ void MatchData::MatchToString(std::string& matchOut) {
 		matchOut += "]";  // close the chat array and match
 	}
 	matchOut += "}";
-
-    // if match is not interesting from throttle check we do not need to send it
-    // this check is done here in order to make sure we clean the match's data from buffers
-    if (!m_isInteresting) {
-        matchOut = "";
-        return;
-    }
 }
 
 /**
