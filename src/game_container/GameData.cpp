@@ -77,7 +77,8 @@ GameData* GameData::Clone(bool isWithActions) {
   GameData* cloneGameData =
       new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode, m_serverLocation);
   cloneGameData->m_gameGuid = m_gameGuid;
-  cloneGameData->m_sentGameMarkedAsEnded = cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
+  cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
+  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded;
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
@@ -117,6 +118,10 @@ bool GameData::IsGameMarkedAsEnded() {
 
 bool GameData::DidSendGameMarkedAsEnded() {
     return m_sentGameMarkedAsEnded;
+}
+
+void GameData::SendingGameMarkedAsEnded() {
+    m_sentGameMarkedAsEnded = true;
 }
 
 /**

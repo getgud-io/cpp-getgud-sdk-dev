@@ -281,8 +281,6 @@ GameData* GameContainer::PopNextGameToProcess() {
 	unsigned gameDataSizeInBytes;
     bool sendingEmptyGameMarkedAsEnded = false;
 
-	//m_gameContainerMutex.lock();
-
 	// traverse through all the live games and find the first eligible game to be
 	// processed and pop it.
 	for (int index = 0; index < m_gameVector.size(); index++) {
@@ -291,10 +289,12 @@ GameData* GameContainer::PopNextGameToProcess() {
 
 		gameDataSizeInBytes = gameData->GetGameSizeInBytes();
 		if (gameData->IsGameEligibleForProcessing() == true) {
-			// we found our earliest injected, eligible game
+			
+            // we found our earliest injected, eligible game
 			// check if this game is bigger than max allowed size to process
 			if (gameDataSizeInBytes > sdkConfig.packetMaxSizeInBytes) {
-				//  create a copy of game data with max allowed size, the rest will
+				
+                //  create a copy of game data with max allowed size, the rest will
 				//  remain for next time someone will try to pop a game
 				gameData = gameData->SliceGame(sdkConfig.packetMaxSizeInBytes);
 
@@ -305,6 +305,9 @@ GameData* GameContainer::PopNextGameToProcess() {
             // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
             // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
 			else if (gameDataSizeInBytes == 0 && gameData->IsGameMarkedAsEnded() == true && gameData->DidSendGameMarkedAsEnded() == false) {
+                
+                // clone the game and do not delete it, it will be deleted in the next iteration if needed
+                gameData = gameData->Clone(false);
                 sendingEmptyGameMarkedAsEnded = true;
 			}
 			else if (gameData->CanDeleteGame() == true) {
@@ -315,8 +318,7 @@ GameData* GameContainer::PopNextGameToProcess() {
 				DeleteGame(gameGuid, false);
 				gameData = nullptr;
 			}
-			else if (gameDataSizeInBytes > 0 ||
-				gameData->GetNumberOfGameReportsAndMessages() > 0) {
+			else if (gameDataSizeInBytes > 0 || gameData->GetNumberOfGameReportsAndMessages() > 0) {
 				// this is a normal sized game packet that is ready to be sent whole
 				// Do the old switcheroo trick: pop it and insert an empty GameData
 				// instance instead of it
@@ -363,17 +365,15 @@ GameData* GameContainer::PopNextGameToProcess() {
 		}
 	}
 
-	//m_gameContainerMutex.unlock();
-
 	// make sure a none empty game was found elidible and return it (even an empty
 	// game has to go through the logic above) note that an empty game (with no
 	// actions) will NOT be sent for processing and will not have any record it
 	// ever existed
-	if ( (gameData == nullptr || gameData->GetGameSizeInBytes() == 0) && sendingEmptyGameMarkedAsEnded == false) {
-		gameData = nullptr;
-	}
+	if ( (gameData == nullptr || gameData->GetGameSizeInBytes() == 0) && sendingEmptyGameMarkedAsEnded == false) 
+        gameData = nullptr;
 	else logger.Log(LogType::DEBUG, std::string("Popping Game with guid: " + gameData->GetGameGuid()));
-	return gameData;
+	
+    return gameData;
 }
 
 /**
@@ -399,6 +399,24 @@ game with the guid: " + gameGuid));
   m_gameContainerMutex.unlock();
 
   return retValue;
+}
+
+bool GameContainer::SendingGameMarkedAsEnded(std::string gameGuid) {
+    bool retValue = true;
+
+    // find the game that needs to be marked, and mark it :)
+    auto gameData_it = m_gameMap.find(gameGuid);
+    if (gameData_it == m_gameMap.end()) {
+        logger.Log(LogType::WARN,
+            std::string("GameContainer::SeningGameMarkedAsEnded->Failed to find a \
+game with the guid: " + gameGuid));
+        retValue = false;
+    }
+    else {
+        gameData_it->second->SendingGameMarkedAsEnded();
+    }
+
+    return retValue;
 }
 
 /**

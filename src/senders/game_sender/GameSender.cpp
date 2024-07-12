@@ -78,58 +78,63 @@ void GameSender::Start(int sleepIntervalMilli) {
  * Grab new actions, search for next game packet to send, send it if exists
  **/
 void GameSender::SendNextGame() {
-  // first thing is first, grab all the actions from from the buffer and inject
-  // them to the game container
-  std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
-  bool result = gameContainer.AddActions(nextActions);
-  if (result == false)
-    logger.Log(LogType::WARN,
-               "GameSender::SendNextGame->Failed to add actions to "
-               "GameContainer");
-  {
-    //TODO LATER refactor this part, games must be updated as non-block
-    std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
-    // get the next game we need to send. might be that there are no games to send
-    GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
-    if (gameDataToSend == nullptr)
-      return;
+	// first thing is first, grab all the actions from from the buffer and inject
+	// them to the game container
 
-    // If there is a game packet to send go through each match of the packet
-    // check if it is interesting for Getgud or no with a thtrottle check
-    // api request.
-    ThrottleCheckGameMatches(gameDataToSend);
-    //TODO return if game is not interesting
+	GameData* gameDataToSend = nullptr;
+	bool sendingEmptyGameMarkedAsEnded = false;
+	std::string gameOut;
 
-    // We reduce action size of the match by applying our
-    // dynamic programming to match actions
-    // similar to how we dynamically encode timestamps
-    ReduceMatchActionsSize(gameDataToSend);
+	std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
+	bool result = gameContainer.AddActions(nextActions);
+	if (result == false)
+		logger.Log(LogType::WARN,
+			"GameSender::SendNextGame->Failed to add actions to "
+			"GameContainer");
+	{
+		std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
 
-    unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
-    bool sendingEmptyGameMarkedAsEnded = false;
+		// get the next game we need to send. might be that there are no games to send
+		gameDataToSend = gameContainer.PopNextGameToProcess();
+		if (gameDataToSend == nullptr) return;
 
-    // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
-    // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
-    if (gameDataSizeInBytes == 0 && gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
-        sendingEmptyGameMarkedAsEnded = true;
-        logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameDataToSend->GetGameGuid());
-    }
+		// If there is a game packet to send go through each match of the packet
+		// check if it is interesting for Getgud or no with a thtrottle check
+		// api request.
+		ThrottleCheckGameMatches(gameDataToSend);
+		
+		// We reduce action size of the match by applying our
+		// dynamic programming to match actions
+		// similar to how we dynamically encode timestamps
+		ReduceMatchActionsSize(gameDataToSend);
 
-    // convert the game to a sendable string and send it to Getgud.io's cloud
-    // using curl
-    std::string gameOut;
-    gameDataToSend->GameToString(gameOut);
-    if (!gameOut.empty() || sendingEmptyGameMarkedAsEnded == true) {
-      logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
-      SendGamePacket(gameOut);
-    }
+		unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
 
-    if (sendingEmptyGameMarkedAsEnded == false) {
-        // Dispose actions
-        gameDataToSend->Dispose();
-        delete gameDataToSend;
-    }
-  }
+		// check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
+		// thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
+		if (gameDataSizeInBytes == 0 && gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
+			sendingEmptyGameMarkedAsEnded = true;
+			logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameDataToSend->GetGameGuid());
+		}
+
+		// convert the game to a sendable string and send it to Getgud.io's cloud using curl
+		gameDataToSend->GameToString(gameOut);
+
+        // mark the fact that a game that was marked as ened by the client is going to be sent to the server
+        if (gameDataToSend->IsGameMarkedAsEnded()) {
+            gameContainer.SendingGameMarkedAsEnded(gameDataToSend->GetGameGuid());
+        }
+
+	} // end of lock scope
+
+	if (!gameOut.empty() || sendingEmptyGameMarkedAsEnded == true) {
+		logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
+		SendGamePacket(gameOut);
+	}
+
+	// Dispose of the cloned game
+	gameDataToSend->Dispose();
+	delete gameDataToSend;
 }
 
 /**
