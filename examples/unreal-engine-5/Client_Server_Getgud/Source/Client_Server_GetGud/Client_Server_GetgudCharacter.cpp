@@ -191,10 +191,31 @@ void AClient_Server_GetGudCharacter::ServerRemoteSpawn_Implementation(const FInp
 
 	GetgudSDK::BaseActionData* outAction = nullptr;
 
+
+	float pitch = 0;
+	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	{
+		pitch = CameraRotation.Pitch * -1;
+	}
+	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	{
+		pitch = 360 - CameraRotation.Pitch;
+	}
+
+	float yaw = 0;
+	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
+	{
+		yaw = CameraRotation.Yaw * -1;
+	}
+	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
+	{
+		yaw = 360 - CameraRotation.Yaw;
+	}
+
 	outAction = new GetgudSDK::SpawnActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", 0, 100.f,
 		GetgudSDK::PositionF{(float)position.X, (float)position.Y, (float)position.Z},
-		GetgudSDK::RotationF{0, ((float)CameraRotation.Yaw - 180) * -1, 0});
+		GetgudSDK::RotationF{pitch, yaw, 0});
 
 	GetgudSDK::SendAction(outAction);
 
