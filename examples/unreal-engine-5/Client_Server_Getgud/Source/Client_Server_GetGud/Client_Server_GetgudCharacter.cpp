@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Client_Server_GetgudCharacter.h"
+#include "Client_Server_GetGudCharacter.h"
 #include "GetgudSDK.h"
-#include "Client_Server_GetgudProjectile.h"
+#include "Client_Server_GetGudProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -18,9 +18,9 @@ extern std::string g_matchGuid;
 std::string g_playerGuid;
 
 //////////////////////////////////////////////////////////////////////////
-// AClient_Server_GetgudCharacter
+// AClient_Server_GetGudCharacter
 
-AClient_Server_GetgudCharacter::AClient_Server_GetgudCharacter()
+AClient_Server_GetGudCharacter::AClient_Server_GetGudCharacter()
 {
 	//bReplicates = true;
 	//SetReplicatingMovement(true);
@@ -48,7 +48,7 @@ AClient_Server_GetgudCharacter::AClient_Server_GetgudCharacter()
 
 }
 
-void AClient_Server_GetgudCharacter::BeginPlay()
+void AClient_Server_GetGudCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -62,7 +62,7 @@ void AClient_Server_GetgudCharacter::BeginPlay()
 
 //////////////////////////////////////////////////////////////////////////// Input
 
-void AClient_Server_GetgudCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AClient_Server_GetGudCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {	
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
@@ -72,10 +72,10 @@ void AClient_Server_GetgudCharacter::SetupPlayerInputComponent(UInputComponent* 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AClient_Server_GetgudCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AClient_Server_GetGudCharacter::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AClient_Server_GetgudCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AClient_Server_GetGudCharacter::Look);
 	}
 	else
 	{
@@ -84,7 +84,7 @@ void AClient_Server_GetgudCharacter::SetupPlayerInputComponent(UInputComponent* 
 }
 
 
-void AClient_Server_GetgudCharacter::Move(const FInputActionValue& Value)
+void AClient_Server_GetGudCharacter::Move(const FInputActionValue& Value)
 {
 	if (IsLocallyControlled()) // Make sure this is the local client
 	{
@@ -103,8 +103,14 @@ void AClient_Server_GetgudCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AClient_Server_GetgudCharacter::Look(const FInputActionValue& Value)
+void AClient_Server_GetGudCharacter::Look(const FInputActionValue& Value)
 {
+	if (IsLocallyControlled()) // Make sure this is the local client
+	{
+		// Call the server RPC function
+		ServerRemoteMove(Value);
+	}
+
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -116,7 +122,7 @@ void AClient_Server_GetgudCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInputActionValue& Value)
+void AClient_Server_GetGudCharacter::ServerRemoteMove_Implementation(const FInputActionValue& Value)
 {
 	// Handle the movement on the server
 	//Move(Value); // Call the local move function
@@ -125,30 +131,52 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 	FVector position = GetActorLocation();
 
 	UE_LOG(LogTemp, Warning, TEXT("Character Position: %s"), *position.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Character Rotation: %s"), *CameraRotation.ToString());
 
 	FDateTime Now = FDateTime::UtcNow();
 
 	// Calculate the Unix timestamp in milliseconds
 	int64 UnixTimestampMillis = (Now.GetTicks() - FDateTime(1970, 1, 1, 0, 0, 0, 0).GetTicks()) / ETimespan::TicksPerMillisecond;
 
+	float pitch = 0;
+	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	{
+		pitch = CameraRotation.Pitch * -1;
+	}
+	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	{
+		pitch = 360 - CameraRotation.Pitch;
+	}
+
+	float yaw = 0;
+
+	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
+	{
+		yaw = CameraRotation.Yaw * -1;
+	}
+	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
+	{
+		yaw = 360 - CameraRotation.Yaw;
+	}
+
 	GetgudSDK::BaseActionData* outAction = nullptr;
 	outAction = new GetgudSDK::PositionActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid,
-		GetgudSDK::PositionF{(float)position.X, (float)position.Y, (float)position.Z},
-		GetgudSDK::RotationF{(float)CameraRotation.Pitch, (float)CameraRotation.Yaw, (float)CameraRotation.Roll});
+		GetgudSDK::PositionF{ (float)position.X, (float)position.Y, (float)position.Z },
+		GetgudSDK::RotationF{pitch, yaw, 0});
 
 	GetgudSDK::SendAction(outAction);
 
 	delete outAction;
 }
 
-bool AClient_Server_GetgudCharacter::ServerRemoteMove_Validate(const FInputActionValue& Value)
+bool AClient_Server_GetGudCharacter::ServerRemoteMove_Validate(const FInputActionValue& Value)
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes
 }
 
-void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInputActionValue& Value)
+void AClient_Server_GetGudCharacter::ServerRemoteSpawn_Implementation(const FInputActionValue& Value)
 {
 	// Handle the movement on the server
 
@@ -163,15 +191,38 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 
 	GetgudSDK::BaseActionData* outAction = nullptr;
 
+
+	float pitch = 0;
+	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	{
+		pitch = CameraRotation.Pitch * -1;
+	}
+	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	{
+		pitch = 360 - CameraRotation.Pitch;
+	}
+
+	float yaw = 0;
+	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
+	{
+		yaw = CameraRotation.Yaw * -1;
+	}
+	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
+	{
+		yaw = 360 - CameraRotation.Yaw;
+	}
+
 	outAction = new GetgudSDK::SpawnActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", 0, 100.f,
 		GetgudSDK::PositionF{(float)position.X, (float)position.Y, (float)position.Z},
-		GetgudSDK::RotationF{(float)CameraRotation.Pitch, (float)CameraRotation.Yaw, (float)CameraRotation.Roll});
+		GetgudSDK::RotationF{pitch, yaw, 0});
+
+	GetgudSDK::SendAction(outAction);
 
 	delete outAction;
 }
 
-bool AClient_Server_GetgudCharacter::ServerRemoteSpawn_Validate(const FInputActionValue& Value)
+bool AClient_Server_GetGudCharacter::ServerRemoteSpawn_Validate(const FInputActionValue& Value)
 {
 	// Add any necessary validation here
 	return true; // Assume validation passes
