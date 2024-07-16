@@ -193,7 +193,7 @@ void ReportSender::SendReportPacket(std::string& packet) {
   curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, packet.c_str());
 
   // counter of the number of time trying to send packet
-  auto apiTimeoutRetries = 0;
+  int apiTimeoutRetries = 0;
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
 

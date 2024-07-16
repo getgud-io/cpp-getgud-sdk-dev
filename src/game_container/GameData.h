@@ -38,7 +38,6 @@ class GameData {
   void MarkGameAsEnded();
   bool IsGameMarkedAsEnded();
   bool DidSendGameMarkedAsEnded();
-  void SendingGameMarkedAsEnded();
   MatchData* AddMatch(std::string matchMode, std::string mapName);
   bool IsGameEligibleForProcessing();
   GameData* SliceGame(int sizeToSliceInBytes);

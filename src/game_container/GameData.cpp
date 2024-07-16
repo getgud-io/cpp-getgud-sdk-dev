@@ -78,10 +78,13 @@ GameData* GameData::Clone(bool isWithActions) {
       new GameData(m_titleId, m_privateKey, m_serverGuid, m_gameMode, m_serverLocation);
   cloneGameData->m_gameGuid = m_gameGuid;
   cloneGameData->m_isGameMarkedAsEnded = m_isGameMarkedAsEnded;
-  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded;
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
+
+  // whenever a game is cloned it means it's going to be sent to the server, 
+  // thus if m_isGameMarkedAsEnded is true it means m_sentGameMarkedAsEnded should chnage to true as well -> both in the cloned game and original game
+  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded = m_isGameMarkedAsEnded;
 
   std::string matchGuid;
 
@@ -118,10 +121,6 @@ bool GameData::IsGameMarkedAsEnded() {
 
 bool GameData::DidSendGameMarkedAsEnded() {
     return m_sentGameMarkedAsEnded;
-}
-
-void GameData::SendingGameMarkedAsEnded() {
-    m_sentGameMarkedAsEnded = true;
 }
 
 /**
@@ -270,7 +269,7 @@ bool GameData::CanDeleteGame() {
 
   // Check if this game did not receive any actions for a very long long time,
   // indicating it's probably closed
-  else if (m_lastUpdateTime + std::chrono::milliseconds(
+  else if (gameSizeInBytes == 0 && m_lastUpdateTime + std::chrono::milliseconds(
                                 sdkConfig.liveGameTimeoutInMilliseconds) <
            std::chrono::system_clock::now())
     return true;
@@ -376,16 +375,13 @@ void GameData::GameToString(std::string& gameOut) {
       containsMatch = true;
     }
   }
-  if (containsMatch || (m_isGameMarkedAsEnded == true && m_sentGameMarkedAsEnded == false)) {
+  if (containsMatch || (m_isGameMarkedAsEnded == true) ) {
     gameOut.pop_back();  // pop the last delimiter
 
     gameOut += "]}";
   } else {
     gameOut.clear();
   }
-
-  // flag the fact that the MarkEndGame singal is being sent to the server, thus no need to send it again on empty game
-  if (m_isGameMarkedAsEnded == true) m_sentGameMarkedAsEnded = true;
 }
 
 /**

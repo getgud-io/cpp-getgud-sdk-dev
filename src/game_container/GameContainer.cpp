@@ -278,8 +278,7 @@ bool GameContainer::AddChatMessage(std::string matchGuid,
 GameData* GameContainer::PopNextGameToProcess() {
 	GameData* gameData = nullptr;
 	std::string gameGuid;
-	unsigned gameDataSizeInBytes;
-    bool sendingEmptyGameMarkedAsEnded = false;
+	unsigned gameDataSizeInBytes = 0;
 
 	// traverse through all the live games and find the first eligible game to be
 	// processed and pop it.
@@ -308,7 +307,8 @@ GameData* GameContainer::PopNextGameToProcess() {
                 
                 // clone the game and do not delete it, it will be deleted in the next iteration if needed
                 gameData = gameData->Clone(false);
-                sendingEmptyGameMarkedAsEnded = true;
+                logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameData->GetGameGuid());
+                break;
 			}
 			else if (gameData->CanDeleteGame() == true) {
 				// the delete method will take care of reducing the game size from the
@@ -369,10 +369,8 @@ GameData* GameContainer::PopNextGameToProcess() {
 	// game has to go through the logic above) note that an empty game (with no
 	// actions) will NOT be sent for processing and will not have any record it
 	// ever existed
-	if ( (gameData == nullptr || gameData->GetGameSizeInBytes() == 0) && sendingEmptyGameMarkedAsEnded == false) 
-        gameData = nullptr;
-	else logger.Log(LogType::DEBUG, std::string("Popping Game with guid: " + gameData->GetGameGuid()));
-	
+    if (gameData != nullptr) logger.Log(LogType::DEBUG, std::string("Popping Game with guid: " + gameData->GetGameGuid()));
+    
     return gameData;
 }
 
@@ -399,24 +397,6 @@ game with the guid: " + gameGuid));
   m_gameContainerMutex.unlock();
 
   return retValue;
-}
-
-bool GameContainer::SendingGameMarkedAsEnded(std::string gameGuid) {
-    bool retValue = true;
-
-    // find the game that needs to be marked, and mark it :)
-    auto gameData_it = m_gameMap.find(gameGuid);
-    if (gameData_it == m_gameMap.end()) {
-        logger.Log(LogType::WARN,
-            std::string("GameContainer::SeningGameMarkedAsEnded->Failed to find a \
-game with the guid: " + gameGuid));
-        retValue = false;
-    }
-    else {
-        gameData_it->second->SendingGameMarkedAsEnded();
-    }
-
-    return retValue;
 }
 
 /**
