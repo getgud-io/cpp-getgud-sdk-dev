@@ -13,7 +13,7 @@
   "maxPlayerUpdatesToSendAtOnce": 100,
   "gameSenderSleepIntervalMilliseconds": 100,
   "apiTimeoutMilliseconds": 5000,
-  "apiWaitTimeMilliseconds": 5000,
+  "apiTimeoutRetries": 3,
   "packetMaxSizeInBytes": 2000000,
   "actionsBufferMaxSizeInBytes": 50000000,
   "gameContainerMaxSizeInBytes": 100000000,
