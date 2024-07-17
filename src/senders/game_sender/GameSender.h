@@ -19,35 +19,35 @@
 
 namespace GetgudSDK {
 
-class GameSender {
- public:
-  GameSender();
-  void Start(int sleepIntervalMilli);
-  void Dispose();
-  ~GameSender();
+	class GameSender {
+	public:
+		GameSender();
+		void Start(int sleepIntervalMilli);
+		void Dispose();
+		~GameSender();
 
- private:
-  int m_sleepTimeMilli = 0;
-  std::thread m_updaterThread;
-  bool m_threadWorking = false;
-  
-  //game stream CURL
-  curl_slist* m_streamHeaders = NULL;
-  CURL* m_streamCurl = nullptr;
-  std::string m_streamCurlReadBuffer;
+	private:
+		int m_sleepTimeMilli = 0;
+		std::thread m_updaterThread;
+		bool m_threadWorking = false;
 
-  //throttle check CURL
-  curl_slist* m_throttleHeaders = NULL;
-  CURL* m_throttleCurl = nullptr;
-  std::string m_throttleCurlReadBuffer;
+		//game stream CURL
+		curl_slist* m_streamHeaders = NULL;
+		CURL* m_streamCurl = nullptr;
+		std::string m_streamCurlReadBuffer;
 
- private:
-  void InitCurl();
-  void SendNextGame();
-  void ManageHyperMode();
-  void ThrottleCheckGameMatches(GameData* gameDataToSend);
-  bool SendThrottleCheckForMatch(std::string& packet);
-  void SendGamePacket(std::string& packet);
-  void ReduceMatchActionsSize(GameData* gameDataToSend);
-};
+		//throttle check CURL
+		curl_slist* m_throttleHeaders = NULL;
+		CURL* m_throttleCurl = nullptr;
+		std::string m_throttleCurlReadBuffer;
+
+	private:
+		void InitCurl();
+		void SendNextGame();
+		void ManageHyperMode();
+		void ThrottleCheckGameMatches(GameData* gameDataToSend);
+		bool SendThrottleCheckForMatch(std::string& packet);
+		void SendGamePacket(std::string& packet);
+		void ReduceMatchActionsSize(GameData* gameDataToSend);
+	};
 }  // namespace GetgudSDK

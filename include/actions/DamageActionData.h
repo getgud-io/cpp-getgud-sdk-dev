@@ -12,24 +12,24 @@
 #endif
 
 namespace GetgudSDK {
-class DamageActionData : public BaseActionData {
-  std::string m_weaponGuid;
-  std::string m_victimPlayerGuid;
-  float m_damageDone = 0;
+	class DamageActionData : public BaseActionData {
+		std::string m_weaponGuid;
+		std::string m_victimPlayerGuid;
+		float m_damageDone = 0;
 
- public:
-   GETGUDSDK_API DamageActionData(std::string matchGuid,
-                   long long actionTimeEpoch,
-                   std::string playerGuid,
-                   std::string victimPlayerGuid,
-                   float damageDone,
-                   std::string weaponGuid);
-  GETGUDSDK_API DamageActionData(const DamageActionData& data);
-  GETGUDSDK_API DamageActionData() = delete;
-  GETGUDSDK_API ~DamageActionData() override;
-  GETGUDSDK_API bool IsValid() override;
-  GETGUDSDK_API std::string ToString() override;
-  GETGUDSDK_API std::string ToStringMeta() override;
-  GETGUDSDK_API DamageActionData* Clone() override;
-};
+	public:
+		GETGUDSDK_API DamageActionData(std::string matchGuid,
+			long long actionTimeEpoch,
+			std::string playerGuid,
+			std::string victimPlayerGuid,
+			float damageDone,
+			std::string weaponGuid);
+		GETGUDSDK_API DamageActionData(const DamageActionData& data);
+		GETGUDSDK_API DamageActionData() = delete;
+		GETGUDSDK_API ~DamageActionData() override;
+		GETGUDSDK_API bool IsValid() override;
+		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API std::string ToStringMeta() override;
+		GETGUDSDK_API DamageActionData* Clone() override;
+	};
 }  // namespace GetgudSDK
