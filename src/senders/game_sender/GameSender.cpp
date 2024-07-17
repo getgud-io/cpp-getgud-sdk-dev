@@ -444,6 +444,9 @@ void GameSender::InitCurl() {
   curl_easy_setopt(m_streamCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
   curl_easy_setopt(m_streamCurl, CURLOPT_WRITEDATA, &m_streamCurlReadBuffer);
 
+  //TODO: Fix this for a security reason
+  curl_easy_setopt(m_streamCurl, CURLOPT_SSL_VERIFYPEER, 0L);
+
   //Throttle Curl
   m_throttleHeaders =
       curl_slist_append(m_throttleHeaders, "Accept: application/json");
@@ -459,6 +462,9 @@ void GameSender::InitCurl() {
                    sdkConfig.apiTimeoutMilliseconds);
   curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEFUNCTION, CURLWriteCallback);
   curl_easy_setopt(m_throttleCurl, CURLOPT_WRITEDATA, &m_throttleCurlReadBuffer);
+
+  //TODO: Fix this for a security reason
+  curl_easy_setopt(m_throttleCurl, CURLOPT_SSL_VERIFYPEER, 0L);
 }
 
 /**

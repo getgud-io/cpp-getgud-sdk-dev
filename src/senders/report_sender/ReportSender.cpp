@@ -256,6 +256,9 @@ void ReportSender::InitCurl() {
                    sdkConfig.apiTimeoutMilliseconds);
   curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallbackReport);
   curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
+
+  //TODO: Fix this for a security reason
+  curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
 }
 
 /**
