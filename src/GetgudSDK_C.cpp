@@ -666,6 +666,7 @@ int SendReport(int titleId,
     reportInfoOut.MatchGuid = matchGuid.c_str();
     //required
     reportInfoOut.ReportedTimeEpoch = reportInfo.reportedTimeEpoch;
+    reportInfoOut.TbType = static_cast<GetgudSDK::TbType>(reportInfo.tbType);
     if (reportInfo.reporterNameSize > 0)
       reportInfoOut.ReporterName = reporterName.c_str();
     if (reportInfo.reporterSubType != -1)
@@ -678,8 +679,6 @@ int SendReport(int titleId,
     reportInfoOut.SuspectedPlayerGuid = suspectedPlayerGuid.c_str();
     if (reportInfo.tbTimeEpoch != -1)
       reportInfoOut.TbTimeEpoch = reportInfo.tbTimeEpoch;
-    if (reportInfo.tbType != -1)
-      reportInfoOut.TbType = static_cast<GetgudSDK::TbType>(reportInfo.tbType);
 
     std::deque<GetgudSDK::ReportInfo> reports;
     reports.push_back(reportInfoOut);

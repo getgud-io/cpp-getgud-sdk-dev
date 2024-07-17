@@ -78,47 +78,48 @@ void GameSender::Start(int sleepIntervalMilli) {
  * Grab new actions, search for next game packet to send, send it if exists
  **/
 void GameSender::SendNextGame() {
-  // first thing is first, grab all the actions from from the buffer and inject
-  // them to the game container
-  std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
-  bool result = gameContainer.AddActions(nextActions);
-  if (result == false)
-    logger.Log(LogType::WARN,
-               "GameSender::SendNextGame->Failed to add actions to "
-               "GameContainer");
-  {
-    //TODO LATER refactor this part, games must be updated as non-block
-    std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
-    // get the next game we need to send. might be that there are no games to send
-    GameData* gameDataToSend = gameContainer.PopNextGameToProcess();
-    if (gameDataToSend == nullptr)
-      return;
 
-    // If there is a game packet to send go through each match of the packet
-    // check if it is interesting for Getgud or no with a thtrottle check
-    // api request.
-    ThrottleCheckGameMatches(gameDataToSend);
-    //TODO return if game is not interesting
+	GameData* gameDataToSend = nullptr;
+	std::string gameOut;
 
-    // We reduce action size of the match by applying our
-    // dynamic programming to match actions
-    // similar to how we dynamically encode timestamps
-    ReduceMatchActionsSize(gameDataToSend);
+	// first, grab all the actions from from the buffer and inject them to the game container
+	std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
+	bool result = gameContainer.AddActions(nextActions);
+	if (result == false) logger.Log(LogType::WARN, "GameSender::SendNextGame->Failed to add actions to GameContainer");
 
-    // convert the game to a sendable string and send it to Getgud.io's cloud
-    // using curl
-    std::string gameOut;
-    gameDataToSend->GameToString(gameOut);
-    if (!gameOut.empty()) {
-      logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " +
-        gameDataToSend->GetGameGuid());
-      SendGamePacket(gameOut);
-    }
+	{   // start lock scope
 
-    // Dispose actions
-    gameDataToSend->Dispose();
-    delete gameDataToSend;
-  }
+		std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
+
+		// get the next game we need to send. might be that there are no games to send
+		gameDataToSend = gameContainer.PopNextGameToProcess();
+		if (gameDataToSend == nullptr) return;
+
+		// If there is a game packet to send go through each match of the packet
+		// check if it is interesting for Getgud or no with a thtrottle check
+		// api request.
+		ThrottleCheckGameMatches(gameDataToSend);
+
+	} // end of lock scope
+
+	// We reduce action size of the match by applying our
+	// dynamic programming to match actions
+	// similar to how we dynamically encode timestamps
+	ReduceMatchActionsSize(gameDataToSend);
+
+	unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
+
+	// convert the game to a sendable string and send it to Getgud.io's cloud using curl
+	gameDataToSend->GameToString(gameOut);
+
+	if (!gameOut.empty()) {
+		logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
+		SendGamePacket(gameOut);
+	}
+
+	// Dispose of the cloned game
+	gameDataToSend->Dispose();
+	delete gameDataToSend;
 }
 
 /**
@@ -286,19 +287,26 @@ bool GameSender::SendThrottleCheckForMatch(std::string& packet) {
   m_throttleCurlReadBuffer.clear();
   curl_easy_setopt(m_throttleCurl, CURLOPT_POSTFIELDS, packet.c_str());
 
-  // time when we should stop trying to send packet
-  auto stopWaitingTime =
-      std::chrono::system_clock::now() +
-      std::chrono::milliseconds(sdkConfig.apiWaitTimeMilliseconds);
+  // counter of the number of time trying to send packet
+  int apiTimeoutRetries = 0;
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
   bool result = false;  // we consider match not interesting by default
-  while (!result && sendCode != CURLE_OK &&
-         stopWaitingTime > std::chrono::system_clock::now()) {
-    // send prepared packet
-    sendCode = curl_easy_perform(m_throttleCurl);
-    // make small delay in order to save hardware usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  
+  while (!result && sendCode != CURLE_OK && apiTimeoutRetries < sdkConfig.apiTimeoutRetries) {
+
+      if (apiTimeoutRetries > 0) {
+
+          logger.Log(LogType::WARN, "GameSender::SendThrottleCheckForMatch->Failed to send packet - Retry number: " + std::to_string(apiTimeoutRetries) + " Error Code: " + std::string(curl_easy_strerror(sendCode)));
+      }
+
+      apiTimeoutRetries++;
+	  
+      // send prepared packet
+	  sendCode = curl_easy_perform(m_throttleCurl);
+	  
+      // make small delay in order to save hardware usage
+	  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   if (sendCode == CURLcode::CURLE_OK) {
@@ -364,19 +372,25 @@ void GameSender::SendGamePacket(std::string& packet) {
   m_streamCurlReadBuffer.clear();
   curl_easy_setopt(m_streamCurl, CURLOPT_POSTFIELDS, packet.c_str());
 
-  // time when we should stop trying to send packet
-  auto stopWaitingTime =
-      std::chrono::system_clock::now() +
-      std::chrono::milliseconds(sdkConfig.apiWaitTimeMilliseconds);
+  // counter of the number of time trying to send packet
+  int apiTimeoutRetries = 0;
 
   CURLcode sendCode = CURLE_UNKNOWN_OPTION;
 
-  while (sendCode != CURLE_OK &&
-         stopWaitingTime > std::chrono::system_clock::now()) {
-    // send prepared packet
-    sendCode = curl_easy_perform(m_streamCurl);
-    // make small delay in order to save hardware usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  while (sendCode != CURLE_OK && apiTimeoutRetries < sdkConfig.apiTimeoutRetries) {
+	  
+      if (apiTimeoutRetries > 0) {
+
+          logger.Log(LogType::WARN, "GameSender::SendGamePacket->Failed to send packet - Retry number: " + std::to_string(apiTimeoutRetries) + " Error Code: " + std::string(curl_easy_strerror(sendCode)));
+      }
+
+      apiTimeoutRetries++;
+
+      // send prepared packet
+	  sendCode = curl_easy_perform(m_streamCurl);
+	  
+      // make small delay in order to save hardware usage
+	  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   if (sendCode != CURLcode::CURLE_OK) {

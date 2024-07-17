@@ -18,42 +18,43 @@ std::string GameContainer::AddGame(int titleId,
                                    std::string serverGuid,
                                    std::string gameMode,
                                    std::string serverLocation) {
-  std::string gameGuid;
-  // make sure the container has enough room for another game
-  if (m_gameVector.size() >= sdkConfig.maxGames) {
-    logger.Log(LogType::WARN,
-               std::string("GameContainer::AddGame->Live game limit reached, "
-                           "cannot add a new game"));
-    return gameGuid;
-  }
+	std::string gameGuid;
 
-  // create a GameData and a pointer to it so we can reference the same GameData
-  // object from different data structures
-  GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode, serverLocation);
+	// make sure the container has enough room for another game
+	if (m_gameVector.size() >= sdkConfig.maxGames) {
+		logger.Log(LogType::WARN,std::string("GameContainer::AddGame->Live game limit reached - cannot add a new game"));
+		return gameGuid;
+	}
 
-  if (!gameData->IsValid()) {
-    delete gameData;
-    return gameGuid;
-  }
+	// create a GameData and a pointer to it so we can reference the same GameData
+	// object from different data structures
+	GameData* gameData = new GameData(titleId, privateKey, serverGuid, gameMode, serverLocation);
 
-  m_gameContainerMutex.lock();
+	if (!gameData->IsValid()) {
 
-  // insert the game to the game map (for quick access when searching for a game
-  // via guid)
-  auto gameGuidPair = std::make_pair(gameData->GetGameGuid(), gameData);
-  m_gameMap.insert(gameGuidPair);
+        logger.Log(LogType::WARN, std::string("GameContainer::AddGame->One or more of the Game's paraemters are not valid - Game will not start. Game paraemters: Title ID: " + std::to_string(titleId) + " | serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
+		delete gameData;
+		return gameGuid;
+	}
 
-  // insert the game to the game vector, because this is a new game, its place
-  // is at the last of the line (which is the tail of the vector)
-  m_gameVector.push_back(gameData);
-  gameGuid = gameData->GetGameGuid();
-  std::string gameStringMeta = gameData->ToStringMeta();
-  m_gameContainerMutex.unlock();
+	m_gameContainerMutex.lock();
 
-  logger.Log(LogType::DEBUG, std::string("Started a new Game: " + gameGuid));
+	// insert the game to the game map (for quick access when searching for a game
+	// via guid)
+	auto gameGuidPair = std::make_pair(gameData->GetGameGuid(), gameData);
+	m_gameMap.insert(gameGuidPair);
 
-  // return the guid of the match, this acts as it's key to finding it
-  return gameGuid;
+	// insert the game to the game vector, because this is a new game, its place
+	// is at the last of the line (which is the tail of the vector)
+	m_gameVector.push_back(gameData);
+	gameGuid = gameData->GetGameGuid();
+	std::string gameStringMeta = gameData->ToStringMeta();
+	m_gameContainerMutex.unlock();
+
+	logger.Log(LogType::DEBUG, std::string("Started a new Game: " + gameGuid));
+
+	// return the guid of the match, this acts as it's key to finding it
+	return gameGuid;
 }
 
 /**
@@ -63,28 +64,25 @@ std::string GameContainer::AddGame(int titleId,
 std::string GameContainer::AddMatch(std::string gameGuid,
                                     std::string matchMode,
                                     std::string mapName) {
-  std::string retValue;
-  MatchData* matchData = nullptr;
-  std::string matchStringMeta;
+	std::string retValue;
+	MatchData* matchData = nullptr;
+	std::string matchStringMeta;
 
-  m_gameContainerMutex.lock();
+	m_gameContainerMutex.lock();
 
-  //  find the game that this new match is asking to join to
-  auto game_it = m_gameMap.find(gameGuid);
-  if (game_it == m_gameMap.end()) {
-    logger.Log(
-        LogType::WARN,
-        std::string(
-            "GameContainer::AddMatch->Can't find game with guid \"" + gameGuid + "\" to push match into"));
-    m_gameContainerMutex.unlock();
-    return retValue;
-  }
-  // create a new match from the passed parameters and add it to the game we
-  // found above
-  matchData = game_it->second->AddMatch(matchMode, mapName);
-  if (matchData == nullptr) {
-    m_gameContainerMutex.unlock();
-    return retValue;
+	//  find the game that this new match is asking to join to
+	auto game_it = m_gameMap.find(gameGuid);
+	if (game_it == m_gameMap.end()) {
+		logger.Log(LogType::WARN, std::string("GameContainer::AddMatch->Can't find game with guid \"" + gameGuid + "\" to push match into - Match will not start"));
+		m_gameContainerMutex.unlock();
+		return retValue;
+	}
+	// create a new match from the passed parameters and add it to the game we
+	// found above
+	matchData = game_it->second->AddMatch(matchMode, mapName);
+	if (matchData == nullptr) {
+		m_gameContainerMutex.unlock();
+		return retValue;
   }
 
   // insert the match to the match map (for quick access when searching for
@@ -278,95 +276,102 @@ bool GameContainer::AddChatMessage(std::string matchGuid,
  * meaning no packet is ready to be sent at the moment
  **/
 GameData* GameContainer::PopNextGameToProcess() {
-  GameData* gameData = nullptr;
-  std::string gameGuid;
-  unsigned gameDataSizeInBytes;
+	GameData* gameData = nullptr;
+	std::string gameGuid;
+	unsigned gameDataSizeInBytes = 0;
 
-  //m_gameContainerMutex.lock();
+	// traverse through all the live games and find the first eligible game to be
+	// processed and pop it.
+	for (int index = 0; index < m_gameVector.size(); index++) {
+		gameData = m_gameVector[index];
+		gameGuid = gameData->GetGameGuid();
 
-  // traverse through all the live games and find the first eligible game to be
-  // processed and pop it.
-  for (int index = 0; index < m_gameVector.size(); index++) {
-    gameData = m_gameVector[index];
-    gameGuid = gameData->GetGameGuid();
+		gameDataSizeInBytes = gameData->GetGameSizeInBytes();
+		if (gameData->IsGameEligibleForProcessing() == true) {
+			
+            // we found our earliest injected, eligible game
+			// check if this game is bigger than max allowed size to process
+			if (gameDataSizeInBytes > sdkConfig.packetMaxSizeInBytes) {
+				
+                //  create a copy of game data with max allowed size, the rest will
+				//  remain for next time someone will try to pop a game
+				gameData = gameData->SliceGame(sdkConfig.packetMaxSizeInBytes);
 
-    gameDataSizeInBytes = gameData->GetGameSizeInBytes();
-    if (gameData->IsGameEligibleForProcessing() == true) {
-      // we found our earliest injected, eligible game
-      // check if this game is bigger than max allowed size to process
-      if (gameDataSizeInBytes > sdkConfig.packetMaxSizeInBytes) {
-        //  create a copy of game data with max allowed size, the rest will
-        //  remain for next time someone will try to pop a game
-        gameData = gameData->SliceGame(sdkConfig.packetMaxSizeInBytes);
+				// update the game container size after this slice
+				m_gameContainerSizeInBytes -= gameData->GetGameSizeInBytes();
+				break;
+			}
+            // check if this is a game with no current actions (they were probably sent already) but just now it was marked as ended
+            // thus it contains an empty packet but still needs to be sent in order to signal to the server that it needs to be finalized
+			else if (gameDataSizeInBytes == 0 && gameData->IsGameMarkedAsEnded() == true && gameData->DidSendGameMarkedAsEnded() == false) {
+                
+                // clone the game and do not delete it, it will be deleted in the next iteration if needed
+                gameData = gameData->Clone(false);
+                logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameData->GetGameGuid());
+                break;
+			}
+			else if (gameData->CanDeleteGame() == true) {
+				// the delete method will take care of reducing the game size from the
+				// container
+				// we are cleaning game container on the way by removing
+				// unneeded games
+				DeleteGame(gameGuid, false);
+				gameData = nullptr;
+			}
+			else if (gameDataSizeInBytes > 0 || gameData->GetNumberOfGameReportsAndMessages() > 0) {
+				// this is a normal sized game packet that is ready to be sent whole
+				// Do the old switcheroo trick: pop it and insert an empty GameData
+				// instance instead of it
+				m_gameVector.erase(m_gameVector.begin() + index);
+				index--;
+				m_gameMap.erase(gameGuid);
 
-        // update the game container size after this slice
-        m_gameContainerSizeInBytes -= gameData->GetGameSizeInBytes();
-        break;
-      } else if (gameData->CanDeleteGame() == true) {
-        // the delete method will take care of reducing the game size from the
-        // container
-        // we are cleaning game container on the way by removing
-        // unneeded games
-        DeleteGame(gameGuid, false);
-        gameData = nullptr;
-      } else if (gameDataSizeInBytes > 0 ||
-                 gameData->GetNumberOfGameReportsAndMessages() > 0) {
-        // this is a normal sized game packet that is ready to be sent whole
-        // Do the old switcheroo trick: pop it and insert an empty GameData
-        // instance instead of it
-        m_gameVector.erase(m_gameVector.begin() + index);
-        index--;
-        m_gameMap.erase(gameGuid);
+				//  create the empty game data that will replace the one we are popping
+				//  and insert it to all the data structures
+				GameData* cloneGameData = gameData->Clone(false);
+				m_gameVector.push_back(cloneGameData);
 
-        //  create the empty game data that will replace the one we are popping
-        //  and insert it to all the data structures
-        GameData* cloneGameData = gameData->Clone(false);
-        m_gameVector.push_back(cloneGameData);
+				std::pair<std::string, GameData*> gameGuidPair(gameGuid, cloneGameData);
+				m_gameMap.insert(gameGuidPair);
 
-        std::pair<std::string, GameData*> gameGuidPair(gameGuid, cloneGameData);
-        m_gameMap.insert(gameGuidPair);
+				//  fill the match map (abomination) with the new match pointers of the
+				//  new game (replace the old one that belong longed to the game we are
+				//  popping)
+				std::vector<std::string> gameMatchGuids;
+				cloneGameData->GetGameMatchGuids(gameMatchGuids);
+				for (auto& gameMatchGuid : gameMatchGuids) {
+					auto matchData_it = m_matchMap.find(gameMatchGuid);
 
-        //  fill the match map (abomination) with the new match pointers of the
-        //  new game (replace the old one that belong longed to the game we are
-        //  popping)
-        std::vector<std::string> gameMatchGuids;
-        cloneGameData->GetGameMatchGuids(gameMatchGuids);
-        for (auto& gameMatchGuid : gameMatchGuids) {
-          auto matchData_it = m_matchMap.find(gameMatchGuid);
+					// if this match that we are titrating over belong longs to the game
+					// we popped, replace match pointers with the clone's pointers
+					if (matchData_it != m_matchMap.end())
+						m_matchMap[gameMatchGuid] =
+						cloneGameData->GetGameMatch(gameMatchGuid);
+				}
 
-          // if this match that we are titrating over belong longs to the game
-          // we popped, replace match pointers with the clone's pointers
-          if (matchData_it != m_matchMap.end())
-            m_matchMap[gameMatchGuid] =
-                cloneGameData->GetGameMatch(gameMatchGuid);
-        }
+				// we just removed a game packet, update the size of the container
+				// accordingly
+				m_gameContainerSizeInBytes -= gameDataSizeInBytes;
+				m_gameVector.shrink_to_fit();
+				break;
+			}
+			else {
+				// if gameContainerSizeInBytes = 0 we can't send it
+				gameData = nullptr;
+			}
+		}
+		else {
+			gameData = nullptr;
+		}
+	}
 
-        // we just removed a game packet, update the size of the container
-        // accordingly
-        m_gameContainerSizeInBytes -= gameDataSizeInBytes;
-        m_gameVector.shrink_to_fit();
-        break;
-      } else {
-        // if gameContainerSizeInBytes = 0 we can't send it
-        gameData = nullptr;
-      }
-    } else {
-      gameData = nullptr;
-    }
-  }
-
-  //m_gameContainerMutex.unlock();
-
-  // make sure a none empty game was found elidible and return it (even an empty
-  // game has to go through the logic above) note that an empty game (with no
-  // actions) will NOT be sent for processing and will not have any record it
-  // ever existed
-  if (gameData == nullptr || gameData->GetGameSizeInBytes() == 0) {
-    gameData = nullptr;
-  } else
-    logger.Log(LogType::DEBUG, std::string("Popping Game with guid: " +
-                                           gameData->GetGameGuid()));
-  return gameData;
+	// make sure a none empty game was found elidible and return it (even an empty
+	// game has to go through the logic above) note that an empty game (with no
+	// actions) will NOT be sent for processing and will not have any record it
+	// ever existed
+    if (gameData != nullptr) logger.Log(LogType::DEBUG, std::string("Popping Game with guid: " + gameData->GetGameGuid()));
+    
+    return gameData;
 }
 
 /**

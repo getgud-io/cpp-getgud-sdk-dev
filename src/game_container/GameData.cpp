@@ -82,6 +82,10 @@ GameData* GameData::Clone(bool isWithActions) {
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
 
+  // whenever a game is cloned it means it's going to be sent to the server, 
+  // thus if m_isGameMarkedAsEnded is true it means m_sentGameMarkedAsEnded should chnage to true as well -> both in the cloned game and original game
+  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded = m_isGameMarkedAsEnded;
+
   std::string matchGuid;
 
   // run through all the game's matches and clone them as well
@@ -111,37 +115,41 @@ void GameData::MarkGameAsEnded() {
              std::string("Mark end game for game guid: " + m_gameGuid));
 }
 
+bool GameData::IsGameMarkedAsEnded() {
+    return m_isGameMarkedAsEnded;
+}
+
+bool GameData::DidSendGameMarkedAsEnded() {
+    return m_sentGameMarkedAsEnded;
+}
+
 /**
  * AddMatch:
  *
  **/
 MatchData* GameData::AddMatch(std::string matchMode, std::string mapName) {
-  // make sure the game has enough room for another match
-  if (m_matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
-    logger.Log(
-        LogType::WARN,
-        std::string("GameData::AddMatch->Live matches per game limit reached, "
-                    "cannot add a new match to game with guid: " +
-                    m_gameGuid));
-    return nullptr;
-  }
+	
+    // make sure the game has enough room for another match
+	if (m_matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
+		logger.Log(LogType::WARN,std::string("GameData::AddMatch->Live matches per game limit reached - cannot add a new match to game with guid: " + m_gameGuid));
+		return nullptr;
+	}
 
-  // create the new match with the passed parameters and insert it to the game's
-  // match map
-  MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName);
-  if (!matchData->IsValid()) {
-    delete matchData;
-    return nullptr;
-  }
-  std::pair<std::string, MatchData*> matchGuidPair(matchData->GetMatchGuid(),
-                                                   matchData);
-  m_matchMap.insert(matchGuidPair);
-  m_matchGuidVector.push_back(matchData->GetMatchGuid());
-  m_matchGuidVector.shrink_to_fit();
+	// create the new match with the passed parameters and insert it to the game's match map
+	MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName);
+	if (!matchData->IsValid()) {
+        logger.Log(LogType::WARN, std::string("GameData::AddMatch->One or more of the Match's paraemters are not valid - Match will not start. Match paraemters: matchMode: " + matchMode + " | mapName: " + mapName + " | gameGuid: " + m_gameGuid));
+		delete matchData;
+		return nullptr;
+	}
+	std::pair<std::string, MatchData*> matchGuidPair(matchData->GetMatchGuid(), matchData);
+	m_matchMap.insert(matchGuidPair);
+	m_matchGuidVector.push_back(matchData->GetMatchGuid());
+	m_matchGuidVector.shrink_to_fit();
 
-  m_lastUpdateTime = std::chrono::system_clock::now();
+	m_lastUpdateTime = std::chrono::system_clock::now();
 
-  return matchData;
+	return matchData;
 }
 
 /**
@@ -261,7 +269,7 @@ bool GameData::CanDeleteGame() {
 
   // Check if this game did not receive any actions for a very long long time,
   // indicating it's probably closed
-  else if (m_lastUpdateTime + std::chrono::milliseconds(
+  else if (gameSizeInBytes == 0 && m_lastUpdateTime + std::chrono::milliseconds(
                                 sdkConfig.liveGameTimeoutInMilliseconds) <
            std::chrono::system_clock::now())
     return true;
@@ -367,7 +375,7 @@ void GameData::GameToString(std::string& gameOut) {
       containsMatch = true;
     }
   }
-  if (containsMatch) {
+  if (containsMatch || (m_isGameMarkedAsEnded == true) ) {
     gameOut.pop_back();  // pop the last delimiter
 
     gameOut += "]}";

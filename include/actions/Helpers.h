@@ -46,8 +46,8 @@ enum class Actions : int {
  * Toxic behaviour types you can send in reports
  **/
 enum class TbType : int {
-  None = -1,
-  Aimbot = 1,
+  Other = 1,
+  Aimbot,
   Wallhack,
   Laghack,
   Godmode,
@@ -66,6 +66,7 @@ enum class TbType : int {
   Smurfing,
   Ragequit,
   Afk,
+  Teaming,
   RapidFire
 };
 
@@ -180,7 +181,7 @@ struct ReportInfo {
   GetgudSDK::ReporterType ReporterType = GetgudSDK::ReporterType::None; // >= 1, < max
   ReporterSubtype ReporterSubType = GetgudSDK::ReporterSubtype::None; // >= 1, < max
   std::string SuspectedPlayerGuid;  // 36 + SQL //required
-  GetgudSDK::TbType TbType = GetgudSDK::TbType::None; //>=1, <max
+  GetgudSDK::TbType TbType = GetgudSDK::TbType::Other; //>=1, <max
   long long TbTimeEpoch = -1; //>=time.min, <= time.max
   int SuggestedToxicityScore = -1; //>=0, <=100
   long long ReportedTimeEpoch = -1; //>=time.min, <=time.max

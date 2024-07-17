@@ -29,3 +29,7 @@ build/*
 .vscode/*
 
 output.txt
+
+
+src/GetgudSDK.dir/*
+GetgudSDK.vcxproj
