@@ -162,7 +162,7 @@ namespace GetgudSDK
             string reporterName = "",
             int reporterType = -1,
             int reporterSubType = -1,
-            int tbType = -1,
+            int tbType = 1,
             long tbTimeEpoch = -1,
             int suggestedToxicityScore = -1
             )
