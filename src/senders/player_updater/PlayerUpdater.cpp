@@ -252,6 +252,9 @@ void PlayerUpdater::InitCurl() {
                    sdkConfig.apiTimeoutMilliseconds);
   curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CURLWriteCallbackPlayer);
   curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &m_curlReadBuffer);
+
+  //TODO: Fix this for a security reason
+  curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, 0L);
 }
 
 /**
