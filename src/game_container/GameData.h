@@ -21,6 +21,7 @@ class GameData {
   std::string m_serverLocation;
   bool m_isGameMarkedAsEnded = false;
   bool m_sentGameMarkedAsEnded = false;
+  bool m_gameNotInteresting = false;
   unsigned int m_sizeInBytes = 0;
   std::chrono::system_clock::time_point m_startGameTimer;
   std::chrono::system_clock::time_point m_lastUpdateTime;
@@ -56,6 +57,7 @@ class GameData {
   unsigned int GetGameSizeInBytes();
   unsigned int GetNumberOfGameReportsAndMessages();
   std::unordered_map<std::string, MatchData*>& GetMatchMap();
+  void MarkGameAsNotInteresting();
   void Dispose();
   bool IsValid();
 };

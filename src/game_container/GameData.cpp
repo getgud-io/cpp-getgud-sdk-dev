@@ -81,6 +81,7 @@ GameData* GameData::Clone(bool isWithActions) {
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
+  cloneGameData->m_gameNotInteresting = m_gameNotInteresting;
 
   // whenever a game is cloned it means it's going to be sent to the server, 
   // thus if m_isGameMarkedAsEnded is true it means m_sentGameMarkedAsEnded should chnage to true as well -> both in the cloned game and original game
@@ -341,47 +342,51 @@ MatchData* GameData::GetGameMatch(std::string matchGuid) {
  *
  **/
 void GameData::GameToString(std::string& gameOut) {
-  std::string lastPacket = "false";
-  if (m_isGameMarkedAsEnded == true)
-    lastPacket = "true";
 
-  bool containsMatch = false;
+    if (m_gameNotInteresting) return;
 
-  gameOut += "{";
-  gameOut += "\"privateKey\":\"" + m_privateKey + "\",";
-  gameOut += "\"titleId\":" + std::to_string(m_titleId) + ",";
-  gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
-  gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
-  gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
-  gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
-  gameOut += "\"gameLastPacket\":" + lastPacket + ",";
-  gameOut += "\"matches\":[\n";
+	std::string lastPacket = "false";
+	if (m_isGameMarkedAsEnded == true)
+		lastPacket = "true";
 
-  // run through all the game's matches, get their match_out string and append
-  // them to the game
-  for (int index = 0; index < m_matchGuidVector.size(); index++) {
-    auto matchGuid = m_matchGuidVector[index];
-    auto matchData_it = m_matchMap.find(matchGuid);
-    if (matchData_it == m_matchMap.end() || matchData_it->second == nullptr)
-      continue;
+	bool containsMatch = false;
 
-    std::string matchString;
-    matchData_it->second->MatchToString(matchString);
-    // in case MatchToString returned anything
-    // if it is not isInteresting it will not return anything
-    if (matchString.size() > 0) {
-      gameOut += matchString;
-      gameOut += ",";
-      containsMatch = true;
-    }
-  }
-  if (containsMatch || (m_isGameMarkedAsEnded == true) ) {
-    gameOut.pop_back();  // pop the last delimiter
+	gameOut += "{";
+	gameOut += "\"privateKey\":\"" + m_privateKey + "\",";
+	gameOut += "\"titleId\":" + std::to_string(m_titleId) + ",";
+	gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
+	gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
+	gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
+	gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
+	gameOut += "\"gameLastPacket\":" + lastPacket + ",";
+	gameOut += "\"matches\":[\n";
 
-    gameOut += "]}";
-  } else {
-    gameOut.clear();
-  }
+	// run through all the game's matches, get their match_out string and append
+	// them to the game
+	for (int index = 0; index < m_matchGuidVector.size(); index++) {
+		auto matchGuid = m_matchGuidVector[index];
+		auto matchData_it = m_matchMap.find(matchGuid);
+		if (matchData_it == m_matchMap.end() || matchData_it->second == nullptr)
+			continue;
+
+		std::string matchString;
+		matchData_it->second->MatchToString(matchString);
+		// in case MatchToString returned anything
+		// if it is not isInteresting it will not return anything
+		if (matchString.size() > 0) {
+			gameOut += matchString;
+			gameOut += ",";
+			containsMatch = true;
+		}
+	}
+	if (containsMatch || (m_isGameMarkedAsEnded == true)) {
+		gameOut.pop_back();  // pop the last delimiter
+
+		gameOut += "]}";
+	}
+	else {
+		gameOut.clear();
+	}
 }
 
 /**
@@ -439,6 +444,11 @@ unsigned int GameData::GetNumberOfGameReportsAndMessages() {
  **/
 std::unordered_map<std::string, MatchData*>& GameData::GetMatchMap() {
   return m_matchMap;
+}
+
+void GameData::MarkGameAsNotInteresting() {
+
+    m_gameNotInteresting = true;
 }
 
 /**

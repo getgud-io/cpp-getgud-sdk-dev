@@ -47,7 +47,7 @@ class GameSender {
   void ManageHyperMode();
   void ThrottleCheckGameMatches(GameData* gameDataToSend);
   bool SendThrottleCheckForMatch(std::string& packet);
-  void SendGamePacket(std::string& packet);
+  bool SendGamePacket(std::string& packet);
   void ReduceMatchActionsSize(GameData* gameDataToSend);
 };
 }  // namespace GetgudSDK

@@ -399,6 +399,22 @@ game with the guid: " + gameGuid));
   return retValue;
 }
 
+void GameContainer::MarkGameAsNotInteresting(std::string gameGuid) {
+
+    m_gameContainerMutex.lock();
+
+    // find the game that needs to be marked as not interesting, and mark it as such
+    auto gameData_it = m_gameMap.find(gameGuid);
+    if (gameData_it == m_gameMap.end()) {
+        logger.Log(LogType::WARN, std::string("GameContainer::MarkGameAsNotInteresting->Failed to find a game with the guid: " + gameGuid));   
+    }
+    else {
+        gameData_it->second->MarkGameAsNotInteresting();
+    }
+
+    m_gameContainerMutex.unlock();
+}
+
 /**
  * GetSizeInBytes:
  *

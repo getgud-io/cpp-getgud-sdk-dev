@@ -112,9 +112,17 @@ void GameSender::SendNextGame() {
 	// convert the game to a sendable string and send it to Getgud.io's cloud using curl
 	gameDataToSend->GameToString(gameOut);
 
-	if (!gameOut.empty()) {
+	if (gameOut.empty() == false) {
+
 		logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
-		SendGamePacket(gameOut);
+
+        if (SendGamePacket(gameOut) == false) {
+
+            // incase failed to send the packet to the server, mark the game as not interesting so no other packets will be sent for this game
+            gameContainer.MarkGameAsNotInteresting(gameDataToSend->GetGameGuid());
+            logger.Log(LogType::WARN, "Failed to send game packets to server, game will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
+        }
+        else logger.Log(LogType::DEBUG, "Packet for the following Game guid was sent: " + gameDataToSend->GetGameGuid());
 	}
 
 	// Dispose of the cloned game
@@ -365,53 +373,56 @@ void GameSender::ReduceMatchActionsSize(GameData* gameDataToSend)
  *
  * Send game packet with action streams of game matches to Getgud
  **/
-void GameSender::SendGamePacket(std::string& packet) {
-  if (!m_streamCurl || packet.empty()) {
-    return;
-  }
-  m_streamCurlReadBuffer.clear();
-  curl_easy_setopt(m_streamCurl, CURLOPT_POSTFIELDS, packet.c_str());
+bool GameSender::SendGamePacket(std::string& packet) {
 
-  // counter of the number of time trying to send packet
-  int apiTimeoutRetries = 0;
+    bool retValue = true;
 
-  CURLcode sendCode = CURLE_UNKNOWN_OPTION;
+	if (!m_streamCurl || packet.empty()) {
+		return retValue;
+	}
+	m_streamCurlReadBuffer.clear();
+	curl_easy_setopt(m_streamCurl, CURLOPT_POSTFIELDS, packet.c_str());
 
-  while (sendCode != CURLE_OK && apiTimeoutRetries < sdkConfig.apiTimeoutRetries) {
-	  
-      if (apiTimeoutRetries > 0) {
+	// counter of the number of time trying to send packet
+	int apiTimeoutRetries = 0;
 
-          logger.Log(LogType::WARN, "GameSender::SendGamePacket->Failed to send packet - Retry number: " + std::to_string(apiTimeoutRetries) + " Error Code: " + std::string(curl_easy_strerror(sendCode)));
-      }
+	CURLcode sendCode = CURLE_UNKNOWN_OPTION;
 
-      apiTimeoutRetries++;
+	while (sendCode != CURLE_OK && apiTimeoutRetries < sdkConfig.apiTimeoutRetries) {
 
-      // send prepared packet
-	  sendCode = curl_easy_perform(m_streamCurl);
-	  
-      // make small delay in order to save hardware usage
-	  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  }
+		if (apiTimeoutRetries > 0) {
 
-  if (sendCode != CURLcode::CURLE_OK) {
-    if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      logger.Log(LogType::DEBUG,
-                 "GameSender::SendGamePacket->Failed to send throttle request: " +
-        m_streamCurlReadBuffer);
-    } else {
-      logger.Log(LogType::_ERROR,
-                 "GameSender::SendGamePacket->Failed to send packet: " +
-                     std::string(curl_easy_strerror(sendCode)));
-    }
-  }
-  else
-  {
-    if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-      logger.Log(LogType::DEBUG,
-        "GameSender::SendGamePacket->Failed to send throttle request: " +
-        m_streamCurlReadBuffer);
-    }
-  }
+			logger.Log(LogType::WARN, "GameSender::SendGamePacket->Failed to send packet - Retry number: " + std::to_string(apiTimeoutRetries) + " Error Code: " + std::string(curl_easy_strerror(sendCode)));
+		}
+
+		apiTimeoutRetries++;
+
+		// send prepared packet
+		sendCode = curl_easy_perform(m_streamCurl);
+
+		// make small delay in order to save hardware usage
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+
+	if (sendCode != CURLcode::CURLE_OK) {
+
+        retValue = false;
+
+		if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+			logger.Log(LogType::DEBUG, "GameSender::SendGamePacket->Failed to send throttle request: " + m_streamCurlReadBuffer);
+		}
+		else {
+			logger.Log(LogType::_ERROR,"GameSender::SendGamePacket->Failed to send packet: " + std::string(curl_easy_strerror(sendCode)));
+		}
+	}
+	else if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
+
+        retValue = false;
+
+		logger.Log(LogType::DEBUG, "GameSender::SendGamePacket->Failed to send throttle request: " + m_streamCurlReadBuffer);
+	}
+
+    return retValue;
 }
 
 /**

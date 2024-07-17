@@ -42,10 +42,10 @@ public:
   unsigned int GetAverageSizeInBytes();
   GameData* PopNextGameToProcess();
   bool MarkEndGame(std::string gameGuid);
+  void MarkGameAsNotInteresting(std::string gameGuid);
   bool DeleteGame(std::string gameGuid, bool externalCall);
   void Dispose();
   std::unordered_map<std::string, MatchData*>& GetMatchMap();
-  bool SendThrottleCheckForMatch(std::string& packet);
 
  private:
   bool DeleteGame(std::string gameGuid,
