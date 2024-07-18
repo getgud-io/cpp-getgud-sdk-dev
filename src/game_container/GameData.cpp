@@ -81,11 +81,7 @@ GameData* GameData::Clone(bool isWithActions) {
   cloneGameData->m_sizeInBytes = m_sizeInBytes;
   cloneGameData->m_startGameTimer = m_startGameTimer;
   cloneGameData->m_lastUpdateTime = m_lastUpdateTime;
-  cloneGameData->m_gameNotInteresting = m_gameNotInteresting;
-
-  // whenever a game is cloned it means it's going to be sent to the server, 
-  // thus if m_isGameMarkedAsEnded is true it means m_sentGameMarkedAsEnded should chnage to true as well -> both in the cloned game and original game
-  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded = m_isGameMarkedAsEnded;
+  cloneGameData->m_sentGameMarkedAsEnded = m_sentGameMarkedAsEnded;
 
   std::string matchGuid;
 
@@ -122,6 +118,26 @@ bool GameData::IsGameMarkedAsEnded() {
 
 bool GameData::DidSendGameMarkedAsEnded() {
     return m_sentGameMarkedAsEnded;
+}
+
+void GameData::SentGameMarkedAsEnded() {
+
+    m_sentGameMarkedAsEnded = true;
+}
+
+void GameData::MarkGameMatchesAsNotInteresting(std::vector<std::string>& matchGuids) {
+
+    std::string matchGuid;
+
+    for (int index = 0; index < matchGuids.size(); index++) {
+        matchGuid = matchGuids[index];
+        auto matchData_it = m_matchMap.find(matchGuid);
+        if (matchData_it == m_matchMap.end())
+            continue;
+
+        matchData_it->second->SetThrottleCheckResults(true, false);
+        logger.Log(LogType::WARN, std::string("Match with the following Guid was marked as Not Interesting: " + matchGuid));
+    }
 }
 
 /**
@@ -341,9 +357,7 @@ MatchData* GameData::GetGameMatch(std::string matchGuid) {
  * GameToString:
  *
  **/
-void GameData::GameToString(std::string& gameOut) {
-
-    if (m_gameNotInteresting) return;
+void GameData::GameToString(std::string& gameOut, std::vector<std::string>& matchGuids) {
 
 	std::string lastPacket = "false";
 	if (m_isGameMarkedAsEnded == true)
@@ -377,9 +391,10 @@ void GameData::GameToString(std::string& gameOut) {
 			gameOut += matchString;
 			gameOut += ",";
 			containsMatch = true;
+            matchGuids.push_back(matchGuid);
 		}
 	}
-	if (containsMatch || (m_isGameMarkedAsEnded == true)) {
+	if (containsMatch || (m_isGameMarkedAsEnded == true && m_sentGameMarkedAsEnded == false)) {
 		gameOut.pop_back();  // pop the last delimiter
 
 		gameOut += "]}";
@@ -444,11 +459,6 @@ unsigned int GameData::GetNumberOfGameReportsAndMessages() {
  **/
 std::unordered_map<std::string, MatchData*>& GameData::GetMatchMap() {
   return m_matchMap;
-}
-
-void GameData::MarkGameAsNotInteresting() {
-
-    m_gameNotInteresting = true;
 }
 
 /**

@@ -399,20 +399,37 @@ game with the guid: " + gameGuid));
   return retValue;
 }
 
-void GameContainer::MarkGameAsNotInteresting(std::string gameGuid) {
+void GameContainer::SentGameMarkedAsEnded(std::string gameGuid) {
 
     m_gameContainerMutex.lock();
 
     // find the game that needs to be marked as not interesting, and mark it as such
     auto gameData_it = m_gameMap.find(gameGuid);
     if (gameData_it == m_gameMap.end()) {
-        logger.Log(LogType::WARN, std::string("GameContainer::MarkGameAsNotInteresting->Failed to find a game with the guid: " + gameGuid));   
+        logger.Log(LogType::WARN, std::string("GameContainer::SentGameMarkedAsEnded->Failed to find a game with the guid: " + gameGuid));   
     }
     else {
-        gameData_it->second->MarkGameAsNotInteresting();
+        gameData_it->second->SentGameMarkedAsEnded();
     }
 
     m_gameContainerMutex.unlock();
+}
+
+void GameContainer::MarkGameMatchesAsNotInteresting(std::string gameGuid, std::vector<std::string>& matchGuids) {
+
+    m_gameContainerMutex.lock();
+
+    // find the game that needs to be marked as not interesting, and mark it as such
+    auto gameData_it = m_gameMap.find(gameGuid);
+    if (gameData_it == m_gameMap.end()) {
+        logger.Log(LogType::WARN, std::string("GameContainer::MarkGameMatchesAsNotInteresting->Failed to find a game with the guid: " + gameGuid));
+    }
+    else {
+        gameData_it->second->MarkGameMatchesAsNotInteresting(matchGuids);
+    }
+
+    m_gameContainerMutex.unlock();
+
 }
 
 /**

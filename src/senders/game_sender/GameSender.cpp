@@ -108,9 +108,10 @@ void GameSender::SendNextGame() {
 	ReduceMatchActionsSize(gameDataToSend);
 
 	unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
+    std::vector<std::string> matchGuids;
 
 	// convert the game to a sendable string and send it to Getgud.io's cloud using curl
-	gameDataToSend->GameToString(gameOut);
+	gameDataToSend->GameToString(gameOut, matchGuids);
 
 	if (gameOut.empty() == false) {
 
@@ -118,12 +119,17 @@ void GameSender::SendNextGame() {
 
         if (SendGamePacket(gameOut) == false) {
 
-            // incase failed to send the packet to the server, mark the game as not interesting so no other packets will be sent for this game
-            gameContainer.MarkGameAsNotInteresting(gameDataToSend->GetGameGuid());
-            logger.Log(LogType::WARN, "Failed to send game packets to server, game will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
+            // incase failed to send the packet to the server, mark the matches with lost data as not interesting so no other packets will be sent for these matches
+            logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
+            gameContainer.MarkGameMatchesAsNotInteresting(gameDataToSend->GetGameGuid(), matchGuids);
         }
         else logger.Log(LogType::DEBUG, "Packet for the following Game guid was sent: " + gameDataToSend->GetGameGuid());
 	}
+
+    // check if this is the first time a packet contains the MarkEndGame signal, if so, mark the fact that this signal was sent to the server
+    if (gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
+        gameContainer.SentGameMarkedAsEnded(gameDataToSend->GetGameGuid());
+    }
 
 	// Dispose of the cloned game
 	gameDataToSend->Dispose();

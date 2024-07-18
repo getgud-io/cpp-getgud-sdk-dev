@@ -42,7 +42,8 @@ public:
   unsigned int GetAverageSizeInBytes();
   GameData* PopNextGameToProcess();
   bool MarkEndGame(std::string gameGuid);
-  void MarkGameAsNotInteresting(std::string gameGuid);
+  void SentGameMarkedAsEnded(std::string gameGuid);
+  void MarkGameMatchesAsNotInteresting(std::string gameGuid, std::vector<std::string>& matchGuids);
   bool DeleteGame(std::string gameGuid, bool externalCall);
   void Dispose();
   std::unordered_map<std::string, MatchData*>& GetMatchMap();

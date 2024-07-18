@@ -21,7 +21,6 @@ class GameData {
   std::string m_serverLocation;
   bool m_isGameMarkedAsEnded = false;
   bool m_sentGameMarkedAsEnded = false;
-  bool m_gameNotInteresting = false;
   unsigned int m_sizeInBytes = 0;
   std::chrono::system_clock::time_point m_startGameTimer;
   std::chrono::system_clock::time_point m_lastUpdateTime;
@@ -39,6 +38,8 @@ class GameData {
   void MarkGameAsEnded();
   bool IsGameMarkedAsEnded();
   bool DidSendGameMarkedAsEnded();
+  void SentGameMarkedAsEnded();
+  void MarkGameMatchesAsNotInteresting(std::vector<std::string>& matchGuids);
   MatchData* AddMatch(std::string matchMode, std::string mapName);
   bool IsGameEligibleForProcessing();
   GameData* SliceGame(int sizeToSliceInBytes);
@@ -52,12 +53,11 @@ class GameData {
   std::string GetServerLocation();
   void GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut);
   MatchData* GetGameMatch(std::string matchGuid);
-  void GameToString(std::string& gameOut);
+  void GameToString(std::string& gameOut, std::vector<std::string>& matchGuids);
   std::string ToStringMeta();
   unsigned int GetGameSizeInBytes();
   unsigned int GetNumberOfGameReportsAndMessages();
   std::unordered_map<std::string, MatchData*>& GetMatchMap();
-  void MarkGameAsNotInteresting();
   void Dispose();
   bool IsValid();
 };
