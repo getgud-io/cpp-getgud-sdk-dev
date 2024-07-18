@@ -198,8 +198,6 @@ namespace GetgudSDK {
 	GameData* GameData::SliceGame(int sizeToSliceInBytes) {
 		// only clone the metadata of the game, without any actions
 		GameData* cloneGameData = this->Clone(false);
-		// if we are cloning we might have more packets and this is not the last one
-		cloneGameData->m_isGameMarkedAsEnded = false;
 		std::string matchGuid;
 
 		// calculate the action percentage that we need to take from each match in
