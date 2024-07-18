@@ -12,24 +12,24 @@ extern Config sdkConfig;
  *
  **/
 HealActionData::HealActionData(std::string matchGuid,
-                               long long actionTimeEpoch,
-                               std::string playerGuid,
-                               const float healthGained)
-    : BaseActionData({Actions::Heal, actionTimeEpoch, playerGuid, matchGuid}),
-      m_healthGained(healthGained) {}
+	long long actionTimeEpoch,
+	std::string playerGuid,
+	const float healthGained)
+	: BaseActionData({ Actions::Heal, actionTimeEpoch, playerGuid, matchGuid }),
+	m_healthGained(healthGained) {}
 
 /**
  * HealActionData:
  *
  **/
 HealActionData::HealActionData(const HealActionData& data)
-    : BaseActionData(data), m_healthGained(data.m_healthGained) {}
+	: BaseActionData(data), m_healthGained(data.m_healthGained) {}
 
 /**
  * ~HealActionData:
  *
  **/
-HealActionData::~HealActionData(){
+HealActionData::~HealActionData() {
 
 };
 
@@ -40,8 +40,8 @@ HealActionData::~HealActionData(){
  * game!
  **/
 bool HealActionData::IsValid() {
-  bool isActionValid = BaseActionData::IsValid();
-  return isActionValid;
+	bool isActionValid = BaseActionData::IsValid();
+	return isActionValid;
 }
 
 /**
@@ -50,13 +50,13 @@ bool HealActionData::IsValid() {
  * For sending action stream to Getgud
  **/
 std::string HealActionData::ToString() {
-  std::string actionString;
-  actionString += std::to_string(m_actionTimeEpoch) + ",";
-  actionString += "H,";
-  actionString += m_playerGuid + ",";
-  actionString += ShortenDecimalNumber(std::to_string(m_healthGained));
+	std::string actionString;
+	actionString += std::to_string(m_actionTimeEpoch) + ",";
+	actionString += "H,";
+	actionString += m_playerGuid + ",";
+	actionString += ShortenDecimalNumber(std::to_string(m_healthGained));
 
-  return actionString;
+	return actionString;
 }
 
 /**
@@ -65,11 +65,11 @@ std::string HealActionData::ToString() {
  * ToString, but for logging purposes
  **/
 std::string HealActionData::ToStringMeta() {
-  std::string actionMetaString = BaseActionData::ToStringMeta();
+	std::string actionMetaString = BaseActionData::ToStringMeta();
 
-  actionMetaString += "Health gained:" + std::to_string(m_healthGained) + ";";
+	actionMetaString += "Health gained:" + std::to_string(m_healthGained) + ";";
 
-  return actionMetaString;
+	return actionMetaString;
 }
 
 /**
@@ -77,5 +77,5 @@ std::string HealActionData::ToStringMeta() {
  *
  **/
 HealActionData* HealActionData::Clone() {
-  return new HealActionData(*this);
+	return new HealActionData(*this);
 }

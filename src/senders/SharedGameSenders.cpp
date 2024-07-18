@@ -1,5 +1,5 @@
 #include "SharedGameSenders.h"
 
 namespace GetgudSDK {
-SharedGameSenders sharedGameSenders;
+	SharedGameSenders sharedGameSenders;
 }

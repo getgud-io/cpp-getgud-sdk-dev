@@ -6,17 +6,17 @@
 #include "../../include/actions/Helpers.h"
 
 namespace GetgudSDK {
-class Logger {
- private:
-  std::mutex m_writeMutex;
+	class Logger {
+	private:
+		std::mutex m_writeMutex;
 
- private:
-  void WriteToFile(std::string outString);
-  long GetFileSize();
-  void ManageConfigFileSize();
+	private:
+		void WriteToFile(std::string outString);
+		long GetFileSize();
+		void ManageConfigFileSize();
 
- public:
-  void Log(LogType logType, std::string logString);
-  void WriteActionToFile(std::string fileName, std::string outString);
-};
+	public:
+		void Log(LogType logType, std::string logString);
+		void WriteActionToFile(std::string fileName, std::string outString);
+	};
 }  // namespace GetgudSDK

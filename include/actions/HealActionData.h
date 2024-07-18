@@ -12,20 +12,20 @@
 #endif
 
 namespace GetgudSDK {
-class HealActionData : public BaseActionData {
-  float m_healthGained = 0;
+	class HealActionData : public BaseActionData {
+		float m_healthGained = 0;
 
- public:
-   GETGUDSDK_API HealActionData(std::string matchGuid,
-                 long long actionTimeEpoch,
-                 std::string playerGuid,
-                 float healthGained);
-  GETGUDSDK_API HealActionData(const HealActionData& data);
-  GETGUDSDK_API HealActionData() = delete;
-  GETGUDSDK_API ~HealActionData() override;
-  GETGUDSDK_API bool IsValid() override;
-  GETGUDSDK_API std::string ToString() override;
-  GETGUDSDK_API std::string ToStringMeta() override;
-  GETGUDSDK_API HealActionData* Clone() override;
-};
+	public:
+		GETGUDSDK_API HealActionData(std::string matchGuid,
+			long long actionTimeEpoch,
+			std::string playerGuid,
+			float healthGained);
+		GETGUDSDK_API HealActionData(const HealActionData& data);
+		GETGUDSDK_API HealActionData() = delete;
+		GETGUDSDK_API ~HealActionData() override;
+		GETGUDSDK_API bool IsValid() override;
+		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API std::string ToStringMeta() override;
+		GETGUDSDK_API HealActionData* Clone() override;
+	};
 }  // namespace GetgudSDK

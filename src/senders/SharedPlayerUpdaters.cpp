@@ -1,5 +1,5 @@
 #include "SharedPlayerUpdaters.h"
 
 namespace GetgudSDK {
-SharedPlayerUpdaters sharedPlayerUpdaters;
+	SharedPlayerUpdaters sharedPlayerUpdaters;
 }
