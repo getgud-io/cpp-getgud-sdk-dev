@@ -60,19 +60,6 @@ std::string HealActionData::ToString() {
 }
 
 /**
- * ToStringMeta:
- *
- * ToString, but for logging purposes
- **/
-std::string HealActionData::ToStringMeta() {
-	std::string actionMetaString = BaseActionData::ToStringMeta();
-
-	actionMetaString += "Health gained:" + std::to_string(m_healthGained) + ";";
-
-	return actionMetaString;
-}
-
-/**
  * Clone:
  *
  **/

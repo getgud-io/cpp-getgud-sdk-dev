@@ -85,35 +85,6 @@ std::string SpawnActionData::ToString() {
 }
 
 /**
- * ToStringMeta:
- *
- * ToString, but for logging purposes
- **/
-std::string SpawnActionData::ToStringMeta() {
-	std::string actionMetaString = BaseActionData::ToStringMeta();
-
-
-	actionMetaString += "Character guid:" + m_characterGuid + ";";
-	actionMetaString += "Team guid:" + m_teamGuid + ";";
-	actionMetaString += "Health:" + std::to_string(m_initialHealth) + ";";
-	actionMetaString += "Position:" + std::to_string(m_position.X) + "," +
-		std::to_string(m_position.Y) + "," +
-		std::to_string(m_position.Z) + ";";
-	actionMetaString += "Rotation:" + std::to_string(m_rotation.Yaw) + "," +
-		std::to_string(m_rotation.Pitch) + "," +
-		std::to_string(m_rotation.Roll);
-
-	if (m_rotation.Roll != -1000.f)
-	{
-		actionMetaString += "," + std::to_string(m_rotation.Roll);
-	}
-
-	actionMetaString += ";";
-
-	return actionMetaString;
-}
-
-/**
  * Clone:
  *
  **/

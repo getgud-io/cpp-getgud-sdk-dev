@@ -507,17 +507,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString but for logging purposes
-	 **/
-	std::string MatchData::ToStringMeta() {
-		return std::string("Match Guid: " + m_matchGuid +
-			" | Parent Game Guid: " + m_gameGuid +
-			" | Match Mode: " + m_matchMode + " | Map Name: " + m_mapName);
-	}
-
-	/**
 	 * Dispose:
 	 *
 	 **/

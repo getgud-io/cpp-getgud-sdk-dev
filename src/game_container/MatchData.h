@@ -58,7 +58,6 @@ namespace GetgudSDK {
 		unsigned int GetNumberOfMatchReportsAndMessages();
 		std::string GetMatchGuid();
 		std::string GetGameGuid();
-		std::string ToStringMeta();
 		void SetThrottleCheckResults(bool inThrottleChecked, bool inIsInteresting);
 		bool GetThrottleChecked();
 		std::set<std::string> GetPlayerGuids();

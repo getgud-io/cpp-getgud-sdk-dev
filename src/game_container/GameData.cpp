@@ -386,15 +386,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 **/
-	std::string GameData::ToStringMeta() {
-		return "Game Guid: " + m_gameGuid + " | Server: " + m_serverGuid +
-			" | Title id: " + std::to_string(m_titleId);
-	}
-
-	/**
 	 * GetGameSizeInBytes:
 	 *
 	 **/

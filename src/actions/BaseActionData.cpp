@@ -107,53 +107,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString, but for logging purposes
-	 **/
-	std::string BaseActionData::ToStringMeta() {
-		std::string actionMetaString;
-
-		std::string actionTypeStr;
-
-		switch (m_actionType) {
-		case Actions::None:
-			actionTypeStr = "None";
-			break;
-		case Actions::Affect:
-			actionTypeStr = "Affect";
-		case Actions::Attack:
-			actionTypeStr = "Attack";
-			break;
-		case Actions::Damage:
-			actionTypeStr = "Damage";
-			break;
-		case Actions::Death:
-			actionTypeStr = "Death";
-			break;
-		case Actions::Heal:
-			actionTypeStr = "Heal";
-			break;
-		case Actions::Position:
-			actionTypeStr = "Position";
-			break;
-		case Actions::Spawn:
-			actionTypeStr = "Spawn";
-			break;
-		default:
-			actionTypeStr = "None";
-			break;
-		}
-
-		actionMetaString += "Type:" + actionTypeStr + ";";
-		actionMetaString += "Time:" + std::to_string(m_actionTimeEpoch) + ";";
-		actionMetaString += "Match guid:" + m_matchGuid + ";";
-		actionMetaString += "Player guid: " + m_playerGuid + ";";
-
-		return actionMetaString;
-	}
-
-	/**
 	 * Clone:
 	 *
 	 **/
