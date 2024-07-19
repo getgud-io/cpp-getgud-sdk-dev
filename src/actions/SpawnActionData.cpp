@@ -53,6 +53,8 @@ bool SpawnActionData::IsValid() {
 	bool isActionValid = BaseActionData::IsValid();
 	isActionValid &= Validator::ValidateStringLength(m_characterGuid, 1, 36);
 	isActionValid &= Validator::ValidateStringChars(m_characterGuid);
+	isActionValid &= Validator::ValidateStringLength(m_teamGuid, 1, 36);
+	isActionValid &= Validator::ValidateStringChars(m_teamGuid);
 
 	return isActionValid;
 }
