@@ -164,7 +164,7 @@ class GetgudSDK:
         return getgudsdk.SendHealAction(base_data[0], health_gained)
 
     def send_spawn_action(self, match_guid, action_time_epoch, player_guid,
-                        character_guid, team_id, initial_health, position, rotation):
+                        character_guid, team_guid, initial_health, position, rotation):
         base_data = ffi.new("struct BaseActionData*")
         base_data.actionTimeEpoch = action_time_epoch
         match_guid_data = ffi.new("char[]", match_guid.encode('utf-8'))
@@ -176,12 +176,15 @@ class GetgudSDK:
 
         character_guid_data = ffi.new("char[]", character_guid.encode('utf-8'))
         character_guid_size = len(character_guid)
+        
+        team_guid_data = ffi.new("char[]", team_guid.encode('utf-8'))
+        team_guid_size = len(team_guid)
 
         position_struct = ffi.new("struct PositionF*", {"X": position[0], "Y": position[1], "Z": position[2]})
         rotation_struct = ffi.new("struct RotationF*", {"Yaw": rotation[0], "Pitch": rotation[1], "Roll": rotation[2]})
 
         return getgudsdk.SendSpawnAction(base_data[0], character_guid_data, character_guid_size,
-                                        team_id, initial_health, position_struct[0], rotation_struct[0])
+                                        team_guid_data, team_guid_size, initial_health, position_struct[0], rotation_struct[0])
 
 
     

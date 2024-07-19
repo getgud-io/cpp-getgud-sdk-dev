@@ -55,7 +55,7 @@ namespace GetgudSDK
     {
         public BaseActionData baseData;
         public string characterGuid;
-        public int teamId;
+		public string teamGuid;
         public float initialHealth;
         public PositionF position;
         public RotationF rotation;
@@ -428,13 +428,17 @@ namespace GetgudSDK
 
             IntPtr characterGuid = Marshal.StringToHGlobalAnsi(info.characterGuid);
             int characterGuidSize = info.characterGuid.Length;
+			
+			IntPtr teamGuid = Marshal.StringToHGlobalAnsi(info.teamGuid);
+            int teamGuidSize = info.teamGuid.Length;
 
-            var result = GetgudSDK_calls.GetgudSDK_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, teamGuid, teamGuidSize, info.initialHealth,
                 info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
             Marshal.FreeHGlobal(characterGuid);
+			Marshal.FreeHGlobal(teamGuid);
 
             return result;
         }
