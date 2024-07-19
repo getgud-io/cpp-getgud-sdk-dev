@@ -49,7 +49,6 @@ class Program
         SpawnInfo.characterGuid = "LL";
 		SpawnInfo.teamGuid = "Team_1";
         SpawnInfo.initialHealth = 100;
-        SpawnInfo.teamId = 1;
         SpawnInfo.position = new GetgudSDK.PositionF{ X = 10F, Y = 10F, Z = 0.0001F };
         SpawnInfo.rotation = new GetgudSDK.RotationF{ Roll = 240F, Pitch = 180F, Yaw = 0F };
 
