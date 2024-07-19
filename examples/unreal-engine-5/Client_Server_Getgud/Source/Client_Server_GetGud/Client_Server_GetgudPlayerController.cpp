@@ -48,8 +48,8 @@ void AClient_Server_GetgudPlayerController::ServerRemoteGameAndMapStart_Implemen
 	std::string serverLocation = "UK";
 
 	// Start a Game:
-	g_gameGuid = GetgudSDK::StartGame(123,
-		"123",
+	g_gameGuid = GetgudSDK::StartGame(your_title_id,
+		your_private_key,
 		serverGuid,  // serverGuid
 		gameMode,     // gameMode
 		serverLocation
