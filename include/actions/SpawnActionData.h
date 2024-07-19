@@ -19,7 +19,7 @@ namespace GetgudSDK {
 		PositionF m_position;
 		RotationF m_rotation;
 		float m_initialHealth = 0;
-		int m_teamId = 0;
+		std::string m_teamGuid;
 		std::string m_characterGuid;
 
 	public:
@@ -27,7 +27,7 @@ namespace GetgudSDK {
 			long long actionTimeEpoch,
 			std::string playerGuid,
 			std::string characterGuid,
-			int teamId,
+			std::string teamGuid,
 			float initialHealth,
 			PositionF position,
 			RotationF rotation);

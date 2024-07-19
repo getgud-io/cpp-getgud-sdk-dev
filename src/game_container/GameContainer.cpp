@@ -401,6 +401,26 @@ game with the guid: " + gameGuid));
 		return retValue;
 	}
 
+	bool GameContainer::SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
+		bool retValue = true;
+
+		m_gameContainerMutex.lock();
+
+		// find the game that needs to be marked, and mark it :)
+		auto matchData_it = m_matchMap.find(matchGuid);
+		if (matchData_it == m_matchMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::MarkMatchWinTeam->Failed to find a match with the guid: " + matchGuid));
+			retValue = false;
+		}
+		else {
+			matchData_it->second->SetMatchWinTeam(teamGuid);
+		}
+
+		m_gameContainerMutex.unlock();
+
+		return retValue;
+	}
+
 	/**
 	 * GetSizeInBytes:
 	 *

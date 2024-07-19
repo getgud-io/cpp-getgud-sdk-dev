@@ -258,10 +258,29 @@ namespace GetgudSDK {
 		}
 		catch (std::exception& _error) {
 
-			logger.Log(LogType::FATAL, std::string("GetgudSDK::MarkEndGame->Couldn't end game: ") + std::string(_error.what()));
+			logger.Log(LogType::FATAL, std::string("GetgudSDK::MarkEndGame->: ") + std::string(_error.what()));
 		}
 		return gameEnded;
 	}
+
+	bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
+
+		bool retValue = false;
+
+		try {
+
+			logger.Log(LogType::DEBUG, std::string("Marking Match Win Team for the following match Guid: " + matchGuid));
+
+			retValue = gameContainer.SetMatchWinTeam(matchGuid, teamGuid);
+
+		}
+		catch (std::exception& _error) {
+
+			logger.Log(LogType::FATAL, std::string("GetgudSDK::SetMatchWinTeam->: ") + std::string(_error.what()));
+		}
+		return retValue;
+	}
+
 
 	/**
 	 * SendInMatchReport:
@@ -459,7 +478,7 @@ namespace GetgudSDK {
 		long long actionTimeEpoch,
 		std::string playerGuid,
 		std::string characterGuid,
-		int teamId,
+		std::string teamGuid,
 		float initialHealth,
 		PositionF position,
 		RotationF rotation) {
@@ -467,7 +486,7 @@ namespace GetgudSDK {
 		try {
 			SpawnActionData* spawnAction =
 				new SpawnActionData(matchGuid, actionTimeEpoch, playerGuid, characterGuid,
-					teamId, initialHealth, position, rotation);
+					teamGuid, initialHealth, position, rotation);
 			std::deque<BaseActionData*> actions = { spawnAction };
 			sendResult = SendActions(actions);
 			delete spawnAction;

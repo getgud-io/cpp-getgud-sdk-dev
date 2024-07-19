@@ -25,6 +25,7 @@ namespace GetgudSDK {
 		std::string m_gameGuid;
 		std::string m_matchMode;
 		std::string m_mapName;
+		std::string m_matchWinTeamGuid;
 		bool m_throttleChecked = false;
 		bool m_isInteresting = false;
 		std::set<std::string> m_playerGuids;
@@ -66,6 +67,7 @@ namespace GetgudSDK {
 		std::string GetMatchMode();
 		std::string GetMapName();
 		void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
+		void SetMatchWinTeam(std::string teamGuid);
 		void Dispose();
 		bool IsValid();
 	};

@@ -77,6 +77,7 @@ namespace GetgudSDK {
 		cloneMatchData->m_isInteresting = m_isInteresting;
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
+		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
 
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
@@ -348,6 +349,9 @@ namespace GetgudSDK {
 		matchOut += "\"mapName\":\"" + m_mapName + "\",";
 		if (m_matchMode.size() > 0)
 			matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+		if (m_matchWinTeamGuid.size() > 0)
+			matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
+
 		matchOut += "\"matchActionStream\":\"";
 
 		for (int index = 0; index < m_actionVector.size(); index++) {
@@ -472,6 +476,10 @@ namespace GetgudSDK {
 		{
 			m_lastPositionActionVector[playerPos.first] = playerPos.second;
 		}
+	}
+
+	void MatchData::SetMatchWinTeam(std::string teamGuid) {
+		m_matchWinTeamGuid = teamGuid;
 	}
 
 	/**

@@ -393,7 +393,8 @@ extern "C" {
 	int SendSpawnAction(BaseActionData baseData,
 		const char* characterGuid,
 		int characterGuidSize,
-		int teamId,
+		const char* teamGuid,
+		int teamGuidSize,
 		float initialHealth,
 		PositionF position,
 		RotationF rotation) {
@@ -402,6 +403,7 @@ extern "C" {
 			std::string matchGuid;
 			std::string playerGuid;
 			std::string inCharacterGuid;
+			std::string inTeamGuid;
 
 			if (baseData.matchGuid != NULL &&
 				strlen(baseData.matchGuid) == baseData.matchGuidSize)
@@ -421,11 +423,17 @@ extern "C" {
 				inCharacterGuid = std::string(characterGuid, characterGuidSize);
 			}
 
+			if (teamGuid != NULL &&
+				strlen(teamGuid) == characterGuidSize)
+			{
+				inTeamGuid = std::string(teamGuid, characterGuidSize);
+			}
+
 			GetgudSDK::SpawnActionData* spawnAction = new GetgudSDK::SpawnActionData(
 				matchGuid.c_str(),
 				baseData.actionTimeEpoch,
 				playerGuid.c_str(),
-				inCharacterGuid.c_str(), teamId, initialHealth,
+				inCharacterGuid.c_str(), inTeamGuid.c_str(), initialHealth,
 				*(GetgudSDK::PositionF*)&position, *(GetgudSDK::RotationF*)&rotation);
 			std::deque<GetgudSDK::BaseActionData*> actions = { spawnAction };
 			sendResult = GetgudSDK::SendActions(actions);
