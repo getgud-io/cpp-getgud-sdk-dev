@@ -83,30 +83,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString, but for logging purposes
-	 **/
-	std::string PositionActionData::ToStringMeta() {
-		std::string actionMetaString = BaseActionData::ToStringMeta();
-
-		actionMetaString += "Position:" + std::to_string(m_orientation.position.X) + ", " +
-			std::to_string(m_orientation.position.Y) + "," +
-			std::to_string(m_orientation.position.Z) + ";";
-		actionMetaString += "Rotation:" + std::to_string(m_orientation.rotation.Yaw) + "," +
-			std::to_string(m_orientation.rotation.Pitch);
-
-		if (m_orientation.rotation.Roll != -1000.f)
-		{
-			actionMetaString += "," + std::to_string(m_orientation.rotation.Roll);
-		}
-
-		actionMetaString += ";";
-
-		return actionMetaString;
-	}
-
-	/**
 	 * Clone:
 	 *
 	 **/

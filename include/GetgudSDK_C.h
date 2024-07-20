@@ -199,7 +199,8 @@ extern "C" {
 	GETGUDSDK_API int SendSpawnAction(struct BaseActionData baseData,
 		const char* characterGuid,
 		int characterGuidSize,
-		int teamId,
+		const char* teamGuid,
+		int teamGuidGuidSize,
 		float initialHealth,
 		struct PositionF position,
 		struct RotationF rotation);

@@ -147,7 +147,7 @@ public class Player : MonoBehaviour
         {
             baseData = baseActionData,
             characterGuid = "example-character-guid",
-            teamId = 1,
+            teamId = "Team_1",
             initialHealth = 100.0f,
             position = position,
             rotation = rotation

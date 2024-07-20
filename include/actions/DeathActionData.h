@@ -25,7 +25,6 @@ namespace GetgudSDK {
 		GETGUDSDK_API ~DeathActionData() override;
 		GETGUDSDK_API bool IsValid() override;
 		GETGUDSDK_API std::string ToString() override;
-		GETGUDSDK_API std::string ToStringMeta() override;
 		GETGUDSDK_API DeathActionData* Clone() override;
 	};
 }  // namespace GetgudSDK

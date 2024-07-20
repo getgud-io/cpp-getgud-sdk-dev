@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
-#nullable enable
-
 namespace GetgudSDK
 {
     public struct PlayerTransactionsData
@@ -57,7 +55,7 @@ namespace GetgudSDK
     {
         public BaseActionData baseData;
         public string characterGuid;
-        public int teamId;
+		public string teamGuid;
         public float initialHealth;
         public PositionF position;
         public RotationF rotation;
@@ -182,7 +180,7 @@ namespace GetgudSDK
         }
     };
 
-    static public class Methods
+    static internal class Methods
     {
 #pragma warning disable CS8601, CS0649
         /**
@@ -193,6 +191,21 @@ namespace GetgudSDK
         static public int Init()
         {
             return GetgudSDK_calls.GetgudSDK_calls.init();
+        }
+		
+		/**
+        * Init_conf:
+        *
+        * Init Getgud SDK with provided config
+        **/
+        static public int InitConf(string configPath, int isConfigContent)
+        {
+			var unmanagedConfigPath = Marshal.StringToHGlobalAnsi(configPath);
+            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf(unmanagedConfigPath, isConfigContent);
+
+            Marshal.FreeHGlobal(unmanagedConfigPath);
+			
+            return result;
         }
 
         /**
@@ -415,13 +428,17 @@ namespace GetgudSDK
 
             IntPtr characterGuid = Marshal.StringToHGlobalAnsi(info.characterGuid);
             int characterGuidSize = info.characterGuid.Length;
+			
+			IntPtr teamGuid = Marshal.StringToHGlobalAnsi(info.teamGuid);
+            int teamGuidSize = info.teamGuid.Length;
 
-            var result = GetgudSDK_calls.GetgudSDK_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, info.teamId, info.initialHealth,
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendSpawnAction(unmanagedBaseData, characterGuid, characterGuidSize, teamGuid, teamGuidSize, info.initialHealth,
                 info.position, info.rotation);
 
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
             Marshal.FreeHGlobal(characterGuid);
+			Marshal.FreeHGlobal(teamGuid);
 
             return result;
         }

@@ -52,7 +52,6 @@ namespace GetgudSDK {
 		void GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut);
 		MatchData* GetGameMatch(std::string matchGuid);
 		void GameToString(std::string& gameOut);
-		std::string ToStringMeta();
 		unsigned int GetGameSizeInBytes();
 		unsigned int GetNumberOfGameReportsAndMessages();
 		std::unordered_map<std::string, MatchData*>& GetMatchMap();

@@ -29,7 +29,6 @@ namespace GetgudSDK {
 		GETGUDSDK_API ~DamageActionData() override;
 		GETGUDSDK_API bool IsValid() override;
 		GETGUDSDK_API std::string ToString() override;
-		GETGUDSDK_API std::string ToStringMeta() override;
 		GETGUDSDK_API DamageActionData* Clone() override;
 	};
 }  // namespace GetgudSDK

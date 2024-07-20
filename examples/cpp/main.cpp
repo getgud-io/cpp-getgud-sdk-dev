@@ -39,7 +39,7 @@ GetgudSDK::BaseActionData* MakeRandomAction(std::string matchGuid,
         break;
     case 5:
         outAction = new GetgudSDK::SpawnActionData(
-            matchGuid, curTimeEpoch, "player-10", "ttr", 0, 100.f,
+            matchGuid, curTimeEpoch, "player-10", "ttr", "team_1", 0, 100.f,
             GetgudSDK::PositionF{1, 2, 3}, GetgudSDK::RotationF{10, 20});
         break;
     }

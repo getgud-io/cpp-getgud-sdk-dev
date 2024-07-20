@@ -174,7 +174,8 @@ namespace GetgudSDK_calls
             public BaseActionDataWrapper baseData;
             public IntPtr characterGuid;
             public int characterGuidSize;
-            public int teamId;
+            public IntPtr teamGuid;
+            public int teamGuidSize;
             public float initialHealth;
             public PositionF position;
             public RotationF rotation;
@@ -228,8 +229,8 @@ namespace GetgudSDK_calls
         public static extern int SendHealAction(BaseActionDataWrapper matchInfo, float healthGained);
 
         [DllImport(dllPath)]
-        public static extern int SendSpawnAction(BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidGuidSize,
-            int teamId, float initialHealth, PositionF position, RotationF rotation);
+        public static extern int SendSpawnAction(BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidSize,
+            IntPtr teamGuid, int teamGuidSize, float initialHealth, PositionF position, RotationF rotation);
 
         [DllImport(dllPath)]
         public static extern int SendDeathAction(BaseActionDataWrapper matchInfo, IntPtr attackerGuid, int attackerGuidSize);

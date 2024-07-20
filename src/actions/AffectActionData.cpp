@@ -69,20 +69,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString, but for logging purposes
-	 **/
-	std::string AffectActionData::ToStringMeta() {
-		std::string actionMetaString = BaseActionData::ToStringMeta();
-
-		actionMetaString += "Affect guid:" + m_affectGuid + ";";
-		actionMetaString += "Affect state:" + std::to_string(static_cast<int>(m_affectState)) + ";";
-
-		return actionMetaString;
-	}
-
-	/**
 	 * Clone:
 	 *
 	 **/

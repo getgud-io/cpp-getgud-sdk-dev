@@ -48,7 +48,6 @@ namespace GetgudSDK {
 		// is at the last of the line (which is the tail of the vector)
 		m_gameVector.push_back(gameData);
 		gameGuid = gameData->GetGameGuid();
-		std::string gameStringMeta = gameData->ToStringMeta();
 		m_gameContainerMutex.unlock();
 
 		logger.Log(LogType::DEBUG, std::string("Started a new Game: " + gameGuid));
@@ -66,7 +65,6 @@ namespace GetgudSDK {
 		std::string mapName) {
 		std::string retValue;
 		MatchData* matchData = nullptr;
-		std::string matchStringMeta;
 
 		m_gameContainerMutex.lock();
 
@@ -92,7 +90,6 @@ namespace GetgudSDK {
 
 		// return the guid of the match, this acts as it's key to finding it
 		retValue = matchData->GetMatchGuid();
-		matchStringMeta = matchData->ToStringMeta();
 
 		m_gameContainerMutex.unlock();
 
@@ -169,7 +166,7 @@ namespace GetgudSDK {
 				logger.Log(
 					LogType::DEBUG,
 					std::string("Action is invalid OR empty because Game Container or Action Buffer is full"));
-				logger.Log(LogType::DEBUG, nextAction->ToStringMeta());
+				logger.Log(LogType::DEBUG, nextAction->ToString());
 				DeleteGame(matchData->GetGameGuid(), false, matchPtrVector);
 				delete nextAction;
 				continue;
@@ -394,6 +391,26 @@ game with the guid: " + gameGuid));
 		}
 		else {
 			gameData_it->second->MarkGameAsEnded();
+		}
+
+		m_gameContainerMutex.unlock();
+
+		return retValue;
+	}
+
+	bool GameContainer::SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
+		bool retValue = true;
+
+		m_gameContainerMutex.lock();
+
+		// find the game that needs to be marked, and mark it :)
+		auto matchData_it = m_matchMap.find(matchGuid);
+		if (matchData_it == m_matchMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::MarkMatchWinTeam->Failed to find a match with the guid: " + matchGuid));
+			retValue = false;
+		}
+		else {
+			matchData_it->second->SetMatchWinTeam(teamGuid);
 		}
 
 		m_gameContainerMutex.unlock();

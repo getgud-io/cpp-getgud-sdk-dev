@@ -62,18 +62,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString, but for logging purposes
-	 **/
-	std::string DeathActionData::ToStringMeta() {
-		std::string actionMetaString = BaseActionData::ToStringMeta();
-
-		actionMetaString += "Attacker GUID:" + m_attackerGuid + ";";
-
-		return actionMetaString;
-	}
-	/**
 	 * Clone:
 	 *
 	 **/

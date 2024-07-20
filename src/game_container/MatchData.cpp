@@ -77,6 +77,7 @@ namespace GetgudSDK {
 		cloneMatchData->m_isInteresting = m_isInteresting;
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
+		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
 
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
@@ -348,6 +349,9 @@ namespace GetgudSDK {
 		matchOut += "\"mapName\":\"" + m_mapName + "\",";
 		if (m_matchMode.size() > 0)
 			matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+		if (m_matchWinTeamGuid.size() > 0)
+			matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
+
 		matchOut += "\"matchActionStream\":\"";
 
 		for (int index = 0; index < m_actionVector.size(); index++) {
@@ -474,6 +478,10 @@ namespace GetgudSDK {
 		}
 	}
 
+	void MatchData::SetMatchWinTeam(std::string teamGuid) {
+		m_matchWinTeamGuid = teamGuid;
+	}
+
 	/**
 	 * GetNumberOfMatchReportsAndMessages:
 	 *
@@ -496,17 +504,6 @@ namespace GetgudSDK {
 	 **/
 	std::string MatchData::GetGameGuid() {
 		return m_gameGuid;
-	}
-
-	/**
-	 * ToStringMeta:
-	 *
-	 * ToString but for logging purposes
-	 **/
-	std::string MatchData::ToStringMeta() {
-		return std::string("Match Guid: " + m_matchGuid +
-			" | Parent Game Guid: " + m_gameGuid +
-			" | Match Mode: " + m_matchMode + " | Map Name: " + m_mapName);
 	}
 
 	/**

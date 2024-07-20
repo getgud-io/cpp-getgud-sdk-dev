@@ -33,7 +33,6 @@ namespace GetgudSDK {
 		GETGUDSDK_API virtual ~BaseActionData();
 		GETGUDSDK_API virtual bool IsValid();
 		GETGUDSDK_API virtual std::string ToString();
-		GETGUDSDK_API virtual std::string ToStringMeta();
 		GETGUDSDK_API virtual BaseActionData* Clone();
 	};
 }  // namespace GetgudSDK

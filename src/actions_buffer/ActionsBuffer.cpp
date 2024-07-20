@@ -19,21 +19,28 @@ namespace GetgudSDK {
 	 * one of the GameSender threads
 	 **/
 	std::deque<BaseActionData*> ActionsBuffer::PopActions() {
+
 		std::deque<BaseActionData*> outputActionsBuffer; // used for faster copy with swap
+		int actionsBufferSize = 0;
+
 		m_actionsBufferLocker.lock();
+
 		m_actionsBuffer.shrink_to_fit();
-		if (m_actionsBuffer.size() != 0) {
+		actionsBufferSize = m_actionsBuffer.size();
+
+		if (actionsBufferSize != 0) {
 			// fast processing function to move elements from the buffer
 			m_actionsBuffer.swap(outputActionsBuffer);
-			logger.Log(LogType::DEBUG, "Popped " +
-				std::to_string(outputActionsBuffer.size()) +
-				" action(s) from ActionBuffer");
 		}
+
 		// We recalculate this on every pop to make hypermode more efficient
 		m_averageSize.UpdateSize(m_actionsBufferSize);
-
 		m_actionsBufferSize = 0;
+
 		m_actionsBufferLocker.unlock();
+
+		if (actionsBufferSize != 0) logger.Log(LogType::DEBUG, "Popped " + std::to_string(outputActionsBuffer.size()) + " action(s) from ActionBuffer");
+
 		return outputActionsBuffer;
 	}
 

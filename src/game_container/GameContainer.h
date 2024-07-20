@@ -42,6 +42,7 @@ namespace GetgudSDK {
 		unsigned int GetAverageSizeInBytes();
 		GameData* PopNextGameToProcess();
 		bool MarkEndGame(std::string gameGuid);
+		bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid);
 		bool DeleteGame(std::string gameGuid, bool externalCall);
 		void Dispose();
 		std::unordered_map<std::string, MatchData*>& GetMatchMap();

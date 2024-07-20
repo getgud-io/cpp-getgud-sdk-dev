@@ -174,7 +174,8 @@ namespace GetgudSDK_calls
             public BaseActionDataWrapper baseData;
             public IntPtr characterGuid;
             public int characterGuidSize;
-            public int teamId;
+            public IntPtr teamGuid;
+            public int teamGuidSize;
             public float initialHealth;
             public PositionF position;
             public RotationF rotation;
@@ -196,11 +197,14 @@ namespace GetgudSDK_calls
 		//
 		// Linux deploy path
 		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-        const string dllPath = "GetgudSDK.dll";
+        const string dllPath = "libGetgudSDK.so";
 
 
         [DllImport(dllPath)]
         public static extern int init();
+		
+		[DllImport(dllPath)]
+        public static extern int init_conf(IntPtr configPath, int isConfigContent);
 
         [DllImport(dllPath)]
         public static extern int StartGame(StartGameInfoWrapper gameInfo, IntPtr gameGuidOut);
@@ -209,7 +213,7 @@ namespace GetgudSDK_calls
         public static extern int StartMatch(StartMatchInfoWrapper matchInfo, IntPtr matchGuidOut);
 
         [DllImport(dllPath)]
-        public static extern int MarkEndGame(IntPtr matchGuid, int matchGuidSize);
+        public static extern int MarkEndGame(IntPtr gameGuid, int gameGuidSize);
 
         [DllImport(dllPath)]
         public static extern int SendAffectAction(BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);
@@ -225,8 +229,8 @@ namespace GetgudSDK_calls
         public static extern int SendHealAction(BaseActionDataWrapper matchInfo, float healthGained);
 
         [DllImport(dllPath)]
-        public static extern int SendSpawnAction(BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidGuidSize,
-            int teamId, float initialHealth, PositionF position, RotationF rotation);
+        public static extern int SendSpawnAction(BaseActionDataWrapper matchInfo, IntPtr characterGuid, int characterGuidSize,
+            IntPtr teamGuid, int teamGuidSize, float initialHealth, PositionF position, RotationF rotation);
 
         [DllImport(dllPath)]
         public static extern int SendDeathAction(BaseActionDataWrapper matchInfo, IntPtr attackerGuid, int attackerGuidSize);

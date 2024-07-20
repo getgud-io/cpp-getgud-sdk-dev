@@ -74,21 +74,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ToStringMeta:
-	 *
-	 * ToString, but for logging purposes
-	 **/
-	std::string DamageActionData::ToStringMeta() {
-		std::string actionMetaString = BaseActionData::ToStringMeta();
-
-		actionMetaString += "Victim guid:" + m_victimPlayerGuid + ";";
-		actionMetaString += "Weapon guid:" + m_weaponGuid + ";";
-		actionMetaString += "Damage done:" + std::to_string(m_damageDone) + ";";
-
-		return actionMetaString;
-	}
-
-	/**
 	 * Clone:
 	 *
 	 **/

@@ -32,7 +32,6 @@ namespace GetgudSDK {
 		GETGUDSDK_API ~AffectActionData() override;
 		GETGUDSDK_API bool IsValid() override;
 		GETGUDSDK_API std::string ToString() override;
-		GETGUDSDK_API std::string ToStringMeta() override;
 		GETGUDSDK_API AffectActionData* Clone() override;
 	};
 }  // namespace GetgudSDK
