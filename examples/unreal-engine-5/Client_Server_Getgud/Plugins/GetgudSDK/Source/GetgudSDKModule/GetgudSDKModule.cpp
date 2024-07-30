@@ -1,6 +1,6 @@
 
 
-#include "GetGudSDKModule.h"
+#include "GetgudSDKModule.h"
 
 #include <GetgudSDK.h>
 
