@@ -20,8 +20,9 @@ namespace GetgudSDK {
 	 **/
 	PlayerData::PlayerData(int titleId,
 		std::string privateKey,
-		PlayerInfo playerInfo)
-		: m_titleId(titleId), m_privateKey(privateKey), m_playerInfo(playerInfo) {}
+		PlayerInfo playerInfo
+		)
+		: m_playerInfo(playerInfo), m_titleId(titleId), m_privateKey(privateKey) {}
 
 	/**
 	 * ToString:

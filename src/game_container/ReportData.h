@@ -13,5 +13,6 @@ namespace GetgudSDK {
 		ReportData(ReportInfo reportInfo);
 		std::string ToString(bool isOutsideMatch = false);
 		virtual bool IsValid();
+		virtual ~ReportData(){};
 	};
 }  // namespace GetgudSDK

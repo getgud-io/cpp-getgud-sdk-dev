@@ -213,7 +213,7 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 	}
 
 	outAction = new GetgudSDK::SpawnActionData(
-		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", 0, 100.f,
+		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", "Team_1", 100.f,
 		GetgudSDK::PositionF{(float)position.X, (float)position.Y, (float)position.Z},
 		GetgudSDK::RotationF{pitch, yaw, 0});
 

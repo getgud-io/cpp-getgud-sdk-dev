@@ -7,7 +7,7 @@
 #define GETGUDSDK_API __declspec(dllimport)
 #endif
 #else // not win32
-#define GETGUDSDK_API
+#define GETGUDSDK_API __attribute__((visibility("default")))
 #endif
 
 #include "actions/AttackActionData.h"

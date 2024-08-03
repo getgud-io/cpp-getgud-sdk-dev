@@ -9,7 +9,7 @@
 #define GETGUDSDK_API __declspec(dllimport)
 #endif
 #else
-#define GETGUDSDK_API
+#define GETGUDSDK_API __attribute__((visibility("default")))
 #endif
 
 namespace GetgudSDK {

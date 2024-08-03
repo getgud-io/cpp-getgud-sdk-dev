@@ -33,8 +33,11 @@ public:
 	
 	void ShutdownModule() override
 	{
-		FPlatformProcess::FreeDllHandle(DllHandle);
-		DllHandle = nullptr;
+		if (DllHandle != nullptr)
+		{
+			FPlatformProcess::FreeDllHandle(DllHandle);
+			DllHandle = nullptr;
+		}
 	}
 
 	void* DllHandle = nullptr;

@@ -18,11 +18,10 @@ public class GetgudSDKModule : ModuleRules
 			new string[] {
 				"Core",
 				"Engine",
-				
-				"libcurl",
-				"zlib",
+				"OpenSSL",
 				"nghttp2",
-				"OpenSSL"
+				"libcurl",
+				"zlib"
 			}
 		);
 		

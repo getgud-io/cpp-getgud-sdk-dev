@@ -18,9 +18,10 @@ namespace GetgudSDK {
 		float damageDone,
 		std::string weaponGuid)
 		: BaseActionData({ Actions::Damage, actionTimeEpoch, playerGuid, matchGuid }),
-		m_damageDone(damageDone),
 		m_weaponGuid(weaponGuid),
-		m_victimPlayerGuid(victimPlayerGuid) {}
+		m_victimPlayerGuid(victimPlayerGuid),
+		m_damageDone(damageDone)
+	       	{}
 
 	/**
 	 * DamageActionData:
@@ -28,9 +29,10 @@ namespace GetgudSDK {
 	 **/
 	DamageActionData::DamageActionData(const DamageActionData& data)
 		: BaseActionData(data),
-		m_damageDone(data.m_damageDone),
 		m_weaponGuid(data.m_weaponGuid),
-		m_victimPlayerGuid(data.m_victimPlayerGuid) {}
+		m_victimPlayerGuid(data.m_victimPlayerGuid),
+		m_damageDone(data.m_damageDone)
+       	{}
 
 	/**
 	 * ~DamageActionData:
