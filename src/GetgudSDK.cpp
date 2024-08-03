@@ -55,46 +55,12 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * Init:
-	 *
-	 * Init Getgud SDK
-	 **/
-	bool Init(std::string configFileFullPath) {
-		bool init_result = false;
-		try {
-			curl_global_init(CURL_GLOBAL_DEFAULT);
-			if (sdkConfig.LoadSettings(configFileFullPath, false))
-			{
-				logger.Log(LogType::DEBUG,
-					"Loaded config with the following parameters: \n" +
-					sdkConfig.ToString());
-				init_result = true;
-			}
-			else
-			{
-				sdkConfig.logToFile = true;
-				logger.Log(LogType::_ERROR,
-					"Config can not be loaded, exit");
-				sdkConfig.logToFile = false;
-			}
-		}
-		catch (std::exception& _error) {
-			sdkConfig.logToFile = true;
-			logger.Log(
-				LogType::FATAL,
-				std::string("GetgudSDK::Init->Couldn't initialize Getgud SDK: ") +
-				std::string(_error.what()));
-			sdkConfig.logToFile = false;
-		}
-
-		return init_result;
-	}
-
-	/**
-	 * Init:
-	 *
-	 * Init Getgud SDK
-	 **/
+	* Init:
+	*
+	* Init Getgud SDK
+	* *passAsContent: true - read the configFile as a string
+	* *passAsContent: false - read the configFile as a file path
+	**/
 	bool Init(std::string configFile, bool passAsContent) {
 		bool init_result = false;
 		try {
