@@ -36,13 +36,14 @@ namespace GetgudSDK {
 	 *
 	 **/
 	MatchData::MatchData(const MatchData& data)
-		: m_matchGuid(data.m_matchGuid),
-		m_gameGuid(data.m_gameGuid),
-		m_matchMode(data.m_matchMode),
-		m_mapName(data.m_mapName),
+		:
 		m_actionVector(data.m_actionVector),
 		m_reportVector(data.m_reportVector),
 		m_chatMessageVector(data.m_chatMessageVector),
+		m_matchGuid(data.m_matchGuid),
+		m_gameGuid(data.m_gameGuid),
+		m_matchMode(data.m_matchMode),
+		m_mapName(data.m_mapName),
 		m_throttleChecked(data.m_throttleChecked),
 		m_isInteresting(data.m_isInteresting),
 		m_playerGuids(data.m_playerGuids),
