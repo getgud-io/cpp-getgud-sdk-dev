@@ -426,9 +426,9 @@ extern "C" {
 			}
 
 			if (teamGuid != NULL &&
-				strlen(teamGuid) == characterGuidSize)
+				strlen(teamGuid) == teamGuidSize)
 			{
-				inTeamGuid = std::string(teamGuid, characterGuidSize);
+				inTeamGuid = std::string(teamGuid, teamGuidSize);
 			}
 
 			GetgudSDK::SpawnActionData* spawnAction = new GetgudSDK::SpawnActionData(

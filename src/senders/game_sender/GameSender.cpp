@@ -401,7 +401,7 @@ namespace GetgudSDK {
 		if (sendCode != CURLcode::CURLE_OK) {
 			if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
 				logger.Log(LogType::DEBUG,
-					"GameSender::SendGamePacket->Failed to send throttle request: " +
+					"GameSender::SendGamePacket->Failed to send packet: " +
 					m_streamCurlReadBuffer);
 			}
 			else {
@@ -414,7 +414,7 @@ namespace GetgudSDK {
 		{
 			if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
 				logger.Log(LogType::DEBUG,
-					"GameSender::SendGamePacket->Failed to send throttle request: " +
+					"GameSender::SendGamePacket->Failed to send packet: " +
 					m_streamCurlReadBuffer);
 			}
 		}
