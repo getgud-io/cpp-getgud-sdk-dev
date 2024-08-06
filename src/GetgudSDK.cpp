@@ -26,29 +26,25 @@ namespace GetgudSDK {
 	bool Init() {
 		bool init_result = false;
 		try {
+			
+			sdkConfig.logToFile = true;
 			curl_global_init(CURL_GLOBAL_DEFAULT);
 			if (sdkConfig.LoadSettings("", false)) //NULL path
 			{
-				logger.Log(LogType::DEBUG,
-					"Loaded config with the following parameters: \n" +
-					sdkConfig.ToString());
+				logger.Log(LogType::DEBUG, "Loaded config with the following parameters: \n" + sdkConfig.ToString());
 				init_result = true;
 			}
 			else
 			{
-				sdkConfig.logToFile = true;
-				logger.Log(LogType::_ERROR,
-					"Config can not be loaded, exit");
+				logger.Log(LogType::_ERROR,"Config can not be loaded, SDK will not work properly.");
 				sdkConfig.logToFile = false;
 			}
 		}
 		catch (std::exception& _error) {
-			sdkConfig.logToFile = true;
 			logger.Log(
 				LogType::FATAL,
 				std::string("GetgudSDK::Init->Couldn't initialize Getgud SDK: ") +
 				std::string(_error.what()));
-			sdkConfig.logToFile = false;
 		}
 
 		return init_result;
@@ -62,29 +58,25 @@ namespace GetgudSDK {
 	bool Init(std::string configFileFullPath) {
 		bool init_result = false;
 		try {
+			
+			sdkConfig.logToFile = true;
 			curl_global_init(CURL_GLOBAL_DEFAULT);
 			if (sdkConfig.LoadSettings(configFileFullPath, false))
 			{
-				logger.Log(LogType::DEBUG,
-					"Loaded config with the following parameters: \n" +
-					sdkConfig.ToString());
+				logger.Log(LogType::DEBUG, "Loaded config with the following parameters: \n" + sdkConfig.ToString());
 				init_result = true;
 			}
 			else
 			{
-				sdkConfig.logToFile = true;
-				logger.Log(LogType::_ERROR,
-					"Config can not be loaded, exit");
+				logger.Log(LogType::_ERROR, "Config can not be loaded, exit");
 				sdkConfig.logToFile = false;
 			}
 		}
 		catch (std::exception& _error) {
-			sdkConfig.logToFile = true;
 			logger.Log(
 				LogType::FATAL,
 				std::string("GetgudSDK::Init->Couldn't initialize Getgud SDK: ") +
 				std::string(_error.what()));
-			sdkConfig.logToFile = false;
 		}
 
 		return init_result;

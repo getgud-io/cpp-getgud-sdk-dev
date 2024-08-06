@@ -38,8 +38,7 @@ namespace GetgudSDK {
 		char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
 		if (logsFilePathHolder == nullptr) {
 			// Environment variable LOG_FILE_PATH is required to work
-			logger.Log(LogType::WARN, std::string("Config::LoadSettings->Environment "
-				"variable GETGUD_LOG_FILE_PATH is empty"));
+			logger.Log(LogType::WARN, std::string("Config::LoadSettings->Environment variable GETGUD_LOG_FILE_PATH is empty - log file will not be created"));
 		}
 		else {
 			logsFilePath = std::string(logsFilePathHolder);
@@ -53,8 +52,7 @@ namespace GetgudSDK {
 		bool valueReadResult = false;
 
 		// Read logger parameters
-		GetConfigValue(configData, sdkConfigFieldNames.logToFile,
-			sdkConfig.logToFile);
+		GetConfigValue(configData, sdkConfigFieldNames.logToFile, sdkConfig.logToFile);
 
 		unsigned int _logFileSizeInBytes = 0;
 		valueReadResult = GetConfigValue(
@@ -304,29 +302,26 @@ namespace GetgudSDK {
 
 		if (passAsContent == false && !configFile.empty())
 		{
+			// Loading config file from provided path
 			configFilePath = configFile;
-			logger.Log(LogType::DEBUG,
-				std::string("Loading config file from " + configFilePath + " path"));
 		}
 		else if (passAsContent == true && !configFile.empty())
 		{
+			// Loading config file from a content string
 			contentString = configFile;
-			logger.Log(LogType::DEBUG,
-				std::string("Loading config file from a content string"));
 		}
 		else
 		{
-
 			char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
 			if (configPathHolder == nullptr) {
-				logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment "
-					"variable GETGUD_CONFIG_PATH is empty"));
+
+				// config path is not provided by the user and does not reside in ENV Variable - send a warning
+				logger.Log(LogType::WARN, std::string("GETGUD_CONFIG_PATH ENV Varialbe is empty, thus Config file cannot be loaded.\nYou can provide a full path to config file or the config file content using the Init() method."));
 			}
 			else
 			{
+				// Loading config file from GETGUD_CONFIG_PATH Environment Parameter
 				configFilePath = std::string(configPathHolder);
-				logger.Log(LogType::DEBUG,
-					std::string("Loading config file from " + configFilePath + " path"));
 			}
 		}
 
