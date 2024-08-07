@@ -180,7 +180,7 @@ namespace GetgudSDK
         }
     };
 
-    static internal class Methods
+    static public class Methods
     {
 #pragma warning disable CS8601, CS0649
         /**
