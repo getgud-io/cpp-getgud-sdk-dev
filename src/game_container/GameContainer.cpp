@@ -158,16 +158,13 @@ namespace GetgudSDK {
 
 			matchData = match_it->second;
 
-			// validate the structure and parameters of the next action we are going to
-			// assimilate
+			// validate the structure and parameters of the next action we are going to assimilate
 			if (nextAction->IsValid() == false) {
-				// action is invalid and thus -> we are going to delete the entire game :/
-				// why? Ask Art!
-				logger.Log(
-					LogType::DEBUG,
-					std::string("Action is invalid OR empty because Game Container or Action Buffer is full"));
+
+				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
+				logger.Log(LogType::DEBUG, std::string("Action is invalid - Marking the match as not interesting, thus no more actions will be sent for the match with guid:" + matchData->GetMatchGuid()));
 				logger.Log(LogType::DEBUG, nextAction->ToString());
-				DeleteGame(matchData->GetGameGuid(), false, matchPtrVector);
+				matchData->SetThrottleCheckResults(true, false);
 				delete nextAction;
 				continue;
 			}
@@ -384,9 +381,7 @@ namespace GetgudSDK {
 		// find the game that needs to be marked, and mark it :)
 		auto gameData_it = m_gameMap.find(gameGuid);
 		if (gameData_it == m_gameMap.end()) {
-			logger.Log(LogType::WARN,
-				std::string("GameContainer::MarkEndGame->Failed to find a \
-game with the guid: " + gameGuid));
+			logger.Log(LogType::WARN,std::string("GameContainer::MarkEndGame->Failed to find a game with the guid: " + gameGuid));
 			retValue = false;
 		}
 		else {
@@ -396,6 +391,38 @@ game with the guid: " + gameGuid));
 		m_gameContainerMutex.unlock();
 
 		return retValue;
+	}
+
+	void GameContainer::SentGameMarkedAsEnded(std::string gameGuid) {
+
+		m_gameContainerMutex.lock();
+
+		// find the game that needs to be marked as not interesting, and mark it as such
+		auto gameData_it = m_gameMap.find(gameGuid);
+		if (gameData_it == m_gameMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::SentGameMarkedAsEnded->Failed to find a game with the guid: " + gameGuid));
+		}
+		else {
+			gameData_it->second->SentGameMarkedAsEnded();
+		}
+
+		m_gameContainerMutex.unlock();
+	}
+
+	void GameContainer::MarkGameMatchesAsNotInteresting(std::string gameGuid, std::vector<std::string>& matchGuids) {
+
+		m_gameContainerMutex.lock();
+
+		// find the game that needs to be marked as not interesting, and mark it as such
+		auto gameData_it = m_gameMap.find(gameGuid);
+		if (gameData_it == m_gameMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::MarkGameMatchesAsNotInteresting->Failed to find a game with the guid: " + gameGuid));
+		}
+		else {
+			gameData_it->second->MarkGameMatchesAsNotInteresting(matchGuids);
+		}
+
+		m_gameContainerMutex.unlock();
 	}
 
 	bool GameContainer::SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
