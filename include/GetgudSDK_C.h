@@ -133,6 +133,13 @@ extern "C" {
 	* Init:
 	*
 	* Init Getgud SDK
+	**/
+	GETGUDSDK_API int init_conf_path(const char* configFilePath);
+
+	/**
+	* Init:
+	*
+	* Init Getgud SDK
 	* *passAsContent: true - read the configFile as a string
 	* *passAsContent: false - read the configFile as a file path
 	**/

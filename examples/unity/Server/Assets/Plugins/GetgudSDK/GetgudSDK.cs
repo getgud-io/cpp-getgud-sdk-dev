@@ -180,7 +180,7 @@ namespace GetgudSDK
         }
     };
 
-    static public class Methods
+    static internal class Methods
     {
 #pragma warning disable CS8601, CS0649
         /**
@@ -191,6 +191,21 @@ namespace GetgudSDK
         static public int Init()
         {
             return GetgudSDK_calls.GetgudSDK_calls.init();
+        }
+		
+		/**
+		* Init:
+		*
+		* Init Getgud SDK
+		**/
+        static public int InitConfPath(string configFilePath)
+        {
+			var unmanagedConfigFile = Marshal.StringToHGlobalAnsi(configFilePath);
+            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf_path(unmanagedConfigFile);
+
+            Marshal.FreeHGlobal(unmanagedConfigFile);
+			
+            return result;
         }
 		
 		/**
