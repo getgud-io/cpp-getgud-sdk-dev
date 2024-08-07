@@ -31,14 +31,16 @@ extern "C" {
 	}
 
 	/**
-	 * Init_conf:
-	 *
-	 * Init Getgud SDK with provided config
-	 **/
-	int init_conf(const char* configPath, int isConfigContent) {
+	* Init:
+	*
+	* Init Getgud SDK
+	* *passAsContent: true - read the configFile as a string
+	* *passAsContent: false - read the configFile as a file path
+	**/
+	int init_conf(const char* configFile, int passAsContent) {
 		bool result = false;
 		try {
-			result = GetgudSDK::Init(std::string(configPath), isConfigContent);
+			result = GetgudSDK::Init(std::string(configFile), passAsContent);
 		}
 		catch (std::exception& _error) {
 			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
@@ -424,9 +426,9 @@ extern "C" {
 			}
 
 			if (teamGuid != NULL &&
-				strlen(teamGuid) == characterGuidSize)
+				strlen(teamGuid) == teamGuidSize)
 			{
-				inTeamGuid = std::string(teamGuid, characterGuidSize);
+				inTeamGuid = std::string(teamGuid, teamGuidSize);
 			}
 
 			GetgudSDK::SpawnActionData* spawnAction = new GetgudSDK::SpawnActionData(

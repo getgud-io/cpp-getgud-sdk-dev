@@ -197,7 +197,7 @@ namespace GetgudSDK_calls
 		//
 		// Linux deploy path
 		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-        const string dllPath = "libGetgudSDK.so";
+        const string dllPath = "GetgudSDK";
 
 
         [DllImport(dllPath)]

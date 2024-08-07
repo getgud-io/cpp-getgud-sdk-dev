@@ -7,7 +7,7 @@
 #define GETGUDSDK_API __declspec(dllimport)
 #endif
 #else // not win32
-#define GETGUDSDK_API
+#define GETGUDSDK_API __attribute__((visibility("default")))
 #endif
 
 #include "actions/AttackActionData.h"
@@ -24,8 +24,14 @@
 namespace GetgudSDK {
 
 	GETGUDSDK_API bool Init();
-	GETGUDSDK_API bool Init(std::string configFileFullPath);
-	GETGUDSDK_API bool Init(std::string configFile, bool passAsContent);
+	/**
+	 * Init:
+	 *
+	 * Init Getgud SDK
+	 * *passAsContent: true - read the configFile as a string
+	 * *passAsContent: false - read the configFile as a file path
+	 **/
+	GETGUDSDK_API bool Init(std::string configFile, bool passAsContent = false);
 	GETGUDSDK_API std::string StartGame(int titleId,
 		std::string privateKey,
 		std::string serverGuid,

@@ -180,7 +180,7 @@ namespace GetgudSDK
         }
     };
 
-    static internal class Methods
+    static public class Methods
     {
 #pragma warning disable CS8601, CS0649
         /**
@@ -194,16 +194,18 @@ namespace GetgudSDK
         }
 		
 		/**
-        * Init_conf:
-        *
-        * Init Getgud SDK with provided config
-        **/
-        static public int InitConf(string configPath, int isConfigContent)
+		* Init:
+		*
+		* Init Getgud SDK
+		* *passAsContent: true - read the configFile as a string
+		* *passAsContent: false - read the configFile as a file path
+		**/
+        static public int InitConf(string configFile, int passAsContent)
         {
-			var unmanagedConfigPath = Marshal.StringToHGlobalAnsi(configPath);
-            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf(unmanagedConfigPath, isConfigContent);
+			var unmanagedConfigFile = Marshal.StringToHGlobalAnsi(configFile);
+            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf(unmanagedConfigFile, passAsContent);
 
-            Marshal.FreeHGlobal(unmanagedConfigPath);
+            Marshal.FreeHGlobal(unmanagedConfigFile);
 			
             return result;
         }
