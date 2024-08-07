@@ -84,7 +84,8 @@ public class NetworkManager : MonoBehaviour
         GameLogic.Singleton.LoadScene(1);
 
         // Initialize GetgudSDK
-        int status = GetgudSDK.Methods.Init();
+        string configFullPath = "FULL_PATH_TO_CONFIG";
+        int status = GetgudSDK.Methods.InitConfPath(configFullPath);
         Debug.Log($"GetgudSDK Init status: {status}");
 
         StartGameAndMatch();
