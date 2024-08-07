@@ -197,6 +197,21 @@ namespace GetgudSDK
 		* Init:
 		*
 		* Init Getgud SDK
+		**/
+        static public int InitConfPath(string configFilePath)
+        {
+			var unmanagedConfigFile = Marshal.StringToHGlobalAnsi(configFilePath);
+            var result = GetgudSDK_calls.GetgudSDK_calls.init_conf_path(unmanagedConfigFile);
+
+            Marshal.FreeHGlobal(unmanagedConfigFile);
+			
+            return result;
+        }
+		
+		/**
+		* Init:
+		*
+		* Init Getgud SDK
 		* *passAsContent: true - read the configFile as a string
 		* *passAsContent: false - read the configFile as a file path
 		**/

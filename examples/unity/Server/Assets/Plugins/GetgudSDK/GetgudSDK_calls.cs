@@ -204,6 +204,9 @@ namespace GetgudSDK_calls
         public static extern int init();
 		
 		[DllImport(dllPath)]
+        public static extern int init_conf_path(IntPtr configFilePath);
+		
+		[DllImport(dllPath)]
         public static extern int init_conf(IntPtr configPath, int isConfigContent);
 
         [DllImport(dllPath)]
