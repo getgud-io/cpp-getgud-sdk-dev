@@ -38,7 +38,7 @@ namespace GetgudSDK {
 		char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
 		if (logsFilePathHolder == nullptr) {
 			// Environment variable LOG_FILE_PATH is required to work
-			logger.Log(LogType::WARN, std::string("Config::LoadSettings->Environment variable GETGUD_LOG_FILE_PATH is empty - log file will not be created"));
+			logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment variable GETGUD_LOG_FILE_PATH is empty - log file will be created in the root folder"));
 		}
 		else {
 			logsFilePath = std::string(logsFilePathHolder);
@@ -315,8 +315,8 @@ namespace GetgudSDK {
 			char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
 			if (configPathHolder == nullptr) {
 
-				// config path is not provided by the user and does not reside in ENV Variable - send a warning
-				logger.Log(LogType::WARN, std::string("GETGUD_CONFIG_PATH ENV Varialbe is empty, thus Config file cannot be loaded.\nYou can provide a full path to config file or the config file content using the Init() method."));
+				// Try loading the config file from the root folder of the project
+				configFilePath = this->configFilePath;
 			}
 			else
 			{
@@ -335,6 +335,13 @@ namespace GetgudSDK {
 					file_stream.get(next_character);
 					contentString += next_character;
 				}
+			}
+			else {
+				logger.Log(LogType::WARN, std::string("Config file was not found, thus cannot be loaded.There are four ways to load the config file:" 
+					"\n1) You can provide a full path to the config file using the Init(configFileFullPath) method" 
+					"\n2) You can provide the config file content as string using the Init(configFile, passConfigAsConect = true) method." 
+					"\n3) You can provide a config file full path using the GETGUD_CONFIG_PATH environment variable and call the Init() method" 
+					"\n4) You can place the config file in the root folder of the project, where the GetgudSDK is running from and call the Init() method"));
 			}
 
 			file_stream.close();
