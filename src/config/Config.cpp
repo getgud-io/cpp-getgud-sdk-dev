@@ -313,13 +313,8 @@ namespace GetgudSDK {
 		else
 		{
 			char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
-			if (configPathHolder == nullptr) {
+			if (configPathHolder != nullptr) {
 
-				// Try loading the config file from the root folder of the project
-				configFilePath = this->configFilePath;
-			}
-			else
-			{
 				// Loading config file from GETGUD_CONFIG_PATH Environment Parameter
 				configFilePath = std::string(configPathHolder);
 			}
@@ -341,7 +336,7 @@ namespace GetgudSDK {
 					"\n1) You can provide a full path to the config file using the Init(configFileFullPath) method" 
 					"\n2) You can provide the config file content as string using the Init(configFile, passConfigAsConect = true) method." 
 					"\n3) You can provide a config file full path using the GETGUD_CONFIG_PATH environment variable and call the Init() method" 
-					"\n4) You can place the config file in the root folder of the project, where the GetgudSDK is running from and call the Init() method"));
+					"\n4) You can place the config file where the GetgudSDK is running from and call the Init() method. The config file Will be searched in the reletaive path: ./config.json"));
 			}
 
 			file_stream.close();
