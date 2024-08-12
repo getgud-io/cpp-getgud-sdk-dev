@@ -41,6 +41,10 @@ fi
 cd ${PROJECT_DIR}
 cmake --no-warn-unused-cli -DSO_BUILD:STRING=True -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -B./build -G "Unix Makefiles"
 
+if ! test ${PROJECT_DIR}build; then
+	mkdir ${PROJECT_DIR}build
+fi
+
 cd ${PROJECT_DIR}build/
 
 cmake --build . --config Release --target all -j 4 --
