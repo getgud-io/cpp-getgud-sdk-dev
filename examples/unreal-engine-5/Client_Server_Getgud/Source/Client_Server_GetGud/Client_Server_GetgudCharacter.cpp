@@ -53,6 +53,20 @@ void AClient_Server_GetgudCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	// Get the PlayerStart location
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (GameMode)
+	{
+		AActor* StartSpot = GameMode->FindPlayerStart(GetController());
+		if (StartSpot)
+		{
+			// Set the character's position to the PlayerStart location
+			SetActorLocation(StartSpot->GetActorLocation());
+			SetActorRotation(StartSpot->GetActorRotation());
+		}
+	}
+
+
 	if (IsLocallyControlled()) // Make sure this is the local client
 	{
 		// Call the server RPC function

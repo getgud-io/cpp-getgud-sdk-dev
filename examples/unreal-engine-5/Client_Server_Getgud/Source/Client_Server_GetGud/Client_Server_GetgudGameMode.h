@@ -13,6 +13,9 @@ class AClient_Server_GetgudGameMode : public AGameModeBase
 
 public:
 	AClient_Server_GetgudGameMode();
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
+
+
 };
 
 
