@@ -109,7 +109,6 @@ namespace GetgudSDK {
 	bool GameContainer::AddActions(std::deque<BaseActionData*>& actionVector) {
 		//  first check that we are allowed to add more action to the game container
 		//  and did not run out of allowed memory to consume
-		m_gameContainerMutex.lock();
 		bool result = true;
 
 		// if game is full we add empty actions that will then trigger deletion of
@@ -219,8 +218,6 @@ namespace GetgudSDK {
 		}
 
 		m_averageSize.UpdateSize(m_gameContainerSizeInBytes);
-
-		m_gameContainerMutex.unlock();
 
 		return result;
 	}
