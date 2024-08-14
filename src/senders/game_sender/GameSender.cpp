@@ -63,8 +63,8 @@ namespace GetgudSDK {
 				sdkConfig.hyperModeThreadCreationStaggerMilliseconds));
 			while (m_threadWorking) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(m_sleepTimeMilli));
-				ManageHyperMode();
 				SendNextGame();
+				ManageHyperMode();
 			}
 			// TODO LATER: For future: we shouldn't be self destructing
 			// this is a long term task
@@ -82,14 +82,14 @@ namespace GetgudSDK {
 		GameData* gameDataToSend = nullptr;
 		std::string gameOut;
 
-		// first, grab all the actions from from the buffer and inject them to the game container
-		std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
-		bool result = gameContainer.AddActions(nextActions);
-		if (result == false) logger.Log(LogType::WARN, "GameSender::SendNextGame->Failed to add actions to GameContainer");
-
 		{   // start lock scope
 
 			std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
+
+			// first, grab all the actions from from the buffer and inject them to the game container
+			std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
+			bool result = gameContainer.AddActions(nextActions);
+			if (result == false) logger.Log(LogType::WARN, "GameSender::SendNextGame->Failed to add actions to GameContainer");
 
 			// get the next game we need to send. might be that there are no games to send
 			gameDataToSend = gameContainer.PopNextGameToProcess();
