@@ -15,7 +15,7 @@ void UGetgudInstance::Init()
     }
 }
 
-UGetgudInstance::~UGetgudInstance()
+UGetgudInstance::~UGetgudInstance() noexcept
 {
     if (GetWorld() && (GetWorld()->IsNetMode(NM_DedicatedServer) || GetWorld()->IsNetMode(NM_ListenServer)))
     {
