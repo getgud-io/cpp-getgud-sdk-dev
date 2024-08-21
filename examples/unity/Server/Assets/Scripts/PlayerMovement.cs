@@ -163,7 +163,12 @@ public class PlayerMovement : MonoBehaviour
         pitch = -pitch;
 
         // Create PositionF for position action
-        PositionF currentPosition = new PositionF { X = transform.position.x, Y = transform.position.y, Z = transform.position.z };
+        PositionF currentPosition = new PositionF PositionF currentPosition = new PositionF
+        {
+            X = transform.position.z,   // Unity's forward maps to Getgud's forward
+            Y = -transform.position.x,  // Unity's right maps to Getgud's right (with negation)
+            Z = transform.position.y    // Unity's up maps to Getgud's up
+        };
         // Create RotationF for position action
         RotationF currentRotation = new RotationF { Yaw = yaw, Pitch = pitch, Roll = roll };
 
