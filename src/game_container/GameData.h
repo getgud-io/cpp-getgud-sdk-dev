@@ -38,6 +38,8 @@ namespace GetgudSDK {
 		void MarkGameAsEnded();
 		bool IsGameMarkedAsEnded();
 		bool DidSendGameMarkedAsEnded();
+		void SentGameMarkedAsEnded();
+		void MarkGameMatchesAsNotInteresting(std::vector<std::string>& matchGuids);
 		MatchData* AddMatch(std::string matchMode, std::string mapName);
 		bool IsGameEligibleForProcessing();
 		GameData* SliceGame(int sizeToSliceInBytes);
@@ -51,7 +53,7 @@ namespace GetgudSDK {
 		std::string GetServerLocation();
 		void GetGameMatchGuids(std::vector<std::string>& matchGuidVectorOut);
 		MatchData* GetGameMatch(std::string matchGuid);
-		void GameToString(std::string& gameOut);
+		void GameToString(std::string& gameOut, std::vector<std::string>& matchGuids);
 		unsigned int GetGameSizeInBytes();
 		unsigned int GetNumberOfGameReportsAndMessages();
 		std::unordered_map<std::string, MatchData*>& GetMatchMap();

@@ -63,8 +63,8 @@ namespace GetgudSDK {
 				sdkConfig.hyperModeThreadCreationStaggerMilliseconds));
 			while (m_threadWorking) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(m_sleepTimeMilli));
-				ManageHyperMode();
 				SendNextGame();
+				ManageHyperMode();
 			}
 			// TODO LATER: For future: we shouldn't be self destructing
 			// this is a long term task
@@ -82,14 +82,14 @@ namespace GetgudSDK {
 		GameData* gameDataToSend = nullptr;
 		std::string gameOut;
 
-		// first, grab all the actions from from the buffer and inject them to the game container
-		std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
-		bool result = gameContainer.AddActions(nextActions);
-		if (result == false) logger.Log(LogType::WARN, "GameSender::SendNextGame->Failed to add actions to GameContainer");
-
 		{   // start lock scope
 
 			std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
+
+			// first, grab all the actions from from the buffer and inject them to the game container
+			std::deque<BaseActionData*> nextActions = actionsBuffer.PopActions();
+			bool result = gameContainer.AddActions(nextActions);
+			if (result == false) logger.Log(LogType::WARN, "GameSender::SendNextGame->Failed to add actions to GameContainer");
 
 			// get the next game we need to send. might be that there are no games to send
 			gameDataToSend = gameContainer.PopNextGameToProcess();
@@ -110,11 +110,25 @@ namespace GetgudSDK {
 		unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
 
 		// convert the game to a sendable string and send it to Getgud.io's cloud using curl
-		gameDataToSend->GameToString(gameOut);
+		std::vector<std::string> matchGuids;
+		gameDataToSend->GameToString(gameOut, matchGuids);
 
-		if (!gameOut.empty()) {
+		if (gameOut.empty() == false) {
+
 			logger.Log(LogType::DEBUG, "Sending Game packet for Game guid: " + gameDataToSend->GetGameGuid());
-			SendGamePacket(gameOut);
+
+			if (SendGamePacket(gameOut) == false) {
+
+				// incase failed to send the packet to the server, mark the matches with lost data as not interesting so no other packets will be sent for these matches
+				logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
+				gameContainer.MarkGameMatchesAsNotInteresting(gameDataToSend->GetGameGuid(), matchGuids);
+			}
+			else logger.Log(LogType::DEBUG, "Packet for the following Game guid was sent: " + gameDataToSend->GetGameGuid());
+		}
+
+		// check if this is the first time a packet contains the MarkEndGame signal, if so, mark the fact that this signal was sent to the server
+		if (gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
+			gameContainer.SentGameMarkedAsEnded(gameDataToSend->GetGameGuid());
 		}
 
 		// Dispose of the cloned game
@@ -370,9 +384,12 @@ namespace GetgudSDK {
 	 *
 	 * Send game packet with action streams of game matches to Getgud
 	 **/
-	void GameSender::SendGamePacket(std::string& packet) {
+	bool GameSender::SendGamePacket(std::string& packet) {
+		
+		bool retValue = true;
+
 		if (!m_streamCurl || packet.empty()) {
-			return;
+			return retValue;
 		}
 		m_streamCurlReadBuffer.clear();
 		curl_easy_setopt(m_streamCurl, CURLOPT_POSTFIELDS, packet.c_str());
@@ -399,25 +416,27 @@ namespace GetgudSDK {
 		}
 
 		if (sendCode != CURLcode::CURLE_OK) {
+
+			retValue = false;
+
 			if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-				logger.Log(LogType::DEBUG,
-					"GameSender::SendGamePacket->Failed to send packet: " +
-					m_streamCurlReadBuffer);
+				logger.Log(LogType::DEBUG,"GameSender::SendGamePacket->Failed to send throttle request: " + m_streamCurlReadBuffer);
 			}
 			else {
-				logger.Log(LogType::_ERROR,
-					"GameSender::SendGamePacket->Failed to send packet: " +
-					std::string(curl_easy_strerror(sendCode)));
+				logger.Log(LogType::_ERROR,"GameSender::SendGamePacket->Failed to send packet: " + std::string(curl_easy_strerror(sendCode)));
 			}
 		}
 		else
 		{
 			if (m_streamCurlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
-				logger.Log(LogType::DEBUG,
-					"GameSender::SendGamePacket->Failed to send packet: " +
-					m_streamCurlReadBuffer);
+
+				retValue = false;
+
+				logger.Log(LogType::DEBUG,"GameSender::SendGamePacket->Failed to send throttle request: " + m_streamCurlReadBuffer);
 			}
 		}
+
+		return retValue;
 	}
 
 	/**

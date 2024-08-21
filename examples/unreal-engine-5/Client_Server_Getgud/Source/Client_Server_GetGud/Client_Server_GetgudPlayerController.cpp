@@ -24,8 +24,10 @@ void AClient_Server_GetgudPlayerController::BeginPlay()
 	if (GetWorld() && (GetWorld()->IsNetMode(NM_DedicatedServer) || GetWorld()->IsNetMode(NM_ListenServer)))
 	{
 		ServerRemoteGameAndMapStart();
-		UE_LOG(LogTemp, Warning, TEXT("Player Controller is ending play, possibly due to disconnection."));
+		UE_LOG(LogTemp, Warning, TEXT("Server: Game and Map Start initiated."));
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("PlayerController BeginPlay completed"));
 }
 
 void AClient_Server_GetgudPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)

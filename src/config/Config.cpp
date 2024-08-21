@@ -38,8 +38,7 @@ namespace GetgudSDK {
 		char* logsFilePathHolder = std::getenv("GETGUD_LOG_FILE_PATH");
 		if (logsFilePathHolder == nullptr) {
 			// Environment variable LOG_FILE_PATH is required to work
-			logger.Log(LogType::WARN, std::string("Config::LoadSettings->Environment "
-				"variable GETGUD_LOG_FILE_PATH is empty"));
+			logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment variable GETGUD_LOG_FILE_PATH is empty - log file will be created in the root folder"));
 		}
 		else {
 			logsFilePath = std::string(logsFilePathHolder);
@@ -53,8 +52,7 @@ namespace GetgudSDK {
 		bool valueReadResult = false;
 
 		// Read logger parameters
-		GetConfigValue(configData, sdkConfigFieldNames.logToFile,
-			sdkConfig.logToFile);
+		GetConfigValue(configData, sdkConfigFieldNames.logToFile, sdkConfig.logToFile);
 
 		unsigned int _logFileSizeInBytes = 0;
 		valueReadResult = GetConfigValue(
@@ -304,29 +302,21 @@ namespace GetgudSDK {
 
 		if (passAsContent == false && !configFile.empty())
 		{
+			// Loading config file from provided path
 			configFilePath = configFile;
-			logger.Log(LogType::DEBUG,
-				std::string("Loading config file from " + configFilePath + " path"));
 		}
 		else if (passAsContent == true && !configFile.empty())
 		{
+			// Loading config file from a content string
 			contentString = configFile;
-			logger.Log(LogType::DEBUG,
-				std::string("Loading config file from a content string"));
 		}
 		else
 		{
-
 			char* configPathHolder = std::getenv("GETGUD_CONFIG_PATH");
-			if (configPathHolder == nullptr) {
-				logger.Log(LogType::DEBUG, std::string("Config::LoadSettings->Environment "
-					"variable GETGUD_CONFIG_PATH is empty"));
-			}
-			else
-			{
+			if (configPathHolder != nullptr) {
+
+				// Loading config file from GETGUD_CONFIG_PATH Environment Parameter
 				configFilePath = std::string(configPathHolder);
-				logger.Log(LogType::DEBUG,
-					std::string("Loading config file from " + configFilePath + " path"));
 			}
 		}
 
@@ -340,6 +330,13 @@ namespace GetgudSDK {
 					file_stream.get(next_character);
 					contentString += next_character;
 				}
+			}
+			else {
+				logger.Log(LogType::WARN, std::string("Config file was not found, thus cannot be loaded.There are four ways to load the config file:" 
+					"\n1) You can provide a full path to the config file using the Init(configFileFullPath) method" 
+					"\n2) You can provide the config file content as string using the Init(configFile, passConfigAsConect = true) method." 
+					"\n3) You can provide a config file full path using the GETGUD_CONFIG_PATH environment variable and call the Init() method" 
+					"\n4) You can place the config file where the GetgudSDK is running from and call the Init() method. The config file Will be searched in the reletaive path: ./config.json"));
 			}
 
 			file_stream.close();

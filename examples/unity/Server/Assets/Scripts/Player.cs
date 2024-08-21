@@ -138,7 +138,12 @@ public class Player : MonoBehaviour
         };
 
         // Create PositionF (assuming it's defined somewhere in your project)
-        PositionF position = new PositionF { X = transform.position.x, Y = transform.position.y, Z = transform.position.z };
+        PositionF position = new PositionF 
+        {
+            X = transform.position.z,   // Unity's forward maps to Getgud's forward
+            Y = -transform.position.x,  // Unity's right maps to Getgud's right (with negation)
+            Z = transform.position.y    // Unity's up maps to Getgud's up
+        };
         // Create RotationF (assuming it's defined somewhere in your project)
         RotationF rotation = new RotationF { Yaw = 0.0f, Pitch = 1.0f, Roll = 0.0f };
 
