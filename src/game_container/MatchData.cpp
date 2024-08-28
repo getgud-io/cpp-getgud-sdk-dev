@@ -355,6 +355,8 @@ namespace GetgudSDK {
 
 		matchOut += "\"matchActionStream\":\"";
 
+		if (m_actionVector.size() > 0) actionStream += GetPlayerMapString() + ",";
+
 		for (int index = 0; index < m_actionVector.size(); index++) {
 			actionStream += m_actionVector[index]->ToString() + ",";
 		}
@@ -394,6 +396,16 @@ namespace GetgudSDK {
 			matchOut += "]";  // close the chat array and match
 		}
 		matchOut += "}";
+	}
+
+	std::string MatchData::GetPlayerMapString() {
+		std::string result = "playerMap";
+
+		for (const auto& entry : m_playerNameMap) {
+			result += "~G~" + entry.second + "~G~" + entry.first;
+		}
+
+		return result;
 	}
 
 	/**
@@ -463,6 +475,23 @@ namespace GetgudSDK {
 	 **/
 	std::string MatchData::GetMapName() {
 		return m_mapName;
+	}
+
+	std::string MatchData::getPlayerKeyName(std::string& playerGuid) {
+
+		// Check if the playerGuid already has a key
+		auto it = m_playerNameMap.find(playerGuid);
+		if (it != m_playerNameMap.end()) {
+			return it->second; // Return the existing key
+		}
+
+		// Generate a new key (a simple incrementing integer converted to a string)
+		std::string newKey = std::to_string(m_nextPlayerKey++);
+
+		// Store the new key in the map
+		m_playerNameMap[playerGuid] = newKey;
+
+		return newKey;
 	}
 
 	/**

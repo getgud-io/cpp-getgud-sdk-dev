@@ -35,6 +35,12 @@ namespace GetgudSDK {
 
 		std::map<std::string, Orientation> m_lastPositionActionVector;
 
+		// holds the  player Key to player Guid mapping
+		std::map<std::string, std::string> m_playerNameMap;
+
+		// used to generate new player keys
+		int m_nextPlayerKey = 0;  
+
 	public:
 		MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
 		MatchData(const MatchData& data);
@@ -67,6 +73,8 @@ namespace GetgudSDK {
 		std::string GetMapName();
 		void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
 		void SetMatchWinTeam(std::string teamGuid);
+		std::string getPlayerKeyName(std::string& playerGuid);
+		std::string  GetPlayerMapString();
 		void Dispose();
 		bool IsValid();
 	};

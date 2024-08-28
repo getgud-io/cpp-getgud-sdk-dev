@@ -13,6 +13,8 @@
 
 namespace GetgudSDK {
 	class DamageActionData : public BaseActionData {
+
+	public:
 		std::string m_weaponGuid;
 		std::string m_victimPlayerGuid;
 		float m_damageDone = 0;

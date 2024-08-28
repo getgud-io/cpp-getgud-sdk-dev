@@ -14,6 +14,8 @@
 
 namespace GetgudSDK {
 	class DeathActionData : public BaseActionData {
+
+	public:
 		std::string m_attackerGuid;
 	public:
 		GETGUDSDK_API DeathActionData(std::string matchGuid,

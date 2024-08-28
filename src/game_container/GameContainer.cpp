@@ -1,6 +1,8 @@
 #include "GameContainer.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
+#include "../../include/actions/DamageActionData.h"
+#include "../../include/actions/DeathActionData.h"
 
 namespace GetgudSDK {
 
@@ -166,6 +168,21 @@ namespace GetgudSDK {
 				matchData->SetThrottleCheckResults(true, false);
 				delete nextAction;
 				continue;
+			}
+
+			// convert the player guid to a player key in order to save space (a guid is usually much longer than a key)
+			nextAction->m_playerGuid = matchData->getPlayerKeyName(nextAction->m_playerGuid);
+
+			// in the Damage action, there is another player guid, convert it too to a key
+			if (nextAction->m_actionType == Actions::Damage) {
+				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
+				damageAction->m_victimPlayerGuid = matchData->getPlayerKeyName(damageAction->m_victimPlayerGuid);
+			}
+
+			// same for death action, convert the extra player guid to a key
+			if (nextAction->m_actionType == Actions::Death) {
+				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
+				deathAction->m_attackerGuid = matchData->getPlayerKeyName(deathAction->m_attackerGuid);
 			}
 
 			//  get the local vector (from the local map) that belong longs to this
