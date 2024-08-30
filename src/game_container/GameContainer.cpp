@@ -64,7 +64,8 @@ namespace GetgudSDK {
 	 **/
 	std::string GameContainer::AddMatch(std::string gameGuid,
 		std::string matchMode,
-		std::string mapName) {
+		std::string mapName, 
+		std::string customField) {
 		std::string retValue;
 		MatchData* matchData = nullptr;
 
@@ -79,7 +80,7 @@ namespace GetgudSDK {
 		}
 		// create a new match from the passed parameters and add it to the game we
 		// found above
-		matchData = game_it->second->AddMatch(matchMode, mapName);
+		matchData = game_it->second->AddMatch(matchMode, mapName, customField);
 		if (matchData == nullptr) {
 			m_gameContainerMutex.unlock();
 			return retValue;
@@ -319,14 +320,6 @@ namespace GetgudSDK {
 					logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameData->GetGameGuid());
 					break;
 				}
-				else if (gameData->CanDeleteGame() == true) {
-					// the delete method will take care of reducing the game size from the
-					// container
-					// we are cleaning game container on the way by removing
-					// unneeded games
-					DeleteGame(gameGuid, false);
-					gameData = nullptr;
-				}
 				else if (gameDataSizeInBytes > 0 || gameData->GetNumberOfGameReportsAndMessages() > 0) {
 					// this is a normal sized game packet that is ready to be sent whole
 					// Do the old switcheroo trick: pop it and insert an empty GameData
@@ -363,6 +356,14 @@ namespace GetgudSDK {
 					m_gameContainerSizeInBytes -= gameDataSizeInBytes;
 					m_gameVector.shrink_to_fit();
 					break;
+				}
+				else if (gameData->CanDeleteGame() == true) {
+					// the delete method will take care of reducing the game size from the
+					// container
+					// we are cleaning game container on the way by removing
+					// unneeded games
+					DeleteGame(gameGuid, false);
+					gameData = nullptr;
 				}
 				else {
 					// if gameContainerSizeInBytes = 0 we can't send it

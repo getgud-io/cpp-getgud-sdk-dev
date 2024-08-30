@@ -26,6 +26,7 @@ namespace GetgudSDK {
 		std::string m_matchMode;
 		std::string m_mapName;
 		std::string m_matchWinTeamGuid;
+		std::string m_customField;
 		bool m_throttleChecked = false;
 		bool m_isInteresting = false;
 		std::set<std::string> m_playerGuids;
@@ -42,7 +43,7 @@ namespace GetgudSDK {
 		int m_nextPlayerKey = 0;  
 
 	public:
-		MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
+		MatchData(std::string gameGuid, std::string matchMode, std::string mapName, std::string m_customField);
 		MatchData(const MatchData& data);
 		MatchData() = delete;
 		~MatchData();
@@ -71,6 +72,7 @@ namespace GetgudSDK {
 		std::vector<ChatMessageData*> GetChatMessageVector();
 		std::string GetMatchMode();
 		std::string GetMapName();
+		std::string GetCustomField();
 		void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
 		void SetMatchWinTeam(std::string teamGuid);
 		std::string getPlayerKeyName(std::string& playerGuid);

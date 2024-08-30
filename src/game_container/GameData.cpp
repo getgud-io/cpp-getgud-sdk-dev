@@ -144,7 +144,7 @@ namespace GetgudSDK {
 	 * AddMatch:
 	 *
 	 **/
-	MatchData* GameData::AddMatch(std::string matchMode, std::string mapName) {
+	MatchData* GameData::AddMatch(std::string matchMode, std::string mapName, std::string customField) {
 
 		// make sure the game has enough room for another match
 		if (m_matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
@@ -153,7 +153,7 @@ namespace GetgudSDK {
 		}
 
 		// create the new match with the passed parameters and insert it to the game's match map
-		MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName);
+		MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName, customField);
 		if (!matchData->IsValid()) {
 			logger.Log(LogType::WARN, std::string("GameData::AddMatch->One or more of the Match's paraemters are not valid - Match will not start. Match paraemters: matchMode: " + matchMode + " | mapName: " + mapName + " | gameGuid: " + m_gameGuid));
 			delete matchData;
@@ -369,9 +369,9 @@ namespace GetgudSDK {
 		gameOut += "\"privateKey\":\"" + m_privateKey + "\",";
 		gameOut += "\"titleId\":" + std::to_string(m_titleId) + ",";
 		gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
-		gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
-		gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
-		gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
+		if (m_gameMode.size() > 0) gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
+		if (m_serverGuid.size() > 0) gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
+		if (m_serverLocation.size() > 0) gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
 		gameOut += "\"gameLastPacket\":" + lastPacket + ",";
 		gameOut += "\"matches\":[\n";
 

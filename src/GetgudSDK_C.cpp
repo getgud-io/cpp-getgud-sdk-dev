@@ -125,6 +125,7 @@ extern "C" {
 			std::string gameGuid;
 			std::string matchMode;
 			std::string mapName;
+			std::string customField;
 
 			if (matchInfo.gameGuid != NULL &&
 				strlen(matchInfo.gameGuid) == matchInfo.gameGuidSize)
@@ -144,10 +145,17 @@ extern "C" {
 				mapName = std::string(matchInfo.mapName, matchInfo.mapNameSize);
 			}
 
+			if (matchInfo.customField != NULL &&
+				strlen(matchInfo.customField) == matchInfo.customFieldSize)
+			{
+				customField = std::string(matchInfo.customField, matchInfo.customFieldSize);
+			}
+
 			matchGuid = GetgudSDK::StartMatch(
 				gameGuid.c_str(),
 				matchMode.c_str(),
-				mapName.c_str());
+				mapName.c_str(),
+				customField.c_str());
 
 			strcpy(matchGuidOut, matchGuid.c_str());
 		}

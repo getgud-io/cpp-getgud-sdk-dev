@@ -34,7 +34,8 @@ namespace GetgudSDK {
 			std::string serverLocation);
 		std::string AddMatch(std::string gameGuid,
 			std::string matchMode,
-			std::string mapName);
+			std::string mapName,
+			std::string customField);
 		bool AddActions(std::deque<BaseActionData*>& actionVector);
 		bool AddInMatchReport(ReportInfo reportData);
 		bool AddChatMessage(std::string matchGuid, ChatMessageInfo chatData);

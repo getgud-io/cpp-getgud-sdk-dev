@@ -59,6 +59,8 @@ struct StartMatchInfo {
 	int matchModeSize;
 	const char* mapName;
 	int mapNameSize;
+	const char* customField;
+	int customFieldSize;
 };
 
 struct ChatMessageInfo {

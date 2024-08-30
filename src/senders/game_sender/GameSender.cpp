@@ -240,20 +240,14 @@ namespace GetgudSDK {
 				// start preparing throttle check request JSON body
 				std::string packet;
 				packet += "{";
-				packet +=
-					"\"privateKey\":\"" + gameDataToSend->GetPrivateKey() + "\",";
-				packet +=
-					"\"titleId\":" + std::to_string(gameDataToSend->GetTitleId()) +
-					",";
-				packet +=
-					"\"serverGuid\":\"" + gameDataToSend->GetServerGuid() + "\",";
-				packet +=
-					"\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
-				packet +=
-					"\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
-				packet +=
-					"\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
+				packet += "\"privateKey\":\"" + gameDataToSend->GetPrivateKey() + "\",";
+				packet += "\"titleId\":" + std::to_string(gameDataToSend->GetTitleId()) + ",";
+				if(gameDataToSend->GetServerGuid().size() > 0) packet += "\"serverGuid\":\"" + gameDataToSend->GetServerGuid() + "\",";
+				if (gameDataToSend->GetGameMode().size() > 0) packet += "\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
+				if (gameDataToSend->GetServerLocation().size() > 0) packet += "\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
+				if (match.second->GetMatchMode().size() > 0) packet += "\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
 				packet += "\"mapName\":\"" + match.second->GetMapName() + "\",";
+				if (match.second->GetCustomField().size() > 0) packet += "\"customField\":\"" + match.second->GetCustomField() + "\",";
 				packet += "\"playerGuids\":[";
 				for (auto& playerGuid : playerGuids) {
 					packet += "\"" + playerGuid + "\",";

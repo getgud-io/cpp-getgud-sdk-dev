@@ -21,7 +21,7 @@
   "maxMatchesPerGame": 50,
   "minPacketSizeForSendingInBytes": 1000000,
   "packetTimeoutInMilliseconds": 60000,
-  "gameCloseGraceAfterMarkEndInMilliseconds": 10000,
+  "gameCloseGraceAfterMarkEndInMilliseconds": 500,
   "liveGameTimeoutInMilliseconds": 300000,
   "hyperModeFeatureEnabled": false,
   "hyperModeMaxThreads": 10,

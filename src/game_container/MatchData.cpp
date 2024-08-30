@@ -24,8 +24,9 @@ namespace GetgudSDK {
 	 **/
 	MatchData::MatchData(std::string gameGuid,
 		std::string matchMode,
-		std::string mapName)
-		: m_gameGuid(gameGuid), m_matchMode(matchMode), m_mapName(mapName) {
+		std::string mapName,
+		std::string customField)
+		: m_gameGuid(gameGuid), m_matchMode(matchMode), m_mapName(mapName), m_customField(customField) {
 		m_matchGuid = GenerateGuid();
 		matchesAmount++;
 		totalCreatedMatches++;
@@ -44,6 +45,7 @@ namespace GetgudSDK {
 		m_gameGuid(data.m_gameGuid),
 		m_matchMode(data.m_matchMode),
 		m_mapName(data.m_mapName),
+		m_customField(data.m_customField),
 		m_throttleChecked(data.m_throttleChecked),
 		m_isInteresting(data.m_isInteresting),
 		m_playerGuids(data.m_playerGuids),
@@ -69,12 +71,13 @@ namespace GetgudSDK {
 	 * to the original match and match copy that will be sent to Getgud
 	 **/
 	MatchData* MatchData::Clone(bool isWithActions) {
-		MatchData* cloneMatchData = new MatchData(m_gameGuid, m_matchMode, m_mapName);
+		MatchData* cloneMatchData = new MatchData(m_gameGuid, m_matchMode, m_mapName, m_customField);
 		// Clone some metadata variables
 		cloneMatchData->m_matchGuid = m_matchGuid;
 		cloneMatchData->m_gameGuid = m_gameGuid;
 		cloneMatchData->m_matchMode = m_matchMode;
 		cloneMatchData->m_mapName = m_mapName;
+		cloneMatchData->m_customField = m_customField;
 		cloneMatchData->m_isInteresting = m_isInteresting;
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
@@ -348,10 +351,10 @@ namespace GetgudSDK {
 		matchOut += "{";
 		matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
 		matchOut += "\"mapName\":\"" + m_mapName + "\",";
-		if (m_matchMode.size() > 0)
-			matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
-		if (m_matchWinTeamGuid.size() > 0)
-			matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
+		
+		if (m_matchMode.size() > 0) matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
+		if (m_matchWinTeamGuid.size() > 0) matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
+		if (m_customField.size() > 0) matchOut += "\"customField\":\"" + m_customField + "\",";
 
 		matchOut += "\"matchActionStream\":\"";
 
@@ -477,6 +480,14 @@ namespace GetgudSDK {
 		return m_mapName;
 	}
 
+	/**
+	* GetCustomField:
+	*
+	**/
+	std::string MatchData::GetCustomField() {
+		return m_customField;
+	}
+
 	std::string MatchData::getPlayerKeyName(std::string& playerGuid) {
 
 		// Check if the playerGuid already has a key
@@ -563,6 +574,8 @@ namespace GetgudSDK {
 		isActionValid &= Validator::ValidateStringChars(m_matchMode);
 		isActionValid &= Validator::ValidateStringLength(m_mapName, 1, 36);
 		isActionValid &= Validator::ValidateStringChars(m_mapName);
+		isActionValid &= Validator::ValidateStringLength(m_customField, 0, 128);
+		isActionValid &= Validator::ValidateStringChars(m_customField);
 		return isActionValid;
 	}
 
