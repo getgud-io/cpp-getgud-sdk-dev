@@ -13,6 +13,8 @@
 
 namespace GetgudSDK {
 	class AttackActionData : public BaseActionData {
+
+	public:
 		std::string m_weaponGuid;
 
 	public:

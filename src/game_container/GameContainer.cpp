@@ -2,6 +2,7 @@
 #include "../config/Config.h"
 #include "../logger/Logger.h"
 #include "../../include/actions/DamageActionData.h"
+#include "../../include/actions/AttackActionData.h"
 #include "../../include/actions/DeathActionData.h"
 
 namespace GetgudSDK {
@@ -174,10 +175,17 @@ namespace GetgudSDK {
 			// convert the player guid to a player key in order to save space (a guid is usually much longer than a key)
 			nextAction->m_playerGuid = matchData->getPlayerKeyName(nextAction->m_playerGuid);
 
-			// in the Damage action, there is another player guid, convert it too to a key
+			// in the Damage action, there is another player guid and a weapon guid, convert both to keys
 			if (nextAction->m_actionType == Actions::Damage) {
 				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
 				damageAction->m_victimPlayerGuid = matchData->getPlayerKeyName(damageAction->m_victimPlayerGuid);
+				damageAction->m_weaponGuid = matchData->getWeaponKeyName(damageAction->m_weaponGuid);
+			}
+
+			// in the Attack action, there is a weapon guid, convert it to a key
+			if (nextAction->m_actionType == Actions::Attack) {
+				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
+				attackAction->m_weaponGuid = matchData->getWeaponKeyName(attackAction->m_weaponGuid);
 			}
 
 			// same for death action, convert the extra player guid to a key

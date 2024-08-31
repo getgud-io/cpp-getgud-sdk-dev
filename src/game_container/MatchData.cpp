@@ -358,7 +358,7 @@ namespace GetgudSDK {
 
 		matchOut += "\"matchActionStream\":\"";
 
-		if (m_actionVector.size() > 0) actionStream += GetPlayerMapString() + ",";
+		if (m_actionVector.size() > 0) actionStream += GetPlayerMapString() + GetWeaponMapString() + ",";
 
 		for (int index = 0; index < m_actionVector.size(); index++) {
 			actionStream += m_actionVector[index]->ToString() + ",";
@@ -404,8 +404,18 @@ namespace GetgudSDK {
 	std::string MatchData::GetPlayerMapString() {
 		std::string result = "playerMap";
 
-		for (const auto& entry : m_playerNameMap) {
+		for (const auto& entry : m_playerGuidMap) {
 			result += "~G~" + entry.second + "~G~" + entry.first;
+		}
+
+		return result;
+	}
+
+	std::string MatchData::GetWeaponMapString() {
+		std::string result = "~G~weaponMap~G~";
+
+		for (const auto& entry : m_weaponGuidMap) {
+			result += "~W~" + entry.second + "~W~" + entry.first;
 		}
 
 		return result;
@@ -491,8 +501,8 @@ namespace GetgudSDK {
 	std::string MatchData::getPlayerKeyName(std::string& playerGuid) {
 
 		// Check if the playerGuid already has a key
-		auto it = m_playerNameMap.find(playerGuid);
-		if (it != m_playerNameMap.end()) {
+		auto it = m_playerGuidMap.find(playerGuid);
+		if (it != m_playerGuidMap.end()) {
 			return it->second; // Return the existing key
 		}
 
@@ -500,7 +510,24 @@ namespace GetgudSDK {
 		std::string newKey = std::to_string(m_nextPlayerKey++);
 
 		// Store the new key in the map
-		m_playerNameMap[playerGuid] = newKey;
+		m_playerGuidMap[playerGuid] = newKey;
+
+		return newKey;
+	}
+
+	std::string MatchData::getWeaponKeyName(std::string& weaponGuid) {
+
+		// Check if the weaponGuid already has a key
+		auto it = m_weaponGuidMap.find(weaponGuid);
+		if (it != m_weaponGuidMap.end()) {
+			return it->second; // Return the existing key
+		}
+
+		// Generate a new key (a simple incrementing integer converted to a string)
+		std::string newKey = std::to_string(m_nextWeaponKey++);
+
+		// Store the new key in the map
+		m_weaponGuidMap[weaponGuid] = newKey;
 
 		return newKey;
 	}
