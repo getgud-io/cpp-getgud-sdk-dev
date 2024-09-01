@@ -120,8 +120,8 @@ namespace GetgudSDK {
 			if (SendGamePacket(gameOut) == false) {
 
 				// incase failed to send the packet to the server, mark the matches with lost data as not interesting so no other packets will be sent for these matches
-				logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
-				gameContainer.MarkGameMatchesAsNotInteresting(gameDataToSend->GetGameGuid(), matchGuids);
+				logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as incomplite and will not be analyzed for Game guid: " + gameDataToSend->GetGameGuid());
+				gameContainer.SetGameMatchesIncompleteState(gameDataToSend->GetGameGuid(), matchGuids, MatchCompletionState::ActionLose);
 			}
 			else logger.Log(LogType::DEBUG, "Packet for the following Game guid was sent: " + gameDataToSend->GetGameGuid());
 		}

@@ -48,6 +48,8 @@ namespace GetgudSDK {
 		// used to generate new weapon keys
 		int m_nextWeaponKey = 0;
 
+		MatchCompletionState m_matchCompletionState = MatchCompletionState::Complete;
+
 	public:
 		MatchData(std::string gameGuid, std::string matchMode, std::string mapName, std::string m_customField);
 		MatchData(const MatchData& data);
@@ -85,6 +87,7 @@ namespace GetgudSDK {
 		std::string getWeaponKeyName(std::string& weaponGuid);
 		std::string  GetPlayerMapString();
 		std::string  GetWeaponMapString();
+		void SetMatchIncompleteState(MatchCompletionState state);
 		void Dispose();
 		bool IsValid();
 	};

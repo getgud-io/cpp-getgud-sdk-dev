@@ -165,9 +165,9 @@ namespace GetgudSDK {
 			if (nextAction->IsValid() == false) {
 
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
-				logger.Log(LogType::DEBUG, std::string("Action is invalid - Marking the match as not interesting, thus no more actions will be sent for the match with guid:" + matchData->GetMatchGuid()));
+				logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
 				logger.Log(LogType::DEBUG, nextAction->ToString());
-				matchData->SetThrottleCheckResults(true, false);
+				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
 				delete nextAction;
 				continue;
 			}
@@ -443,6 +443,22 @@ namespace GetgudSDK {
 		}
 		else {
 			gameData_it->second->MarkGameMatchesAsNotInteresting(matchGuids);
+		}
+
+		m_gameContainerMutex.unlock();
+	}
+
+	void GameContainer::SetGameMatchesIncompleteState(std::string gameGuid, std::vector<std::string>& matchGuids, MatchCompletionState state) {
+
+		m_gameContainerMutex.lock();
+
+		// find the game that it's matches need to be marked as incomplite, and mark it as such
+		auto gameData_it = m_gameMap.find(gameGuid);
+		if (gameData_it == m_gameMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::SetGameMatchesComplitionState->Failed to find a game with the guid: " + gameGuid));
+		}
+		else {
+			gameData_it->second->SetGameMatchesIncompleteState(matchGuids, state);
 		}
 
 		m_gameContainerMutex.unlock();

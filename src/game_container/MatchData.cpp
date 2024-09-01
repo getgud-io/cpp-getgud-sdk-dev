@@ -82,6 +82,7 @@ namespace GetgudSDK {
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
 		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
+		cloneMatchData->m_matchCompletionState = m_matchCompletionState;
 
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
@@ -355,6 +356,7 @@ namespace GetgudSDK {
 		if (m_matchMode.size() > 0) matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
 		if (m_matchWinTeamGuid.size() > 0) matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
 		if (m_customField.size() > 0) matchOut += "\"customField\":\"" + m_customField + "\",";
+		matchOut += "\"matchCompletionState\":\"" + std::to_string((int)m_matchCompletionState) + "\",";
 
 		matchOut += "\"matchActionStream\":\"";
 
@@ -419,6 +421,50 @@ namespace GetgudSDK {
 		}
 
 		return result;
+	}
+
+	void MatchData::SetMatchIncompleteState(MatchCompletionState state) {
+
+		switch (state)
+		{
+			case MatchCompletionState::ActionDrop:
+				switch (m_matchCompletionState) {
+				case MatchCompletionState::Complete:
+					m_matchCompletionState = MatchCompletionState::ActionDrop;
+					break;
+				case MatchCompletionState::ActionLose:
+					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
+					break;
+				default:
+					break;
+				}
+				break;
+			case MatchCompletionState::ActionLose:
+				switch (m_matchCompletionState) {
+				case MatchCompletionState::Complete:
+					m_matchCompletionState = MatchCompletionState::ActionLose;
+					break;
+				case MatchCompletionState::ActionDrop:
+					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
+					break;
+				default:
+					break;
+				}
+				break;
+			case MatchCompletionState::ActionDropAndLose:
+				switch (m_matchCompletionState) {
+				case MatchCompletionState::Complete:
+				case MatchCompletionState::ActionDrop:
+				case MatchCompletionState::ActionLose:
+					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
+					break;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 
 	/**

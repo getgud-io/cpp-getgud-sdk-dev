@@ -122,6 +122,21 @@ namespace GetgudSDK {
 		}
 	}
 
+	void GameData::SetGameMatchesIncompleteState(std::vector<std::string>& matchGuids, MatchCompletionState state) {
+
+		std::string matchGuid;
+
+		for (int index = 0; index < matchGuids.size(); index++) {
+			matchGuid = matchGuids[index];
+			auto matchData_it = m_matchMap.find(matchGuid);
+			if (matchData_it == m_matchMap.end())
+				continue;
+
+			matchData_it->second->SetMatchIncompleteState(state);
+			logger.Log(LogType::WARN, std::string("Match with the following Guid was marked as incomplete: " + matchGuid + " with the state: " + std::to_string((int)state)));
+		}
+	}
+
 	/**
 	 * MarkGameAsEnded:
 	 *
