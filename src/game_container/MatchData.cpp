@@ -425,45 +425,9 @@ namespace GetgudSDK {
 
 	void MatchData::SetMatchIncompleteState(MatchCompletionState state) {
 
-		switch (state)
-		{
-			case MatchCompletionState::ActionDrop:
-				switch (m_matchCompletionState) {
-				case MatchCompletionState::Complete:
-					m_matchCompletionState = MatchCompletionState::ActionDrop;
-					break;
-				case MatchCompletionState::ActionLose:
-					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
-					break;
-				default:
-					break;
-				}
-				break;
-			case MatchCompletionState::ActionLose:
-				switch (m_matchCompletionState) {
-				case MatchCompletionState::Complete:
-					m_matchCompletionState = MatchCompletionState::ActionLose;
-					break;
-				case MatchCompletionState::ActionDrop:
-					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
-					break;
-				default:
-					break;
-				}
-				break;
-			case MatchCompletionState::ActionDropAndLose:
-				switch (m_matchCompletionState) {
-				case MatchCompletionState::Complete:
-				case MatchCompletionState::ActionDrop:
-				case MatchCompletionState::ActionLose:
-					m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
-					break;
-				default:
-					break;
-				}
-				break;
-			default:
-				break;
+		if (m_matchCompletionState != state) {
+			if (m_matchCompletionState == MatchCompletionState::Complete) m_matchCompletionState = state;
+			else m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
 		}
 	}
 
