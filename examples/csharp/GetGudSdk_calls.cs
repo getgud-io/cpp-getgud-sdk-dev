@@ -95,8 +95,8 @@ namespace GetgudSDK_calls
             public int playerReputationSize;
             public IntPtr playerStatus;
             public int playerStatusSize;
-            public IntPtr playerCompaign;
-            public int playerCompaignSize;
+            public IntPtr PlayerCompaign;
+            public int PlayerCompaignSize;
             public IntPtr playerNotes;
             public int playerNotesSize;
             public IntPtr playerDevice;
