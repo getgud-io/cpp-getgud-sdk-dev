@@ -159,10 +159,16 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 		yaw = 360 - CameraRotation.Yaw;
 	}
 
+
+	// divide position to transform from cm to meters
 	GetgudSDK::BaseActionData* outAction = nullptr;
 	outAction = new GetgudSDK::PositionActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid,
-		GetgudSDK::PositionF{ (float)position.X, (float)position.Y, (float)position.Z },
+		GetgudSDK::PositionF{ 	
+			(float)position.X / 100.0f, 
+			(float)position.Y / 100.0f, 
+			(float)position.Z / 100.0f 
+		},
 		GetgudSDK::RotationF{pitch, yaw, 0});
 
 	GetgudSDK::SendAction(outAction);
@@ -211,10 +217,15 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 	{
 		yaw = 360 - CameraRotation.Yaw;
 	}
-
+	
+	// divide position to transform from cm to meters
 	outAction = new GetgudSDK::SpawnActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", "Team_1", 100.f,
-		GetgudSDK::PositionF{(float)position.X, (float)position.Y, (float)position.Z},
+		GetgudSDK::PositionF{ 	
+			(float)position.X / 100.0f, 
+			(float)position.Y / 100.0f, 
+			(float)position.Z / 100.0f 
+		},
 		GetgudSDK::RotationF{pitch, yaw, 0});
 
 	GetgudSDK::SendAction(outAction);

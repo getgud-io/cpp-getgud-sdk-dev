@@ -23,7 +23,7 @@ namespace GetgudSDK {
 			std::string privateKey,
 			ReportInfo reportInfo);
 		bool IsValid() override;
-		virtual ~CredentialsReportData() { ReportData::~ReportData();};
+		virtual ~CredentialsReportData() { };
 	};
 
 	class ReportSender {

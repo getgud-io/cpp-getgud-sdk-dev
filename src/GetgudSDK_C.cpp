@@ -31,6 +31,25 @@ extern "C" {
 	}
 
 	/**
+	 * Init:
+	 *
+	 * Init Getgud SDK
+	 **/
+	int init_conf_path(const char* configFilePath) {
+		bool result = false;
+		try {
+			result = GetgudSDK::Init(std::string(configFilePath));
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::init() "
+					"can not be sent: ") +
+				std::string(_error.what()));
+		}
+		return result;
+	}
+
+	/**
 	* Init:
 	*
 	* Init Getgud SDK

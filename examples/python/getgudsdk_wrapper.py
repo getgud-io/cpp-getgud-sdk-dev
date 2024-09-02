@@ -13,6 +13,9 @@ class GetgudSDK:
     def __init__(self):
         getgudsdk.init()
         
+    def __init_conf_path__(self, config_file_path):
+        getgudsdk.init_conf_path(config_file_path.encode('utf-8'))
+        
     def __init_conf__(self, config_file, passAsContent):
         getgudsdk.init_conf(config_file.encode('utf-8'), passAsContent)
 
