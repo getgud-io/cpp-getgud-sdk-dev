@@ -317,7 +317,7 @@ class GetgudSDK:
 
         player_nickname_data = ffi.new("char[]", player_nickname.encode('utf-8'))
         player_info.playerNickname = player_nickname_data
-        player_info.reporterNameSize = len(player_nickname)
+        player_info.playerNicknameSize = len(player_nickname)
 
         player_email_data = ffi.new("char[]", player_email.encode('utf-8'))
         player_info.playerEmail = player_email_data
