@@ -45,7 +45,7 @@ class GetgudSDK:
 
         return ffi.string(game_guid).decode('utf-8')
 
-    def start_match(self, game_guid, match_mode, map_name):
+    def start_match(self, game_guid, match_mode, map_name, custom_field=""):
         match_info = ffi.new("struct StartMatchInfo*")
 
         game_guid_data = ffi.new("char[]", game_guid.encode('utf-8'))
@@ -59,6 +59,10 @@ class GetgudSDK:
         map_name_data = ffi.new("char[]", map_name.encode('utf-8'))
         match_info.mapName = map_name_data
         match_info.mapNameSize = len(map_name)
+
+        custom_field_data = ffi.new("char[]", custom_field.encode('utf-8'))
+        match_info.customField = custom_field_data
+        match_info.customFieldSize = len(custom_field)
 
         match_guid = ffi.new("char[256]")
         result_code = getgudsdk.StartMatch(match_info[0], match_guid)

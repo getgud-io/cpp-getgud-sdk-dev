@@ -9,7 +9,7 @@ def random_string(length):
 if __name__ == "__main__":
     sdk = GetgudSDK()
     game_guid = sdk.start_game(1, "pk", "aws", "deathmatch")
-    match_guid = sdk.start_match(game_guid, "test_map", "deathmatch")
+    match_guid = sdk.start_match(game_guid, "test_map", "deathmatch", "custom_field_value")
     
     action_time_epoch = 1000*int(time.time())
     weapon_guid = random_string(3)
