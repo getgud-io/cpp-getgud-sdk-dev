@@ -32,6 +32,8 @@ class Program
         matchInfo.gameGuid = gameGuid;
         matchInfo.mapName = "map";
         matchInfo.matchMode = "matchMode";
+        matchInfo.customField = "customFieldValue";
+
 
         // Start a Match of the Game:
         status = GetgudSDK.Methods.StartMatch(matchInfo, out matchGuid);

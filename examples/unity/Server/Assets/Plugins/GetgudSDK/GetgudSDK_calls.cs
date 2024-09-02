@@ -64,6 +64,8 @@ namespace GetgudSDK_calls
             public int matchModeSize;
             public IntPtr mapName;
             public int mapNameSize;
+            public IntPtr customField;
+            public int customFieldSize;
         };
 
         public struct ChatMessageWrapper

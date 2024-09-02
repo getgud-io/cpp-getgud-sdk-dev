@@ -64,6 +64,8 @@ namespace GetgudSDK_calls
             public int matchModeSize;
             public IntPtr mapName;
             public int mapNameSize;
+            public IntPtr customField;
+            public int customFieldSize;
         };
 
         public struct ChatMessageWrapper
@@ -197,7 +199,7 @@ namespace GetgudSDK_calls
 		//
 		// Linux deploy path
 		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-        const string dllPath = "libGetgudSDK.so";
+        const string dllPath = "GetgudSDK";
 
 
         [DllImport(dllPath)]

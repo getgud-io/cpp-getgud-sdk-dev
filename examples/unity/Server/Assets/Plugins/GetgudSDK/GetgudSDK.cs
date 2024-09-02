@@ -81,6 +81,8 @@ namespace GetgudSDK
         public string gameGuid;
         public string matchMode;
         public string mapName;
+        public string customField;
+
     };
     public struct ChatMessageInfo
     {
@@ -283,7 +285,9 @@ namespace GetgudSDK
                 matchMode = Marshal.StringToHGlobalAnsi(info.matchMode),
                 matchModeSize = info.matchMode.Length,
                 mapName = Marshal.StringToHGlobalAnsi(info.mapName),
-                mapNameSize = info.mapName.Length
+                mapNameSize = info.mapName.Length,
+                customField = Marshal.StringToHGlobalAnsi(info.customField),
+                customFieldSize = info.customField?.Length ?? 0
             };
 
             // call unmanaged function
@@ -303,6 +307,7 @@ namespace GetgudSDK
             Marshal.FreeHGlobal(unmanagedInfo.gameGuid);
             Marshal.FreeHGlobal(unmanagedInfo.matchMode);
             Marshal.FreeHGlobal(unmanagedInfo.mapName);
+            Marshal.FreeHGlobal(unmanagedInfo.customField);
             Marshal.FreeHGlobal(matchGuidOutPtr);
 
             return result;
