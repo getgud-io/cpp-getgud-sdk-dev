@@ -305,7 +305,6 @@ class GetgudSDK:
         player_location, 
         transactions
     ):
-        
         private_key_data = ffi.new("char[]", private_key.encode('utf-8'))
         privateKeySize = len(private_key)
         
@@ -366,16 +365,20 @@ class GetgudSDK:
 
         # Handle transactions if provided
         if transactions:
-            # Assuming transactions is a list of dictionaries
-            transaction_structs = [ffi.new("struct PlayerTransactions*", {
-                'TransactionGuid': ffi.new("char[]", transaction['TransactionGuid'].encode('utf-8')),
-                'TransactionGuidSize': len(transaction['TransactionGuid']),
-                'TransactionName': ffi.new("char[]", transaction['TransactionName'].encode('utf-8')),
-                'TransactionNameSize': len(transaction['TransactionName']),
-                'TransactionDateEpoch': transaction['TransactionDateEpoch'],
-                'TransactionValueUSD': transaction['TransactionValueUSD']
-            }) for transaction in transactions]
-            player_info.transactions = ffi.new("struct PlayerTransactions[]", transaction_structs)
+            # Create an array of PlayerTransactions structures
+            transaction_array = ffi.new("struct PlayerTransactions[]", len(transactions))
+            for i, transaction in enumerate(transactions):
+                transaction_guid = ffi.new("char[]", transaction['TransactionGuid'].encode('utf-8'))
+                transaction_name = ffi.new("char[]", transaction['TransactionName'].encode('utf-8'))
+                
+                transaction_array[i].TransactionGuid = transaction_guid
+                transaction_array[i].TransactionGuidSize = len(transaction['TransactionGuid'])
+                transaction_array[i].TransactionName = transaction_name
+                transaction_array[i].TransactionNameSize = len(transaction['TransactionName'])
+                transaction_array[i].TransactionDateEpoch = transaction['TransactionDateEpoch']
+                transaction_array[i].TransactionValueUSD = transaction['TransactionValueUSD']
+
+            player_info.transactions = transaction_array
             player_info.transactionsSize = len(transactions)
         else:
             player_info.transactions = ffi.NULL
