@@ -38,9 +38,7 @@ def build_sdk(c):
     ffi.set_source(
         "getgudsdk",
         '#include "GetgudSDK_C.h"',
-        # libraries=[":libGetgudSDK.so", "stdc++", "crypto", "ssl", ":libz.so"], # Linux
-        libraries=[":libGetgudSDK.so"], # Linux
-        # libraries=["GetgudSDK"], # Windows
+        libraries=["GetgudSDK"],
         library_dirs=[this_dir.as_posix()],
         extra_link_args=["-Wl,-rpath,."],
     )
