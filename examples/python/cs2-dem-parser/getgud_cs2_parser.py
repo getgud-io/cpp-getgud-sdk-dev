@@ -10,10 +10,6 @@ from typing import Any
 from tqdm import tqdm
 import re
 
-
-unknown_data = "UNKNOWN"
-team_id_mapping = {'T': 0, 'CT': 1, unknown_data:-1, 't': 0, 'ct': 1}
-PARSE_RATE = 1
 CHAR_LIMIT = { "small": 20, "big": 36 }
 
         
@@ -849,8 +845,8 @@ class GetgudCS2Parser:
                             match_guid,
                             round(self.match_start_time_in_milliseconds + (round_start_tick / tick_rate) * 1000),
                             player_id,
-                            player_side,
-                            team_id_mapping[player_side],
+                            player_side, # character guid
+                            player_side, # team guid
                             tick_row['health'], # + tick_row['armor'],  # Assuming 'armor' value is available
                             Position(tick_row['X'], tick_row['Y'], tick_row['Z']),
                             Rotation(tick_row['pitch'], tick_row['yaw'], 0),

@@ -300,7 +300,7 @@ class SpawnActionData:
         self.match_guid = match_guid
         self.player_guid = str(player_guid)
         self.character_guid = str(character_guid)
-        self.team_guid = team_guid
+        self.team_guid = str(team_guid)
         self.initial_health = initial_health
         self.position = position
         self.rotation = rotation
