@@ -611,7 +611,7 @@ class GetgudDemoParser:
         header = self.parser.parse_header()
         events = dict(
             self.parser.parse_events(
-                self.parser.list_game_events(),
+                self.parser.list_game_events() + ['round_end'],
                 player=[
                     "X",
                     "Y",
@@ -870,22 +870,20 @@ class GetgudCS2Parser:
                     )
                 ])
 
+            round_end_event = demo_data['events']['round_end'].loc[
+                (demo_data['events']['round_end']['tick'] > round_start_tick) & 
+                (demo_data['events']['round_end']['tick'] <= round_end_tick)
+            ]
             
-                    
-                    
-            # round_end_event = demo_data['events']['round_end'].loc[
-            #     (demo_data['events']['round_end']['tick'] > round_start_tick) & 
-            #     (demo_data['events']['round_end']['tick'] <= round_end_tick)
-            # ].iloc[0]
-            
-            # print(round_end_event)
-            
-            # winning_team = "Unknown"  # Handle any other cases
+            winning_team = "unknown"
+            if round_end_event.shape[0] > 0:
+                winning_team = round_end_event.iloc[0].get('winner', "unknown")
 
-            # sdk_commands.append([
-            #     round(self.game_start_time_in_milliseconds + (round_end_event['tick'] / tick_rate) * 1000),
-            #     SetMatchWinTeam(match_guid, winning_team)
-            # ])
+            sdk_commands.append([
+                round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                SetMatchWinTeam(match_guid, winning_team)
+            ])
+
         # Sort SDK commands by timestamp
         sdk_commands.sort(key=lambda x: x[0])
         
