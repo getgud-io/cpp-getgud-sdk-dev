@@ -870,6 +870,22 @@ class GetgudCS2Parser:
                     )
                 ])
 
+            
+                    
+                    
+            # round_end_event = demo_data['events']['round_end'].loc[
+            #     (demo_data['events']['round_end']['tick'] > round_start_tick) & 
+            #     (demo_data['events']['round_end']['tick'] <= round_end_tick)
+            # ].iloc[0]
+            
+            # print(round_end_event)
+            
+            # winning_team = "Unknown"  # Handle any other cases
+
+            # sdk_commands.append([
+            #     round(self.game_start_time_in_milliseconds + (round_end_event['tick'] / tick_rate) * 1000),
+            #     SetMatchWinTeam(match_guid, winning_team)
+            # ])
         # Sort SDK commands by timestamp
         sdk_commands.sort(key=lambda x: x[0])
         

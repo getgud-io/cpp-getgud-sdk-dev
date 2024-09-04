@@ -8,7 +8,7 @@ import threading
 import queue
 
 current_script_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_script_path, "python-getgud-sdk"))
+sys.path.append(os.path.join(current_script_path, "../"))
 from getgudsdk_wrapper import GetgudSDK
 
 GETGUD_TITLE_ID = os.environ.get("GETGUD_TITLE_ID")
