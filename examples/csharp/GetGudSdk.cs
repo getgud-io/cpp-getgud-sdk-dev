@@ -329,6 +329,24 @@ namespace GetgudSDK
         }
 
         /**
+         * SetMatchWinTeam:
+         *
+         * Set the winning team for a match
+         **/
+        static public int SetMatchWinTeam(string matchGuid, string teamGuid)
+        {
+            IntPtr matchGuidPtr = Marshal.StringToHGlobalAnsi(matchGuid);
+            IntPtr teamGuidPtr = Marshal.StringToHGlobalAnsi(teamGuid);
+
+            var result = GetgudSDK_calls.GetgudSDK_calls.SetMatchWinTeam(matchGuidPtr, matchGuid.Length, teamGuidPtr, teamGuid.Length);
+
+            Marshal.FreeHGlobal(matchGuidPtr);
+            Marshal.FreeHGlobal(teamGuidPtr);
+
+            return result;
+        }
+
+        /**
          * SendAffectAction:
          *
          **/
