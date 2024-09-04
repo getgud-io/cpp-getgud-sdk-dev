@@ -35,10 +35,11 @@ def build_sdk(c):
         processed_header_content = preprocess_header(header_content)
         ffi.cdef(processed_header_content)
 
+    # we need to link psl otherwise python getgudsdk doesn't see it for some reason
     ffi.set_source(
         "getgudsdk",
         '#include "GetgudSDK_C.h"',
-        libraries=["GetgudSDK"],
+        libraries=["GetgudSDK", "psl"],
         library_dirs=[this_dir.as_posix()],
         extra_link_args=["-Wl,-rpath,."],
     )
