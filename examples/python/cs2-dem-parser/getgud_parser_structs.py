@@ -107,6 +107,17 @@ class MarkEndGame:
     def call(self, sdk):
         return sdk.mark_end_game(self.game_guid)
 
+class SetMatchWinTeam:
+    def __init__(self, match_guid, team_guid):
+        self.match_guid = match_guid
+        self.team_guid = team_guid
+
+    def to_string(self):
+        return f'SetMatchWinTeam:{self.match_guid};{self.team_guid}\n'
+
+    def call(self, sdk):
+        return sdk.set_match_win_team(self.match_guid, self.team_guid)
+
 class SendChatMessage:
     def __init__(self, match_guid, message_time_epoch, player_guid, message):
         self.match_guid = match_guid

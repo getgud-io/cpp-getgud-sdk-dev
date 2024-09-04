@@ -71,6 +71,17 @@ class GetgudSDK:
 
     def mark_end_game(self, game_guid):
         return getgudsdk.MarkEndGame(game_guid.encode('utf-8'), len(game_guid))
+    
+    def set_match_win_team(self, match_guid, team_guid):
+        match_guid_data = ffi.new("char[]", match_guid.encode('utf-8'))
+        match_guid_size = len(match_guid)
+
+        team_guid_data = ffi.new("char[]", team_guid.encode('utf-8'))
+        team_guid_size = len(team_guid)
+
+        result_code = getgudsdk.SetMatchWinTeam(match_guid_data, match_guid_size, team_guid_data, team_guid_size)
+
+        return result_code
 
     def send_in_match_report(self, match_guid, reporter_name, reporter_type, reporter_sub_type, 
                          suspected_player_guid, tb_type, 
