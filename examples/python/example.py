@@ -40,7 +40,7 @@ if __name__ == "__main__":
     sdk.send_heal_action(match_guid, action_time_epoch, player_guid, health_gained)
     
     character_guid = random_string(3)
-    team_guid = str(random.randint(1, 2))
+    team_guid = "Team-1"
     initial_health = 100
     position = (random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1))
     rotation = (random.uniform(0, 360), random.uniform(0, 360), random.uniform(0, 360))
@@ -89,7 +89,6 @@ if __name__ == "__main__":
     # Add an example of set_match_win_team
     winning_team_guid = team_guid  # Using the previously generated team_guid as the winning team
     result = sdk.set_match_win_team(match_guid, winning_team_guid)
-    print(f"Set winning team result: {result}")
     
     time.sleep(2)
     sdk.mark_end_game(game_guid)
