@@ -33,3 +33,5 @@ output.txt
 
 src/GetgudSDK.dir/*
 GetgudSDK.vcxproj
+
+*.dem
