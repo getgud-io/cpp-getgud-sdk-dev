@@ -170,6 +170,13 @@ extern "C" {
 	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
 
 	/**
+     * SetMatchWinTeam:
+     *
+     * Set the winning team for a match
+     **/
+    GETGUDSDK_API int SetMatchWinTeam(const char* matchGuid, int matchGuidSize, const char* teamGuid, int teamGuidSize);
+
+	/**
 	 * SendAffectAction:
 	 *
 	 **/

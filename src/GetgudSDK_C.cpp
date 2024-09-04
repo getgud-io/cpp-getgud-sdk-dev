@@ -212,6 +212,39 @@ extern "C" {
 		}
 		return result;
 	}
+	
+	/**
+	 * SetMatchWinTeam:
+	 *
+	 * Set match win team
+	 **/
+	int SetMatchWinTeam(const char* matchGuid, int matchGuidSize, const char* teamGuid, int teamGuidSize)
+	{
+		bool result = false;
+		try {
+			std::string matchGuidStr;
+			std::string teamGuidStr;
+
+			if (matchGuid != NULL && strlen(matchGuid) == matchGuidSize)
+			{
+				matchGuidStr = std::string(matchGuid, matchGuidSize);
+			}
+
+			if (teamGuid != NULL && strlen(teamGuid) == teamGuidSize)
+			{
+				teamGuidStr = std::string(teamGuid, teamGuidSize);
+			}
+
+			result = GetgudSDK::SetMatchWinTeam(matchGuidStr, teamGuidStr);
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::SetMatchWinTeam "
+					"can not be set: ") +
+				std::string(_error.what()));
+		}
+		return result;
+	}
 
 	/**
 	 * SendAffectAction:
