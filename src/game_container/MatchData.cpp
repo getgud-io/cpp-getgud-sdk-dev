@@ -83,6 +83,11 @@ namespace GetgudSDK {
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
 		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
 		cloneMatchData->m_matchCompletionState = m_matchCompletionState;
+		cloneMatchData->m_playerGuidMap = m_playerGuidMap;
+		cloneMatchData->m_nextPlayerKey = m_nextPlayerKey;
+		cloneMatchData->m_weaponGuidMap = m_weaponGuidMap;
+		cloneMatchData->m_nextWeaponKey = m_nextWeaponKey;
+
 
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
