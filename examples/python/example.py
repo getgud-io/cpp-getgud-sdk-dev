@@ -5,9 +5,9 @@ import random
 def random_string(length):
     return ''.join(chr(random.randint(97, 122)) for _ in range(length))
 
-if __name__ == "__main__":
+def test_1(title_id = 1, private_key="pk"):
     sdk = GetgudSDK()
-    game_guid = sdk.start_game(1, "pk", "aws", "deathmatch", "UK")
+    game_guid = sdk.start_game(title_id, private_key, "aws", "deathmatch", "UK")
     match_guid = sdk.start_match(game_guid, "deathmatch", "test_map", "custom_field_value")
     
     action_time_epoch = int(time.time() * 1000)
@@ -92,5 +92,90 @@ if __name__ == "__main__":
     
     time.sleep(2)
     sdk.mark_end_game(game_guid)
-    time.sleep(20)
+    time.sleep(5)
     sdk.dispose()
+
+
+def test_2(title_id=1, private_key="pk"):
+    sdk = GetgudSDK()
+
+    # Start the first game and match
+    game_guid = sdk.start_game(title_id, private_key, "aws", "deathmatch", "UK")
+    match_guid_1 = sdk.start_match(game_guid, "deathmatch", "test_map_1", "custom_field_value_1")
+
+    player_guid_1 = 'pl1'
+    player_guid_2 = 'pl2'
+    team_guid_1 = "Team-1"
+    team_guid_2 = "Team-2"
+
+    character_guid = random_string(3)
+    initial_health = 100
+    action_time_epoch = int(time.time() * 1000)
+    position = (random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1))
+    rotation = (random.uniform(0, 360), random.uniform(0, 360), random.uniform(0, 360))
+
+    # Spawn both players in the first match
+    sdk.send_spawn_action(match_guid_1, action_time_epoch, player_guid_1, character_guid, team_guid_1, initial_health, position, rotation)
+    sdk.send_spawn_action(match_guid_1, action_time_epoch, player_guid_2, character_guid, team_guid_2, initial_health, position, rotation)
+
+    # Generate 20 random weapon GUIDs
+    weapon_guids = [random_string(3) for _ in range(20)]
+
+    # Perform 100 attack and damage actions in the first match
+    for _ in range(10000):
+        action_time_epoch = int(time.time() * 1000)
+        weapon_guid = random.choice(weapon_guids)
+        damage_done = random.randint(10, 50)
+
+        # Attack actions
+        sdk.send_attack_action(match_guid_1, action_time_epoch, player_guid_1, weapon_guid)
+        sdk.send_attack_action(match_guid_1, action_time_epoch, player_guid_2, weapon_guid)
+
+        # Damage actions
+        sdk.send_damage_action(match_guid_1, action_time_epoch, player_guid_1, player_guid_2, damage_done, weapon_guid)
+        sdk.send_damage_action(match_guid_1, action_time_epoch, player_guid_2, player_guid_1, damage_done, weapon_guid)
+
+    action_time_epoch = int(time.time() * 1000)
+    sdk.send_death_action(match_guid_1, action_time_epoch, player_guid_1, player_guid_2)
+
+    # End the first match
+    time.sleep(2)
+
+    # # Start a second match in the same game
+    # match_guid_2 = sdk.start_match(game_guid, "deathmatch", "test_map_2", "custom_field_value_2")
+
+    # # Spawn both players in the second match
+    # sdk.send_spawn_action(match_guid_2, action_time_epoch, player_guid_1, character_guid, team_guid_1, initial_health, position, rotation)
+    # sdk.send_spawn_action(match_guid_2, action_time_epoch, player_guid_2, character_guid, team_guid_2, initial_health, position, rotation)
+
+    # # Perform 100 attack and damage actions in the second match
+    # for _ in range(100):
+    #     action_time_epoch = int(time.time() * 1000)
+    #     weapon_guid = random.choice(weapon_guids)
+    #     damage_done = random.randint(10, 50)
+
+    #     # Attack actions
+    #     sdk.send_attack_action(match_guid_2, action_time_epoch, player_guid_1, weapon_guid)
+    #     sdk.send_attack_action(match_guid_2, action_time_epoch, player_guid_2, weapon_guid)
+
+    #     # Damage actions
+    #     sdk.send_damage_action(match_guid_2, action_time_epoch, player_guid_1, player_guid_2, damage_done, weapon_guid)
+    #     sdk.send_damage_action(match_guid_2, action_time_epoch, player_guid_2, player_guid_1, damage_done, weapon_guid)
+
+    # action_time_epoch = int(time.time() * 1000)
+    # sdk.send_death_action(match_guid_2, action_time_epoch, player_guid_2, player_guid_1)
+    
+    # End the second match
+    time.sleep(2)
+    sdk.mark_end_game(game_guid)
+
+    # Dispose the SDK instance
+    time.sleep(5)
+    sdk.dispose()
+    
+if __name__ == "__main__":
+    title_id=0
+    private_key="test"
+    
+    # test_1(title_id, private_key)
+    test_2(title_id, private_key)
