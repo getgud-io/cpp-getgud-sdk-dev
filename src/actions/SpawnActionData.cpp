@@ -71,16 +71,16 @@ void SpawnActionData::ToString(std::ostringstream& oss) {
 		<< m_playerGuid << ","  // Append m_playerGuid
 		<< m_characterGuid << ","  // Append m_characterGuid
 		<< m_teamGuid << ","  // Append m_teamGuid
-		<< ShortenDecimalNumber(std::to_string(m_initialHealth)) << ","  // Append initial health
-		<< ShortenDecimalNumber(std::to_string(m_position.X)) << "~"  // Append X coordinate
-		<< ShortenDecimalNumber(std::to_string(m_position.Y)) << "~"  // Append Y coordinate
-		<< ShortenDecimalNumber(std::to_string(m_position.Z)) << "~"  // Append Z coordinate
-		<< ShortenDecimalNumber(std::to_string(m_rotation.Yaw)) << "~"  // Append Yaw rotation
-		<< ShortenDecimalNumber(std::to_string(m_rotation.Pitch));  // Append Pitch rotation
+		<< m_initialHealth << ","  // Append initial health
+		<< m_position.X << "~"  // Append X coordinate
+		<< m_position.Y << "~"  // Append Y coordinate
+		<< m_position.Z << "~"  // Append Z coordinate
+		<< m_rotation.Yaw << "~"  // Append Yaw rotation
+		<< m_rotation.Pitch;  // Append Pitch rotation
 
 	// Check for optional Roll value
 	if (m_rotation.Roll != -1000.f) {
-		oss << "~" << ShortenDecimalNumber(std::to_string(m_rotation.Roll));  // Append Roll if valid
+		oss << "~" << m_rotation.Roll;  // Append Roll if valid
 	}
 
 	oss << ",";

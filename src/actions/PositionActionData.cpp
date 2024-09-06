@@ -66,18 +66,19 @@ namespace GetgudSDK {
 	 * For sending action stream to Getgud
 	 **/
 	void PositionActionData::ToString(std::ostringstream& oss) {
+
 		oss << m_actionTimeEpoch << ","     // Append m_actionTimeEpoch
 			<< "P,"                        // Append constant string "P"
 			<< m_playerGuid << ","          // Append m_playerGuid
-			<< ShortenDecimalNumber(std::to_string(m_orientation.position.X)) << "~" // Append X coordinate
-			<< ShortenDecimalNumber(std::to_string(m_orientation.position.Y)) << "~" // Append Y coordinate
-			<< ShortenDecimalNumber(std::to_string(m_orientation.position.Z)) << "~" // Append Z coordinate
-			<< ShortenDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) << "~" // Append Yaw rotation
-			<< ShortenDecimalNumber(std::to_string(m_orientation.rotation.Pitch)); // Append Pitch rotation
+			<< m_orientation.position.X << "~" // Append X coordinate
+			<< m_orientation.position.Y << "~" // Append Y coordinate
+			<< m_orientation.position.Z << "~" // Append Z coordinate
+			<< m_orientation.rotation.Yaw << "~" // Append Yaw rotation
+			<< m_orientation.rotation.Pitch; // Append Pitch rotation
 
 		// Check for optional Roll value
 		if (m_orientation.rotation.Roll != -1000.f) {
-			oss << "~" << ShortenDecimalNumber(std::to_string(m_orientation.rotation.Roll)); // Append Roll if valid
+			oss << "~" << m_orientation.rotation.Roll; // Append Roll if valid
 		}
 
 		oss << ",";
