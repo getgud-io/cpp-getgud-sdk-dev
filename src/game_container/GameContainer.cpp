@@ -1,6 +1,9 @@
 #include "GameContainer.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
+#include "../../include/actions/DamageActionData.h"
+#include "../../include/actions/AttackActionData.h"
+#include "../../include/actions/DeathActionData.h"
 #include <sstream>
 
 namespace GetgudSDK {
@@ -143,7 +146,8 @@ namespace GetgudSDK {
 		// calculate the size of the new actions vector here to avoid calling this
 		// method in the 'for loop' which happens many times
 		MatchData* matchData = nullptr;
-
+		std::unordered_map<MatchData*, std::vector<BaseActionData*>>::iterator matchActions_it;
+		
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
@@ -179,24 +183,48 @@ namespace GetgudSDK {
 				continue;
 			}
 
-			//  get the local vector (from the local map) that belong longs to this
-			//  match and insert the action to it
-			auto matchActions_it = matchActionsMap.find(matchData);
-			if (matchActions_it == matchActionsMap.end()) {
-				// the vector might not exists yet since this is the first time an action
-				// with this match guid appeared in the method call
+			nextAction->m_playerGuid = matchData->getPlayerKeyName(nextAction->m_playerGuid);
 
-				std::vector<BaseActionData*> newMatchActions;
-				newMatchActions.push_back(nextAction);
-				auto matchActionsPair = std::make_pair(matchData, newMatchActions);
-				matchActionsMap.insert(matchActionsPair);
-				// save the match pointer so we can iterate over all of them later on
-				matchPtrVector.push_back(matchData);
+			if (nextAction->m_actionType == Actions::Damage) {
+				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
+				damageAction->m_victimPlayerGuid = matchData->getPlayerKeyName(damageAction->m_victimPlayerGuid);
+				damageAction->m_weaponGuid = matchData->getWeaponKeyName(damageAction->m_weaponGuid);
+			}
+
+			if (nextAction->m_actionType == Actions::Attack) {
+				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
+				attackAction->m_weaponGuid = matchData->getWeaponKeyName(attackAction->m_weaponGuid);
+			}
+
+			if (nextAction->m_actionType == Actions::Death) {
+				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
+				deathAction->m_attackerGuid = matchData->getPlayerKeyName(deathAction->m_attackerGuid);
+			}
+
+			if (lastMatchGuid == nextAction->m_matchGuid) {
+				matchActions_it->second.push_back(nextAction);
 			}
 			else {
-				// insert the new action to the temp vector which is associated to the
-				// same match guid that the action is
-				matchActions_it->second.push_back(nextAction);
+
+				//  get the local vector (from the local map) that belong longs to this
+				//  match and insert the action to it
+				matchActions_it = matchActionsMap.find(matchData);
+				if (matchActions_it == matchActionsMap.end()) {
+					// the vector might not exists yet since this is the first time an action
+					// with this match guid appeared in the method call
+
+					std::vector<BaseActionData*> newMatchActions;
+					newMatchActions.push_back(nextAction);
+					auto matchActionsPair = std::make_pair(matchData, newMatchActions);
+					matchActionsMap.insert(matchActionsPair);
+					// save the match pointer so we can iterate over all of them later on
+					matchPtrVector.push_back(matchData);
+				}
+				else {
+					// insert the new action to the temp vector which is associated to the
+					// same match guid that the action is
+					matchActions_it->second.push_back(nextAction);
+				}
 			}
 		}
 

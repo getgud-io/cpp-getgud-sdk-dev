@@ -7,9 +7,6 @@
 #include "./zip/Zip.h"
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"
-#include "../../include/actions/DamageActionData.h"
-#include "../../include/actions/AttackActionData.h"
-#include "../../include/actions/DeathActionData.h"
 #include <sstream>
 #include <iomanip> // For std::setw, std::setfill
 
@@ -375,23 +372,6 @@ namespace GetgudSDK {
 		
 		// Collect and convert actions
 		for (BaseActionData* nextAction : m_actionVector) {
-			nextAction->m_playerGuid = getPlayerKeyName(nextAction->m_playerGuid);
-
-			if (nextAction->m_actionType == Actions::Damage) {
-				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
-				damageAction->m_victimPlayerGuid = getPlayerKeyName(damageAction->m_victimPlayerGuid);
-				damageAction->m_weaponGuid = getWeaponKeyName(damageAction->m_weaponGuid);
-			}
-
-			if (nextAction->m_actionType == Actions::Attack) {
-				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
-				attackAction->m_weaponGuid = getWeaponKeyName(attackAction->m_weaponGuid);
-			}
-
-			if (nextAction->m_actionType == Actions::Death) {
-				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
-				deathAction->m_attackerGuid = getPlayerKeyName(deathAction->m_attackerGuid);
-			}
 
 			nextAction->ToString(actionStream);
 		}
