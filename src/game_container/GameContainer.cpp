@@ -146,29 +146,23 @@ namespace GetgudSDK {
 		// calculate the size of the new actions vector here to avoid calling this
 		// method in the 'for loop' which happens many times
 		MatchData* matchData = nullptr;
-		std::unordered_map<MatchData*, std::vector<BaseActionData*>>::iterator matchActions_it;
 		
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
-		std::string lastMatchGuid = "";
+
 		for (auto& nextAction : actionVector) {
 
-			// check ig the last found match guid is the same match guid for the next action, only if not, look for a new match
-			if (lastMatchGuid != nextAction->m_matchGuid) {
-
-				// find the match that belongs to the action we are now iterating
-				auto match_it = m_matchMap.find(nextAction->m_matchGuid);
-				if (match_it == m_matchMap.end() || match_it->second == nullptr) {
-					delete nextAction;
-					failedToPushSomeActions = true;
-					continue;  // if a match with the passed guid was not found, just
-					// ignore the action
-				}
-
-				matchData = match_it->second;
-				lastMatchGuid = matchData->GetMatchGuid();
+			// find the match that belongs to the action we are now iterating
+			auto match_it = m_matchMap.find(nextAction->m_matchGuid);
+			if (match_it == m_matchMap.end() || match_it->second == nullptr) {
+				delete nextAction;
+				failedToPushSomeActions = true;
+				continue;  // if a match with the passed guid was not found, just
+				// ignore the action
 			}
+
+			matchData = match_it->second;
 
 			// validate the structure and parameters of the next action we are going to assimilate
 			if (nextAction->IsValid() == false) {
@@ -201,30 +195,23 @@ namespace GetgudSDK {
 				deathAction->m_attackerGuid = matchData->getPlayerKeyName(deathAction->m_attackerGuid);
 			}
 
-			if (lastMatchGuid == nextAction->m_matchGuid) {
-				matchActions_it->second.push_back(nextAction);
+			//  get the local vector (from the local map) that belong longs to this
+			//  match and insert the action to it
+			auto matchActions_it = matchActionsMap.find(matchData);
+			if (matchActions_it == matchActionsMap.end()) {
+				// the vector might not exists yet since this is the first time an action
+				// with this match guid appeared in the method call
+				std::vector<BaseActionData*> newMatchActions;
+				newMatchActions.push_back(nextAction);
+				auto matchActionsPair = std::make_pair(matchData, newMatchActions);
+				matchActionsMap.insert(matchActionsPair);
+				// save the match pointer so we can iterate over all of them later on
+				matchPtrVector.push_back(matchData);
 			}
 			else {
-
-				//  get the local vector (from the local map) that belong longs to this
-				//  match and insert the action to it
-				matchActions_it = matchActionsMap.find(matchData);
-				if (matchActions_it == matchActionsMap.end()) {
-					// the vector might not exists yet since this is the first time an action
-					// with this match guid appeared in the method call
-
-					std::vector<BaseActionData*> newMatchActions;
-					newMatchActions.push_back(nextAction);
-					auto matchActionsPair = std::make_pair(matchData, newMatchActions);
-					matchActionsMap.insert(matchActionsPair);
-					// save the match pointer so we can iterate over all of them later on
-					matchPtrVector.push_back(matchData);
-				}
-				else {
-					// insert the new action to the temp vector which is associated to the
-					// same match guid that the action is
-					matchActions_it->second.push_back(nextAction);
-				}
+				// insert the new action to the temp vector which is associated to the
+				// same match guid that the action is
+				matchActions_it->second.push_back(nextAction);
 			}
 		}
 
