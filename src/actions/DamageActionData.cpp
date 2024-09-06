@@ -69,7 +69,7 @@ namespace GetgudSDK {
 			<< "D,"                      // Append constant string "D"
 			<< m_playerGuid << ","       // Append m_playerGuid
 			<< m_victimPlayerGuid << "," // Append m_victimPlayerGuid
-			<< ShortenDecimalNumber(std::to_string(m_damageDone)) << ","  // Append shortened decimal number
+			<< m_damageDone << ","  // Append shortened decimal number
 			<< m_weaponGuid << ",";             // Append m_weaponGuid
 	}
 

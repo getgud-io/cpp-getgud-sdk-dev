@@ -54,7 +54,7 @@ void HealActionData::ToString(std::ostringstream& oss) {
 	oss << m_actionTimeEpoch << ","  // Append m_actionTimeEpoch
 		<< "H,"                      // Append constant string "H"
 		<< m_playerGuid << ","       // Append m_playerGuid
-		<< ShortenDecimalNumber(std::to_string(m_healthGained)) << ","; // Append shortened decimal number of m_healthGained
+		<< m_healthGained << ","; // Append shortened decimal number of m_healthGained
 }
 
 /**
