@@ -1,6 +1,7 @@
 #include "SpawnActionData.h"
 #include "../config/Config.h"
 #include "../utils/Utils.h"
+#include <sstream>
 
 using namespace GetgudSDK;
 
@@ -64,26 +65,25 @@ bool SpawnActionData::IsValid() {
  *
  * For sending action stream to Getgud
  **/
-std::string SpawnActionData::ToString() {
-	std::string actionString;
-	actionString += std::to_string(m_actionTimeEpoch) + ",";
-	actionString += "S,";
-	actionString += m_playerGuid + ",";
-	actionString += m_characterGuid + ",";
-	actionString += m_teamGuid + ",";
-	actionString += ShortenDecimalNumber(std::to_string(m_initialHealth)) + ",";
-	actionString += ShortenDecimalNumber(std::to_string(m_position.X)) + "~" +
-		ShortenDecimalNumber(std::to_string(m_position.Y)) + "~" +
-		ShortenDecimalNumber(std::to_string(m_position.Z)) + "~";
-	actionString += ShortenDecimalNumber(std::to_string(m_rotation.Yaw)) + "~" +
-		ShortenDecimalNumber(std::to_string(m_rotation.Pitch));
-	if (m_rotation.Roll != -1000.f)
-	{
-		actionString += "~" +
-			ShortenDecimalNumber(std::to_string(m_rotation.Roll));
+void SpawnActionData::ToString(std::ostringstream& oss) {
+	oss << m_actionTimeEpoch << ","  // Append m_actionTimeEpoch
+		<< "S,"  // Append constant string "S"
+		<< m_playerGuid << ","  // Append m_playerGuid
+		<< m_characterGuid << ","  // Append m_characterGuid
+		<< m_teamGuid << ","  // Append m_teamGuid
+		<< ShortenDecimalNumber(std::to_string(m_initialHealth)) << ","  // Append initial health
+		<< ShortenDecimalNumber(std::to_string(m_position.X)) << "~"  // Append X coordinate
+		<< ShortenDecimalNumber(std::to_string(m_position.Y)) << "~"  // Append Y coordinate
+		<< ShortenDecimalNumber(std::to_string(m_position.Z)) << "~"  // Append Z coordinate
+		<< ShortenDecimalNumber(std::to_string(m_rotation.Yaw)) << "~"  // Append Yaw rotation
+		<< ShortenDecimalNumber(std::to_string(m_rotation.Pitch));  // Append Pitch rotation
+
+	// Check for optional Roll value
+	if (m_rotation.Roll != -1000.f) {
+		oss << "~" << ShortenDecimalNumber(std::to_string(m_rotation.Roll));  // Append Roll if valid
 	}
 
-	return actionString;
+	oss << ",";
 }
 
 /**

@@ -1,6 +1,7 @@
 #include "AffectActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include <sstream>
 
 namespace GetgudSDK {
 
@@ -57,15 +58,12 @@ namespace GetgudSDK {
 	 *
 	 * For sending action stream to Getgud
 	 **/
-	std::string AffectActionData::ToString() {
-		std::string actionString;
-		actionString += std::to_string(m_actionTimeEpoch) + ",";
-		actionString += "AF,";
-		actionString += m_playerGuid + ",";
-		actionString += m_affectGuid + ",";
-		actionString += std::to_string(static_cast<int>(m_affectState));
-
-		return actionString;
+	void AffectActionData::ToString(std::ostringstream& oss) {
+		oss << m_actionTimeEpoch << ","   // Append m_actionTimeEpoch
+			<< "AF,"                      // Append constant string "AF"
+			<< m_playerGuid << ","        // Append m_playerGuid
+			<< m_affectGuid << ","        // Append m_affectGuid
+			<< static_cast<int>(m_affectState) << ",";  // Append m_affectState cast to int
 	}
 
 	/**

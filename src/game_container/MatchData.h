@@ -7,6 +7,7 @@
 #include "../../include/actions/BaseActionData.h"
 #include "ChatMessageData.h"
 #include "ReportData.h"
+#include <unordered_map>
 
 namespace GetgudSDK {
 	class MatchData {
@@ -37,17 +38,18 @@ namespace GetgudSDK {
 		std::map<std::string, Orientation> m_lastPositionActionVector;
 
 		// holds the player Key to player Guid mapping
-		std::map<std::string, std::string> m_playerGuidMap;
+		std::unordered_map<std::string, std::string> m_playerGuidMap;
 
 		// used to generate new player keys
 		int m_nextPlayerKey = 0;
 
 		// holds the weapon Key to weapon Guid mapping
-		std::map<std::string, std::string> m_weaponGuidMap;
+		std::unordered_map<std::string, std::string> m_weaponGuidMap;
 
 		// used to generate new weapon keys
 		int m_nextWeaponKey = 0;
 
+		// holds the map action completion state
 		MatchCompletionState m_matchCompletionState = MatchCompletionState::Complete;
 
 	public:

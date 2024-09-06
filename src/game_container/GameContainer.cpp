@@ -1,9 +1,7 @@
 #include "GameContainer.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
-#include "../../include/actions/DamageActionData.h"
-#include "../../include/actions/AttackActionData.h"
-#include "../../include/actions/DeathActionData.h"
+#include <sstream>
 
 namespace GetgudSDK {
 
@@ -149,49 +147,36 @@ namespace GetgudSDK {
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
+		std::string lastMatchGuid = "";
 		for (auto& nextAction : actionVector) {
-			// find the match that belongs to the action we are now iterating
-			auto match_it = m_matchMap.find(nextAction->m_matchGuid);
-			if (match_it == m_matchMap.end() || match_it->second == nullptr) {
-				delete nextAction;
-				failedToPushSomeActions = true;
-				continue;  // if a match with the passed guid was not found, just
-				// ignore the action
-			}
 
-			matchData = match_it->second;
+			// check ig the last found match guid is the same match guid for the next action, only if not, look for a new match
+			if (lastMatchGuid != nextAction->m_matchGuid) {
+
+				// find the match that belongs to the action we are now iterating
+				auto match_it = m_matchMap.find(nextAction->m_matchGuid);
+				if (match_it == m_matchMap.end() || match_it->second == nullptr) {
+					delete nextAction;
+					failedToPushSomeActions = true;
+					continue;  // if a match with the passed guid was not found, just
+					// ignore the action
+				}
+
+				matchData = match_it->second;
+				lastMatchGuid = matchData->GetMatchGuid();
+			}
 
 			// validate the structure and parameters of the next action we are going to assimilate
 			if (nextAction->IsValid() == false) {
 
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
 				logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
-				logger.Log(LogType::DEBUG, nextAction->ToString());
+				std::ostringstream oss;
+				nextAction->ToString(oss);
+				logger.Log(LogType::DEBUG, oss.str());
 				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
 				delete nextAction;
 				continue;
-			}
-
-			// convert the player guid to a player key in order to save space (a guid is usually much longer than a key)
-			nextAction->m_playerGuid = matchData->getPlayerKeyName(nextAction->m_playerGuid);
-
-			// in the Damage action, there is another player guid and a weapon guid, convert both to keys
-			if (nextAction->m_actionType == Actions::Damage) {
-				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
-				damageAction->m_victimPlayerGuid = matchData->getPlayerKeyName(damageAction->m_victimPlayerGuid);
-				damageAction->m_weaponGuid = matchData->getWeaponKeyName(damageAction->m_weaponGuid);
-			}
-
-			// in the Attack action, there is a weapon guid, convert it to a key
-			if (nextAction->m_actionType == Actions::Attack) {
-				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
-				attackAction->m_weaponGuid = matchData->getWeaponKeyName(attackAction->m_weaponGuid);
-			}
-
-			// same for death action, convert the extra player guid to a key
-			if (nextAction->m_actionType == Actions::Death) {
-				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
-				deathAction->m_attackerGuid = matchData->getPlayerKeyName(deathAction->m_attackerGuid);
 			}
 
 			//  get the local vector (from the local map) that belong longs to this
@@ -239,8 +224,7 @@ namespace GetgudSDK {
 			game_it->second->UpdateLastUpdateTime();
 
 			// update the game container size after adding the new messages to the match
-			m_gameContainerSizeInBytes +=
-				matchPtr->GetMatchSizeInBytes() - matchSizeInBytes;
+			m_gameContainerSizeInBytes += matchPtr->GetMatchSizeInBytes() - matchSizeInBytes;
 		}
 
 		m_averageSize.UpdateSize(m_gameContainerSizeInBytes);
@@ -362,7 +346,6 @@ namespace GetgudSDK {
 					// we just removed a game packet, update the size of the container
 					// accordingly
 					m_gameContainerSizeInBytes -= gameDataSizeInBytes;
-					m_gameVector.shrink_to_fit();
 					break;
 				}
 				else if (gameData->CanDeleteGame() == true) {
@@ -571,7 +554,6 @@ gameGuid));
 			logger.Log(LogType::DEBUG,
 				std::string("Deleted the game with guid: " + gameGuid));
 		}
-		m_gameVector.shrink_to_fit();
 
 		if (externalCall)
 			m_gameContainerMutex.unlock();

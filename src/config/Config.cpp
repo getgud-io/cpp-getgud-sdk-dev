@@ -164,7 +164,7 @@ namespace GetgudSDK {
 			GetConfigValue(configData, sdkConfigFieldNames.packetMaxSizeInBytes,
 				_packetMaxSizeInBytes);
 		valueReadResult &=
-			Validator::ValidateItemValue(_packetMaxSizeInBytes, 0U, 2000000U);
+			Validator::ValidateItemValue(_packetMaxSizeInBytes, 0U, 4000000U);
 		if (valueReadResult) {
 			sdkConfig.packetMaxSizeInBytes = _packetMaxSizeInBytes;
 		}
@@ -209,7 +209,7 @@ namespace GetgudSDK {
 			configData, sdkConfigFieldNames.minPacketSizeForSendingInBytes,
 			_minPacketSizeForSendingInBytes);
 		valueReadResult &= Validator::ValidateItemValue(
-			_minPacketSizeForSendingInBytes, 500U, 1500000U);
+			_minPacketSizeForSendingInBytes, 500U, 4000000U);
 		if (valueReadResult) {
 			sdkConfig.minPacketSizeForSendingInBytes = _minPacketSizeForSendingInBytes;
 		}
@@ -218,7 +218,7 @@ namespace GetgudSDK {
 			configData, sdkConfigFieldNames.packetTimeoutInMilliseconds,
 			_packetTimeoutInMilliseconds);
 		valueReadResult &=
-			Validator::ValidateItemValue(_packetTimeoutInMilliseconds, 500U, 100000U);
+			Validator::ValidateItemValue(_packetTimeoutInMilliseconds, 500U, 120000U);
 		if (valueReadResult) {
 			sdkConfig.packetTimeoutInMilliseconds = _packetTimeoutInMilliseconds;
 		}

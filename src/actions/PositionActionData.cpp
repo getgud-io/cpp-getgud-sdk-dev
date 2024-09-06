@@ -2,6 +2,7 @@
 #include "../config/Config.h"
 #include "../utils/Utils.h"
 #include "../utils/Utils.h"
+#include <sstream>
 
 namespace GetgudSDK {
 	/**
@@ -64,22 +65,22 @@ namespace GetgudSDK {
 	 *
 	 * For sending action stream to Getgud
 	 **/
-	std::string PositionActionData::ToString() {
-		std::string actionString;
-		actionString += std::to_string(m_actionTimeEpoch) + ",";
-		actionString += "P,";
-		actionString += m_playerGuid + ",";
-		actionString += ShortenDecimalNumber(std::to_string(m_orientation.position.X)) + "~" +
-			ShortenDecimalNumber(std::to_string(m_orientation.position.Y)) + "~" +
-			ShortenDecimalNumber(std::to_string(m_orientation.position.Z)) + "~";
-		actionString += ShortenDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) + "~" +
-			ShortenDecimalNumber(std::to_string(m_orientation.rotation.Pitch));
-		if (m_orientation.rotation.Roll != -1000.f)
-		{
-			actionString += "~" + ShortenDecimalNumber(std::to_string(m_orientation.rotation.Roll));
+	void PositionActionData::ToString(std::ostringstream& oss) {
+		oss << m_actionTimeEpoch << ","     // Append m_actionTimeEpoch
+			<< "P,"                        // Append constant string "P"
+			<< m_playerGuid << ","          // Append m_playerGuid
+			<< ShortenDecimalNumber(std::to_string(m_orientation.position.X)) << "~" // Append X coordinate
+			<< ShortenDecimalNumber(std::to_string(m_orientation.position.Y)) << "~" // Append Y coordinate
+			<< ShortenDecimalNumber(std::to_string(m_orientation.position.Z)) << "~" // Append Z coordinate
+			<< ShortenDecimalNumber(std::to_string(m_orientation.rotation.Yaw)) << "~" // Append Yaw rotation
+			<< ShortenDecimalNumber(std::to_string(m_orientation.rotation.Pitch)); // Append Pitch rotation
+
+		// Check for optional Roll value
+		if (m_orientation.rotation.Roll != -1000.f) {
+			oss << "~" << ShortenDecimalNumber(std::to_string(m_orientation.rotation.Roll)); // Append Roll if valid
 		}
 
-		return actionString;
+		oss << ",";
 	}
 
 	/**

@@ -28,7 +28,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API PositionActionData() = delete;
 		GETGUDSDK_API ~PositionActionData() override;
 		GETGUDSDK_API bool IsValid() override;
-		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API void ToString(std::ostringstream& oss) override;
 		GETGUDSDK_API PositionActionData* Clone() override;
 		GETGUDSDK_API Orientation& getOrientation();
 	};

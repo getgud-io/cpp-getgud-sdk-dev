@@ -177,7 +177,6 @@ namespace GetgudSDK {
 		std::pair<std::string, MatchData*> matchGuidPair(matchData->GetMatchGuid(), matchData);
 		m_matchMap.insert(matchGuidPair);
 		m_matchGuidVector.push_back(matchData->GetMatchGuid());
-		m_matchGuidVector.shrink_to_fit();
 
 		m_lastUpdateTime = std::chrono::system_clock::now();
 
@@ -506,7 +505,6 @@ namespace GetgudSDK {
 
 		m_matchMap.clear();
 		m_matchGuidVector.clear();
-		m_matchGuidVector.shrink_to_fit();
 	}
 
 	bool GameData::IsValid() {

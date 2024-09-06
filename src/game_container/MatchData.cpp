@@ -7,6 +7,11 @@
 #include "./zip/Zip.h"
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"
+#include "../../include/actions/DamageActionData.h"
+#include "../../include/actions/AttackActionData.h"
+#include "../../include/actions/DeathActionData.h"
+#include <sstream>
+#include <iomanip> // For std::setw, std::setfill
 
 namespace GetgudSDK {
 	extern Config sdkConfig;
@@ -88,7 +93,6 @@ namespace GetgudSDK {
 		cloneMatchData->m_weaponGuidMap = m_weaponGuidMap;
 		cloneMatchData->m_nextWeaponKey = m_nextWeaponKey;
 
-
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
 			cloneMatchData->AddActions(m_actionVector);
@@ -138,7 +142,7 @@ namespace GetgudSDK {
 			// store unique player guids of the match
 			m_playerGuids.insert(actionPtr->m_playerGuid);
 		}
-		m_actionVector.shrink_to_fit();
+
 		// calculate the new size of this object (using deltas only)
 		m_actionsCount += newActionVectorSize;
 		m_sizeInBytes += GetPositionActionSize() * newActionVectorSize;
@@ -169,7 +173,6 @@ namespace GetgudSDK {
 			m_actionVector.begin() + actionsToTakeFromMatch);
 		m_actionVector.erase(m_actionVector.begin(),
 			m_actionVector.begin() + actionsToTakeFromMatch);
-		m_actionVector.shrink_to_fit();
 
 		// we need to convert time stamps of returned actions to the old format
 		// because later we call add and the format will  be calculated
@@ -346,66 +349,89 @@ namespace GetgudSDK {
 	 **/
 	void MatchData::MatchToString(std::string& matchOut) {
 
-		if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0) return;
+		if (m_actionVector.empty() && m_reportVector.empty() && m_chatMessageVector.empty()) {
+			return;
+		}
 
-		// if match is not interesting from throttle check we do not need to send it
-		if (!m_isInteresting) return;
+		if (!m_isInteresting) {
+			return;
+		}
 
-		std::string actionStream;
+		std::ostringstream oss;
 		std::string compressedActionStream;
+		std::ostringstream actionStream;
 
-		matchOut += "{";
-		matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
-		matchOut += "\"mapName\":\"" + m_mapName + "\",";
+		oss << "{";
+		oss << "\"matchGuid\":\"" << m_matchGuid << "\",";
+		oss << "\"mapName\":\"" << m_mapName << "\",";
+
+		if (!m_matchMode.empty()) oss << "\"matchMode\":\"" << m_matchMode << "\",";
+		if (!m_matchWinTeamGuid.empty()) oss << "\"matchWinTeamGuid\":\"" << m_matchWinTeamGuid << "\",";
+		if (!m_customField.empty()) oss << "\"customField\":\"" << m_customField << "\",";
+		oss << "\"matchCompletionState\":" << static_cast<int>(m_matchCompletionState) << ",";
+		oss << "\"matchActionStream\":\"";
+
+
 		
-		if (m_matchMode.size() > 0) matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
-		if (m_matchWinTeamGuid.size() > 0) matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
-		if (m_customField.size() > 0) matchOut += "\"customField\":\"" + m_customField + "\",";
-		matchOut += "\"matchCompletionState\":\"" + std::to_string((int)m_matchCompletionState) + "\",";
+		// Collect and convert actions
+		for (BaseActionData* nextAction : m_actionVector) {
+			nextAction->m_playerGuid = getPlayerKeyName(nextAction->m_playerGuid);
 
-		matchOut += "\"matchActionStream\":\"";
+			if (nextAction->m_actionType == Actions::Damage) {
+				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
+				damageAction->m_victimPlayerGuid = getPlayerKeyName(damageAction->m_victimPlayerGuid);
+				damageAction->m_weaponGuid = getWeaponKeyName(damageAction->m_weaponGuid);
+			}
 
-		if (m_actionVector.size() > 0) actionStream += GetPlayerMapString() + GetWeaponMapString() + ",";
+			if (nextAction->m_actionType == Actions::Attack) {
+				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
+				attackAction->m_weaponGuid = getWeaponKeyName(attackAction->m_weaponGuid);
+			}
 
-		for (int index = 0; index < m_actionVector.size(); index++) {
-			actionStream += m_actionVector[index]->ToString() + ",";
+			if (nextAction->m_actionType == Actions::Death) {
+				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
+				deathAction->m_attackerGuid = getPlayerKeyName(deathAction->m_attackerGuid);
+			}
+
+			nextAction->ToString(actionStream);
 		}
 
-		if (actionStream.size() > 0) {
-			actionStream.pop_back();  // pop the last delimiter
-			zipper.CompressString(actionStream, compressedActionStream);
+		if (!actionStream.str().empty()) {
+
+			std::string actionsStr = GetPlayerMapString() + GetWeaponMapString() + "," + actionStream.str();
+			actionsStr.pop_back();  // Remove the last comma
+			zipper.CompressString(actionsStr, compressedActionStream);
 		}
-		actionStream.clear();
-		matchOut += compressedActionStream;
-		matchOut += "\"";
-		// convert all reports to json string
-		if (m_reportVector.size() > 0)
-		{
-			matchOut += ",\"reports\":[";
-			for (int index = 0; index < m_reportVector.size(); index++) {
-				matchOut += m_reportVector[index]->ToString() + ",";
+		oss << compressedActionStream << "\"";
+
+		// Convert all reports to JSON string
+		if (!m_reportVector.empty()) {
+			oss << ",\"reports\":[";
+			for (const auto& report : m_reportVector) {
+				oss << report->ToString() << ",";
 #ifdef _DEBUG
 				sdkConfig.totalReportsSent++;
 #endif
 			}
-			matchOut.pop_back();       // pop the last delimiter
-			matchOut += "]";  // close the report array
+			oss.seekp(-1, std::ios_base::end); // Remove the last comma
+			oss << "]";
 		}
 
-		if (m_chatMessageVector.size() > 0)
-		{
-			// convert all chat messages to json string
-			matchOut += ",\"chat\":[";
-			for (int index = 0; index < m_chatMessageVector.size(); index++) {
-				matchOut += "" + m_chatMessageVector[index]->ToString() + ",";
+		// Convert all chat messages to JSON string
+		if (!m_chatMessageVector.empty()) {
+			oss << ",\"chat\":[";
+			for (const auto& chatMessage : m_chatMessageVector) {
+				oss << chatMessage->ToString() << ",";
 #ifdef _DEBUG
 				sdkConfig.totalChatSent++;
 #endif
 			}
-			matchOut.pop_back();         // pop the last delimiter
-			matchOut += "]";  // close the chat array and match
+			oss.seekp(-1, std::ios_base::end); // Remove the last comma
+			oss << "]";
 		}
-		matchOut += "}";
+
+		oss << "}";
+		matchOut = oss.str();
 	}
 
 	std::string MatchData::GetPlayerMapString() {
@@ -525,7 +551,7 @@ namespace GetgudSDK {
 		std::string newKey = std::to_string(m_nextPlayerKey++);
 
 		// Store the new key in the map
-		m_playerGuidMap[playerGuid] = newKey;
+		m_playerGuidMap.emplace(playerGuid, newKey);
 
 		return newKey;
 	}
@@ -542,7 +568,7 @@ namespace GetgudSDK {
 		std::string newKey = std::to_string(m_nextWeaponKey++);
 
 		// Store the new key in the map
-		m_weaponGuidMap[weaponGuid] = newKey;
+		m_weaponGuidMap.emplace(weaponGuid, newKey);
 
 		return newKey;
 	}
@@ -597,7 +623,6 @@ namespace GetgudSDK {
 		for (auto& action : m_actionVector)
 			delete action;
 		m_actionVector.clear();
-		m_actionVector.shrink_to_fit();
 		for (auto& report : m_reportVector)
 			delete report;
 		m_reportVector.clear();
@@ -605,7 +630,6 @@ namespace GetgudSDK {
 		for (auto& chatMessage : m_chatMessageVector)
 			delete chatMessage;
 		m_chatMessageVector.clear();
-		m_chatMessageVector.shrink_to_fit();
 		m_playerGuids.clear();
 	}
 

@@ -35,7 +35,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API SpawnActionData() = delete;
 		GETGUDSDK_API ~SpawnActionData() override;
 		GETGUDSDK_API bool IsValid() override;
-		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API void ToString(std::ostringstream& oss) override;
 		GETGUDSDK_API SpawnActionData* Clone() override;
 	};
 }  // namespace GetgudSDK
