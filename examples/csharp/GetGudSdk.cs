@@ -655,8 +655,8 @@ namespace GetgudSDK
                 playerReputationSize = player.playerReputation?.Length ?? 0,
                 playerStatus = Marshal.StringToHGlobalAnsi(player.playerStatus),
                 playerStatusSize = player.playerStatus?.Length ?? 0,
-                PlayerCampaign = Marshal.StringToHGlobalAnsi(player.PlayerCampaign),
-                PlayerCampaignSize = player.PlayerCampaign?.Length ?? 0,
+                playerCampaign = Marshal.StringToHGlobalAnsi(player.playerCampaign),
+                playerCampaignSize = player.playerCampaign?.Length ?? 0,
                 playerNotes = Marshal.StringToHGlobalAnsi(player.playerNotes),
                 playerNotesSize = player.playerNotes?.Length ?? 0,
                 playerDevice = Marshal.StringToHGlobalAnsi(player.playerDevice),
@@ -706,7 +706,7 @@ namespace GetgudSDK
             Marshal.FreeHGlobal(unmanagedBaseData.playerSuspectScore);
             Marshal.FreeHGlobal(unmanagedBaseData.playerReputation);
             Marshal.FreeHGlobal(unmanagedBaseData.playerStatus);
-            Marshal.FreeHGlobal(unmanagedBaseData.PlayerCampaign);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerCampaign);
             Marshal.FreeHGlobal(unmanagedBaseData.playerNotes);
             Marshal.FreeHGlobal(unmanagedBaseData.playerDevice);
             Marshal.FreeHGlobal(unmanagedBaseData.playerOS);

@@ -349,8 +349,8 @@ class GetgudSDK:
         player_info.playerStatusSize = len(player_status)
 
         player_campaign_data = ffi.new("char[]", player_campaign.encode('utf-8'))
-        player_info.PlayerCampaign = player_campaign_data
-        player_info.PlayerCampaignSize = len(player_campaign)
+        player_info.playerCampaign = player_campaign_data
+        player_info.playerCampaignSize = len(player_campaign)
 
         player_notes_data = ffi.new("char[]", player_notes.encode('utf-8'))
         player_info.playerNotes = player_notes_data

@@ -804,7 +804,7 @@ extern "C" {
 			std::string inPrivateKey;
 			std::string playerEmail;
 			std::string playerGuid;
-			std::string PlayerCampaign;
+			std::string playerCampaign;
 			std::string playerDevice;
 			std::string playerSuspectScore;
 			std::string playerGender;
@@ -827,8 +827,8 @@ extern "C" {
 				playerGuid = std::string(player.playerGuid, player.playerGuidSize);
 			}
 
-			if (player.PlayerCampaign != NULL && strlen(player.PlayerCampaign) == player.PlayerCampaignSize) {
-				PlayerCampaign = std::string(player.PlayerCampaign, player.PlayerCampaignSize);
+			if (player.playerCampaign != NULL && strlen(player.playerCampaign) == player.playerCampaignSize) {
+				playerCampaign = std::string(player.playerCampaign, player.playerCampaignSize);
 			}
 
 			if (player.playerDevice != NULL && strlen(player.playerDevice) == player.playerDeviceSize) {
@@ -883,8 +883,8 @@ extern "C" {
 				playerOut.PlayerReputation = player.playerReputation;
 			if (player.playerStatusSize > 0)
 				playerOut.PlayerStatus = player.playerStatus;
-			if (player.PlayerCampaignSize > 0)
-				playerOut.PlayerCampaign = player.PlayerCampaign;
+			if (player.playerCampaignSize > 0)
+				playerOut.playerCampaign = player.playerCampaign;
 			if (player.playerNotesSize > 0)
 				playerOut.PlayerNotes = player.playerNotes;
 			if (player.playerDeviceSize > 0)
