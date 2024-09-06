@@ -884,7 +884,7 @@ extern "C" {
 			if (player.playerStatusSize > 0)
 				playerOut.PlayerStatus = player.playerStatus;
 			if (player.playerCampaignSize > 0)
-				playerOut.playerCampaign = player.playerCampaign;
+				playerOut.PlayerCampaign = player.playerCampaign;
 			if (player.playerNotesSize > 0)
 				playerOut.PlayerNotes = player.playerNotes;
 			if (player.playerDeviceSize > 0)
