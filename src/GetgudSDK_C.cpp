@@ -144,6 +144,7 @@ extern "C" {
 			std::string gameGuid;
 			std::string matchMode;
 			std::string mapName;
+			std::string customField;
 
 			if (matchInfo.gameGuid != NULL &&
 				strlen(matchInfo.gameGuid) == matchInfo.gameGuidSize)
@@ -163,10 +164,17 @@ extern "C" {
 				mapName = std::string(matchInfo.mapName, matchInfo.mapNameSize);
 			}
 
+			if (matchInfo.customField != NULL &&
+				strlen(matchInfo.customField) == matchInfo.customFieldSize)
+			{
+				customField = std::string(matchInfo.customField, matchInfo.customFieldSize);
+			}
+
 			matchGuid = GetgudSDK::StartMatch(
 				gameGuid.c_str(),
 				matchMode.c_str(),
-				mapName.c_str());
+				mapName.c_str(),
+				customField.c_str());
 
 			strcpy(matchGuidOut, matchGuid.c_str());
 		}
@@ -200,6 +208,39 @@ extern "C" {
 			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
 				std::string("GetgudSDK::MarkEndGame "
 					"can not be sent: ") +
+				std::string(_error.what()));
+		}
+		return result;
+	}
+	
+	/**
+	 * SetMatchWinTeam:
+	 *
+	 * Set match win team
+	 **/
+	int SetMatchWinTeam(const char* matchGuid, int matchGuidSize, const char* teamGuid, int teamGuidSize)
+	{
+		bool result = false;
+		try {
+			std::string matchGuidStr;
+			std::string teamGuidStr;
+
+			if (matchGuid != NULL && strlen(matchGuid) == matchGuidSize)
+			{
+				matchGuidStr = std::string(matchGuid, matchGuidSize);
+			}
+
+			if (teamGuid != NULL && strlen(teamGuid) == teamGuidSize)
+			{
+				teamGuidStr = std::string(teamGuid, teamGuidSize);
+			}
+
+			result = GetgudSDK::SetMatchWinTeam(matchGuidStr, teamGuidStr);
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::SetMatchWinTeam "
+					"can not be set: ") +
 				std::string(_error.what()));
 		}
 		return result;
@@ -763,7 +804,7 @@ extern "C" {
 			std::string inPrivateKey;
 			std::string playerEmail;
 			std::string playerGuid;
-			std::string PlayerCampaign;
+			std::string playerCampaign;
 			std::string playerDevice;
 			std::string playerSuspectScore;
 			std::string playerGender;
@@ -786,8 +827,8 @@ extern "C" {
 				playerGuid = std::string(player.playerGuid, player.playerGuidSize);
 			}
 
-			if (player.PlayerCampaign != NULL && strlen(player.PlayerCampaign) == player.PlayerCampaignSize) {
-				PlayerCampaign = std::string(player.PlayerCampaign, player.PlayerCampaignSize);
+			if (player.playerCampaign != NULL && strlen(player.playerCampaign) == player.playerCampaignSize) {
+				playerCampaign = std::string(player.playerCampaign, player.playerCampaignSize);
 			}
 
 			if (player.playerDevice != NULL && strlen(player.playerDevice) == player.playerDeviceSize) {
@@ -842,8 +883,8 @@ extern "C" {
 				playerOut.PlayerReputation = player.playerReputation;
 			if (player.playerStatusSize > 0)
 				playerOut.PlayerStatus = player.playerStatus;
-			if (player.PlayerCampaignSize > 0)
-				playerOut.PlayerCampaign = player.PlayerCampaign;
+			if (player.playerCampaignSize > 0)
+				playerOut.PlayerCampaign = player.playerCampaign;
 			if (player.playerNotesSize > 0)
 				playerOut.PlayerNotes = player.playerNotes;
 			if (player.playerDeviceSize > 0)

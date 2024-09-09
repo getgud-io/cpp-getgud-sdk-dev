@@ -14,6 +14,7 @@
 #include <string>
 
 #include "Helpers.h"
+#include <sstream>
 
 namespace GetgudSDK {
 	unsigned int GetEmptyActionSize();
@@ -32,7 +33,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API BaseActionData() = delete;
 		GETGUDSDK_API virtual ~BaseActionData();
 		GETGUDSDK_API virtual bool IsValid();
-		GETGUDSDK_API virtual std::string ToString();
+		GETGUDSDK_API virtual void ToString(std::ostringstream& oss);
 		GETGUDSDK_API virtual BaseActionData* Clone();
 	};
 }  // namespace GetgudSDK

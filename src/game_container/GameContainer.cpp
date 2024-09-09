@@ -1,6 +1,10 @@
 #include "GameContainer.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
+#include "../../include/actions/DamageActionData.h"
+#include "../../include/actions/AttackActionData.h"
+#include "../../include/actions/DeathActionData.h"
+#include <sstream>
 
 namespace GetgudSDK {
 
@@ -62,7 +66,8 @@ namespace GetgudSDK {
 	 **/
 	std::string GameContainer::AddMatch(std::string gameGuid,
 		std::string matchMode,
-		std::string mapName) {
+		std::string mapName, 
+		std::string customField) {
 		std::string retValue;
 		MatchData* matchData = nullptr;
 
@@ -77,7 +82,7 @@ namespace GetgudSDK {
 		}
 		// create a new match from the passed parameters and add it to the game we
 		// found above
-		matchData = game_it->second->AddMatch(matchMode, mapName);
+		matchData = game_it->second->AddMatch(matchMode, mapName, customField);
 		if (matchData == nullptr) {
 			m_gameContainerMutex.unlock();
 			return retValue;
@@ -141,31 +146,58 @@ namespace GetgudSDK {
 		// calculate the size of the new actions vector here to avoid calling this
 		// method in the 'for loop' which happens many times
 		MatchData* matchData = nullptr;
-
+		
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
-		for (auto& nextAction : actionVector) {
-			// find the match that belongs to the action we are now iterating
-			auto match_it = m_matchMap.find(nextAction->m_matchGuid);
-			if (match_it == m_matchMap.end() || match_it->second == nullptr) {
-				delete nextAction;
-				failedToPushSomeActions = true;
-				continue;  // if a match with the passed guid was not found, just
-				// ignore the action
-			}
+		std::string lastMatchGuid = "";
 
-			matchData = match_it->second;
+		for (auto& nextAction : actionVector) {
+
+			if (lastMatchGuid != nextAction->m_matchGuid) {
+
+				// find the match that belongs to the action we are now iterating
+				auto match_it = m_matchMap.find(nextAction->m_matchGuid);
+				if (match_it == m_matchMap.end() || match_it->second == nullptr) {
+					delete nextAction;
+					failedToPushSomeActions = true;
+					continue;  // if a match with the passed guid was not found, just
+					// ignore the action
+				}
+
+				matchData = match_it->second;
+				lastMatchGuid = nextAction->m_matchGuid;
+			}
 
 			// validate the structure and parameters of the next action we are going to assimilate
 			if (nextAction->IsValid() == false) {
 
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
-				logger.Log(LogType::DEBUG, std::string("Action is invalid - Marking the match as not interesting, thus no more actions will be sent for the match with guid:" + matchData->GetMatchGuid()));
-				logger.Log(LogType::DEBUG, nextAction->ToString());
-				matchData->SetThrottleCheckResults(true, false);
+				logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
+				std::ostringstream oss;
+				nextAction->ToString(oss);
+				logger.Log(LogType::DEBUG, oss.str());
+				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
 				delete nextAction;
 				continue;
+			}
+
+			nextAction->m_playerGuid = matchData->getPlayerKeyName(nextAction->m_playerGuid);
+
+			if (nextAction->m_actionType == Actions::Damage) {
+				DamageActionData* damageAction = static_cast<DamageActionData*>(nextAction);
+				damageAction->m_victimPlayerGuid = matchData->getPlayerKeyName(damageAction->m_victimPlayerGuid);
+				damageAction->m_weaponGuid = matchData->getWeaponKeyName(damageAction->m_weaponGuid);
+			}
+
+			if (nextAction->m_actionType == Actions::Attack) {
+				AttackActionData* attackAction = static_cast<AttackActionData*>(nextAction);
+				attackAction->m_weaponGuid = matchData->getWeaponKeyName(attackAction->m_weaponGuid);
+			}
+
+			if (nextAction->m_actionType == Actions::Death) {
+				DeathActionData* deathAction = static_cast<DeathActionData*>(nextAction);
+				deathAction->m_attackerGuid = matchData->getPlayerKeyName(deathAction->m_attackerGuid);
 			}
 
 			//  get the local vector (from the local map) that belong longs to this
@@ -174,7 +206,6 @@ namespace GetgudSDK {
 			if (matchActions_it == matchActionsMap.end()) {
 				// the vector might not exists yet since this is the first time an action
 				// with this match guid appeared in the method call
-
 				std::vector<BaseActionData*> newMatchActions;
 				newMatchActions.push_back(nextAction);
 				auto matchActionsPair = std::make_pair(matchData, newMatchActions);
@@ -213,8 +244,7 @@ namespace GetgudSDK {
 			game_it->second->UpdateLastUpdateTime();
 
 			// update the game container size after adding the new messages to the match
-			m_gameContainerSizeInBytes +=
-				matchPtr->GetMatchSizeInBytes() - matchSizeInBytes;
+			m_gameContainerSizeInBytes += matchPtr->GetMatchSizeInBytes() - matchSizeInBytes;
 		}
 
 		m_averageSize.UpdateSize(m_gameContainerSizeInBytes);
@@ -302,14 +332,6 @@ namespace GetgudSDK {
 					logger.Log(LogType::DEBUG, "Sending an empty Game packet that was marked as ended for Game guid: " + gameData->GetGameGuid());
 					break;
 				}
-				else if (gameData->CanDeleteGame() == true) {
-					// the delete method will take care of reducing the game size from the
-					// container
-					// we are cleaning game container on the way by removing
-					// unneeded games
-					DeleteGame(gameGuid, false);
-					gameData = nullptr;
-				}
 				else if (gameDataSizeInBytes > 0 || gameData->GetNumberOfGameReportsAndMessages() > 0) {
 					// this is a normal sized game packet that is ready to be sent whole
 					// Do the old switcheroo trick: pop it and insert an empty GameData
@@ -344,8 +366,15 @@ namespace GetgudSDK {
 					// we just removed a game packet, update the size of the container
 					// accordingly
 					m_gameContainerSizeInBytes -= gameDataSizeInBytes;
-					m_gameVector.shrink_to_fit();
 					break;
+				}
+				else if (gameData->CanDeleteGame() == true) {
+					// the delete method will take care of reducing the game size from the
+					// container
+					// we are cleaning game container on the way by removing
+					// unneeded games
+					DeleteGame(gameGuid, false);
+					gameData = nullptr;
 				}
 				else {
 					// if gameContainerSizeInBytes = 0 we can't send it
@@ -417,6 +446,22 @@ namespace GetgudSDK {
 		}
 		else {
 			gameData_it->second->MarkGameMatchesAsNotInteresting(matchGuids);
+		}
+
+		m_gameContainerMutex.unlock();
+	}
+
+	void GameContainer::SetGameMatchesIncompleteState(std::string gameGuid, std::vector<std::string>& matchGuids, MatchCompletionState state) {
+
+		m_gameContainerMutex.lock();
+
+		// find the game that it's matches need to be marked as incomplite, and mark it as such
+		auto gameData_it = m_gameMap.find(gameGuid);
+		if (gameData_it == m_gameMap.end()) {
+			logger.Log(LogType::WARN, std::string("GameContainer::SetGameMatchesComplitionState->Failed to find a game with the guid: " + gameGuid));
+		}
+		else {
+			gameData_it->second->SetGameMatchesIncompleteState(matchGuids, state);
 		}
 
 		m_gameContainerMutex.unlock();
@@ -529,7 +574,6 @@ gameGuid));
 			logger.Log(LogType::DEBUG,
 				std::string("Deleted the game with guid: " + gameGuid));
 		}
-		m_gameVector.shrink_to_fit();
 
 		if (externalCall)
 			m_gameContainerMutex.unlock();

@@ -39,9 +39,8 @@ namespace GetgudSDK {
 		std::string gameMode,
 		std::string serverLocation);
 	GETGUDSDK_API std::string StartGame(std::string serverGuid, std::string gameMode, std::string serverLocation);
-	GETGUDSDK_API std::string StartMatch(std::string gameGuid,
-		std::string matchMode,
-		std::string mapName);
+	GETGUDSDK_API std::string StartMatch(std::string gameGuid, std::string matchMode, std::string mapName);
+	GETGUDSDK_API std::string StartMatch(std::string gameGuid, std::string matchMode, std::string mapName,std::string customField);
 	GETGUDSDK_API bool MarkEndGame(std::string gameGuid);
 	GETGUDSDK_API bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid);
 	GETGUDSDK_API bool SendInMatchReport(ReportInfo reportInfo);

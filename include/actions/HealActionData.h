@@ -24,7 +24,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API HealActionData() = delete;
 		GETGUDSDK_API ~HealActionData() override;
 		GETGUDSDK_API bool IsValid() override;
-		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API void ToString(std::ostringstream& oss) override;
 		GETGUDSDK_API HealActionData* Clone() override;
 	};
 }  // namespace GetgudSDK

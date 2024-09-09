@@ -64,6 +64,8 @@ namespace GetgudSDK_calls
             public int matchModeSize;
             public IntPtr mapName;
             public int mapNameSize;
+            public IntPtr customField;
+            public int customFieldSize;
         };
 
         public struct ChatMessageWrapper
@@ -93,8 +95,8 @@ namespace GetgudSDK_calls
             public int playerReputationSize;
             public IntPtr playerStatus;
             public int playerStatusSize;
-            public IntPtr playerCompaign;
-            public int playerCompaignSize;
+            public IntPtr PlayerCompaign;
+            public int PlayerCompaignSize;
             public IntPtr playerNotes;
             public int playerNotesSize;
             public IntPtr playerDevice;

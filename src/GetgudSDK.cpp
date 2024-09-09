@@ -165,13 +165,26 @@ namespace GetgudSDK {
 		std::string matchMode,
 		std::string mapName) {
 
+		return StartMatch(gameGuid, matchMode, mapName, "");
+	}
+
+	/**
+	 * Start match:
+	 *
+	 * Start a new match for an existing game
+	 **/
+	std::string StartMatch(std::string gameGuid,
+		std::string matchMode,
+		std::string mapName,
+		std::string customField) {
+
 		std::string matchGuid;
 
 		try {
 
-			logger.Log(LogType::DEBUG, std::string("String a new Match with the following parameters: gameGuid: " + gameGuid + " | matchMode: " + matchMode + " | mapName: " + mapName));
+			logger.Log(LogType::DEBUG, std::string("String a new Match with the following parameters: gameGuid: " + gameGuid + " | matchMode: " + matchMode + " | mapName: " + mapName + " | customField: " + customField));
 
-			matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName);
+			matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName, customField);
 
 		}
 		catch (std::exception& _error) {

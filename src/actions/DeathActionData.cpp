@@ -1,6 +1,7 @@
 #include "DeathActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include <sstream>
 
 namespace GetgudSDK {
 
@@ -51,14 +52,11 @@ namespace GetgudSDK {
 	 *
 	 * For sending action stream to Getgud
 	 **/
-	std::string DeathActionData::ToString() {
-		std::string actionString;
-		actionString += std::to_string(m_actionTimeEpoch) + ",";
-		actionString += "DD,";
-		actionString += m_playerGuid + ",";
-		actionString += m_attackerGuid;
-
-		return actionString;
+	void DeathActionData::ToString(std::ostringstream& oss) {
+		oss << m_actionTimeEpoch << ","  // Append m_actionTimeEpoch
+			<< "DD,"                     // Append constant string "DD"
+			<< m_playerGuid << ","       // Append m_playerGuid
+			<< m_attackerGuid << ",";           // Append m_attackerGuid
 	}
 
 	/**
