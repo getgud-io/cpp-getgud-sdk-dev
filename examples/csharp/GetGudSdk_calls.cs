@@ -192,15 +192,7 @@ namespace GetgudSDK_calls
 
 #pragma warning restore CS8601, CS0649
 
-		// Windows build path
-        //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net6.0
-		// Linux build path
-        //sdk_project\tests\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-		//
-		// Linux deploy path
-		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
         const string dllPath = "GetgudSDK";
-
 
         [DllImport(dllPath)]
         public static extern int init();
