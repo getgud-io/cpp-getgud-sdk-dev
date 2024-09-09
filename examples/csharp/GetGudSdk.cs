@@ -102,7 +102,7 @@ namespace GetgudSDK
         public string playerSuspectScore;
         public string playerReputation;
         public string playerStatus;
-        public string playerCompaign;
+        public string playerCampaign;
         public string playerNotes;
         public string playerDevice;
         public string playerOS;
@@ -118,7 +118,7 @@ namespace GetgudSDK
                           string playerSuspectScore = "",
                           string playerReputation = "",
                           string playerStatus = "",
-                          string playerCompaign = "",
+                          string playerCampaign = "",
                           string playerNotes = "",
                           string playerDevice = "",
                           string playerOS = "",
@@ -135,7 +135,7 @@ namespace GetgudSDK
             this.playerSuspectScore = playerSuspectScore;
             this.playerReputation = playerReputation;
             this.playerStatus = playerStatus;
-            this.playerCompaign = playerCompaign;
+            this.playerCampaign = playerCampaign;
             this.playerNotes = playerNotes;
             this.playerDevice = playerDevice;
             this.playerOS = playerOS;
@@ -646,7 +646,7 @@ namespace GetgudSDK
                 playerNickname = Marshal.StringToHGlobalAnsi(player.playerNickname),
                 playerNicknameSize = player.playerNickname.Length,
                 playerEmail = Marshal.StringToHGlobalAnsi(player.playerEmail),
-                playerEmailSize = player.playerEmail.Length,
+                playerEmailSize = player.playerEmail?.Length ?? 0,
                 playerRank = player.playerRank,
                 playerJoinDateEpoch = player.playerJoinDateEpoch,
                 playerSuspectScore = Marshal.StringToHGlobalAnsi(player.playerSuspectScore),
@@ -667,16 +667,20 @@ namespace GetgudSDK
                 playerGender = Marshal.StringToHGlobalAnsi(player.playerGender),
                 playerGenderSize = player.playerGender?.Length ?? 0,
                 playerLocation = Marshal.StringToHGlobalAnsi(player.playerLocation),
-                playerLocationSize = player.playerLocation?.Length ?? 0
+                playerLocationSize = player.playerLocation?.Length ?? 0,
+                transactions = IntPtr.Zero,  // This will be set later if there are transactions
+                transactionsSize = 0  // This will be updated later if there are transactions
             };
 
-            // Handle transactions
+             // Handle transactions
             if (player.transactions != null && player.transactions.Count > 0)
             {
-                var transactionArray = new GetgudSDK_calls.GetgudSDK_calls.PlayerTransactions[player.transactions.Count];
+                unmanagedBaseData.transactions = Marshal.AllocHGlobal(Marshal.SizeOf<GetgudSDK.PlayerTransactions>() * player.transactions.Count);
+                unmanagedBaseData.transactionsSize = player.transactions.Count;
+
                 for (int i = 0; i < player.transactions.Count; i++)
                 {
-                    transactionArray[i] = new GetgudSDK_calls.GetgudSDK_calls.PlayerTransactions
+                    var transaction = new GetgudSDK.PlayerTransactions
                     {
                         TransactionGuid = Marshal.StringToHGlobalAnsi(player.transactions[i].TransactionGuid),
                         TransactionGuidSize = player.transactions[i].TransactionGuid.Length,
@@ -685,10 +689,10 @@ namespace GetgudSDK
                         TransactionDateEpoch = player.transactions[i].TransactionDateEpoch,
                         TransactionValueUSD = player.transactions[i].TransactionValueUSD
                     };
+
+                    IntPtr transactionPtr = new IntPtr(unmanagedBaseData.transactions.ToInt64() + i * Marshal.SizeOf<GetgudSDK.PlayerTransactions>());
+                    Marshal.StructureToPtr(transaction, transactionPtr, false);
                 }
-                unmanagedBaseData.transactions = Marshal.AllocHGlobal(Marshal.SizeOf<GetgudSDK_calls.GetgudSDK_calls.PlayerTransactions>() * player.transactions.Count);
-                Marshal.Copy(transactionArray, 0, unmanagedBaseData.transactions, player.transactions.Count);
-                unmanagedBaseData.transactionsSize = player.transactions.Count;
             }
             else
             {
@@ -718,9 +722,8 @@ namespace GetgudSDK
             {
                 for (int i = 0; i < unmanagedBaseData.transactionsSize; i++)
                 {
-                    var offset = i * Marshal.SizeOf<GetgudSDK_calls.GetgudSDK_calls.PlayerTransactions>();
-                    var transactionPtr = new IntPtr(unmanagedBaseData.transactions.ToInt64() + offset);
-                    var transaction = Marshal.PtrToStructure<GetgudSDK_calls.GetgudSDK_calls.PlayerTransactions>(transactionPtr);
+                    IntPtr transactionPtr = new IntPtr(unmanagedBaseData.transactions.ToInt64() + i * Marshal.SizeOf<GetgudSDK.PlayerTransactions>());
+                    var transaction = Marshal.PtrToStructure<GetgudSDK.PlayerTransactions>(transactionPtr);
                     
                     Marshal.FreeHGlobal(transaction.TransactionGuid);
                     Marshal.FreeHGlobal(transaction.TransactionName);
