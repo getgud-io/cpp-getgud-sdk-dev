@@ -221,6 +221,9 @@ namespace GetgudSDK_calls
         public static extern int MarkEndGame(IntPtr gameGuid, int gameGuidSize);
 
         [DllImport(dllPath)]
+        public static extern int SetMatchWinTeam(IntPtr matchGuid, int matchGuidSize, IntPtr teamGuid, int teamGuidSize);
+
+        [DllImport(dllPath)]
         public static extern int SendAffectAction(BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);
 
         [DllImport(dllPath)]
