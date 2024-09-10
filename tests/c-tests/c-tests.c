@@ -122,11 +122,14 @@ void testGetgudSDK() {
     reportInfo.matchGuidSize = strlen(matchGuid);
     reportInfo.reporterName = "reporter1";
     reportInfo.reporterNameSize = strlen(reportInfo.reporterName);
-    reportInfo.reporterType = 1; 
+    reportInfo.reporterType = 1;  // Player (based on your enum definition)
+    reportInfo.reporterSubType = -1;  // None (or provide a subtype if available)
     reportInfo.suspectedPlayerGuid = "player2";
     reportInfo.suspectedPlayerGuidSize = strlen(reportInfo.suspectedPlayerGuid);
-    reportInfo.tbType = 1;
-    reportInfo.reportedTimeEpoch = (long long)time(NULL) * 1000;
+    reportInfo.tbType = 1;  // Example: Aimbot (based on your enum definition)
+    reportInfo.tbTimeEpoch = (long long)time(NULL) * 1000;  // Set a valid time
+    reportInfo.suggestedToxicityScore = -1;  // Optional: -1 if not suggested
+    reportInfo.reportedTimeEpoch = (long long)time(NULL) * 1000;  // Set the report time
 
     if (!SendInMatchReport(reportInfo)) {
         fprintf(stderr, "Failed to send in-match report\n");
