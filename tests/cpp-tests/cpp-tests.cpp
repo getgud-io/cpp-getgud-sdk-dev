@@ -123,9 +123,14 @@ TEST(testGetgudSDK) {
     
     std::cout << "In-match report sent!" << std::endl;
 
+    // End game
+    ASSERT(GetgudSDK::MarkEndGame(gameGuid));
+    
+    std::cout << "Game marked as ended!" << std::endl;
+
     // Send report outside the match
     GetgudSDK::ReportInfo reportOutsideMatch;
-    reportOutsideMatch.MatchGuid = gameGuid;  // Attach it to the game but outside the match
+    reportOutsideMatch.MatchGuid = matchGuid;  // Attach it to the game but outside the match
     reportOutsideMatch.ReporterName = "reporter2";
     reportOutsideMatch.ReporterType = GetgudSDK::ReporterType::Moderator;
     reportOutsideMatch.SuspectedPlayerGuid = "player3";
@@ -137,11 +142,6 @@ TEST(testGetgudSDK) {
     ASSERT(GetgudSDK::SendReports(titleId, privateKey, reports));
 
     std::cout << "Report sent outside match!" << std::endl;
-
-    // End game
-    ASSERT(GetgudSDK::MarkEndGame(gameGuid));
-    
-    std::cout << "Game marked as ended!" << std::endl;
 
     // Dispose of SDK
     GetgudSDK::Dispose();

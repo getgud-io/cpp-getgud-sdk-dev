@@ -140,6 +140,13 @@ void testGetgudSDK() {
     }
     printf("In-match report sent!\n");
 
+    // End game
+    if (!MarkEndGame(gameGuid, strlen(gameGuid))) {
+        fprintf(stderr, "Failed to mark game as ended\n");
+        return;
+    }
+    printf("Game marked as ended!\n");
+
     // Send report outside the match
     struct ReportInfo reportOutsideMatch;
     reportOutsideMatch.matchGuid = gameGuid;  // Use gameGuid for outside match report
@@ -160,13 +167,6 @@ void testGetgudSDK() {
         return;
     }
     printf("Report sent outside match!\n");
-
-    // End game
-    if (!MarkEndGame(gameGuid, strlen(gameGuid))) {
-        fprintf(stderr, "Failed to mark game as ended\n");
-        return;
-    }
-    printf("Game marked as ended!\n");
 
     // Dispose SDK
     dispose();
