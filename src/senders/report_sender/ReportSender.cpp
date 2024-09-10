@@ -278,8 +278,9 @@ namespace GetgudSDK {
 	 *
 	 **/
 	void ReportSender::Dispose() {
-		m_threadWorking = false;
+		
 		m_reportSenderMutex.lock();
+
 		// Iterate through all the actions in the buffer and delete them
 		for (auto* reportData : m_reportVector) {
 			delete reportData;
@@ -288,13 +289,13 @@ namespace GetgudSDK {
 		m_reportVector.clear();
 		m_reportBufferSize = 0;
 
+		sharedReportSenders.reportSendersCount--;
+
 		m_reportSenderMutex.unlock();
+
 		m_updaterThread.detach();
 
-		{
-			std::lock_guard<std::mutex> locker(sharedReportSenders.reportSendersMutex);
-			sharedReportSenders.reportSendersCount--;
-		}
+		m_threadWorking = false;
 	}
 
 }  // namespace GetgudSDK
