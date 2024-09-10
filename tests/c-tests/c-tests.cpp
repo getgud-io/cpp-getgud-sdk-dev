@@ -122,10 +122,10 @@ void testGetgudSDK() {
     reportInfo.matchGuidSize = strlen(matchGuid);
     reportInfo.reporterName = "reporter1";
     reportInfo.reporterNameSize = strlen(reportInfo.reporterName);
-    reportInfo.reporterType = 0; // Assuming 0 for player type
+    reportInfo.reporterType = 1; 
     reportInfo.suspectedPlayerGuid = "player2";
     reportInfo.suspectedPlayerGuidSize = strlen(reportInfo.suspectedPlayerGuid);
-    reportInfo.tbType = 0; // Assuming 0 for aimbot
+    reportInfo.tbType = 1;
     reportInfo.reportedTimeEpoch = (long long)time(NULL) * 1000;
 
     if (!SendInMatchReport(reportInfo)) {
