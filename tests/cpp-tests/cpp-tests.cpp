@@ -17,14 +17,18 @@ float randomFloat(float min, float max) {
     return dis(gen);
 }
 
+// Define titleId and privateKey globally
+const int titleId = 219;
+const std::string privateKey = "";
+
 TEST(testGetgudSDK) {
     // Initialize SDK
     ASSERT(GetgudSDK::Init());
 
     // Start Game
     std::string gameGuid = GetgudSDK::StartGame(
-        219, // titleId
-        "12bebc20-6aa6-11ef-b599-37b14b47bb25",
+        titleId, // Use the defined titleId
+        privateKey, // Use the defined privateKey
         "server-123",
         "deathmatch",
         "US-West"
@@ -101,10 +105,11 @@ TEST(testGetgudSDK) {
     playerInfo.PlayerEmail = "test@example.com";
     playerInfo.PlayerRank = 10;
     std::deque<GetgudSDK::PlayerInfo> players = {playerInfo};
-    ASSERT(GetgudSDK::UpdatePlayers(219, "12bebc20-6aa6-11ef-b599-37b14b47bb25", players));
+    ASSERT(GetgudSDK::UpdatePlayers(titleId, privateKey, players));
 
     std::cout << "Update player sent!" << std::endl;
-    // Send report
+
+    // Send in-match report
     GetgudSDK::ReportInfo reportInfo;
     reportInfo.MatchGuid = matchGuid;
     reportInfo.ReporterName = "reporter1";
@@ -116,15 +121,27 @@ TEST(testGetgudSDK) {
     ).count();
     ASSERT(GetgudSDK::SendInMatchReport(reportInfo));
     
-    std::cout << "Report sent!" << std::endl;
+    std::cout << "In-match report sent!" << std::endl;
+
+    // Send report outside the match
+    GetgudSDK::ReportInfo reportOutsideMatch;
+    reportOutsideMatch.MatchGuid = gameGuid;  // Attach it to the game but outside the match
+    reportOutsideMatch.ReporterName = "reporter2";
+    reportOutsideMatch.ReporterType = GetgudSDK::ReporterType::Moderator;
+    reportOutsideMatch.SuspectedPlayerGuid = "player3";
+    reportOutsideMatch.TbType = GetgudSDK::TbType::Insulting;
+    reportOutsideMatch.ReportedTimeEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+    std::deque<GetgudSDK::ReportInfo> reports = {reportOutsideMatch};
+    ASSERT(GetgudSDK::SendReports(titleId, privateKey, reports));
+
+    std::cout << "Report sent outside match!" << std::endl;
 
     // End game
     ASSERT(GetgudSDK::MarkEndGame(gameGuid));
     
     std::cout << "Game marked as ended!" << std::endl;
-
-    // Wait for any pending operations to complete
-    // std::this_thread::sleep_for(std::chrono::seconds(5));
 
     // Dispose of SDK
     GetgudSDK::Dispose();

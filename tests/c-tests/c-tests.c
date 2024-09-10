@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include "GetgudSDK_C.h"
 
+// Define titleId and privateKey globally
+const int titleId = 219;
+const char* privateKey = "";
+
 // Helper function to generate random float
 float randomFloat(float min, float max) {
     return min + ((float)rand() / RAND_MAX) * (max - min);
@@ -20,8 +24,8 @@ void testGetgudSDK() {
     // Start Game
     char gameGuid[64] = {0};
     struct StartGameInfo gameInfo;
-    gameInfo.titleId = 219;
-    gameInfo.privateKey = "12bebc20-6aa6-11ef-b599-37b14b47bb25";
+    gameInfo.titleId = titleId;  // Use the defined titleId
+    gameInfo.privateKey = privateKey;  // Use the defined privateKey
     gameInfo.privateKeySize = strlen(gameInfo.privateKey);
     gameInfo.serverGuid = "server-123";
     gameInfo.serverGuidSize = strlen(gameInfo.serverGuid);
@@ -67,7 +71,6 @@ void testGetgudSDK() {
         rotation.Pitch = randomFloat(-90, 90);
         rotation.Roll = 0;
 
-        // Base action data
         struct BaseActionData actionData;
         actionData.actionTimeEpoch = (long long)time(NULL) * 1000;
         actionData.matchGuid = matchGuid;
@@ -110,13 +113,13 @@ void testGetgudSDK() {
     playerInfo.transactions = NULL;
     playerInfo.transactionsSize = 0;
 
-    if (!UpdatePlayer(219, "12bebc20-6aa6-11ef-b599-37b14b47bb25", strlen("12bebc20-6aa6-11ef-b599-37b14b47bb25"), playerInfo)) {
+    if (!UpdatePlayer(titleId, privateKey, strlen(privateKey), playerInfo)) {
         fprintf(stderr, "Failed to update player\n");
         return;
     }
     printf("Player info updated!\n");
 
-    // Send in-match report
+    // Send in-match report with correctly defined fields
     struct ReportInfo reportInfo;
     reportInfo.matchGuid = matchGuid;
     reportInfo.matchGuidSize = strlen(matchGuid);
@@ -126,7 +129,7 @@ void testGetgudSDK() {
     reportInfo.reporterSubType = -1;  // None (or provide a subtype if available)
     reportInfo.suspectedPlayerGuid = "player2";
     reportInfo.suspectedPlayerGuidSize = strlen(reportInfo.suspectedPlayerGuid);
-    reportInfo.tbType = 1;  // Example: Aimbot (based on your enum definition)
+    reportInfo.tbType = 1;  // Aimbot (based on your enum definition)
     reportInfo.tbTimeEpoch = (long long)time(NULL) * 1000;  // Set a valid time
     reportInfo.suggestedToxicityScore = -1;  // Optional: -1 if not suggested
     reportInfo.reportedTimeEpoch = (long long)time(NULL) * 1000;  // Set the report time
@@ -135,7 +138,28 @@ void testGetgudSDK() {
         fprintf(stderr, "Failed to send in-match report\n");
         return;
     }
-    printf("Report sent!\n");
+    printf("In-match report sent!\n");
+
+    // Send report outside the match
+    struct ReportInfo reportOutsideMatch;
+    reportOutsideMatch.matchGuid = gameGuid;  // Use gameGuid for outside match report
+    reportOutsideMatch.matchGuidSize = strlen(gameGuid);
+    reportOutsideMatch.reporterName = "reporter2";
+    reportOutsideMatch.reporterNameSize = strlen(reportOutsideMatch.reporterName);
+    reportOutsideMatch.reporterType = 2;  // Moderator
+    reportOutsideMatch.reporterSubType = -1;  // None (or provide a subtype if available)
+    reportOutsideMatch.suspectedPlayerGuid = "player3";
+    reportOutsideMatch.suspectedPlayerGuidSize = strlen(reportOutsideMatch.suspectedPlayerGuid);
+    reportOutsideMatch.tbType = 16;  // Insulting
+    reportOutsideMatch.tbTimeEpoch = (long long)time(NULL) * 1000;  // Set the toxic behavior time
+    reportOutsideMatch.suggestedToxicityScore = -1;  // Optional: -1 if not suggested
+    reportOutsideMatch.reportedTimeEpoch = (long long)time(NULL) * 1000;  // Set the report time
+
+    if (!SendReport(titleId, privateKey, strlen(privateKey), reportOutsideMatch)) {
+        fprintf(stderr, "Failed to send report outside match\n");
+        return;
+    }
+    printf("Report sent outside match!\n");
 
     // End game
     if (!MarkEndGame(gameGuid, strlen(gameGuid))) {
