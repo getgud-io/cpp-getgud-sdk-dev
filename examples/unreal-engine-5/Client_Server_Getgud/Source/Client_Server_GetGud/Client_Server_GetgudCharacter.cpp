@@ -139,24 +139,23 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 	int64 UnixTimestampMillis = (Now.GetTicks() - FDateTime(1970, 1, 1, 0, 0, 0, 0).GetTicks()) / ETimespan::TicksPerMillisecond;
 
 	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	if (CameraRotation.Pitch > 180.0f)
 	{
-		pitch = CameraRotation.Pitch * -1;
+		pitch = 360.0f - CameraRotation.Pitch;
 	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	else
 	{
-		pitch = 360 - CameraRotation.Pitch;
+		pitch = -CameraRotation.Pitch;
 	}
 
 	float yaw = 0;
-
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
+	if (CameraRotation.Yaw > 180.0f)
 	{
-		yaw = CameraRotation.Yaw * -1;
+		yaw = 360.0f - CameraRotation.Yaw;
 	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
+	else
 	{
-		yaw = 360 - CameraRotation.Yaw;
+		yaw = -CameraRotation.Yaw;
 	}
 
 
@@ -199,23 +198,23 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 
 
 	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	if (CameraRotation.Pitch > 180.0f)
 	{
-		pitch = CameraRotation.Pitch * -1;
+		pitch = 360.0f - CameraRotation.Pitch;
 	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	else
 	{
-		pitch = 360 - CameraRotation.Pitch;
+		pitch = -CameraRotation.Pitch;
 	}
 
 	float yaw = 0;
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
+	if (CameraRotation.Yaw > 180.0f)
 	{
-		yaw = CameraRotation.Yaw * -1;
+		yaw = 360.0f - CameraRotation.Yaw;
 	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
+	else
 	{
-		yaw = 360 - CameraRotation.Yaw;
+		yaw = -CameraRotation.Yaw;
 	}
 	
 	// divide position to transform from cm to meters
