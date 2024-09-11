@@ -36,7 +36,7 @@ namespace GetgudSDK {
 
 		if (!gameData->IsValid()) {
 
-			logger.Log(LogType::WARN, std::string("GameContainer::AddGame->One or more of the Game's paraemters are not valid - Game will not start. Game paraemters: Title ID: " + std::to_string(titleId) + " | serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
+			logger.Log(LogType::WARN, std::string("GameContainer::AddGame->One or more of the Game's parameters are not valid - Game will not start. Game parameters: Title ID: " + std::to_string(titleId) + " | serverGuid: " + serverGuid + " | gameMode: " + gameMode + " | serverLocation: " + serverLocation));
 			delete gameData;
 			return gameGuid;
 		}
