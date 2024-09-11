@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GetgudSDK;
 using System.Collections.Generic;
 
@@ -7,7 +7,8 @@ class Program
     static void Main(string[] args)
     {
         // Initialize SDK
-        int result = Methods.Init();
+        string configPath = "C:\\Users\\Shadow\\Downloads\\Getgud\\cpp-getgud-sdk-dev\\tests\\csharp-tests\\config.json";
+        int result = Methods.InitConfPath(configPath);
         if (result != 1)
         {
             Console.WriteLine("Failed to initialize Getgud SDK.");
