@@ -120,8 +120,7 @@ namespace GetgudSDK {
 	/**
 	 * AddActions:
 	 *
-	 * Add actions to the match, make sure dynamic time stamps of the actions are
-	 *linked to previous actions if we copy match
+	 * Add actions to the match
 	 **/
 	void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector) {
 		if (incomingActionVector.size() == 0)
@@ -132,8 +131,6 @@ namespace GetgudSDK {
 		// add the newly arrived action vector to the current action vector, where all
 		// the actions are waiting to be processed
 		for (auto& actionPtr : incomingActionVector) {
-			actionPtr->m_actionTimeEpoch -= m_lastActionTimeEpoch;
-			m_lastActionTimeEpoch += actionPtr->m_actionTimeEpoch;
 
 			m_actionVector.push_back(actionPtr);
 			// store unique player guids of the match
@@ -368,10 +365,15 @@ namespace GetgudSDK {
 		oss << "\"matchCompletionState\":" << static_cast<int>(m_matchCompletionState) << ",";
 		oss << "\"matchActionStream\":\"";
 
-
+		long long lastActionTimeEpoch = 0;
 		
-		// Collect and convert actions
+		// convert actions to an action stream string output
 		for (BaseActionData* nextAction : m_actionVector) {
+
+			// first action in the packet should have a full timestmap
+			// all action after that, should just have delta timestamps compared to the first action
+			nextAction->m_actionTimeEpoch -= lastActionTimeEpoch;
+			lastActionTimeEpoch += nextAction->m_actionTimeEpoch;
 
 			nextAction->ToString(actionStream);
 		}

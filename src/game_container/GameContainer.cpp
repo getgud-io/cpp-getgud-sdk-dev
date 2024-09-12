@@ -146,28 +146,23 @@ namespace GetgudSDK {
 		// calculate the size of the new actions vector here to avoid calling this
 		// method in the 'for loop' which happens many times
 		MatchData* matchData = nullptr;
-		
+
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
-		std::string lastMatchGuid = "";
 
 		for (auto& nextAction : actionVector) {
 
-			if (lastMatchGuid != nextAction->m_matchGuid) {
-
-				// find the match that belongs to the action we are now iterating
-				auto match_it = m_matchMap.find(nextAction->m_matchGuid);
-				if (match_it == m_matchMap.end() || match_it->second == nullptr) {
-					delete nextAction;
-					failedToPushSomeActions = true;
-					continue;  // if a match with the passed guid was not found, just
-					// ignore the action
-				}
-
-				matchData = match_it->second;
-				lastMatchGuid = nextAction->m_matchGuid;
+			// find the match that belongs to the action we are now iterating
+			auto match_it = m_matchMap.find(nextAction->m_matchGuid);
+			if (match_it == m_matchMap.end() || match_it->second == nullptr) {
+				delete nextAction;
+				failedToPushSomeActions = true;
+				continue;  // if a match with the passed guid was not found, just
+				// ignore the action
 			}
+
+			matchData = match_it->second;
 
 			// validate the structure and parameters of the next action we are going to assimilate
 			if (nextAction->IsValid() == false) {
@@ -220,10 +215,7 @@ namespace GetgudSDK {
 			}
 		}
 
-		if (failedToPushSomeActions)
-			logger.Log(LogType::WARN,
-				"GameContainer::AddActions->Failed to push some actions to "
-				"GameContainer because no matching guid was found!");
+		if (failedToPushSomeActions)logger.Log(LogType::WARN, "GameContainer::AddActions->Failed to push some actions to GameContainer because no matching guid was found!");
 
 		// now run through all the matches that have new actions and insert the new
 		// action vector to the match all at once while doing it, need to make sure

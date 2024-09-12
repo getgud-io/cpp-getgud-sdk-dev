@@ -33,7 +33,6 @@ namespace GetgudSDK {
 		std::set<std::string> m_playerGuids;
 		unsigned int m_actionsCount = 0;
 		unsigned int m_sizeInBytes = 0;
-		long long m_lastActionTimeEpoch = 0;
 
 		std::map<std::string, Orientation> m_lastPositionActionVector;
 
