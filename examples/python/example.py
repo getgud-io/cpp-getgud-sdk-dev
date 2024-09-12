@@ -138,44 +138,70 @@ def test_2(title_id=1, private_key="pk"):
     action_time_epoch = int(time.time() * 1000)
     sdk.send_death_action(match_guid_1, action_time_epoch, player_guid_1, player_guid_2)
 
-    # End the first match
-    time.sleep(2)
-
-    # # Start a second match in the same game
-    # match_guid_2 = sdk.start_match(game_guid, "deathmatch", "test_map_2", "custom_field_value_2")
-
-    # # Spawn both players in the second match
-    # sdk.send_spawn_action(match_guid_2, action_time_epoch, player_guid_1, character_guid, team_guid_1, initial_health, position, rotation)
-    # sdk.send_spawn_action(match_guid_2, action_time_epoch, player_guid_2, character_guid, team_guid_2, initial_health, position, rotation)
-
-    # # Perform 100 attack and damage actions in the second match
-    # for _ in range(100):
-    #     action_time_epoch = int(time.time() * 1000)
-    #     weapon_guid = random.choice(weapon_guids)
-    #     damage_done = random.randint(10, 50)
-
-    #     # Attack actions
-    #     sdk.send_attack_action(match_guid_2, action_time_epoch, player_guid_1, weapon_guid)
-    #     sdk.send_attack_action(match_guid_2, action_time_epoch, player_guid_2, weapon_guid)
-
-    #     # Damage actions
-    #     sdk.send_damage_action(match_guid_2, action_time_epoch, player_guid_1, player_guid_2, damage_done, weapon_guid)
-    #     sdk.send_damage_action(match_guid_2, action_time_epoch, player_guid_2, player_guid_1, damage_done, weapon_guid)
-
-    # action_time_epoch = int(time.time() * 1000)
-    # sdk.send_death_action(match_guid_2, action_time_epoch, player_guid_2, player_guid_1)
-    
-    # End the second match
+    # End the match
     time.sleep(2)
     sdk.mark_end_game(game_guid)
 
     # Dispose the SDK instance
     time.sleep(5)
     sdk.dispose()
+
+def test_heavy_load(title_id=0, private_key="test"):
+    sdk = GetgudSDK()
+    
+    # Start a game
+    game_guid = sdk.start_game(title_id, private_key, "aws", "deathmatch", "UK")
+    print(f"Game started with GUID: {game_guid}")
+
+    # Start a match
+    match_guid = sdk.start_match(game_guid, "deathmatch", "test_map", "heavy_load_test")
+    print(f"Match started with GUID: {match_guid}")
+
+    # Heavy load test: Send 10,000,000 position actions
+    print("Starting heavy load test...")
+    total_actions = 10_000
+    actions_per_batch = 1000
+    total_batches = total_actions // actions_per_batch
+
+    player_guid = "heavy_load_player"
+
+    for batch in range(total_batches):
+        batch_start_time = time.time()
+        
+        for _ in range(actions_per_batch):
+            action_time_epoch = int(time.time() * 1000)
+            position = (random.uniform(-100, 100), random.uniform(-100, 100), random.uniform(-100, 100))
+            rotation = (random.uniform(0, 360), random.uniform(-90, 90), 0)  # Yaw, Pitch, Roll
+
+            sdk.send_position_action(match_guid, action_time_epoch, player_guid, position, rotation)
+
+        if batch % 100 == 0:
+            actions_sent = (batch + 1) * actions_per_batch
+            print(f"Sent {actions_sent:,} actions...")
+
+        # Calculate the time taken for this batch and sleep if necessary
+        batch_duration = time.time() - batch_start_time
+        if batch_duration < 0.1:  # 100 ms
+            time.sleep(0.1 - batch_duration)
+
+    print("Heavy load test completed!")
+
+    # End the game
+    sdk.mark_end_game(game_guid)
+    print("Game marked as ended!")
+
+    # Add a sleep before disposing
+    print("Waiting for 5 seconds before disposing...")
+    time.sleep(5)
+
+    # Clean up SDK resources
+    sdk.dispose()
+    print("SDK disposed.")
     
 if __name__ == "__main__":
-    title_id=0
+    title_id=1
     private_key="test"
     
     # test_1(title_id, private_key)
-    test_2(title_id, private_key)
+    # test_2(title_id, private_key)
+    test_heavy_load(title_id, private_key)
