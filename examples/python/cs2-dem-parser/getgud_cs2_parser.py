@@ -921,7 +921,6 @@ class GetgudCS2Parser:
             print(f'[Parser] Game from {self.resolved_url} is empty, we will not push it!')
         for command in sdk_commands:
             command.call(self.sdk)
-            time.sleep(0.00003125) # this will push about 32,000 actions / second
 
     def dispose(self):
         pass
