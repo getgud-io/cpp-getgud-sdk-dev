@@ -160,7 +160,6 @@ namespace GetgudSDK {
 		if (actionsToTakeFromMatch <= 0)
 			return;
 
-
 		// the the actions to the passed vector and erase them from this match's
 		// vector
 		toActionVector.insert(toActionVector.end(), m_actionVector.begin(),
@@ -168,24 +167,10 @@ namespace GetgudSDK {
 		m_actionVector.erase(m_actionVector.begin(),
 			m_actionVector.begin() + actionsToTakeFromMatch);
 
-		// we need to convert time stamps of returned actions to the old format
-		// because later we call add and the format will  be calculated
-		// again
-		long long lastActionTimeEpochToSlice = 0;
-		for (auto& actionPtr : toActionVector) {
-			actionPtr->m_actionTimeEpoch += lastActionTimeEpochToSlice;
-			lastActionTimeEpochToSlice = actionPtr->m_actionTimeEpoch;
-		}
-		// adjust first remaining action for dynamic programming
-		if (!m_actionVector.empty())
-			m_actionVector.front()->m_actionTimeEpoch += lastActionTimeEpochToSlice;
-
-
 		// calculate the new size of this match after the slice
 		m_actionsCount -= actionsToTakeFromMatch;
 		m_sizeInBytes -= GetPositionActionSize() * actionsToTakeFromMatch;
 	}
-
 
 	/**
 	 * SliceMatchReportVector:
@@ -366,7 +351,7 @@ namespace GetgudSDK {
 		oss << "\"matchActionStream\":\"";
 
 		long long lastActionTimeEpoch = 0;
-		
+
 		// convert actions to an action stream string output
 		for (BaseActionData* nextAction : m_actionVector) {
 
