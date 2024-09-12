@@ -100,12 +100,12 @@ namespace GetgudSDK {
 			// api request.
 			ThrottleCheckGameMatches(gameDataToSend);
 
-		} // end of lock scope
+			// We reduce action size of the match by applying our
+			// dynamic programming to match actions
+			// similar to how we dynamically encode timestamps
+			ReduceMatchActionsSize(gameDataToSend);
 
-		// We reduce action size of the match by applying our
-		// dynamic programming to match actions
-		// similar to how we dynamically encode timestamps
-		ReduceMatchActionsSize(gameDataToSend);
+		} // end of lock scope
 
 		unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
 
@@ -492,6 +492,7 @@ namespace GetgudSDK {
 	 **/
 	void GameSender::Dispose() {
 		m_updaterThread.detach();
+
 		m_threadWorking = false;
 		sharedGameSenders.gameSendersCount--;
 	}
