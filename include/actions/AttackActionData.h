@@ -13,6 +13,8 @@
 
 namespace GetgudSDK {
 	class AttackActionData : public BaseActionData {
+
+	public:
 		std::string m_weaponGuid;
 
 	public:
@@ -24,7 +26,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API AttackActionData() = delete;
 		GETGUDSDK_API ~AttackActionData() override;
 		GETGUDSDK_API bool IsValid() override;
-		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API void ToString(std::ostringstream& oss) override;
 		GETGUDSDK_API AttackActionData* Clone() override;
 	};
 }  // namespace GetgudSDK

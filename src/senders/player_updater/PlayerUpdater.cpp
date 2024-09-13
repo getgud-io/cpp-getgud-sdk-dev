@@ -276,20 +276,22 @@ namespace GetgudSDK {
 	 *
 	 **/
 	void PlayerUpdater::Dispose() {
-		m_threadWorking = false;
+		
 		m_playerUpdaterMutex.lock();
+
 		for (auto* playerData : m_playerVector) {
 			delete playerData;
 		}
 		m_playerVector.clear();
 		m_playerBufferSize = 0;
+
+		sharedPlayerUpdaters.playerUpdatersCount--;
+
 		m_playerUpdaterMutex.unlock();
 
 		m_updaterThread.detach();
-		{
-			std::lock_guard<std::mutex> locker(sharedPlayerUpdaters.playerUpdatersMutex);
-			sharedPlayerUpdaters.playerUpdatersCount--;
-		}
+
+		m_threadWorking = false;
 	}
 
 }  // namespace GetgudSDK

@@ -40,7 +40,8 @@ namespace GetgudSDK {
 		bool DidSendGameMarkedAsEnded();
 		void SentGameMarkedAsEnded();
 		void MarkGameMatchesAsNotInteresting(std::vector<std::string>& matchGuids);
-		MatchData* AddMatch(std::string matchMode, std::string mapName);
+		void SetGameMatchesIncompleteState(std::vector<std::string>& matchGuids, MatchCompletionState state);
+		MatchData* AddMatch(std::string matchMode, std::string mapName, std::string customField);
 		bool IsGameEligibleForProcessing();
 		GameData* SliceGame(int sizeToSliceInBytes);
 		bool CanDeleteGame();

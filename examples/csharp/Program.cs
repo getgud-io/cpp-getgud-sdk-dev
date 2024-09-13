@@ -6,6 +6,7 @@ class Program
     static void Main(string[] args)
     {
         Console.WriteLine("The C Sharp example started");
+
         // Initialize the SDK:
         int status = GetgudSDK.Methods.Init();
         Console.WriteLine(status);
@@ -27,11 +28,11 @@ class Program
 
         // Initialize input and output data for a Match
         string matchGuid;
-
         GetgudSDK.StartMatchInfo matchInfo;
         matchInfo.gameGuid = gameGuid;
         matchInfo.mapName = "map";
         matchInfo.matchMode = "matchMode";
+        matchInfo.customField = "customFieldValue";
 
         // Start a Match of the Game:
         status = GetgudSDK.Methods.StartMatch(matchInfo, out matchGuid);
@@ -47,7 +48,7 @@ class Program
         SpawnInfo.baseData.playerGuid = "player-1";
         SpawnInfo.baseData.actionTimeEpoch = 1684059337532;
         SpawnInfo.characterGuid = "LL";
-		SpawnInfo.teamGuid = "Team_1";
+        SpawnInfo.teamGuid = "Team_1";
         SpawnInfo.initialHealth = 100;
         SpawnInfo.position = new GetgudSDK.PositionF{ X = 10F, Y = 10F, Z = 0.0001F };
         SpawnInfo.rotation = new GetgudSDK.RotationF{ Roll = 240F, Pitch = 180F, Yaw = 0F };
@@ -77,6 +78,11 @@ class Program
         DeathInfo.attackerGuid = "player-3";
         GetgudSDK.Methods.SendDeathAction(DeathInfo);
 
+        // Set the winning team for the match
+        string winningTeam = "Team_1";
+        status = GetgudSDK.Methods.SetMatchWinTeam(matchGuid, winningTeam);
+        Console.WriteLine($"Set winning team status: {status}");
+
         GetgudSDK.ReportInfo reportInfo = new GetgudSDK.ReportInfo(matchGuid, 1684059337532, "player-2");
 
         // Make a report about the player:
@@ -105,7 +111,6 @@ class Program
 
         while (true)
         {
-
         }
     }
 }

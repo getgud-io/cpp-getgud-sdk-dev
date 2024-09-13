@@ -81,6 +81,8 @@ namespace GetgudSDK
         public string gameGuid;
         public string matchMode;
         public string mapName;
+        public string customField;
+
     };
     public struct ChatMessageInfo
     {
@@ -100,7 +102,7 @@ namespace GetgudSDK
         public string playerSuspectScore;
         public string playerReputation;
         public string playerStatus;
-        public string playerCompaign;
+        public string playerCampaign;
         public string playerNotes;
         public string playerDevice;
         public string playerOS;
@@ -116,7 +118,7 @@ namespace GetgudSDK
                           string playerSuspectScore = "",
                           string playerReputation = "",
                           string playerStatus = "",
-                          string playerCompaign = "",
+                          string playerCampaign = "",
                           string playerNotes = "",
                           string playerDevice = "",
                           string playerOS = "",
@@ -133,7 +135,7 @@ namespace GetgudSDK
             this.playerSuspectScore = playerSuspectScore;
             this.playerReputation = playerReputation;
             this.playerStatus = playerStatus;
-            this.playerCompaign = playerCompaign;
+            this.playerCampaign = playerCampaign;
             this.playerNotes = playerNotes;
             this.playerDevice = playerDevice;
             this.playerOS = playerOS;
@@ -180,7 +182,7 @@ namespace GetgudSDK
         }
     };
 
-    static internal class Methods
+    static public class Methods
     {
 #pragma warning disable CS8601, CS0649
         /**
@@ -283,7 +285,9 @@ namespace GetgudSDK
                 matchMode = Marshal.StringToHGlobalAnsi(info.matchMode),
                 matchModeSize = info.matchMode.Length,
                 mapName = Marshal.StringToHGlobalAnsi(info.mapName),
-                mapNameSize = info.mapName.Length
+                mapNameSize = info.mapName.Length,
+                customField = Marshal.StringToHGlobalAnsi(info.customField),
+                customFieldSize = info.customField?.Length ?? 0
             };
 
             // call unmanaged function
@@ -303,6 +307,7 @@ namespace GetgudSDK
             Marshal.FreeHGlobal(unmanagedInfo.gameGuid);
             Marshal.FreeHGlobal(unmanagedInfo.matchMode);
             Marshal.FreeHGlobal(unmanagedInfo.mapName);
+            Marshal.FreeHGlobal(unmanagedInfo.customField);
             Marshal.FreeHGlobal(matchGuidOutPtr);
 
             return result;
@@ -319,6 +324,24 @@ namespace GetgudSDK
             var result = GetgudSDK_calls.GetgudSDK_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedGameGuid);
+
+            return result;
+        }
+
+        /**
+         * SetMatchWinTeam:
+         *
+         * Set the winning team for a match
+         **/
+        static public int SetMatchWinTeam(string matchGuid, string teamGuid)
+        {
+            IntPtr matchGuidPtr = Marshal.StringToHGlobalAnsi(matchGuid);
+            IntPtr teamGuidPtr = Marshal.StringToHGlobalAnsi(teamGuid);
+
+            var result = GetgudSDK_calls.GetgudSDK_calls.SetMatchWinTeam(matchGuidPtr, matchGuid.Length, teamGuidPtr, teamGuid.Length);
+
+            Marshal.FreeHGlobal(matchGuidPtr);
+            Marshal.FreeHGlobal(teamGuidPtr);
 
             return result;
         }
@@ -611,10 +634,8 @@ namespace GetgudSDK
          *
          * Update player info outside of the live match
          **/
-        static public int UpdatePlayer(int titleId,
-        string privateKey, PlayerInfo player)
+        static public int UpdatePlayer(int titleId, string privateKey, PlayerInfo player)
         {
-
             IntPtr privateKeyPtr = Marshal.StringToHGlobalAnsi(privateKey);
             int privateKeySize = privateKey.Length;
 
@@ -625,17 +646,90 @@ namespace GetgudSDK
                 playerNickname = Marshal.StringToHGlobalAnsi(player.playerNickname),
                 playerNicknameSize = player.playerNickname.Length,
                 playerEmail = Marshal.StringToHGlobalAnsi(player.playerEmail),
-                playerEmailSize = player.playerEmail.Length,
+                playerEmailSize = player.playerEmail?.Length ?? 0,
                 playerRank = player.playerRank,
-                playerJoinDateEpoch = player.playerJoinDateEpoch
+                playerJoinDateEpoch = player.playerJoinDateEpoch,
+                playerSuspectScore = Marshal.StringToHGlobalAnsi(player.playerSuspectScore),
+                playerSuspectScoreSize = player.playerSuspectScore?.Length ?? 0,
+                playerReputation = Marshal.StringToHGlobalAnsi(player.playerReputation),
+                playerReputationSize = player.playerReputation?.Length ?? 0,
+                playerStatus = Marshal.StringToHGlobalAnsi(player.playerStatus),
+                playerStatusSize = player.playerStatus?.Length ?? 0,
+                playerCampaign = Marshal.StringToHGlobalAnsi(player.playerCampaign),
+                playerCampaignSize = player.playerCampaign?.Length ?? 0,
+                playerNotes = Marshal.StringToHGlobalAnsi(player.playerNotes),
+                playerNotesSize = player.playerNotes?.Length ?? 0,
+                playerDevice = Marshal.StringToHGlobalAnsi(player.playerDevice),
+                playerDeviceSize = player.playerDevice?.Length ?? 0,
+                playerOS = Marshal.StringToHGlobalAnsi(player.playerOS),
+                playerOSSize = player.playerOS?.Length ?? 0,
+                playerAge = player.playerAge,
+                playerGender = Marshal.StringToHGlobalAnsi(player.playerGender),
+                playerGenderSize = player.playerGender?.Length ?? 0,
+                playerLocation = Marshal.StringToHGlobalAnsi(player.playerLocation),
+                playerLocationSize = player.playerLocation?.Length ?? 0,
+                transactions = IntPtr.Zero,  // This will be set later if there are transactions
+                transactionsSize = 0  // This will be updated later if there are transactions
             };
+
+             // Handle transactions
+            if (player.transactions != null && player.transactions.Count > 0)
+            {
+                unmanagedBaseData.transactions = Marshal.AllocHGlobal(Marshal.SizeOf<GetgudSDK.PlayerTransactions>() * player.transactions.Count);
+                unmanagedBaseData.transactionsSize = player.transactions.Count;
+
+                for (int i = 0; i < player.transactions.Count; i++)
+                {
+                    var transaction = new GetgudSDK.PlayerTransactions
+                    {
+                        TransactionGuid = Marshal.StringToHGlobalAnsi(player.transactions[i].TransactionGuid),
+                        TransactionGuidSize = player.transactions[i].TransactionGuid.Length,
+                        TransactionName = Marshal.StringToHGlobalAnsi(player.transactions[i].TransactionName),
+                        TransactionNameSize = player.transactions[i].TransactionName.Length,
+                        TransactionDateEpoch = player.transactions[i].TransactionDateEpoch,
+                        TransactionValueUSD = player.transactions[i].TransactionValueUSD
+                    };
+
+                    IntPtr transactionPtr = new IntPtr(unmanagedBaseData.transactions.ToInt64() + i * Marshal.SizeOf<GetgudSDK.PlayerTransactions>());
+                    Marshal.StructureToPtr(transaction, transactionPtr, false);
+                }
+            }
+            else
+            {
+                unmanagedBaseData.transactions = IntPtr.Zero;
+                unmanagedBaseData.transactionsSize = 0;
+            }
 
             var result = GetgudSDK_calls.GetgudSDK_calls.UpdatePlayer(titleId, privateKeyPtr, privateKeySize, unmanagedBaseData);
 
+            // Free allocated memory
             Marshal.FreeHGlobal(privateKeyPtr);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerNickname);
             Marshal.FreeHGlobal(unmanagedBaseData.playerEmail);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerSuspectScore);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerReputation);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerStatus);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerCampaign);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerNotes);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerDevice);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerOS);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerGender);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerLocation);
+
+            // Free transaction memory if allocated
+            if (unmanagedBaseData.transactions != IntPtr.Zero)
+            {
+                for (int i = 0; i < unmanagedBaseData.transactionsSize; i++)
+                {
+                    IntPtr transactionPtr = new IntPtr(unmanagedBaseData.transactions.ToInt64() + i * Marshal.SizeOf<GetgudSDK.PlayerTransactions>());
+                    var transaction = Marshal.PtrToStructure<GetgudSDK.PlayerTransactions>(transactionPtr);
+                    
+                    Marshal.FreeHGlobal(transaction.TransactionGuid);
+                    Marshal.FreeHGlobal(transaction.TransactionName);
+                }
+                Marshal.FreeHGlobal(unmanagedBaseData.transactions);
+            }
 
             return result;
         }

@@ -45,7 +45,7 @@ class GetgudSDK:
 
         return ffi.string(game_guid).decode('utf-8')
 
-    def start_match(self, game_guid, match_mode, map_name):
+    def start_match(self, game_guid, match_mode, map_name, custom_field=""):
         match_info = ffi.new("struct StartMatchInfo*")
 
         game_guid_data = ffi.new("char[]", game_guid.encode('utf-8'))
@@ -60,6 +60,10 @@ class GetgudSDK:
         match_info.mapName = map_name_data
         match_info.mapNameSize = len(map_name)
 
+        custom_field_data = ffi.new("char[]", custom_field.encode('utf-8'))
+        match_info.customField = custom_field_data
+        match_info.customFieldSize = len(custom_field)
+
         match_guid = ffi.new("char[256]")
         result_code = getgudsdk.StartMatch(match_info[0], match_guid)
 
@@ -67,6 +71,17 @@ class GetgudSDK:
 
     def mark_end_game(self, game_guid):
         return getgudsdk.MarkEndGame(game_guid.encode('utf-8'), len(game_guid))
+    
+    def set_match_win_team(self, match_guid, team_guid):
+        match_guid_data = ffi.new("char[]", match_guid.encode('utf-8'))
+        match_guid_size = len(match_guid)
+
+        team_guid_data = ffi.new("char[]", team_guid.encode('utf-8'))
+        team_guid_size = len(team_guid)
+
+        result_code = getgudsdk.SetMatchWinTeam(match_guid_data, match_guid_size, team_guid_data, team_guid_size)
+
+        return result_code
 
     def send_in_match_report(self, match_guid, reporter_name, reporter_type, reporter_sub_type, 
                          suspected_player_guid, tb_type, 
@@ -301,7 +316,6 @@ class GetgudSDK:
         player_location, 
         transactions
     ):
-        
         private_key_data = ffi.new("char[]", private_key.encode('utf-8'))
         privateKeySize = len(private_key)
         
@@ -313,7 +327,7 @@ class GetgudSDK:
 
         player_nickname_data = ffi.new("char[]", player_nickname.encode('utf-8'))
         player_info.playerNickname = player_nickname_data
-        player_info.reporterNameSize = len(player_nickname)
+        player_info.playerNicknameSize = len(player_nickname)
 
         player_email_data = ffi.new("char[]", player_email.encode('utf-8'))
         player_info.playerEmail = player_email_data
@@ -335,8 +349,8 @@ class GetgudSDK:
         player_info.playerStatusSize = len(player_status)
 
         player_campaign_data = ffi.new("char[]", player_campaign.encode('utf-8'))
-        player_info.PlayerCampaign = player_campaign_data
-        player_info.PlayerCampaignSize = len(player_campaign)
+        player_info.playerCampaign = player_campaign_data
+        player_info.playerCampaignSize = len(player_campaign)
 
         player_notes_data = ffi.new("char[]", player_notes.encode('utf-8'))
         player_info.playerNotes = player_notes_data
@@ -362,16 +376,20 @@ class GetgudSDK:
 
         # Handle transactions if provided
         if transactions:
-            # Assuming transactions is a list of dictionaries
-            transaction_structs = [ffi.new("struct PlayerTransactions*", {
-                'TransactionGuid': ffi.new("char[]", transaction['TransactionGuid'].encode('utf-8')),
-                'TransactionGuidSize': len(transaction['TransactionGuid']),
-                'TransactionName': ffi.new("char[]", transaction['TransactionName'].encode('utf-8')),
-                'TransactionNameSize': len(transaction['TransactionName']),
-                'TransactionDateEpoch': transaction['TransactionDateEpoch'],
-                'TransactionValueUSD': transaction['TransactionValueUSD']
-            }) for transaction in transactions]
-            player_info.transactions = ffi.new("struct PlayerTransactions[]", transaction_structs)
+            # Create an array of PlayerTransactions structures
+            transaction_array = ffi.new("struct PlayerTransactions[]", len(transactions))
+            for i, transaction in enumerate(transactions):
+                transaction_guid = ffi.new("char[]", transaction['TransactionGuid'].encode('utf-8'))
+                transaction_name = ffi.new("char[]", transaction['TransactionName'].encode('utf-8'))
+                
+                transaction_array[i].TransactionGuid = transaction_guid
+                transaction_array[i].TransactionGuidSize = len(transaction['TransactionGuid'])
+                transaction_array[i].TransactionName = transaction_name
+                transaction_array[i].TransactionNameSize = len(transaction['TransactionName'])
+                transaction_array[i].TransactionDateEpoch = transaction['TransactionDateEpoch']
+                transaction_array[i].TransactionValueUSD = transaction['TransactionValueUSD']
+
+            player_info.transactions = transaction_array
             player_info.transactionsSize = len(transactions)
         else:
             player_info.transactions = ffi.NULL

@@ -139,25 +139,17 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 	int64 UnixTimestampMillis = (Now.GetTicks() - FDateTime(1970, 1, 1, 0, 0, 0, 0).GetTicks()) / ETimespan::TicksPerMillisecond;
 
 	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	if (CameraRotation.Pitch > 180.0f)
 	{
-		pitch = CameraRotation.Pitch * -1;
+		pitch = 360.0f - CameraRotation.Pitch;
 	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	else
 	{
-		pitch = 360 - CameraRotation.Pitch;
+		pitch = -CameraRotation.Pitch;
 	}
 
-	float yaw = 0;
+	float yaw = 360-CameraRotation.Yaw;
 
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
-	{
-		yaw = CameraRotation.Yaw * -1;
-	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
-	{
-		yaw = 360 - CameraRotation.Yaw;
-	}
 
 
 	// divide position to transform from cm to meters
@@ -166,7 +158,7 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 		g_matchGuid, UnixTimestampMillis, g_playerGuid,
 		GetgudSDK::PositionF{ 	
 			(float)position.X / 100.0f, 
-			(float)position.Y / 100.0f, 
+			-(float)position.Y / 100.0f, 
 			(float)position.Z / 100.0f 
 		},
 		GetgudSDK::RotationF{pitch, yaw, 0});
@@ -199,31 +191,24 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 
 
 	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
+	if (CameraRotation.Pitch > 180.0f)
 	{
-		pitch = CameraRotation.Pitch * -1;
+		pitch = 360.0f - CameraRotation.Pitch;
 	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
+	else
 	{
-		pitch = 360 - CameraRotation.Pitch;
+		pitch = -CameraRotation.Pitch;
 	}
 
-	float yaw = 0;
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
-	{
-		yaw = CameraRotation.Yaw * -1;
-	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
-	{
-		yaw = 360 - CameraRotation.Yaw;
-	}
+	float yaw = 360-CameraRotation.Yaw;
+
 	
 	// divide position to transform from cm to meters
 	outAction = new GetgudSDK::SpawnActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", "Team_1", 100.f,
 		GetgudSDK::PositionF{ 	
 			(float)position.X / 100.0f, 
-			(float)position.Y / 100.0f, 
+			-(float)position.Y / 100.0f, 
 			(float)position.Z / 100.0f 
 		},
 		GetgudSDK::RotationF{pitch, yaw, 0});

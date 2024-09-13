@@ -116,6 +116,17 @@ namespace GetgudSDK {
 	};
 
 	/**
+	* MatchCompletionState:
+	*
+	**/
+	enum class MatchCompletionState : int {
+		Complete = 1,
+		ActionDrop = 2,
+		ActionLose = 3,
+		ActionDropAndLose = 4
+	};
+
+	/**
 	 * PositionF:
 	 *
 	 * Defines the <x, y, z> position vector you send to us with Position and Spawn

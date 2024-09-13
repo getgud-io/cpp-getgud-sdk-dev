@@ -122,6 +122,21 @@ namespace GetgudSDK {
 		}
 	}
 
+	void GameData::SetGameMatchesIncompleteState(std::vector<std::string>& matchGuids, MatchCompletionState state) {
+
+		std::string matchGuid;
+
+		for (int index = 0; index < matchGuids.size(); index++) {
+			matchGuid = matchGuids[index];
+			auto matchData_it = m_matchMap.find(matchGuid);
+			if (matchData_it == m_matchMap.end())
+				continue;
+
+			matchData_it->second->SetMatchIncompleteState(state);
+			logger.Log(LogType::WARN, std::string("Match with the following Guid was marked as incomplete: " + matchGuid + " with the state: " + std::to_string((int)state)));
+		}
+	}
+
 	/**
 	 * MarkGameAsEnded:
 	 *
@@ -144,7 +159,7 @@ namespace GetgudSDK {
 	 * AddMatch:
 	 *
 	 **/
-	MatchData* GameData::AddMatch(std::string matchMode, std::string mapName) {
+	MatchData* GameData::AddMatch(std::string matchMode, std::string mapName, std::string customField) {
 
 		// make sure the game has enough room for another match
 		if (m_matchGuidVector.size() > sdkConfig.maxMatchesPerGame) {
@@ -153,7 +168,7 @@ namespace GetgudSDK {
 		}
 
 		// create the new match with the passed parameters and insert it to the game's match map
-		MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName);
+		MatchData* matchData = new MatchData(m_gameGuid, matchMode, mapName, customField);
 		if (!matchData->IsValid()) {
 			logger.Log(LogType::WARN, std::string("GameData::AddMatch->One or more of the Match's paraemters are not valid - Match will not start. Match paraemters: matchMode: " + matchMode + " | mapName: " + mapName + " | gameGuid: " + m_gameGuid));
 			delete matchData;
@@ -162,7 +177,6 @@ namespace GetgudSDK {
 		std::pair<std::string, MatchData*> matchGuidPair(matchData->GetMatchGuid(), matchData);
 		m_matchMap.insert(matchGuidPair);
 		m_matchGuidVector.push_back(matchData->GetMatchGuid());
-		m_matchGuidVector.shrink_to_fit();
 
 		m_lastUpdateTime = std::chrono::system_clock::now();
 
@@ -369,9 +383,9 @@ namespace GetgudSDK {
 		gameOut += "\"privateKey\":\"" + m_privateKey + "\",";
 		gameOut += "\"titleId\":" + std::to_string(m_titleId) + ",";
 		gameOut += "\"gameGuid\":\"" + m_gameGuid + "\",";
-		gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
-		gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
-		gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
+		if (m_gameMode.size() > 0) gameOut += "\"gameMode\":\"" + m_gameMode + "\",";
+		if (m_serverGuid.size() > 0) gameOut += "\"serverGuid\":\"" + m_serverGuid + "\",";
+		if (m_serverLocation.size() > 0) gameOut += "\"serverLocation\":\"" + m_serverLocation + "\",";
 		gameOut += "\"gameLastPacket\":" + lastPacket + ",";
 		gameOut += "\"matches\":[\n";
 
@@ -491,7 +505,6 @@ namespace GetgudSDK {
 
 		m_matchMap.clear();
 		m_matchGuidVector.clear();
-		m_matchGuidVector.shrink_to_fit();
 	}
 
 	bool GameData::IsValid() {

@@ -64,6 +64,8 @@ namespace GetgudSDK_calls
             public int matchModeSize;
             public IntPtr mapName;
             public int mapNameSize;
+            public IntPtr customField;
+            public int customFieldSize;
         };
 
         public struct ChatMessageWrapper
@@ -93,8 +95,8 @@ namespace GetgudSDK_calls
             public int playerReputationSize;
             public IntPtr playerStatus;
             public int playerStatusSize;
-            public IntPtr playerCompaign;
-            public int playerCompaignSize;
+            public IntPtr playerCampaign;
+            public int playerCampaignSize;
             public IntPtr playerNotes;
             public int playerNotesSize;
             public IntPtr playerDevice;
@@ -190,15 +192,7 @@ namespace GetgudSDK_calls
 
 #pragma warning restore CS8601, CS0649
 
-		// Windows build path
-        //sdk_project\tests\Starter_cSharp_dll\bin\Debug\net6.0
-		// Linux build path
-        //sdk_project\tests\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
-		//
-		// Linux deploy path
-		//examples\Starter_cSharp_so\bin\Debug\net7.0\linux-64\
         const string dllPath = "GetgudSDK";
-
 
         [DllImport(dllPath)]
         public static extern int init();
@@ -217,6 +211,9 @@ namespace GetgudSDK_calls
 
         [DllImport(dllPath)]
         public static extern int MarkEndGame(IntPtr gameGuid, int gameGuidSize);
+
+        [DllImport(dllPath)]
+        public static extern int SetMatchWinTeam(IntPtr matchGuid, int matchGuidSize, IntPtr teamGuid, int teamGuidSize);
 
         [DllImport(dllPath)]
         public static extern int SendAffectAction(BaseActionDataWrapper matchInfo, IntPtr affectGuid, int affectGuidSize, AffectState p_affectState);

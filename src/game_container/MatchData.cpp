@@ -7,6 +7,8 @@
 #include "./zip/Zip.h"
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"
+#include <sstream>
+#include <iomanip> // For std::setw, std::setfill
 
 namespace GetgudSDK {
 	extern Config sdkConfig;
@@ -24,8 +26,9 @@ namespace GetgudSDK {
 	 **/
 	MatchData::MatchData(std::string gameGuid,
 		std::string matchMode,
-		std::string mapName)
-		: m_gameGuid(gameGuid), m_matchMode(matchMode), m_mapName(mapName) {
+		std::string mapName,
+		std::string customField)
+		: m_gameGuid(gameGuid), m_matchMode(matchMode), m_mapName(mapName), m_customField(customField) {
 		m_matchGuid = GenerateGuid();
 		matchesAmount++;
 		totalCreatedMatches++;
@@ -44,6 +47,7 @@ namespace GetgudSDK {
 		m_gameGuid(data.m_gameGuid),
 		m_matchMode(data.m_matchMode),
 		m_mapName(data.m_mapName),
+		m_customField(data.m_customField),
 		m_throttleChecked(data.m_throttleChecked),
 		m_isInteresting(data.m_isInteresting),
 		m_playerGuids(data.m_playerGuids),
@@ -69,16 +73,22 @@ namespace GetgudSDK {
 	 * to the original match and match copy that will be sent to Getgud
 	 **/
 	MatchData* MatchData::Clone(bool isWithActions) {
-		MatchData* cloneMatchData = new MatchData(m_gameGuid, m_matchMode, m_mapName);
+		MatchData* cloneMatchData = new MatchData(m_gameGuid, m_matchMode, m_mapName, m_customField);
 		// Clone some metadata variables
 		cloneMatchData->m_matchGuid = m_matchGuid;
 		cloneMatchData->m_gameGuid = m_gameGuid;
 		cloneMatchData->m_matchMode = m_matchMode;
 		cloneMatchData->m_mapName = m_mapName;
+		cloneMatchData->m_customField = m_customField;
 		cloneMatchData->m_isInteresting = m_isInteresting;
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
 		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
 		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
+		cloneMatchData->m_matchCompletionState = m_matchCompletionState;
+		cloneMatchData->m_playerGuidMap = m_playerGuidMap;
+		cloneMatchData->m_nextPlayerKey = m_nextPlayerKey;
+		cloneMatchData->m_weaponGuidMap = m_weaponGuidMap;
+		cloneMatchData->m_nextWeaponKey = m_nextWeaponKey;
 
 		// Clone actions, reports and chat if needed
 		if (isWithActions == true) {
@@ -110,8 +120,7 @@ namespace GetgudSDK {
 	/**
 	 * AddActions:
 	 *
-	 * Add actions to the match, make sure dynamic time stamps of the actions are
-	 *linked to previous actions if we copy match
+	 * Add actions to the match
 	 **/
 	void MatchData::AddActions(std::vector<BaseActionData*>& incomingActionVector) {
 		if (incomingActionVector.size() == 0)
@@ -122,14 +131,12 @@ namespace GetgudSDK {
 		// add the newly arrived action vector to the current action vector, where all
 		// the actions are waiting to be processed
 		for (auto& actionPtr : incomingActionVector) {
-			actionPtr->m_actionTimeEpoch -= m_lastActionTimeEpoch;
-			m_lastActionTimeEpoch += actionPtr->m_actionTimeEpoch;
 
 			m_actionVector.push_back(actionPtr);
 			// store unique player guids of the match
 			m_playerGuids.insert(actionPtr->m_playerGuid);
 		}
-		m_actionVector.shrink_to_fit();
+
 		// calculate the new size of this object (using deltas only)
 		m_actionsCount += newActionVectorSize;
 		m_sizeInBytes += GetPositionActionSize() * newActionVectorSize;
@@ -153,33 +160,17 @@ namespace GetgudSDK {
 		if (actionsToTakeFromMatch <= 0)
 			return;
 
-
 		// the the actions to the passed vector and erase them from this match's
 		// vector
 		toActionVector.insert(toActionVector.end(), m_actionVector.begin(),
 			m_actionVector.begin() + actionsToTakeFromMatch);
 		m_actionVector.erase(m_actionVector.begin(),
 			m_actionVector.begin() + actionsToTakeFromMatch);
-		m_actionVector.shrink_to_fit();
-
-		// we need to convert time stamps of returned actions to the old format
-		// because later we call add and the format will  be calculated
-		// again
-		long long lastActionTimeEpochToSlice = 0;
-		for (auto& actionPtr : toActionVector) {
-			actionPtr->m_actionTimeEpoch += lastActionTimeEpochToSlice;
-			lastActionTimeEpochToSlice = actionPtr->m_actionTimeEpoch;
-		}
-		// adjust first remaining action for dynamic programming
-		if (!m_actionVector.empty())
-			m_actionVector.front()->m_actionTimeEpoch += lastActionTimeEpochToSlice;
-
 
 		// calculate the new size of this match after the slice
 		m_actionsCount -= actionsToTakeFromMatch;
 		m_sizeInBytes -= GetPositionActionSize() * actionsToTakeFromMatch;
 	}
-
 
 	/**
 	 * SliceMatchReportVector:
@@ -337,63 +328,105 @@ namespace GetgudSDK {
 	 **/
 	void MatchData::MatchToString(std::string& matchOut) {
 
-		if (m_actionVector.size() + m_reportVector.size() + m_chatMessageVector.size() == 0) return;
+		if (m_actionVector.empty() && m_reportVector.empty() && m_chatMessageVector.empty()) {
+			return;
+		}
 
-		// if match is not interesting from throttle check we do not need to send it
-		if (!m_isInteresting) return;
+		if (!m_isInteresting) {
+			return;
+		}
 
-		std::string actionStream;
+		std::ostringstream oss;
 		std::string compressedActionStream;
+		std::ostringstream actionStream;
 
-		matchOut += "{";
-		matchOut += "\"matchGuid\":\"" + m_matchGuid + "\",";
-		matchOut += "\"mapName\":\"" + m_mapName + "\",";
-		if (m_matchMode.size() > 0)
-			matchOut += "\"matchMode\":\"" + m_matchMode + "\",";
-		if (m_matchWinTeamGuid.size() > 0)
-			matchOut += "\"matchWinTeamGuid\":\"" + m_matchWinTeamGuid + "\",";
+		oss << "{";
+		oss << "\"matchGuid\":\"" << m_matchGuid << "\",";
+		oss << "\"mapName\":\"" << m_mapName << "\",";
 
-		matchOut += "\"matchActionStream\":\"";
+		if (!m_matchMode.empty()) oss << "\"matchMode\":\"" << m_matchMode << "\",";
+		if (!m_matchWinTeamGuid.empty()) oss << "\"matchWinTeamGuid\":\"" << m_matchWinTeamGuid << "\",";
+		if (!m_customField.empty()) oss << "\"customField\":\"" << m_customField << "\",";
+		oss << "\"matchCompletionState\":" << static_cast<int>(m_matchCompletionState) << ",";
+		oss << "\"matchActionStream\":\"";
 
-		for (int index = 0; index < m_actionVector.size(); index++) {
-			actionStream += m_actionVector[index]->ToString() + ",";
+		long long lastActionTimeEpoch = 0;
+
+		// convert actions to an action stream string output
+		for (BaseActionData* nextAction : m_actionVector) {
+
+			// first action in the packet should have a full timestmap
+			// all action after that, should just have delta timestamps compared to the first action
+			nextAction->m_actionTimeEpoch -= lastActionTimeEpoch;
+			lastActionTimeEpoch += nextAction->m_actionTimeEpoch;
+
+			nextAction->ToString(actionStream);
 		}
 
-		if (actionStream.size() > 0) {
-			actionStream.pop_back();  // pop the last delimiter
-			zipper.CompressString(actionStream, compressedActionStream);
+		if (!actionStream.str().empty()) {
+
+			std::string actionsStr = GetPlayerMapString() + GetWeaponMapString() + "," + actionStream.str();
+			actionsStr.pop_back();  // Remove the last comma
+			zipper.CompressString(actionsStr, compressedActionStream);
 		}
-		actionStream.clear();
-		matchOut += compressedActionStream;
-		matchOut += "\"";
-		// convert all reports to json string
-		if (m_reportVector.size() > 0)
-		{
-			matchOut += ",\"reports\":[";
-			for (int index = 0; index < m_reportVector.size(); index++) {
-				matchOut += m_reportVector[index]->ToString() + ",";
+		oss << compressedActionStream << "\"";
+
+		// Convert all reports to JSON string
+		if (!m_reportVector.empty()) {
+			oss << ",\"reports\":[";
+			for (const auto& report : m_reportVector) {
+				oss << report->ToString() << ",";
 #ifdef _DEBUG
 				sdkConfig.totalReportsSent++;
 #endif
 			}
-			matchOut.pop_back();       // pop the last delimiter
-			matchOut += "]";  // close the report array
+			oss.seekp(-1, std::ios_base::end); // Remove the last comma
+			oss << "]";
 		}
 
-		if (m_chatMessageVector.size() > 0)
-		{
-			// convert all chat messages to json string
-			matchOut += ",\"chat\":[";
-			for (int index = 0; index < m_chatMessageVector.size(); index++) {
-				matchOut += "" + m_chatMessageVector[index]->ToString() + ",";
+		// Convert all chat messages to JSON string
+		if (!m_chatMessageVector.empty()) {
+			oss << ",\"chat\":[";
+			for (const auto& chatMessage : m_chatMessageVector) {
+				oss << chatMessage->ToString() << ",";
 #ifdef _DEBUG
 				sdkConfig.totalChatSent++;
 #endif
 			}
-			matchOut.pop_back();         // pop the last delimiter
-			matchOut += "]";  // close the chat array and match
+			oss.seekp(-1, std::ios_base::end); // Remove the last comma
+			oss << "]";
 		}
-		matchOut += "}";
+
+		oss << "}";
+		matchOut = oss.str();
+	}
+
+	std::string MatchData::GetPlayerMapString() {
+		std::string result = "playerMap";
+
+		for (const auto& entry : m_playerGuidMap) {
+			result += "~G~" + entry.second + "~G~" + entry.first;
+		}
+
+		return result;
+	}
+
+	std::string MatchData::GetWeaponMapString() {
+		std::string result = "~G~weaponMap~G~";
+
+		for (const auto& entry : m_weaponGuidMap) {
+			result += "~W~" + entry.second + "~W~" + entry.first;
+		}
+
+		return result;
+	}
+
+	void MatchData::SetMatchIncompleteState(MatchCompletionState state) {
+
+		if (m_matchCompletionState != state) {
+			if (m_matchCompletionState == MatchCompletionState::Complete) m_matchCompletionState = state;
+			else m_matchCompletionState = MatchCompletionState::ActionDropAndLose;
+		}
 	}
 
 	/**
@@ -466,6 +499,48 @@ namespace GetgudSDK {
 	}
 
 	/**
+	* GetCustomField:
+	*
+	**/
+	std::string MatchData::GetCustomField() {
+		return m_customField;
+	}
+
+	std::string MatchData::getPlayerKeyName(std::string& playerGuid) {
+
+		// Check if the playerGuid already has a key
+		auto it = m_playerGuidMap.find(playerGuid);
+		if (it != m_playerGuidMap.end()) {
+			return it->second; // Return the existing key
+		}
+
+		// Generate a new key (a simple incrementing integer converted to a string)
+		std::string newKey = std::to_string(m_nextPlayerKey++);
+
+		// Store the new key in the map
+		m_playerGuidMap.emplace(playerGuid, newKey);
+
+		return newKey;
+	}
+
+	std::string MatchData::getWeaponKeyName(std::string& weaponGuid) {
+
+		// Check if the weaponGuid already has a key
+		auto it = m_weaponGuidMap.find(weaponGuid);
+		if (it != m_weaponGuidMap.end()) {
+			return it->second; // Return the existing key
+		}
+
+		// Generate a new key (a simple incrementing integer converted to a string)
+		std::string newKey = std::to_string(m_nextWeaponKey++);
+
+		// Store the new key in the map
+		m_weaponGuidMap.emplace(weaponGuid, newKey);
+
+		return newKey;
+	}
+
+	/**
 	 * SetLastPlayersPosition:
 	 *
 	 * Set last position for each player of the match, we use it in
@@ -515,7 +590,6 @@ namespace GetgudSDK {
 		for (auto& action : m_actionVector)
 			delete action;
 		m_actionVector.clear();
-		m_actionVector.shrink_to_fit();
 		for (auto& report : m_reportVector)
 			delete report;
 		m_reportVector.clear();
@@ -523,7 +597,6 @@ namespace GetgudSDK {
 		for (auto& chatMessage : m_chatMessageVector)
 			delete chatMessage;
 		m_chatMessageVector.clear();
-		m_chatMessageVector.shrink_to_fit();
 		m_playerGuids.clear();
 	}
 
@@ -534,6 +607,8 @@ namespace GetgudSDK {
 		isActionValid &= Validator::ValidateStringChars(m_matchMode);
 		isActionValid &= Validator::ValidateStringLength(m_mapName, 1, 36);
 		isActionValid &= Validator::ValidateStringChars(m_mapName);
+		isActionValid &= Validator::ValidateStringLength(m_customField, 0, 128);
+		isActionValid &= Validator::ValidateStringChars(m_customField);
 		return isActionValid;
 	}
 

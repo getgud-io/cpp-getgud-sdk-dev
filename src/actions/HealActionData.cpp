@@ -2,6 +2,7 @@
 #include "../config/Config.h"
 #include "../utils/Validator.h"
 #include "../utils/Utils.h"
+#include <sstream>
 
 using namespace GetgudSDK;
 
@@ -49,14 +50,11 @@ bool HealActionData::IsValid() {
  *
  * For sending action stream to Getgud
  **/
-std::string HealActionData::ToString() {
-	std::string actionString;
-	actionString += std::to_string(m_actionTimeEpoch) + ",";
-	actionString += "H,";
-	actionString += m_playerGuid + ",";
-	actionString += ShortenDecimalNumber(std::to_string(m_healthGained));
-
-	return actionString;
+void HealActionData::ToString(std::ostringstream& oss) {
+	oss << m_actionTimeEpoch << ","  // Append m_actionTimeEpoch
+		<< "H,"                      // Append constant string "H"
+		<< m_playerGuid << ","       // Append m_playerGuid
+		<< m_healthGained << ","; // Append shortened decimal number of m_healthGained
 }
 
 /**

@@ -12,6 +12,11 @@ namespace GetgudSDK {
 
 	ActionsBuffer actionsBuffer;
 
+	ActionsBuffer::ActionsBuffer() {
+		m_actionSize = GetPositionActionSize();
+		m_emptyActionSize = GetEmptyActionSize();
+	}
+
 	/**
 	 * PopActions:
 	 *
@@ -25,7 +30,6 @@ namespace GetgudSDK {
 
 		m_actionsBufferLocker.lock();
 
-		m_actionsBuffer.shrink_to_fit();
 		actionsBufferSize = m_actionsBuffer.size();
 
 		if (actionsBufferSize != 0) {
@@ -52,7 +56,9 @@ namespace GetgudSDK {
 	 **/
 	bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
 		std::deque<BaseActionData*> actionToSend;
-		unsigned int actionSize = GetPositionActionSize();
+
+		unsigned int actionSize = m_actionSize;
+
 		if (m_actionsBufferSize >= sdkConfig.actionsBufferMaxSizeInBytes) {
 			// game sender will grab those actions and will delete the game because
 			// those actions are empty and marked 
@@ -61,7 +67,7 @@ namespace GetgudSDK {
 				emptyAction->m_matchGuid = action->m_matchGuid;
 				actionToSend.push_back(emptyAction);
 			}
-			actionSize = GetEmptyActionSize();
+			actionSize = m_emptyActionSize;
 		}
 		else {
 			// if the action buffer is not full yet we just push regular actions
@@ -77,7 +83,6 @@ namespace GetgudSDK {
 
 		m_actionsBuffer.insert(m_actionsBuffer.end(), actionToSend.begin(),
 			actionToSend.end());
-		m_actionsBuffer.shrink_to_fit();
 		m_actionsBufferLocker.unlock();
 
 		return true;

@@ -34,7 +34,8 @@ namespace GetgudSDK {
 			std::string serverLocation);
 		std::string AddMatch(std::string gameGuid,
 			std::string matchMode,
-			std::string mapName);
+			std::string mapName,
+			std::string customField);
 		bool AddActions(std::deque<BaseActionData*>& actionVector);
 		bool AddInMatchReport(ReportInfo reportData);
 		bool AddChatMessage(std::string matchGuid, ChatMessageInfo chatData);
@@ -44,6 +45,7 @@ namespace GetgudSDK {
 		bool MarkEndGame(std::string gameGuid);
 		void SentGameMarkedAsEnded(std::string gameGuid);
 		void MarkGameMatchesAsNotInteresting(std::string gameGuid, std::vector<std::string>& matchGuids);
+		void SetGameMatchesIncompleteState(std::string gameGuid, std::vector<std::string>& matchGuids, MatchCompletionState state);
 		bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid);
 		bool DeleteGame(std::string gameGuid, bool externalCall);
 		void Dispose();

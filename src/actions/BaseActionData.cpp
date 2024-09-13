@@ -102,8 +102,8 @@ namespace GetgudSDK {
 	 *
 	 * For sending action stream to Getgud
 	 **/
-	std::string BaseActionData::ToString() {
-		return std::string();
+	void BaseActionData::ToString(std::ostringstream& oss) {
+
 	}
 
 	/**

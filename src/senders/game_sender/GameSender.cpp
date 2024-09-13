@@ -100,12 +100,12 @@ namespace GetgudSDK {
 			// api request.
 			ThrottleCheckGameMatches(gameDataToSend);
 
-		} // end of lock scope
+			// We reduce action size of the match by applying our
+			// dynamic programming to match actions
+			// similar to how we dynamically encode timestamps
+			ReduceMatchActionsSize(gameDataToSend);
 
-		// We reduce action size of the match by applying our
-		// dynamic programming to match actions
-		// similar to how we dynamically encode timestamps
-		ReduceMatchActionsSize(gameDataToSend);
+		} // end of lock scope
 
 		unsigned gameDataSizeInBytes = gameDataToSend->GetGameSizeInBytes();
 
@@ -120,8 +120,8 @@ namespace GetgudSDK {
 			if (SendGamePacket(gameOut) == false) {
 
 				// incase failed to send the packet to the server, mark the matches with lost data as not interesting so no other packets will be sent for these matches
-				logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as Not Interesting for Game guid: " + gameDataToSend->GetGameGuid());
-				gameContainer.MarkGameMatchesAsNotInteresting(gameDataToSend->GetGameGuid(), matchGuids);
+				logger.Log(LogType::WARN, "Failed to send game packet to server, matches with data lose will be marked as incomplite and will not be analyzed for Game guid: " + gameDataToSend->GetGameGuid());
+				gameContainer.SetGameMatchesIncompleteState(gameDataToSend->GetGameGuid(), matchGuids, MatchCompletionState::ActionLose);
 			}
 			else logger.Log(LogType::DEBUG, "Packet for the following Game guid was sent: " + gameDataToSend->GetGameGuid());
 		}
@@ -240,20 +240,14 @@ namespace GetgudSDK {
 				// start preparing throttle check request JSON body
 				std::string packet;
 				packet += "{";
-				packet +=
-					"\"privateKey\":\"" + gameDataToSend->GetPrivateKey() + "\",";
-				packet +=
-					"\"titleId\":" + std::to_string(gameDataToSend->GetTitleId()) +
-					",";
-				packet +=
-					"\"serverGuid\":\"" + gameDataToSend->GetServerGuid() + "\",";
-				packet +=
-					"\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
-				packet +=
-					"\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
-				packet +=
-					"\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
+				packet += "\"privateKey\":\"" + gameDataToSend->GetPrivateKey() + "\",";
+				packet += "\"titleId\":" + std::to_string(gameDataToSend->GetTitleId()) + ",";
+				if(gameDataToSend->GetServerGuid().size() > 0) packet += "\"serverGuid\":\"" + gameDataToSend->GetServerGuid() + "\",";
+				if (gameDataToSend->GetGameMode().size() > 0) packet += "\"gameMode\":\"" + gameDataToSend->GetGameMode() + "\",";
+				if (gameDataToSend->GetServerLocation().size() > 0) packet += "\"serverLocation\":\"" + gameDataToSend->GetServerLocation() + "\",";
+				if (match.second->GetMatchMode().size() > 0) packet += "\"matchMode\":\"" + match.second->GetMatchMode() + "\",";
 				packet += "\"mapName\":\"" + match.second->GetMapName() + "\",";
+				if (match.second->GetCustomField().size() > 0) packet += "\"customField\":\"" + match.second->GetCustomField() + "\",";
 				packet += "\"playerGuids\":[";
 				for (auto& playerGuid : playerGuids) {
 					packet += "\"" + playerGuid + "\",";
@@ -498,6 +492,7 @@ namespace GetgudSDK {
 	 **/
 	void GameSender::Dispose() {
 		m_updaterThread.detach();
+
 		m_threadWorking = false;
 		sharedGameSenders.gameSendersCount--;
 	}

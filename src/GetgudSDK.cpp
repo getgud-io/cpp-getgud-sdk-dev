@@ -165,13 +165,26 @@ namespace GetgudSDK {
 		std::string matchMode,
 		std::string mapName) {
 
+		return StartMatch(gameGuid, matchMode, mapName, "");
+	}
+
+	/**
+	 * Start match:
+	 *
+	 * Start a new match for an existing game
+	 **/
+	std::string StartMatch(std::string gameGuid,
+		std::string matchMode,
+		std::string mapName,
+		std::string customField) {
+
 		std::string matchGuid;
 
 		try {
 
-			logger.Log(LogType::DEBUG, std::string("String a new Match with the following parameters: gameGuid: " + gameGuid + " | matchMode: " + matchMode + " | mapName: " + mapName));
+			logger.Log(LogType::DEBUG, std::string("String a new Match with the following parameters: gameGuid: " + gameGuid + " | matchMode: " + matchMode + " | mapName: " + mapName + " | customField: " + customField));
 
-			matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName);
+			matchGuid = gameContainer.AddMatch(gameGuid, matchMode, mapName, customField);
 
 		}
 		catch (std::exception& _error) {
@@ -637,31 +650,29 @@ namespace GetgudSDK {
 	 **/
 	void Dispose() {
 		try {
+
 			actionsBuffer.Dispose();
 			gameContainer.Dispose();
-			{
-				std::lock_guard<std::mutex> locker(
-					sharedReportSenders.reportSendersMutex);
-				if (sharedReportSenders.reportSender != nullptr) {
-					sharedReportSenders.reportSender->Dispose();
-					sharedReportSenders.reportSender = nullptr;
-				}
+
+			if (sharedReportSenders.reportSender != nullptr) {
+				sharedReportSenders.reportSender->Dispose();
+				sharedReportSenders.reportSender = nullptr;
 			}
 
-			{
-				std::lock_guard<std::mutex> locker(
-					sharedPlayerUpdaters.playerUpdatersMutex);
-				if (sharedPlayerUpdaters.playerUpdater != nullptr) {
-					sharedPlayerUpdaters.playerUpdater->Dispose();
-					sharedPlayerUpdaters.playerUpdater = nullptr;
-				}
+			if (sharedPlayerUpdaters.playerUpdater != nullptr) {
+				sharedPlayerUpdaters.playerUpdater->Dispose();
+				sharedPlayerUpdaters.playerUpdater = nullptr;
 			}
 
-			for (auto& senderThread : sharedGameSenders.gameSenders)
+			for (auto& senderThread : sharedGameSenders.gameSenders) {
 				senderThread->Dispose();
+			}
+
 			sharedGameSenders.gameSenders.clear();
 			sharedGameSenders.gameSendersCount = 0;
+
 			curl_global_cleanup();
+			
 
 #ifdef _DEBUG
 			sdkConfig.actionsAmount = 0;

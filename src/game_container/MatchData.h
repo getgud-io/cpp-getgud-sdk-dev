@@ -7,6 +7,7 @@
 #include "../../include/actions/BaseActionData.h"
 #include "ChatMessageData.h"
 #include "ReportData.h"
+#include <unordered_map>
 
 namespace GetgudSDK {
 	class MatchData {
@@ -26,17 +27,32 @@ namespace GetgudSDK {
 		std::string m_matchMode;
 		std::string m_mapName;
 		std::string m_matchWinTeamGuid;
+		std::string m_customField;
 		bool m_throttleChecked = false;
 		bool m_isInteresting = false;
 		std::set<std::string> m_playerGuids;
 		unsigned int m_actionsCount = 0;
 		unsigned int m_sizeInBytes = 0;
-		long long m_lastActionTimeEpoch = 0;
 
 		std::map<std::string, Orientation> m_lastPositionActionVector;
 
+		// holds the player Key to player Guid mapping
+		std::unordered_map<std::string, std::string> m_playerGuidMap;
+
+		// used to generate new player keys
+		int m_nextPlayerKey = 0;
+
+		// holds the weapon Key to weapon Guid mapping
+		std::unordered_map<std::string, std::string> m_weaponGuidMap;
+
+		// used to generate new weapon keys
+		int m_nextWeaponKey = 0;
+
+		// holds the map action completion state
+		MatchCompletionState m_matchCompletionState = MatchCompletionState::Complete;
+
 	public:
-		MatchData(std::string gameGuid, std::string matchMode, std::string mapName);
+		MatchData(std::string gameGuid, std::string matchMode, std::string mapName, std::string m_customField);
 		MatchData(const MatchData& data);
 		MatchData() = delete;
 		~MatchData();
@@ -65,8 +81,14 @@ namespace GetgudSDK {
 		std::vector<ChatMessageData*> GetChatMessageVector();
 		std::string GetMatchMode();
 		std::string GetMapName();
+		std::string GetCustomField();
 		void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
 		void SetMatchWinTeam(std::string teamGuid);
+		std::string getPlayerKeyName(std::string& playerGuid);
+		std::string getWeaponKeyName(std::string& weaponGuid);
+		std::string  GetPlayerMapString();
+		std::string  GetWeaponMapString();
+		void SetMatchIncompleteState(MatchCompletionState state);
 		void Dispose();
 		bool IsValid();
 	};

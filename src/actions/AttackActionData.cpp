@@ -1,6 +1,7 @@
 #include "AttackActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include <sstream>
 
 namespace GetgudSDK {
 
@@ -55,14 +56,11 @@ namespace GetgudSDK {
 	 *
 	 * For sending action stream to Getgud
 	 **/
-	std::string AttackActionData::ToString() {
-		std::string actionString;
-		actionString += std::to_string(m_actionTimeEpoch) + ",";
-		actionString += "A,";
-		actionString += m_playerGuid + ",";
-		actionString += m_weaponGuid;
-
-		return actionString;
+	void AttackActionData::ToString(std::ostringstream& oss) {
+		oss << m_actionTimeEpoch << ","  // Append m_actionTimeEpoch
+			<< "A,"                      // Append constant string "A"
+			<< m_playerGuid << ","       // Append m_playerGuid
+			<< m_weaponGuid << ",";             // Append m_weaponGuid
 	}
 
 	/**

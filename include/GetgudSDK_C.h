@@ -59,6 +59,8 @@ struct StartMatchInfo {
 	int matchModeSize;
 	const char* mapName;
 	int mapNameSize;
+	const char* customField;
+	int customFieldSize;
 };
 
 struct ChatMessageInfo {
@@ -86,8 +88,8 @@ struct PlayerInfo {
 	int playerReputationSize;
 	const char* playerStatus;
 	int playerStatusSize;
-	const char* PlayerCampaign;
-	int PlayerCampaignSize;
+	const char* playerCampaign;
+	int playerCampaignSize;
 	const char* playerNotes;
 	int playerNotesSize;
 	const char* playerDevice;
@@ -166,6 +168,13 @@ extern "C" {
 	 * Mark started game as finished
 	 **/
 	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
+
+	/**
+     * SetMatchWinTeam:
+     *
+     * Set the winning team for a match
+     **/
+    GETGUDSDK_API int SetMatchWinTeam(const char* matchGuid, int matchGuidSize, const char* teamGuid, int teamGuidSize);
 
 	/**
 	 * SendAffectAction:

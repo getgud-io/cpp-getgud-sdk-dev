@@ -14,6 +14,8 @@
 
 namespace GetgudSDK {
 	class DeathActionData : public BaseActionData {
+
+	public:
 		std::string m_attackerGuid;
 	public:
 		GETGUDSDK_API DeathActionData(std::string matchGuid,
@@ -24,7 +26,7 @@ namespace GetgudSDK {
 		GETGUDSDK_API DeathActionData() = delete;
 		GETGUDSDK_API ~DeathActionData() override;
 		GETGUDSDK_API bool IsValid() override;
-		GETGUDSDK_API std::string ToString() override;
+		GETGUDSDK_API void ToString(std::ostringstream& oss) override;
 		GETGUDSDK_API DeathActionData* Clone() override;
 	};
 }  // namespace GetgudSDK
