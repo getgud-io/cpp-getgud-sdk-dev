@@ -749,18 +749,12 @@ class GetgudCS2Parser:
 
         sdk_commands = []
         match_guids = []
-        
-        round_stop_ticks = demo_data['events']['round_officially_ended'][demo_data['events']['round_officially_ended']['is_freeze_period'] == True].reset_index(drop=True)
-        
+                
         # Process each match ("round")
         for round_num in range(len(demo_data['events']['round_freeze_end'])):
             round_start_tick = demo_data['events']['round_freeze_end'].iloc[round_num]['tick']
             # for every round except last we take end tick as the start tick of next round
-            if round_num < len(demo_data['events']['round_freeze_end'])-1:
-                round_end_tick = demo_data['events']['round_freeze_end'].iloc[round_num+1]['tick']
-            else:
-                # for last round end tick is the last tick of the whole event list
-                round_end_tick = demo_data['ticks']['tick'].max()
+            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick']
                 
             kill_match_data = demo_data['kills'].loc[(demo_data['kills']['tick'] >= round_start_tick) & (demo_data['kills']['tick'] <= round_end_tick)].reset_index(drop = True)
             damage_match_data = demo_data['damages'].loc[(demo_data['damages']['tick'] >= round_start_tick) & (demo_data['damages']['tick'] <= round_end_tick)].reset_index(drop = True)
@@ -921,6 +915,8 @@ class GetgudCS2Parser:
             print(f'[Parser] Game from {self.resolved_url} is empty, we will not push it!')
         for command in sdk_commands:
             command.call(self.sdk)
+            # time.sleep(0.00000125)
+
 
     def dispose(self):
         pass
