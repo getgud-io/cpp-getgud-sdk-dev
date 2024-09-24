@@ -751,10 +751,11 @@ class GetgudCS2Parser:
         match_guids = []
                 
         # Process each match ("round")
+        extra_second_of_ticks = 64
         for round_num in range(len(demo_data['events']['round_freeze_end'])):
             round_start_tick = demo_data['events']['round_freeze_end'].iloc[round_num]['tick']
             # for every round except last we take end tick as the start tick of next round
-            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick']
+            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick'] + extra_second_of_ticks
                 
             kill_match_data = demo_data['kills'].loc[(demo_data['kills']['tick'] >= round_start_tick) & (demo_data['kills']['tick'] <= round_end_tick)].reset_index(drop = True)
             damage_match_data = demo_data['damages'].loc[(demo_data['damages']['tick'] >= round_start_tick) & (demo_data['damages']['tick'] <= round_end_tick)].reset_index(drop = True)
@@ -767,7 +768,8 @@ class GetgudCS2Parser:
             match_guid = StartMatch(
                 game_guid,
                 "5v5",
-                demo_data['header']['map_name'].replace(' ', '-')[:CHAR_LIMIT['small']]
+                demo_data['header']['map_name'].replace(' ', '-')[:CHAR_LIMIT['small']],
+                self.dem_file_path.split('/')[-1]
             ).call(self.sdk)
             match_guids.append(match_guid)
             
