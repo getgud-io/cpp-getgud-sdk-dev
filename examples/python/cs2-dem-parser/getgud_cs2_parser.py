@@ -611,7 +611,7 @@ class GetgudDemoParser:
         header = self.parser.parse_header()
         events = dict(
             self.parser.parse_events(
-                self.parser.list_game_events() + ['round_end'],
+                self.parser.list_game_events() + ['round_end', 'round_start'],
                 player=[
                     "X",
                     "Y",
@@ -751,17 +751,16 @@ class GetgudCS2Parser:
         match_guids = []
                 
         # Process each match ("round")
-        extra_second_of_ticks = 64
-        for round_num in range(len(demo_data['events']['round_freeze_end'])):
-            round_start_tick = demo_data['events']['round_freeze_end'].iloc[round_num]['tick']
+        extra_ticks = 128
+        for round_num in range(len(demo_data['events']['round_start'])):
+            round_start_tick = demo_data['events']['round_start'].iloc[round_num]['tick']
             # for every round except last we take end tick as the start tick of next round
-            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick'] + extra_second_of_ticks
-                
+            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick'] + extra_ticks
+            
             kill_match_data = demo_data['kills'].loc[(demo_data['kills']['tick'] >= round_start_tick) & (demo_data['kills']['tick'] <= round_end_tick)].reset_index(drop = True)
             damage_match_data = demo_data['damages'].loc[(demo_data['damages']['tick'] >= round_start_tick) & (demo_data['damages']['tick'] <= round_end_tick)].reset_index(drop = True)
             weapon_fires_match_data = demo_data['weapon_fires'].loc[(demo_data['weapon_fires']['tick'] >= round_start_tick) & (demo_data['weapon_fires']['tick'] <= round_end_tick)].reset_index(drop = True)
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
-            # TODO: use this for spawns, but currently doesn't have health data
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
             
             # Start a new match and record its GUID
@@ -820,41 +819,49 @@ class GetgudCS2Parser:
                     )
                 ])
             
-            # Spawn all players at the start of each round
-            # Assuming that demo_data['ticks'] includes ticks for all rounds and all matches
-            round_start_ticks = demo_data['ticks'][demo_data['ticks']['tick'] == round_start_tick]
-            spectator_ids = []
-            for _, tick_row in round_start_ticks.iterrows():
-                player_id = tick_row['steamid']
-                player_side = tick_row['side']
-                # don't log spectators
-                if player_side == 'spectator':
-                    spectator_ids.append(player_id)
-                    continue
-                if player_side == 'TERRORIST':
-                    player_side = 'T'
+            # Send spawn events from spawn event data
+            player_match_spawns = spawn_match_data[(spawn_match_data['tick']>=round_start_tick) & (spawn_match_data['tick']<=round_end_tick)]
+            
+            for _, spawn_row in player_match_spawns.iterrows():
+                player_health = 100
+                x,y,z = spawn_row['user_X'], spawn_row['user_Y'], spawn_row['user_Z']
+                pitch, yaw = spawn_row['user_pitch'], spawn_row['user_yaw']
+
+                
+                # we need to grab player health from firs tick of match because 
+                # health seems not to be always available on spawn
+                for _, tick_row in tick_match_data.iterrows():
+                    player_id = str(tick_row['steamid'])
+                    if player_id == spawn_row['user_steamid']:
+                        player_health = tick_row['health']
+                        x,y,z = tick_row['X'], tick_row['Y'], tick_row['Z']
+                        pitch, yaw = tick_row['pitch'], tick_row['yaw']
+                        break
                     
-                if player_side is not None:
-                    sdk_commands.append([
-                        round(self.match_start_time_in_milliseconds + (round_start_tick / tick_rate) * 1000),
+                    
+                player_team = spawn_row['user_team_name'] 
+                
+                # renaming for consistency with match win team
+                if player_team == 'TERRORIST':
+                    player_team = 'T'
+                
+                sdk_commands.append([
+                        round(self.match_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
                         SpawnActionData(
                             match_guid,
-                            round(self.match_start_time_in_milliseconds + (round_start_tick / tick_rate) * 1000),
-                            player_id,
-                            player_side, # character guid
-                            player_side, # team guid
-                            tick_row['health'], # + tick_row['armor'],  # Assuming 'armor' value is available
-                            Position(tick_row['X'], tick_row['Y'], tick_row['Z']),
-                            Rotation(tick_row['pitch'], tick_row['yaw'], 0),
+                            round(self.match_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
+                            spawn_row['user_steamid'],
+                            player_team, # character guid
+                            player_team, # team guid
+                            player_health, # todo: where to get armor? 
+                            Position(x,y,z),
+                            Rotation(pitch, yaw, 0),
                         )
                     ])
             
             # Log position for all ticks in the round
             for _, tick_row in tick_match_data.iterrows():
                 player_id = tick_row['steamid']
-                # don't log spectator players
-                if player_id in spectator_ids:
-                    continue
                 sdk_commands.append([
                     round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
                     PositionActionData(
