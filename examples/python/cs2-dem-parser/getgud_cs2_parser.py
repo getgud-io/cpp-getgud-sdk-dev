@@ -845,6 +845,11 @@ class GetgudCS2Parser:
                 if player_team == 'TERRORIST':
                     player_team = 'T'
                 
+                # it's likely a spectator or a bug, we are not going
+                # to spawn this player
+                if player_team != 'T' and player_team != 'CT':
+                    continue
+                
                 sdk_commands.append([
                         round(self.match_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
                         SpawnActionData(
