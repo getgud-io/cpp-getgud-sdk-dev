@@ -48,6 +48,5 @@ namespace GetgudSDK {
 		void ThrottleCheckGameMatches(GameData* gameDataToSend);
 		bool SendThrottleCheckForMatch(std::string& packet);
 		bool SendGamePacket(std::string& packet);
-		void ReduceMatchActionsSize(GameData* gameDataToSend);
 	};
 }  // namespace GetgudSDK
