@@ -791,6 +791,12 @@ class GetgudCS2Parser:
                 damage = damage_row['dmg_health'] + damage_row['dmg_armor']
                 weapon = damage_row['weapon'].replace(' ', '-')[:CHAR_LIMIT['small']]
                 
+                # getgud requires attack and damage guids to be the same
+                # we are replacing inferno with molotov because that's how it's called during
+                # attack event
+                if weapon == 'inferno':
+                    weapon = 'molotov'
+                
                 if pd.isna(attacker_steamid) or attacker_steamid == '' or attacker_steamid is None:
                     attacker_steamid = 'PvE'
                     weapon = 'PvE'
@@ -803,7 +809,7 @@ class GetgudCS2Parser:
                         attacker_steamid,
                         victim_steamid,
                         damage,
-                        weapon[:CHAR_LIMIT['small']]
+                        weapon
                     )
                 ])
 
