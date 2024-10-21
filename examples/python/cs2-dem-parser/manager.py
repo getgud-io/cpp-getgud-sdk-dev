@@ -79,13 +79,13 @@ if __name__ == "__main__":
     getgud_sdk_manager = GetgudParserManager()
     
     # Initialize and start the DatabaseDemScanner
-    db_scanner = DatabaseDemScanner()
-    db_scanner.start()
+    # db_scanner = DatabaseDemScanner()
+    # db_scanner.start()
 
     def signal_handler(sig, frame):
         print("Signal received:", sig)
         getgud_sdk_manager.stop()
-        db_scanner.stop()
+        # db_scanner.stop()
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
