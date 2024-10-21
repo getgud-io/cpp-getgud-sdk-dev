@@ -29,29 +29,40 @@ class GetgudParserManager:
 
     def process_files(self):
         """
-        Continuously scan for .dem files, process them one by one, and delete when done.
+        Continuously scan for .dem files, process them one by one in FIFO order, and delete when done.
+        Skips files that have a corresponding .bz2 file, indicating they're not ready for processing.
         """
         while self.is_manager_active:
             try:
-                for filename in os.listdir(SCAN_FOLDER_PATH):
-                    if filename.endswith(".dem"):
-                        filepath = os.path.join(SCAN_FOLDER_PATH, filename)
-                        print(f'[Manager] Processing file: {filepath}')
+                # Get all .dem files and sort them by creation time
+                dem_files = [f for f in os.listdir(SCAN_FOLDER_PATH) if f.endswith(".dem")]
+                dem_files.sort(key=lambda x: os.stat(os.path.join(SCAN_FOLDER_PATH, x)).st_ctime)
+
+                for filename in dem_files:
+                    filepath = os.path.join(SCAN_FOLDER_PATH, filename)
+                    bz2_filepath = filepath + '.bz2'
+                    
+                    # Skip if corresponding .bz2 file exists
+                    if os.path.exists(bz2_filepath):
+                        print(f'[Manager] Skipping {filepath} as {bz2_filepath} still exists.')
+                        continue
+
+                    print(f'[Manager] Processing file: {filepath}')
+                    try:
+                        parser = GetgudCS2Parser(self.sdk, filepath, [])
+                        game_guid = parser.start()
+                        print(f"[Manager] {game_guid} game sent to Getgud")
+                    except Exception as e:
+                        print(f'[Manager] Error processing {filepath}: {e}')
+                    finally:
+                        # Delete the file after processing, regardless of success or failure
                         try:
-                            parser = GetgudCS2Parser(self.sdk, filepath, [])
-                            game_guid = parser.start()
-                            print(f"[Manager] {game_guid} game sent to Getgud")
+                            os.remove(filepath)
+                            print(f'[Manager] Deleted file {filepath} after processing.')
+                            print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
+                            time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
                         except Exception as e:
-                            print(f'[Manager] Error processing {filepath}: {e}')
-                        finally:
-                            # Delete the file after processing, regardless of success or failure
-                            try:
-                                os.remove(filepath)
-                                print(f'[Manager] Deleted file {filepath} after processing.')
-                                print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
-                                time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
-                            except Exception as e:
-                                print(f'[Manager] Failed to delete file {filepath}: {e}')
+                            print(f'[Manager] Failed to delete file {filepath}: {e}')
             except Exception as e:
                 print(f"[Manager] Error scanning directory {SCAN_FOLDER_PATH}: {e}")
             time.sleep(SCRIPT_INVOKE_INTERVAL_MS / 1000)
@@ -68,13 +79,13 @@ if __name__ == "__main__":
     getgud_sdk_manager = GetgudParserManager()
     
     # Initialize and start the DatabaseDemScanner
-    # db_scanner = DatabaseDemScanner()
-    # db_scanner.start()
+    db_scanner = DatabaseDemScanner()
+    db_scanner.start()
 
     def signal_handler(sig, frame):
         print("Signal received:", sig)
         getgud_sdk_manager.stop()
-        # db_scanner.stop()
+        db_scanner.stop()
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
