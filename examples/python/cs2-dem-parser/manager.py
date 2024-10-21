@@ -18,6 +18,8 @@ GETGUD_PRIVATE_KEY = os.environ.get("GETGUD_PRIVATE_KEY")
 SCAN_FOLDER_PATH = os.environ.get("SCAN_FOLDER_PATH")
 SCRIPT_INVOKE_INTERVAL_MS = int(os.environ.get("SCRIPT_INVOKE_INTERVAL_MS"))
 FILE_SCANNER_INVOKE_EVERY_MS = SCRIPT_INVOKE_INTERVAL_MS
+SCANNER_SLEEP_TIME_BETWEEN_GAMES = 0
+
 
 
 class GetgudParserManager:
@@ -46,6 +48,8 @@ class GetgudParserManager:
                             try:
                                 os.remove(filepath)
                                 print(f'[Manager] Deleted file {filepath} after processing.')
+                                print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
+                                time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
                             except Exception as e:
                                 print(f'[Manager] Failed to delete file {filepath}: {e}')
             except Exception as e:
