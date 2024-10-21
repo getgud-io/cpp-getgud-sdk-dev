@@ -18,85 +18,57 @@ GETGUD_PRIVATE_KEY = os.environ.get("GETGUD_PRIVATE_KEY")
 SCAN_FOLDER_PATH = os.environ.get("SCAN_FOLDER_PATH")
 SCRIPT_INVOKE_INTERVAL_MS = int(os.environ.get("SCRIPT_INVOKE_INTERVAL_MS"))
 FILE_SCANNER_INVOKE_EVERY_MS = SCRIPT_INVOKE_INTERVAL_MS
+SCANNER_SLEEP_TIME_BETWEEN_GAMES = 0
+
 
 
 class GetgudParserManager:
     def __init__(self):
         self.sdk = GetgudSDK()
-        self.file_queue = queue.Queue()
         self.is_manager_active = True
 
-    def file_scanner(self):
+    def process_files(self):
         """
-        Continuously scan for new .dem files and add them to the queue.
+        Continuously scan for .dem files, process them one by one in FIFO order, and delete when done.
+        Skips files that have a corresponding .bz2 file, indicating they're not ready for processing.
         """
         while self.is_manager_active:
-            file_min_add_time = (
-                time.time() - FILE_SCANNER_INVOKE_EVERY_MS / 1000
-            )  # Current time minus X seconds
             try:
-                for filename in os.listdir(SCAN_FOLDER_PATH):
-                    filepath = os.path.join(SCAN_FOLDER_PATH, filename)
-                    if (
-                        filename.endswith(".dem")
-                        and os.path.isfile(filepath)
-                        and os.stat(filepath).st_ctime > file_min_add_time
-                    ):
-                        # Check if corresponding .dem.bz2 file exists
-                        dem_bz2_filename = filename + '.bz2'
-                        dem_bz2_filepath = os.path.join(SCAN_FOLDER_PATH, dem_bz2_filename)
-                        if os.path.exists(dem_bz2_filepath):
-                            # If both .dem and .dem.bz2 files exist, skip processing
-                            print(f"[File Scanner] Skipping {filepath} because {dem_bz2_filepath} exists.")
-                            continue
-                        # Check if file is still being written to (optional)
-                        if self.is_file_in_use(filepath):
-                            print(f"[File Scanner] Skipping {filepath} because it's still being written to.")
-                            continue
-                        print(f'[File Scanner] Pushed new file to the queue: {filepath}')
-                        self.file_queue.put(filepath)
-            except Exception as e:
-                print(f"[File Scanner] Failed to scan directory {SCAN_FOLDER_PATH}: {e}")
-            time.sleep(FILE_SCANNER_INVOKE_EVERY_MS / 1000)
+                # Get all .dem files and sort them by creation time
+                dem_files = [f for f in os.listdir(SCAN_FOLDER_PATH) if f.endswith(".dem")]
+                dem_files.sort(key=lambda x: os.stat(os.path.join(SCAN_FOLDER_PATH, x)).st_ctime)
 
-    def is_file_in_use(self, filepath):
-        """
-        Checks if a file is currently being written to.
-        """
-        try:
-            with open(filepath, 'rb'):
-                return False
-        except IOError:
-            return True
+                for filename in dem_files:
+                    filepath = os.path.join(SCAN_FOLDER_PATH, filename)
+                    bz2_filepath = filepath + '.bz2'
+                    
+                    # Skip if corresponding .bz2 file exists
+                    if os.path.exists(bz2_filepath):
+                        print(f'[Manager] Skipping {filepath} as {bz2_filepath} still exists.')
+                        continue
+
+                    print(f'[Manager] Processing file: {filepath}')
+                    try:
+                        parser = GetgudCS2Parser(self.sdk, filepath, [])
+                        game_guid = parser.start()
+                        print(f"[Manager] {game_guid} game sent to Getgud")
+                    except Exception as e:
+                        print(f'[Manager] Error processing {filepath}: {e}')
+                    finally:
+                        # Delete the file after processing, regardless of success or failure
+                        try:
+                            os.remove(filepath)
+                            print(f'[Manager] Deleted file {filepath} after processing.')
+                            print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
+                            time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
+                        except Exception as e:
+                            print(f'[Manager] Failed to delete file {filepath}: {e}')
+            except Exception as e:
+                print(f"[Manager] Error scanning directory {SCAN_FOLDER_PATH}: {e}")
+            time.sleep(SCRIPT_INVOKE_INTERVAL_MS / 1000)
 
     def start(self):
-        scanner_thread = threading.Thread(target=self.file_scanner)
-        scanner_thread.start()
-        while self.is_manager_active:
-            try:
-                # Wait for a new file path from the queue
-                dem_file_path = self.file_queue.get(
-                    timeout=SCRIPT_INVOKE_INTERVAL_MS / 1000
-                )
-                print(f'[Manager] Took file {dem_file_path}')
-                game_guid = None
-                try:
-                    parser = GetgudCS2Parser(self.sdk, dem_file_path, [])
-                    game_guid = parser.start()
-                    print(f"[Manager] {game_guid} game sent to Getgud")
-                except Exception as e:
-                    print(f'[Manager] Dem file is corrupted for game {dem_file_path}, skipping')
-                finally:
-                    # Delete the file after processing, regardless of success or failure
-                    try:
-                        os.remove(dem_file_path)
-                        print(f'[Manager] Deleted file {dem_file_path} after processing.')
-                    except Exception as e:
-                        print(f'[Manager] Failed to delete file {dem_file_path}: {e}')
-            except queue.Empty:
-                continue  # No file was found in the queue, continue the loop
-
-        scanner_thread.join()
+        self.process_files()
         self.sdk.dispose()
 
     def stop(self):
