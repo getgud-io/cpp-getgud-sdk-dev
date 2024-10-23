@@ -52,6 +52,8 @@ class GetgudParserManager:
                         parser = GetgudCS2Parser(self.sdk, filepath, [])
                         game_guid = parser.start()
                         print(f"[Manager] {game_guid} game sent to Getgud")
+                        print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
+                        time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
                     except Exception as e:
                         print(f'[Manager] Error processing {filepath}: {e}')
                     finally:
@@ -59,8 +61,6 @@ class GetgudParserManager:
                         try:
                             os.remove(filepath)
                             print(f'[Manager] Deleted file {filepath} after processing.')
-                            print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
-                            time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
                         except Exception as e:
                             print(f'[Manager] Failed to delete file {filepath}: {e}')
             except Exception as e:
