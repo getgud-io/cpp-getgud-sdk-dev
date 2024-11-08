@@ -763,6 +763,10 @@ class GetgudCS2Parser:
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
             
+            # don't start round/push match if we couldn't find any spawn or tick data
+            if (spawn_match_data.shape[0] == 0 or tick_match_data.shape[0] == 0):
+                continue
+                
             # Start a new match and record its GUID
             match_guid = StartMatch(
                 game_guid,
@@ -935,7 +939,7 @@ class GetgudCS2Parser:
             print(f'[Parser] Game from {self.resolved_url} is empty, we will not push it!')
         for command in sdk_commands:
             command.call(self.sdk)
-            # time.sleep(0.00000125)
+            time.sleep(0.00000125)
 
 
     def dispose(self):
