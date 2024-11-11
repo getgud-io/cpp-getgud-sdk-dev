@@ -81,6 +81,11 @@ namespace GetgudSDK {
 			oss << "~" << m_orientation.rotation.Roll; // Append Roll if valid
 		}
 
+		// Check if this is the first position of this player in the packet's action stream
+		if (m_isPlayerFirstPosition == true) {
+			oss << "F"; // Append an indication that this is the player's first position at the end of  the oriantation parameters
+		}
+
 		oss << ",";
 	}
 
