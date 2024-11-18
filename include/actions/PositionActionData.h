@@ -15,8 +15,11 @@ namespace GetgudSDK {
 	unsigned int GetPositionActionSize();
 	class PositionActionData : public BaseActionData {
 	private:
-		Orientation m_orientation;
 		unsigned int m_size = 0;
+
+	public: 
+		bool m_isPlayerFirstPosition = false;
+		Orientation m_orientation;
 
 	public:
 		GETGUDSDK_API PositionActionData(std::string matchGuid,

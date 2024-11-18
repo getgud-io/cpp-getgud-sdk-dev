@@ -696,7 +696,6 @@ class GetgudCS2Parser:
             return "skipped"
         print('[Parser] Demo parsed!')
         print('[Parser] Pushing commands into SDK queue...')
-        self.game_start_time_in_milliseconds = round(time.time() * 1000)
         game_guid, sdk_commands = self.push_sdk_commands_from_cs2_dem(demo_data)
         print('[Parser] Pushed commands to SDK queue!')
         print('[Parser] Running SDK on queue...')
@@ -745,7 +744,7 @@ class GetgudCS2Parser:
         ).call(self.sdk)
 
         # Set the match start time once for the entire game
-        self.match_start_time_in_milliseconds = round(time.time() * 1000)
+        self.game_start_time_in_milliseconds = round(time.time() * 1000)
 
         sdk_commands = []
         match_guids = []
@@ -861,10 +860,10 @@ class GetgudCS2Parser:
                     continue
                 
                 sdk_commands.append([
-                        round(self.match_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
+                        round(self.game_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
                         SpawnActionData(
                             match_guid,
-                            round(self.match_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
+                            round(self.game_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
                             spawn_row['user_steamid'],
                             player_team, # character guid
                             player_team, # team guid
@@ -878,10 +877,10 @@ class GetgudCS2Parser:
             for _, tick_row in tick_match_data.iterrows():
                 player_id = tick_row['steamid']
                 sdk_commands.append([
-                    round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                    round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
                     PositionActionData(
                         match_guid,
-                        round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                        round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
                         player_id,
                         Position(tick_row['X'], tick_row['Y'], tick_row['Z']),
                         Rotation(tick_row['pitch'], tick_row['yaw'], 0),
@@ -898,7 +897,7 @@ class GetgudCS2Parser:
                 winning_team = round_end_event.iloc[0].get('winner', "unknown")
 
             sdk_commands.append([
-                round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
                 SetMatchWinTeam(match_guid, winning_team)
             ])
 
@@ -911,7 +910,7 @@ class GetgudCS2Parser:
             sdk_output_commands.append(command)
 
         # Generate reports and mark the end of the game
-        last_timestamp = sdk_commands[-1][0] if sdk_commands else self.match_start_time_in_milliseconds
+        last_timestamp = sdk_commands[-1][0] if sdk_commands else self.game_start_time_in_milliseconds
         for match_guid in match_guids:
             for report_player_id in self.report_players:
                 sdk_output_commands.append(SendInMatchReport(

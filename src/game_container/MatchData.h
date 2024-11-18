@@ -34,8 +34,6 @@ namespace GetgudSDK {
 		unsigned int m_actionsCount = 0;
 		unsigned int m_sizeInBytes = 0;
 
-		std::map<std::string, Orientation> m_lastPositionActionVector;
-
 		// holds the player Key to player Guid mapping
 		std::unordered_map<std::string, std::string> m_playerGuidMap;
 
@@ -68,7 +66,6 @@ namespace GetgudSDK {
 		bool AddChatMessage(ChatMessageInfo chatInfo);
 		bool AddInMatchReport(ReportData* reportData);
 		bool AddChatMessage(ChatMessageData* chatMessageData);
-		std::map<std::string, Orientation> ConvertActionsToDeltas();
 		void MatchToString(std::string& match_out);
 		unsigned int GetMatchSizeInBytes();
 		unsigned int GetNumberOfMatchReportsAndMessages();
@@ -82,7 +79,6 @@ namespace GetgudSDK {
 		std::string GetMatchMode();
 		std::string GetMapName();
 		std::string GetCustomField();
-		void SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector);
 		void SetMatchWinTeam(std::string teamGuid);
 		std::string getPlayerKeyName(std::string& playerGuid);
 		std::string getWeaponKeyName(std::string& weaponGuid);
