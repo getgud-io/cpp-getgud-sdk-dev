@@ -30,7 +30,7 @@ class DatabaseDemScanner:
     def get_data_to_process(self):
         mycursor = self.mydb.cursor()
         mycursor.execute(f'''
-        SELECT id, resolvedUrl
+        SELECT id, resolvedUrl, hasBannedPlayer, bannedPlayerId
         FROM `{DB_TABLE_NAME}` 
         WHERE 
             isProcessed IS NULL 
@@ -60,7 +60,7 @@ class DatabaseDemScanner:
             print(f"[DBScanner] Failed to unzip {source_path}: {e}")
             return False
 
-    def download_dem_file(self, url, local_filename):
+    def download_dem_file(self, url, local_filename, has_banned_player=None, banned_player_id=None):
         """
         Downloads the .dem file from the given URL, unzips if necessary, and saves it to SCAN_FOLDER_PATH.
         """
@@ -85,12 +85,25 @@ class DatabaseDemScanner:
                 if success:
                     # Remove the original .bz2 file
                     os.remove(local_filepath)
+                    
+                    # After successful unzip, rename if there's a banned player
+                    if has_banned_player == 1:
+                        base_name = output_filepath.replace('.dem', '')
+                        new_filepath = f"{base_name}_banned_{banned_player_id}.dem"
+                        os.rename(output_filepath, new_filepath)
+                        output_filepath = new_filepath
+                    
                     print(f"[DBScanner] Unzipped file to {output_filepath}")
                     return output_filepath
                 else:
                     return None
             else:
-                # No need to unzip
+                # If not compressed and has banned player, rename
+                if has_banned_player == 1:
+                    base_name = local_filepath.replace('.dem', '')
+                    new_filepath = f"{base_name}_banned_{banned_player_id}.dem"
+                    os.rename(local_filepath, new_filepath)
+                    local_filepath = new_filepath
                 return local_filepath
 
         except Exception as e:
@@ -101,10 +114,18 @@ class DatabaseDemScanner:
         while self.is_scanner_active:
             data = self.get_data_to_process()
             for row in data:
-                _id, resolved_url = row
+                _id, resolved_url, has_banned_player, banned_player_id = row
                 print(f"[DBScanner] Processing entry ID {_id}")
-                local_filename = f"{_id}_{resolved_url.split('/')[-1]}"
-                dem_file_path = self.download_dem_file(resolved_url, local_filename)
+                
+                # Use simple filename without banned info initially
+                base_filename = f"{_id}_{resolved_url.split('/')[-1]}"
+                
+                dem_file_path = self.download_dem_file(
+                    resolved_url, 
+                    base_filename,
+                    has_banned_player,
+                    banned_player_id
+                )
                 if dem_file_path:
                     print(f"[DBScanner] DEM file ready for ID {_id} at {dem_file_path}")
                     self.update_is_processed(_id)
