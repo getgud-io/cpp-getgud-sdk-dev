@@ -47,9 +47,19 @@ class GetgudParserManager:
                         print(f'[Manager] Skipping {filepath} as {bz2_filepath} still exists.')
                         continue
 
+                    # Extract banned player ID from filename if present
+                    banned_players = []
+                    if '_banned_' in filename:
+                        try:
+                            banned_player_id = filename.split('_banned_')[1].replace('.dem', '')
+                            banned_players.append(banned_player_id)
+                            print(f'[Manager] Detected banned player ID: {banned_player_id}')
+                        except Exception as e:
+                            print(f'[Manager] Error extracting banned player ID from filename: {e}')
+
                     print(f'[Manager] Processing file: {filepath}')
                     try:
-                        parser = GetgudCS2Parser(self.sdk, filepath, [])
+                        parser = GetgudCS2Parser(self.sdk, filepath, banned_players)
                         game_guid = parser.start()
                         print(f"[Manager] {game_guid} game sent to Getgud")
                         print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
