@@ -148,26 +148,12 @@ public class PlayerMovement : MonoBehaviour
         };
 
 
-        // Neccessary adjustments for GetgudSDK around angles
-        // See getgud docs
-        // Swap pitch and yaw as required by the SDK
-        float temp = pitch;
-        pitch = yaw;
-        yaw = temp;
-
-        // Getgud most upward yaw angle is -89, most down yaw angle is 89.
-        // we need to change sign in unity
-        yaw = -yaw;
-
-        // same with pitch. we need to reverse unity pitch to match Getgud format
-        pitch = -pitch;
-
         // Create PositionF for position action
         PositionF currentPosition = new PositionF
         {
-            X = transform.position.z,   // Unity's forward maps to Getgud's forward
-            Y = -transform.position.x,  // Unity's right maps to Getgud's right (with negation)
-            Z = transform.position.y    // Unity's up maps to Getgud's up
+            X = transform.position.x,   
+            Y = transform.position.y, 
+            Z = transform.position.z   
         };
         // Create RotationF for position action
         RotationF currentRotation = new RotationF { Yaw = yaw, Pitch = pitch, Roll = roll };

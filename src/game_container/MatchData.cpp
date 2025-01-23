@@ -82,7 +82,6 @@ namespace GetgudSDK {
 		cloneMatchData->m_customField = m_customField;
 		cloneMatchData->m_isInteresting = m_isInteresting;
 		cloneMatchData->m_throttleChecked = m_throttleChecked;
-		cloneMatchData->m_lastPositionActionVector = m_lastPositionActionVector;
 		cloneMatchData->m_matchWinTeamGuid = m_matchWinTeamGuid;
 		cloneMatchData->m_matchCompletionState = m_matchCompletionState;
 		cloneMatchData->m_playerGuidMap = m_playerGuidMap;
@@ -291,36 +290,6 @@ namespace GetgudSDK {
 	}
 
 	/**
-	 * ConvertActionsToDeltas:
-	 *
-	 * Convert all actions (except first one) of the match
-	 * to action deltas
-	 **/
-	std::map<std::string, Orientation> MatchData::ConvertActionsToDeltas()
-	{
-		std::map<std::string, Orientation> lastPostionActionVector = m_lastPositionActionVector;
-		for (int index = 0; index < m_actionVector.size(); index++) {
-			if (m_actionVector[index]->m_actionType == Actions::Position) {
-				PositionActionData* positionAction =
-					static_cast<PositionActionData*>(m_actionVector[index]);
-				auto orientation_it = lastPostionActionVector.find(positionAction->m_playerGuid);
-				if (orientation_it != lastPostionActionVector.end())
-				{
-					auto tempOrientation = positionAction->getOrientation();
-					positionAction->getOrientation() = positionAction->getOrientation() - orientation_it->second;
-					orientation_it->second = tempOrientation;
-				}
-				else
-				{
-					lastPostionActionVector[positionAction->m_playerGuid] = positionAction->getOrientation();
-				}
-			}
-		}
-		m_lastPositionActionVector = lastPostionActionVector;
-		return m_lastPositionActionVector;
-	}
-
-	/**
 	 * MatchToString:
 	 *
 	 * Convert this match to string for sending to Getgud. Will output empty string
@@ -351,14 +320,42 @@ namespace GetgudSDK {
 		oss << "\"matchActionStream\":\"";
 
 		long long lastActionTimeEpoch = 0;
+		Orientation playerLastPosition;
+		Orientation tempOrientation;
+
+		// holds the map of all the players last position
+		std::unordered_map<std::string, Orientation> playerLastPositionMap;
 
 		// convert actions to an action stream string output
 		for (BaseActionData* nextAction : m_actionVector) {
 
-			// first action in the packet should have a full timestmap
+			// first action in the packet should have a full timestamp
 			// all action after that, should just have delta timestamps compared to the first action
 			nextAction->m_actionTimeEpoch -= lastActionTimeEpoch;
 			lastActionTimeEpoch += nextAction->m_actionTimeEpoch;
+
+			if (nextAction->m_actionType == Actions::Position) {
+
+				// this is a position action, store this position as the current last position of the player that preformed this action
+				PositionActionData* positionAction = static_cast<PositionActionData*>(nextAction);
+				playerLastPosition = positionAction->m_orientation;
+
+				// check if this is the first position action this player has in the action stream
+				auto orientation_it = playerLastPositionMap.find(nextAction->m_playerGuid);
+				if (orientation_it == playerLastPositionMap.end()) {
+					
+					// mark the fact that the player received its first position action and mark this action as such in the stream
+					playerLastPositionMap.emplace(nextAction->m_playerGuid, positionAction->m_orientation);
+					positionAction->m_isPlayerFirstPosition = true;
+				}
+				else {
+
+					// update the player's last position in the map and store the delta between this and the last position in the stream
+					tempOrientation = positionAction->m_orientation;
+					positionAction->m_orientation = positionAction->m_orientation - orientation_it->second;
+					playerLastPositionMap[nextAction->m_playerGuid] = tempOrientation;
+				}
+			}
 
 			nextAction->ToString(actionStream);
 		}
@@ -538,20 +535,6 @@ namespace GetgudSDK {
 		m_weaponGuidMap.emplace(weaponGuid, newKey);
 
 		return newKey;
-	}
-
-	/**
-	 * SetLastPlayersPosition:
-	 *
-	 * Set last position for each player of the match, we use it in
-	 * our dynamic algorithm
-	 **/
-	void MatchData::SetLastPlayersPosition(std::map<std::string, Orientation> lastPositionVector)
-	{
-		for (auto& playerPos : lastPositionVector)
-		{
-			m_lastPositionActionVector[playerPos.first] = playerPos.second;
-		}
 	}
 
 	void MatchData::SetMatchWinTeam(std::string teamGuid) {

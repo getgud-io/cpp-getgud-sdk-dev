@@ -58,23 +58,29 @@ class GetgudParserManager:
                             print(f'[Manager] Error extracting banned player ID from filename: {e}')
 
                     print(f'[Manager] Processing file: {filepath}')
+                    success = False
                     try:
                         parser = GetgudCS2Parser(self.sdk, filepath, banned_players)
                         game_guid = parser.start()
                         print(f"[Manager] {game_guid} game sent to Getgud")
+                        success = True
+                    except BaseException as e:
+                        print(f'[Manager] Error processing {filepath}: {e}')
+                    
+                    if success:
                         print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
                         time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
+                    
+                    # Delete the file after processing, regardless of success or failure
+                    try:
+                        os.remove(filepath)
+                        print(f'[Manager] Deleted file {filepath} after processing.')
                     except Exception as e:
-                        print(f'[Manager] Error processing {filepath}: {e}')
-                    finally:
-                        # Delete the file after processing, regardless of success or failure
-                        try:
-                            os.remove(filepath)
-                            print(f'[Manager] Deleted file {filepath} after processing.')
-                        except Exception as e:
-                            print(f'[Manager] Failed to delete file {filepath}: {e}')
+                        print(f'[Manager] Failed to delete file {filepath}: {e}')
+                        
             except Exception as e:
                 print(f"[Manager] Error scanning directory {SCAN_FOLDER_PATH}: {e}")
+            
             time.sleep(SCRIPT_INVOKE_INTERVAL_MS / 1000)
 
     def start(self):
