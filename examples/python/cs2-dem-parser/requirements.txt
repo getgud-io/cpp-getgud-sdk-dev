@@ -1,5 +1,5 @@
 invoke==2.1.2
 cffi==1.15.1
-demoparser2==0.26.1
+demoparser2==0.36.0
 requests==2.32.3
 mysql-connector-python==8.0.33

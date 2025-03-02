@@ -609,9 +609,15 @@ class GetgudDemoParser:
     
     def parse_demo(self) -> dict[str, Any]:
         header = self.parser.parse_header()
+        
+        # Define specific events we want to process together
+        event_names_to_parse = ['player_spawn', 'player_death', 'player_hurt', 'bomb_planted', 'bomb_defused', 'bomb_exploded', 'smokegrenade_detonate', 'smokegrenade_expired', 
+                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end']
+        
+        # Process main events together
         events = dict(
             self.parser.parse_events(
-                self.parser.list_game_events() + ['round_end', 'round_start'],
+                event_names_to_parse,
                 player=[
                     "X",
                     "Y",
@@ -650,6 +656,13 @@ class GetgudDemoParser:
                 ],
             )
         )
+        
+        # Parse round_start separately without extra fields
+        try:
+            round_start_result = dict(self.parser.parse_events(['round_start']))
+            events['round_start'] = round_start_result.get('round_start')
+        except Exception as e:
+            print(f"Error processing round_start: {e}")
         
         kills = self.parse_kills(events)
         damages = self.parse_damages(events)
