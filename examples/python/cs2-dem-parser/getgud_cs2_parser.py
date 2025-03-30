@@ -893,7 +893,7 @@ class GetgudCS2Parser:
                                 defuse_timestamp,
                                 str(player_id),
                                 "Disable-Bomb",  # affect_guid for the bomb
-                                AffectState.Deactivate # Bomb is now inactive
+                                AffectState.Activate # Bomb is now inactive
                             )
                         ])
             
