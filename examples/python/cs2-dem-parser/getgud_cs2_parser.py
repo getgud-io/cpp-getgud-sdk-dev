@@ -613,7 +613,7 @@ class GetgudDemoParser:
         
         # Define specific events we want to process together
         event_names_to_parse = ['player_spawn', 'player_death', 'player_hurt', 'bomb_planted', 'bomb_defused', 'bomb_exploded', 'smokegrenade_detonate', 'smokegrenade_expired', 
-                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end']
+                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end', 'item_purchase']
         
         # Process main events together
         events = dict(
@@ -762,9 +762,6 @@ class GetgudCS2Parser:
 
         sdk_commands = []
         match_guids = []
-                
-        # Track player affect states within the game loop
-        player_affect_states = {} # Stores {'player_id': {'Crouch': bool, 'Jump': bool}}
         
         # Process each match ("round")
         extra_ticks = 128
@@ -779,6 +776,14 @@ class GetgudCS2Parser:
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
             
+            # Filter item_purchase events for the current round
+            item_purchase_match_data = pd.DataFrame() # Initialize empty DataFrame
+            if 'item_purchase' in demo_data['events'] and demo_data['events']['item_purchase'] is not None and not demo_data['events']['item_purchase'].empty:
+                 item_purchase_match_data = demo_data['events']['item_purchase'].loc[
+                     (demo_data['events']['item_purchase']['tick'] >= round_start_tick) & 
+                     (demo_data['events']['item_purchase']['tick'] <= round_end_tick)
+                 ].reset_index(drop=True)
+
             # don't start round/push match if we couldn't find any spawn or tick data
             if (spawn_match_data.shape[0] == 0 or tick_match_data.shape[0] == 0):
                 continue
@@ -845,6 +850,30 @@ class GetgudCS2Parser:
                     )
                 ])
             
+            # Process item purchases for this match
+            for _, purchase_row in item_purchase_match_data.iterrows():
+                player_id = purchase_row.get('steamid', None)
+                item_name = purchase_row.get('item_name', 'unknown_item')
+                
+                # Only process if we have a valid player ID and it's likely a weapon
+                # (You might want to refine the item check later based on specific needs)
+                if player_id is not None and player_id != '' and not pd.isna(player_id) and isinstance(item_name, str):
+                    purchase_timestamp = round(self.game_start_time_in_milliseconds + (purchase_row['tick'] / tick_rate) * 1000)
+                    # Sanitize weapon name for GUID
+                    weapon_guid = item_name.replace(' ', '').replace('weapon_', '').replace('_silencer', '')[:CHAR_LIMIT['small']]
+                    affect_guid = f"Buy-{weapon_guid}"[:CHAR_LIMIT['big']] # Ensure affect GUID is within limits
+
+                    sdk_commands.append([
+                        purchase_timestamp,
+                        AffectActionData(
+                            match_guid,
+                            purchase_timestamp,
+                            str(player_id),
+                            affect_guid,
+                            AffectState.Activate # Buying is an activation event
+                        )
+                    ])
+
             # Process bomb events directly from event data
             # Process bomb plant events
             bomb_plant_data = None
@@ -947,10 +976,6 @@ class GetgudCS2Parser:
             for _, tick_row in tick_match_data.iterrows():
                 player_id = str(tick_row['steamid'])
                 timestamp = round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000)
-                
-                # Initialize player state if not seen before
-                if player_id not in player_affect_states:
-                    player_affect_states[player_id] = {'Crouch': False}
 
                 # --- Position Update ---
                 sdk_commands.append([
@@ -963,43 +988,6 @@ class GetgudCS2Parser:
                         Rotation(tick_row['pitch'], tick_row['yaw'], 0),
                     )
                 ])
-                
-                # --- Crouch Affect ---
-                is_crouching_raw = tick_row['in_crouch']
-                last_crouch_state = player_affect_states[player_id].get('Crouch', False)
-
-                # Process based on whether the current value is NaN
-                if not pd.isna(is_crouching_raw):
-                    is_crouching = bool(is_crouching_raw)
-                    # Check if state changed from the last known state
-                    if is_crouching != last_crouch_state:
-                        sdk_commands.append([
-                            timestamp,
-                            AffectActionData(
-                                match_guid,
-                                timestamp,
-                                player_id,
-                                "Crouch",
-                                AffectState.Activate if is_crouching else AffectState.Deactivate
-                            )
-                        ])
-                        # Update the state
-                        player_affect_states[player_id]['Crouch'] = is_crouching
-                else:
-                    # Value is NaN. If the last known state was True, deactivate.
-                    if last_crouch_state:
-                        sdk_commands.append([
-                            timestamp,
-                            AffectActionData(
-                                match_guid,
-                                timestamp,
-                                player_id,
-                                "Crouch",
-                                AffectState.Deactivate
-                            )
-                        ])
-                        # Update the state to False as we are deactivating
-                        player_affect_states[player_id]['Crouch'] = False
 
 
             round_end_event = demo_data['events']['round_end'].loc[
