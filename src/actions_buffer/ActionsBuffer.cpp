@@ -54,7 +54,7 @@ namespace GetgudSDK {
 	 *
 	 * Appends the new actions to the end of the action buffer
 	 **/
-	bool ActionsBuffer::AddActions(std::deque<BaseActionData*>& actions) {
+	bool ActionsBuffer::AddActions(const std::deque<BaseActionData*>& actions) {
 		std::deque<BaseActionData*> actionToSend;
 
 		unsigned int actionSize = m_actionSize;
