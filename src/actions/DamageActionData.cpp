@@ -1,6 +1,7 @@
 #include "DamageActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include "../utils/Sanitizer.h"
 #include "../utils/Utils.h"
 #include <sstream>
 
@@ -46,17 +47,22 @@ namespace GetgudSDK {
 	/**
 	 * IsValid:
 	 *
-	 * Check if action is valid, if action is not valid we will delete the
-	 * game!
+	 * Check if core action data is valid. Sanitize non-core fields.
 	 **/
 	bool DamageActionData::IsValid() {
-		bool isActionValid = BaseActionData::IsValid();
-		isActionValid &= Validator::ValidateStringLength(m_victimPlayerGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_victimPlayerGuid);
-		isActionValid &= Validator::ValidateStringLength(m_weaponGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_weaponGuid);
+		// Core validations (playerGuid, matchGuid, timestamp, actionType)
+		bool isCoreValid = BaseActionData::IsValid();
 
-		return isActionValid;
+		// Core validation for numeric range (assuming damageDone is still checked)
+		// isCoreValid &= Validator::ValidateItemValue(m_damageDone, 0.0f, FLT_MAX); // Example if needed
+
+		// Sanitize non-core fields
+		Sanitizer::SanitizeStringChars(m_victimPlayerGuid); // Victim GUID is treated like other GUIDs now
+		Sanitizer::SanitizeStringLength(m_victimPlayerGuid, 36);
+		Sanitizer::SanitizeStringChars(m_weaponGuid);
+		Sanitizer::SanitizeStringLength(m_weaponGuid, 36);
+
+		return isCoreValid;
 	}
 
 	/**

@@ -1,6 +1,7 @@
 #include "DeathActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include "../utils/Sanitizer.h"
 #include <sstream>
 
 namespace GetgudSDK {
@@ -38,13 +39,20 @@ namespace GetgudSDK {
 	/**
 	 * IsValid:
 	 *
-	 * Check if action is valid, if action is not valid we will delete the
-	 * game!
+	 * Check if core action data is valid. Sanitize non-core fields.
 	 **/
 	bool DeathActionData::IsValid() {
-		bool isActionValid = BaseActionData::IsValid();
+		// Core validations (playerGuid, matchGuid, timestamp, actionType)
+		bool isCoreValid = BaseActionData::IsValid();
 
-		return isActionValid;
+		// Sanitize non-core fields
+		// Attacker GUID can be empty (e.g., environmental death), but if present, sanitize it.
+		if (!m_attackerGuid.empty()) {
+		    Sanitizer::SanitizeStringChars(m_attackerGuid);
+		    Sanitizer::SanitizeStringLength(m_attackerGuid, 36);
+		}
+
+		return isCoreValid;
 	}
 
 	/**
