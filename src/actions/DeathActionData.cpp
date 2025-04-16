@@ -45,11 +45,11 @@ namespace GetgudSDK {
 		// Core validations (playerGuid, matchGuid, timestamp, actionType)
 		bool isCoreValid = BaseActionData::IsValid();
 
-		// Sanitize non-core fields
-		// Attacker GUID can be empty (e.g., environmental death), but if present, sanitize it.
+		// Core validation for attackerGuid (if present, must be a valid GUID)
+		// Attacker GUID can be empty (e.g., environmental death).
 		if (!m_attackerGuid.empty()) {
-		    Sanitizer::SanitizeStringChars(m_attackerGuid);
-		    Sanitizer::SanitizeStringLength(m_attackerGuid, 36);
+		    isCoreValid &= Validator::ValidateStringLength(m_attackerGuid, 1, 36);
+		    isCoreValid &= Validator::ValidateStringChars(m_attackerGuid);
 		}
 
 		return isCoreValid;

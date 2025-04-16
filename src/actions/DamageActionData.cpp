@@ -53,12 +53,14 @@ namespace GetgudSDK {
 		// Core validations (playerGuid, matchGuid, timestamp, actionType)
 		bool isCoreValid = BaseActionData::IsValid();
 
+		// Core validation for victimPlayerGuid (Must be a valid GUID)
+		isCoreValid &= Validator::ValidateStringLength(m_victimPlayerGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_victimPlayerGuid);
+
 		// Core validation for numeric range (assuming damageDone is still checked)
 		// isCoreValid &= Validator::ValidateItemValue(m_damageDone, 0.0f, FLT_MAX); // Example if needed
 
-		// Sanitize non-core fields
-		Sanitizer::SanitizeStringChars(m_victimPlayerGuid); // Victim GUID is treated like other GUIDs now
-		Sanitizer::SanitizeStringLength(m_victimPlayerGuid, 36);
+		// Sanitize other non-core fields (weaponGuid)
 		Sanitizer::SanitizeStringChars(m_weaponGuid);
 		Sanitizer::SanitizeStringLength(m_weaponGuid, 36);
 
