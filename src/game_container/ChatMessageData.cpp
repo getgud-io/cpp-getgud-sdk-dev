@@ -43,8 +43,9 @@ namespace GetgudSDK {
 			sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 			sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
 
-		// Sanitize non-core fields (special handling for message)
-		Sanitizer::SanitizeStringLength(m_message, 1024); // Truncate with ellipsis, no char check
+		// Sanitize message: length first, then allowed chars (replacing " and \)
+		Sanitizer::SanitizeStringLength(m_message, 1024); // Truncate with ellipsis
+		Sanitizer::SanitizeStringCharsSpecial(m_message); // Replace ", \, $, %, '
 
 		return isCoreValid;
 	}

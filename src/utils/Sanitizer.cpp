@@ -6,7 +6,7 @@ namespace Sanitizer {
 	void SanitizeStringChars(std::string& str, char replacementChar) {
 		for (char& symbol : str) {
 			if (symbol < '!' || symbol > '~' || symbol == '$' || symbol == '\'' ||
-				symbol == '\"' || symbol == '%' || symbol == '@') {
+				symbol == '\"' || symbol == '%' || symbol == '@' || symbol == '\\') {
 				symbol = replacementChar;
 			}
 		}
@@ -16,7 +16,7 @@ namespace Sanitizer {
 		for (char& symbol : str) {
 			// Note: Allows space (' ') and '@' compared to SanitizeStringChars
 			if (symbol < ' ' || symbol > '~' || symbol == '$' || symbol == '\'' ||
-				symbol == '\"' || symbol == '%') {
+				symbol == '\"' || symbol == '%' || symbol == '\\') {
 				symbol = replacementChar;
 			}
 		}
