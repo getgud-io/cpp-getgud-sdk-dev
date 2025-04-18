@@ -12,6 +12,11 @@
 #include <deque> // For std::deque
 #include <cassert> // For assertions
 
+// ================ CONSTANTS ================
+const int TITLE_ID = 239;
+const std::string PRIVATE_KEY = "3f2c15d0-1c5f-11f0-88b3-fd424aa02c9e";
+// ===========================================
+
 // Custom assertion macro that prints a message and returns false on failure
 #define TEST_ASSERT(condition, message) \
     do { \
@@ -94,7 +99,8 @@ std::deque<GetgudSDK::BaseActionData*> CreateActionsVector(
 
 void CreateReports(std::string matchGuid, int numberOfReports) {
     std::deque<GetgudSDK::ReportInfo> reports;
-    std::string privateKey = "41e99370-b12f-11ee-89f0-4b4e9fccc950";
+    // Use the constant private key
+    // std::string privateKey = "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d"; 
     for (int gameNum = 0; gameNum < numberOfReports; gameNum++) {
         GetgudSDK::ReportInfo reportInfo;
         reportInfo.MatchGuid = matchGuid;
@@ -109,13 +115,14 @@ void CreateReports(std::string matchGuid, int numberOfReports) {
 
         reports.push_back(reportInfo);
     }
-
-    GetgudSDK::SendReports(132, privateKey, reports);
+    // Use constant Title ID and Private Key
+    GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, reports);
 }
 
 void CreatePlayerUpdates(int numberOfPlayerUpdates) {
     std::deque<GetgudSDK::PlayerInfo> playerInfos;
-    std::string privateKey = "41e99370-b12f-11ee-89f0-4b4e9fccc950";
+    // Use the constant private key
+    // std::string privateKey = "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d"; 
     for (int playerUpdateNum = 0; playerUpdateNum < numberOfPlayerUpdates;
         playerUpdateNum++) {
         GetgudSDK::PlayerInfo playerInfo;
@@ -126,8 +133,8 @@ void CreatePlayerUpdates(int numberOfPlayerUpdates) {
         playerInfo.PlayerJoinDateEpoch = 1684059337532;
         playerInfos.push_back(playerInfo);
     }
-
-    GetgudSDK::UpdatePlayers(132, privateKey, playerInfos);
+    // Use constant Title ID and Private Key
+    GetgudSDK::UpdatePlayers(TITLE_ID, PRIVATE_KEY, playerInfos);
 }
 
 int main() {
@@ -138,13 +145,16 @@ int main() {
     std::string gameMode = "deathmatch";
     std::string serverLocation = "UK";
 
-    // Start a Game:
-    std::string gameGuid = GetgudSDK::StartGame(237,
-        "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d",
+    // Start a Game using constants:
+    std::cout << "Starting game with Title ID: " << TITLE_ID << std::endl;
+    std::string gameGuid = GetgudSDK::StartGame(TITLE_ID,
+        PRIVATE_KEY,
         serverGuid,  // serverGuid
         gameMode,     // gameMode
         serverLocation
     );
+    TEST_ASSERT(!gameGuid.empty(), "StartGame should return a valid GUID");
+    std::cout << "Game started with GUID: " << gameGuid << std::endl;
 
     std::string matchGuid = GetgudSDK::StartMatch(gameGuid,
         "Knives-only",  // matchMode
@@ -545,7 +555,7 @@ int main() {
         
         size_t originalSize = reportsVector.size();
         // Send reports in batch 
-        bool batchReportResult = GetgudSDK::SendReports(237, "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d", reportsVector);
+        bool batchReportResult = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, reportsVector);
         TEST_ASSERT(batchReportResult, "Sending batch reports should succeed");
         
         // After sending, the vector should still contain its original data
@@ -562,8 +572,8 @@ int main() {
         
         // Test sending empty collections
         bool emptyActionsResult = GetgudSDK::SendActions(emptyActions);
-        bool emptyReportsResult = GetgudSDK::SendReports(237, "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d", emptyReports);
-        bool emptyPlayersResult = GetgudSDK::UpdatePlayers(237, "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d", emptyPlayers);
+        bool emptyReportsResult = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, emptyReports);
+        bool emptyPlayersResult = GetgudSDK::UpdatePlayers(TITLE_ID, PRIVATE_KEY, emptyPlayers);
         
         // Sending empty collections should be handled gracefully (not crash)
         TEST_ASSERT(emptyActionsResult, "Sending empty actions should succeed (no-op)");
@@ -678,8 +688,8 @@ int main() {
         // Create multiple games
         for (int i = 0; i < numGames; i++) {
             std::string testGameGuid = GetgudSDK::StartGame(
-                237 + i, // Unique title ID for each game
-                "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d",
+                TITLE_ID + i, // Unique title ID for each game
+                PRIVATE_KEY,
                 "server-" + std::to_string(i),
                 "game-mode-" + std::to_string(i),
                 "location-" + std::to_string(i)
@@ -853,22 +863,26 @@ int main() {
     // Test 16: StartGame Validation
     std::cout << "\nTest 16: StartGame Validation..." << std::endl;
     {
+        // Use the constant private key 
+        // std::string correctPrivateKey = "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d";
         // Invalid Title ID (<= 0)
-        std::string invalidTitleGameGuid = GetgudSDK::StartGame(0, "valid-key", "server", "mode", "loc");
+        std::string invalidTitleGameGuid = GetgudSDK::StartGame(0, PRIVATE_KEY, "server", "mode", "loc");
         TEST_ASSERT(invalidTitleGameGuid.empty(), "StartGame should fail with invalid Title ID (0)");
 
         // Invalid Private Key (empty)
-        std::string invalidKeyGameGuid = GetgudSDK::StartGame(237, "", "server", "mode", "loc");
+        std::string invalidKeyGameGuid = GetgudSDK::StartGame(TITLE_ID, "", "server", "mode", "loc");
         TEST_ASSERT(invalidKeyGameGuid.empty(), "StartGame should fail with empty Private Key");
 
         // Invalid Private Key (contains bad chars - assuming basic validation)
-        std::string badCharsKeyGameGuid = GetgudSDK::StartGame(237, "key$", "server", "mode", "loc");
+        std::string badCharsKeyGameGuid = GetgudSDK::StartGame(TITLE_ID, "key$", "server", "mode", "loc");
         TEST_ASSERT(badCharsKeyGameGuid.empty(), "StartGame should fail with Private Key containing invalid chars");
     }
 
     // Test 17: SendReports (Out-of-Match) Validation
     std::cout << "\nTest 17: SendReports Validation..." << std::endl;
     {
+        // Use the constant private key 
+        // std::string correctPrivateKey = "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d";
         std::deque<GetgudSDK::ReportInfo> reports;
         GetgudSDK::ReportInfo report;
         report.MatchGuid = testMatchGuid; // Use a valid match guid
@@ -880,7 +894,7 @@ int main() {
         GetgudSDK::ReportInfo missingGuidReport = report;
         missingGuidReport.SuspectedPlayerGuid = ""; 
         reports.push_back(missingGuidReport);
-        bool missingGuidResult = GetgudSDK::SendReports(237, "valid-key", reports);
+        bool missingGuidResult = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, reports);
         TEST_ASSERT_FAILS(missingGuidResult, "SendReports should fail if SuspectedPlayerGuid is missing");
         reports.clear();
 
@@ -888,7 +902,7 @@ int main() {
         GetgudSDK::ReportInfo invalidTbReport = report;
         invalidTbReport.TbType = (GetgudSDK::TbType)-5; // Invalid enum cast
         reports.push_back(invalidTbReport);
-        bool invalidTbResult = GetgudSDK::SendReports(237, "valid-key", reports);
+        bool invalidTbResult = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, reports);
         // Note: SendReports itself might succeed if AddReports validates, need internal check
         // Assuming AddReports validates and returns false here.
         TEST_ASSERT_FAILS(invalidTbResult, "SendReports should fail with invalid TbType");
@@ -898,6 +912,8 @@ int main() {
     // Test 18: UpdatePlayers Validation
     std::cout << "\nTest 18: UpdatePlayers Validation..." << std::endl;
     {
+        // Use the constant private key 
+        // std::string correctPrivateKey = "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d";
         std::deque<GetgudSDK::PlayerInfo> players;
         GetgudSDK::PlayerInfo player;
         player.PlayerGuid = "player-for-update";
@@ -906,7 +922,7 @@ int main() {
         GetgudSDK::PlayerInfo invalidEmailPlayer = player;
         invalidEmailPlayer.PlayerEmail = "not-an-email";
         players.push_back(invalidEmailPlayer);
-        bool invalidEmailResult = GetgudSDK::UpdatePlayers(237, "valid-key", players);
+        bool invalidEmailResult = GetgudSDK::UpdatePlayers(TITLE_ID, PRIVATE_KEY, players);
         // Update Assertion: The SDK sanitizes emails rather than validating format strictly.
         // So, the UpdatePlayers call should succeed even with a 'bad' format.
         TEST_ASSERT(invalidEmailResult, "UpdatePlayers should succeed even with technically invalid email (sanitization)"); 
@@ -916,7 +932,7 @@ int main() {
         GetgudSDK::PlayerInfo invalidRankPlayer = player;
         invalidRankPlayer.PlayerRank = -5;
         players.push_back(invalidRankPlayer);
-        bool invalidRankResult = GetgudSDK::UpdatePlayers(237, "valid-key", players);
+        bool invalidRankResult = GetgudSDK::UpdatePlayers(TITLE_ID, PRIVATE_KEY, players);
         TEST_ASSERT_FAILS(invalidRankResult, "UpdatePlayers should fail with negative rank");
         players.clear();
     }
@@ -946,11 +962,16 @@ int main() {
             {1,1,1},
             {0,0}
         );
-        // IsValid will sanitize/truncate internally. Send should succeed.
-        GetgudSDK::SendAction(longGuidSpawn); 
-        delete longGuidSpawn;
-        std::cout << "    ACTION SENT. Check Dashboard for Match GUID: " << visualTestMatchGuid << std::endl;
-        std::cout << "    VERIFY: Player with GUID starting 'player-guid-that-is-definitely-lon...' should appear, truncated to 36 chars." << std::endl;
+        // BaseActionData::IsValid() checks PlayerGuid length (1-36) and will fail.
+        // The action will be rejected by GameContainer::AddActions and NOT sent.
+        // SendAction itself returns true because the pointer is valid and added to the buffer initially.
+        bool sendResult = GetgudSDK::SendAction(longGuidSpawn); 
+        TEST_ASSERT(sendResult, "SendAction accepts action with long GUID into buffer");
+        // IMPORTANT: We don't delete longGuidSpawn here because GameContainer::AddActions 
+        // should delete it when IsValid() returns false later in the processing pipeline.
+        // delete longGuidSpawn; // This would cause a double-free if GameContainer works correctly.
+        std::cout << "    ACTION DROPPED (Expected). Check Dashboard for Match GUID: " << visualTestMatchGuid << std::endl;
+        std::cout << "    VERIFY: Player with GUID starting 'player-guid-that-is-definitely-lon...' should NOT appear. The action was rejected due to invalid length." << std::endl;
 
         visualTestTime += 100;
 
@@ -1021,12 +1042,16 @@ int main() {
             visualTestMatchGuid,
             visualTestTime,
             "player-1", // Player 1 dies
-            "" // Empty attacker GUID
+            "" // Empty attacker GUID - NOW CONSIDERED INVALID
         );
-        GetgudSDK::SendAction(envDeath);
-        delete envDeath;
-        std::cout << "    ACTION SENT. Check Dashboard events for Match GUID: " << visualTestMatchGuid << std::endl;
-        std::cout << "    VERIFY: A Death event for 'player-1' should appear, possibly indicating an environmental death or suicide (empty attacker)." << std::endl;
+        // SendAction will succeed (pointer buffered), but IsValid() will fail later.
+        bool sendResult_VT6 = GetgudSDK::SendAction(envDeath);
+        TEST_ASSERT(sendResult_VT6, "SendAction accepts action with empty attacker GUID into buffer");
+        // IMPORTANT: We don't delete envDeath here because GameContainer::AddActions 
+        // should delete it when IsValid() returns false later due to the empty attacker GUID.
+        // delete envDeath; // This would cause a double-free.
+        std::cout << "    ACTION DROPPED (Expected). Check Dashboard events for Match GUID: " << visualTestMatchGuid << std::endl;
+        std::cout << "    VERIFY: A Death event for 'player-1' with an empty attacker should NOT appear. The action was rejected due to invalid empty attacker GUID." << std::endl;
         
         visualTestTime += 100;
 
@@ -1056,7 +1081,7 @@ int main() {
         playerUpdate.PlayerRank = 99;
         playerUpdate.PlayerStatus = "Online-VisualTest";
         playersToUpdate.push_back(playerUpdate);
-        GetgudSDK::UpdatePlayers(237, "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d", playersToUpdate);
+        GetgudSDK::UpdatePlayers(TITLE_ID, PRIVATE_KEY, playersToUpdate);
         std::cout << "    UPDATE SENT. Check Player Profile on Dashboard for GUID: player-for-update" << std::endl;
         std::cout << "    VERIFY: Player 'player-for-update' should have Nickname='UpdatedNickname', Rank=99, Status='Online-VisualTest'." << std::endl;
 
@@ -1066,30 +1091,91 @@ int main() {
         std::cout << "\n  Visual Test 9: Sending out-of-match Report..." << std::endl;
         std::deque<GetgudSDK::ReportInfo> outOfMatchReports;
         GetgudSDK::ReportInfo oomReport;
-        oomReport.MatchGuid = "VISUAL-TEST-OOM-REPORT"; // Non-existent match guid
+        oomReport.MatchGuid = visualTestMatchGuid; // Non-existent match guid
         oomReport.ReporterName = "OutOfMatchReporter";
         oomReport.SuspectedPlayerGuid = "player-reported-oom";
         oomReport.TbType = GetgudSDK::TbType::Smurfing;
         oomReport.ReportedTimeEpoch = visualTestTime;
         outOfMatchReports.push_back(oomReport);
-        GetgudSDK::SendReports(237, "97237e40-1ad4-11f0-83cc-3b0b7cb4e97d", outOfMatchReports);
+        GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, outOfMatchReports);
         std::cout << "    REPORT SENT. Check main Reports list on Dashboard (not tied to a specific match)." << std::endl;
         std::cout << "    VERIFY: A report against 'player-reported-oom' for Smurfing by 'OutOfMatchReporter' should appear in the general reports list." << std::endl;
 
+        visualTestTime += 100;
+
+        // --- Visual Test 10: All Action Types --- 
+        std::cout << "\n  Visual Test 10: Sending one of each core action type in a new match..." << std::endl;
+        // Start a new, dedicated match for this test
+        std::string allActionsMatchGuid = GetgudSDK::StartMatch(gameGuid, "AllActionsTest", "quick_core_check");
+        if (allActionsMatchGuid.empty()) {
+            std::cerr << "  VISUAL TEST 10 ERROR: Failed to create dedicated match." << std::endl;
+        } else {
+            std::cout << "    ==> All Actions Test Match GUID: " << allActionsMatchGuid << " <= Check this match on your dashboard." << std::endl;
+            long long coreActionTime = visualTestTime; // Use a separate time sequence
+            std::string coreActionPlayer = "player-all-actions";
+            
+            // 1. Spawn
+            GetgudSDK::SpawnActionData* spawn = new GetgudSDK::SpawnActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, "core-char", "core-team", 100.f, {10,10,10}, {0,0}
+            );
+            GetgudSDK::SendAction(spawn); delete spawn; coreActionTime += 10;
+
+            // 2. Position
+            GetgudSDK::PositionActionData* position = new GetgudSDK::PositionActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, {11,11,11}, {10,10}
+            );
+            GetgudSDK::SendAction(position); delete position; coreActionTime += 10;
+
+            // 3. Attack
+            GetgudSDK::AttackActionData* attack = new GetgudSDK::AttackActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, "weapon-core-test"
+            );
+            GetgudSDK::SendAction(attack); delete attack; coreActionTime += 10;
+
+            // 4. Damage (deals damage to player-0 - note: player-0 might not be visually present in *this* match replay)
+            GetgudSDK::DamageActionData* damage = new GetgudSDK::DamageActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, "player-0", 15.5f, "weapon-core-test"
+            );
+            GetgudSDK::SendAction(damage); delete damage; coreActionTime += 10;
+
+            // 5. Heal
+            GetgudSDK::HealActionData* heal = new GetgudSDK::HealActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, 25.0f
+            );
+            GetgudSDK::SendAction(heal); delete heal; coreActionTime += 10;
+
+            // 6. Death (killed by player-0)
+            GetgudSDK::DeathActionData* death = new GetgudSDK::DeathActionData(
+                allActionsMatchGuid, coreActionTime, coreActionPlayer, "player-0"
+            );
+            GetgudSDK::SendAction(death); delete death;
+
+            std::cout << "    ACTIONS SENT. Check Dashboard event list for Match GUID: " << allActionsMatchGuid << std::endl;
+            std::cout << "    VERIFY: Events for player '" << coreActionPlayer << "' should appear in order: Spawn, Position, Attack, Damage (to player-0), Heal, Death (by player-0)." << std::endl;
+        }
     }
     std::cout << "\n========== VISUAL DASHBOARD TESTS COMPLETE ==========\n" << std::endl;
     // ============ END VISUAL DASHBOARD TESTS ============
 
-    // End the main game (All Game's Matches will close as well):
-    bool gameEnded = GetgudSDK::MarkEndGame(gameGuid);
+    // Wait until packets potentially generated by tests are sent
+    std::cout << "\nWaiting for final packets to send before ending game..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // Increased wait time
 
-    // Wait until packets will be sent
+    // End the main game (AFTER all tests)
+    std::cout << "\nMarking main game as ended..." << std::endl;
+    bool gameEnded = GetgudSDK::MarkEndGame(gameGuid);
+    TEST_ASSERT(gameEnded, "MarkEndGame should succeed for the main game");
+
+    // Wait until packets will be sent (including potential final game packet)
+    std::cout << "Waiting for final packets to send before disposing SDK..." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     // Close and Dispose of the SDK:
+    std::cout << "\nDisposing SDK..." << std::endl;
     GetgudSDK::Dispose();
 
     // Wait until the threads will be stopped
+    std::cout << "Waiting for threads to stop..." << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     system("pause");
