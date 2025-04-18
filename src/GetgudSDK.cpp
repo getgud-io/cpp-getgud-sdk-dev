@@ -283,7 +283,7 @@ namespace GetgudSDK {
 	 *
 	 * Add actions to an action buffer
 	 **/
-	bool SendActions(std::deque<BaseActionData*> actions) {
+	bool SendActions(const std::deque<BaseActionData*>& actions) {
 		bool actionsSent = false;
 		int actionsSize = 0;
 		try {
@@ -324,10 +324,10 @@ namespace GetgudSDK {
 	 * SendAffectAction:
 	 *
 	 **/
-	bool SendAffectAction(std::string matchGuid,
+	bool SendAffectAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string affectGuid,
+		const std::string& playerGuid,
+		const std::string& affectGuid,
 		AffectState affectState) {
 		bool sendResult = false;
 		try {
@@ -350,10 +350,10 @@ namespace GetgudSDK {
 	 * SendAttackAction:
 	 *
 	 **/
-	bool SendAttackAction(std::string matchGuid,
+	bool SendAttackAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string weaponGuid) {
+		const std::string& playerGuid,
+		const std::string& weaponGuid) {
 		bool sendResult = false;
 		try {
 			AttackActionData* attackAction =
@@ -375,12 +375,12 @@ namespace GetgudSDK {
 	 * SendDamageAction:
 	 *
 	 **/
-	bool SendDamageAction(std::string matchGuid,
+	bool SendDamageAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string victimPlayerGuid,
+		const std::string& playerGuid,
+		const std::string& victimPlayerGuid,
 		float damageDone,
-		std::string weaponGuid) {
+		const std::string& weaponGuid) {
 		bool sendResult = false;
 		try {
 			DamageActionData* damageAction =
@@ -403,9 +403,9 @@ namespace GetgudSDK {
 	 * SendHealAction:
 	 *
 	 **/
-	bool SendHealAction(std::string matchGuid,
+	bool SendHealAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
+		const std::string& playerGuid,
 		float healthGained) {
 		bool sendResult = false;
 		try {
@@ -428,14 +428,14 @@ namespace GetgudSDK {
 	 * SendSpawnAction:
 	 *
 	 **/
-	bool SendSpawnAction(std::string matchGuid,
+	bool SendSpawnAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string characterGuid,
-		std::string teamGuid,
+		const std::string& playerGuid,
+		const std::string& characterGuid,
+		const std::string& teamGuid,
 		float initialHealth,
-		PositionF position,
-		RotationF rotation) {
+		const PositionF& position,
+		const RotationF& rotation) {
 		bool sendResult = false;
 		try {
 			SpawnActionData* spawnAction =
@@ -458,10 +458,10 @@ namespace GetgudSDK {
 	 * SendDeathAction:
 	 *
 	 **/
-	bool SendDeathAction(std::string matchGuid,
+	bool SendDeathAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string attackerGuid) {
+		const std::string& playerGuid,
+		const std::string& attackerGuid) {
 		bool sendResult = false;
 		try {
 			DeathActionData* deathAction =
@@ -483,11 +483,11 @@ namespace GetgudSDK {
 	 * SendPositionAction:
 	 *
 	 **/
-	bool SendPositionAction(std::string matchGuid,
+	bool SendPositionAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		PositionF position,
-		RotationF rotation) {
+		const std::string& playerGuid,
+		const PositionF& position,
+		const RotationF& rotation) {
 		bool sendResult = false;
 		try {
 			PositionActionData* positionAction = new PositionActionData(

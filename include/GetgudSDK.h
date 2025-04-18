@@ -45,44 +45,44 @@ namespace GetgudSDK {
 	GETGUDSDK_API bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid);
 	GETGUDSDK_API bool SendInMatchReport(ReportInfo reportInfo);
 	GETGUDSDK_API bool SendChatMessage(std::string matchGuid, ChatMessageInfo messageInfo);
-	GETGUDSDK_API bool SendActions(std::deque<BaseActionData*> actions);
+	GETGUDSDK_API bool SendActions(const std::deque<BaseActionData*>& actions);
 	GETGUDSDK_API bool SendAction(BaseActionData* action);
-	GETGUDSDK_API bool SendAffectAction(std::string matchGuid,
+	GETGUDSDK_API bool SendAffectAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string affectGuid,
-		std::string playerGuid,
+		const std::string& affectGuid,
+		const std::string& playerGuid,
 		AffectState affectState);
-	GETGUDSDK_API bool SendAttackAction(std::string matchGuid,
+	GETGUDSDK_API bool SendAttackAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string weaponGuid);
-	GETGUDSDK_API bool SendDamageAction(std::string matchGuid,
+		const std::string& playerGuid,
+		const std::string& weaponGuid);
+	GETGUDSDK_API bool SendDamageAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string victimPlayerGuid,
+		const std::string& playerGuid,
+		const std::string& victimPlayerGuid,
 		float damageDone,
-		std::string weaponGuid);
-	GETGUDSDK_API bool SendHealAction(std::string matchGuid,
+		const std::string& weaponGuid);
+	GETGUDSDK_API bool SendHealAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
+		const std::string& playerGuid,
 		float healthGained);
-	GETGUDSDK_API bool SendSpawnAction(std::string matchGuid,
+	GETGUDSDK_API bool SendSpawnAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string characterGuid,
-		std::string teamGuid,
+		const std::string& playerGuid,
+		const std::string& characterGuid,
+		const std::string& teamGuid,
 		float initialHealth,
-		PositionF position,
-		RotationF rotation);
-	GETGUDSDK_API bool SendDeathAction(std::string matchGuid,
+		const PositionF& position,
+		const RotationF& rotation);
+	GETGUDSDK_API bool SendDeathAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		std::string attackerGuid);
-	GETGUDSDK_API bool SendPositionAction(std::string matchGuid,
+		const std::string& playerGuid,
+		const std::string& attackerGuid);
+	GETGUDSDK_API bool SendPositionAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
-		std::string playerGuid,
-		PositionF position,
-		RotationF rotation);
+		const std::string& playerGuid,
+		const PositionF& position,
+		const RotationF& rotation);
 
 	GETGUDSDK_API bool SendReports(int titleId,
 		std::string privateKey,
