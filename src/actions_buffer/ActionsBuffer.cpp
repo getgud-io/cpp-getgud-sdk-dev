@@ -63,16 +63,22 @@ namespace GetgudSDK {
 			// game sender will grab those actions and will delete the game because
 			// those actions are empty and marked 
 			for (auto& action : actions) {
-				auto* emptyAction = new BaseActionData(BaseData(), true);
-				emptyAction->m_matchGuid = action->m_matchGuid;
-				actionToSend.push_back(emptyAction);
+				if (action != nullptr) {
+					auto* emptyAction = new BaseActionData(BaseData(), true);
+					emptyAction->m_matchGuid = action->m_matchGuid;
+					actionToSend.push_back(emptyAction);
+				}
 			}
 			actionSize = m_emptyActionSize;
 		}
 		else {
 			// if the action buffer is not full yet we just push regular actions
-			for (auto& action : actions)
-				actionToSend.push_back(action->Clone());
+			for (auto& action : actions) {
+				if (action != nullptr) {
+					actionToSend.push_back(action->Clone());
+				}
+			}
+
 		}
 		m_actionsBufferLocker.lock();
 
