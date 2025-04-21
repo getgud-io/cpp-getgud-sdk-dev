@@ -21,7 +21,7 @@ namespace GetgudSDK {
 	public:
 		ActionsBuffer();
 		std::deque<BaseActionData*> PopActions();
-		bool AddActions(std::deque<BaseActionData*>& actions);
+		bool AddActions(const std::deque<BaseActionData*>& actions);
 		unsigned int GetSizeInBytes();
 		unsigned int GetAverageSizeInBytes();
 		void Dispose();

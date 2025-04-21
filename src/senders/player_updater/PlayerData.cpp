@@ -3,9 +3,10 @@
 #include "../../logger/Logger.h"
 #include "../../utils/Utils.h"
 #include "../../utils/Validator.h"
+#include "../../utils/Sanitizer.h"
 #include "../../config/Config.h"
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <limits.h>
 #include <cfloat>
 #include <stdio.h>
@@ -105,115 +106,100 @@ namespace GetgudSDK {
 	void PlayerData::Dispose() {}
 
 	bool PlayerData::IsValid() {
-		bool isActionValid =
-			Validator::ValidateStringLength(m_playerInfo.PlayerGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_playerInfo.PlayerGuid);
-		if (!m_playerInfo.PlayerNickname.empty())
-		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerNickname, 0, 36);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNickname);
-		}
-		if (!m_playerInfo.PlayerEmail.empty())
-		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerEmail, 0, 64);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerEmail);
-		}
+		// Core validations
+		bool isCoreValid = Validator::ValidateStringLength(m_playerInfo.PlayerGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_playerInfo.PlayerGuid);
+		isCoreValid &= Validator::ValidateStringLength(m_privateKey, 1, 100);
+		isCoreValid &= Validator::ValidateStringChars(m_privateKey);
+		isCoreValid &= Validator::ValidateItemValue(m_titleId, 1, INT_MAX);
+
 		if (m_playerInfo.PlayerRank != -1)
 		{
-			isActionValid &=
-				Validator::ValidateItemValue(m_playerInfo.PlayerRank, 0, INT_MAX);
+			isCoreValid &= Validator::ValidateItemValue(m_playerInfo.PlayerRank, 0, INT_MAX);
 		}
 		if (m_playerInfo.PlayerJoinDateEpoch != -1)
 		{
-			isActionValid &= Validator::ValidateItemValue(
+			isCoreValid &= Validator::ValidateItemValue(
 				m_playerInfo.PlayerJoinDateEpoch,
 				sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 				sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
 		}
+		// Sanitize non-core fields
+		if (!m_playerInfo.PlayerNickname.empty())
+		{
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerNickname);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerNickname, 36);
+		}
+		if (!m_playerInfo.PlayerEmail.empty())
+		{
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerEmail);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerEmail, 64);
+		}
 		if (!m_playerInfo.PlayerSuspectScore.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerSuspectScore, 0, 100);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerSuspectScore);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerSuspectScore);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerSuspectScore, 100);
 		}
 		if (!m_playerInfo.PlayerReputation.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerReputation, 0, 36);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerReputation);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerReputation);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerReputation, 36);
 		}
 		if (!m_playerInfo.PlayerStatus.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerStatus, 0, 36);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerStatus);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerStatus);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerStatus, 36);
 		}
 		if (!m_playerInfo.PlayerCampaign.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerCampaign, 0, 128);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerCampaign);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerCampaign);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerCampaign, 128);
 		}
 		if (!m_playerInfo.PlayerNotes.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerNotes, 0, 128);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerNotes);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerNotes);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerNotes, 128);
 		}
 		if (!m_playerInfo.PlayerDevice.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerDevice, 0, 8);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerDevice);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerDevice);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerDevice, 8);
 		}
 		if (!m_playerInfo.PlayerOS.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerOS, 0, 8);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerOS);
-		}
-		if (m_playerInfo.PlayerAge != -1)
-		{
-			isActionValid &=
-				Validator::ValidateItemValue(m_playerInfo.PlayerAge, 0, 128);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerOS);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerOS, 8);
 		}
 		if (!m_playerInfo.PlayerGender.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerGender, 0, 8);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerGender);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerGender);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerGender, 8);
 		}
 		if (!m_playerInfo.PlayerLocation.empty())
 		{
-			isActionValid &=
-				Validator::ValidateStringLength(m_playerInfo.PlayerLocation, 0, 36);
-			isActionValid &= Validator::ValidateStringCharsSpecial(m_playerInfo.PlayerLocation);
+			Sanitizer::SanitizeStringCharsSpecial(m_playerInfo.PlayerLocation);
+			Sanitizer::SanitizeStringLength(m_playerInfo.PlayerLocation, 36);
 		}
 		if (!m_playerInfo.Transactions.empty())
 		{
 			for (auto& playerTransaction : m_playerInfo.Transactions)
 			{
-				isActionValid &=
-					Validator::ValidateStringLength(playerTransaction.TransactionGuid, 0, 36);
-				isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionGuid);
-
-				isActionValid &=
-					Validator::ValidateStringLength(playerTransaction.TransactionName, 0, 36);
-				isActionValid &= Validator::ValidateStringCharsSpecial(playerTransaction.TransactionName);
-
-				isActionValid &= Validator::ValidateItemValue(
+				// Core validation for transaction numerics/timestamps
+				isCoreValid &= Validator::ValidateItemValue(
 					playerTransaction.TransactionDateEpoch,
 					sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 					sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
+				isCoreValid &= Validator::ValidateItemValue(playerTransaction.TransactionValueUSD, 0.f, FLT_MAX);
 
-				isActionValid &=
-					Validator::ValidateItemValue(playerTransaction.TransactionValueUSD, 0.f, FLT_MAX);
+				// Sanitize transaction strings
+				Sanitizer::SanitizeStringCharsSpecial(playerTransaction.TransactionGuid);
+				Sanitizer::SanitizeStringLength(playerTransaction.TransactionGuid, 36);
+				Sanitizer::SanitizeStringCharsSpecial(playerTransaction.TransactionName);
+				Sanitizer::SanitizeStringLength(playerTransaction.TransactionName, 36);
 			}
 		}
 
-		return isActionValid;
+		return isCoreValid;
 	}
 
 }  // namespace GetgudSDK
