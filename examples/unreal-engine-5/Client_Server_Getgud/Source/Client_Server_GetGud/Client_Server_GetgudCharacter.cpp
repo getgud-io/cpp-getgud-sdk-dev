@@ -129,6 +129,8 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 
 	FRotator CameraRotation = Controller->GetControlRotation();
 	FVector position = GetActorLocation();
+	float yaw = CameraRotation.Yaw;
+	float pitch = CameraRotation.Pitch;
 
 	UE_LOG(LogTemp, Warning, TEXT("Character Position: %s"), *position.ToString());
 	UE_LOG(LogTemp, Warning, TEXT("Character Rotation: %s"), *CameraRotation.ToString());
@@ -168,6 +170,8 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 	FRotator CameraRotation = Controller->GetControlRotation();
 	UE_LOG(LogTemp, Warning, TEXT("Character Position: %s"), *position.ToString());
 
+	float yaw = CameraRotation.Yaw;
+	float pitch = CameraRotation.Pitch;
 	FDateTime Now = FDateTime::UtcNow();
 
 	// Calculate the Unix timestamp in milliseconds
