@@ -25,7 +25,7 @@ namespace GetgudSDK {
 
 		auto lastUpdateTime =
 			lastUpdate +
-			std::chrono::milliseconds(sdkConfig.bufferAvgSizeCalcDelayMilliseconds);
+			ToSystemDuration(sdkConfig.bufferAvgSizeCalcDelayMilliseconds);
 
 		// if the time for update comes we store avg size and start calculating
 		// statics all over again, so every bufferAvgSizeCalcDelayMilliseconds
@@ -150,5 +150,11 @@ namespace GetgudSDK {
 			return decimalOut;
 		}
 		return decimalIn;
+	}
+
+	// Helper to cast milliseconds to system_clock duration for MSVC compatibility
+	std::chrono::system_clock::duration ToSystemDuration(int ms) {
+		return std::chrono::duration_cast<std::chrono::system_clock::duration>(
+			std::chrono::milliseconds(ms));
 	}
 }  // namespace GetgudSDK
