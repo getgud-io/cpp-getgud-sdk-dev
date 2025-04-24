@@ -1,3 +1,4 @@
+#include <chrono>
 #include "GameData.h"
 #include "../config/Config.h"
 #include "../logger/Logger.h"
@@ -203,14 +204,14 @@ namespace GetgudSDK {
 		// marking (to give time for actions to assimilate before closing)
 		else if (m_isGameMarkedAsEnded == true &&
 			m_lastUpdateTime +
-			std::chrono::milliseconds(
+			ToSystemDuration(
 				sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds) <
 			std::chrono::system_clock::now())
 			return true;
 
 		// check if this game's packet has been waiting for long long enough without
 		// any data coming in to it
-		else if (m_lastUpdateTime + std::chrono::milliseconds(
+		else if (m_lastUpdateTime + ToSystemDuration(
 			sdkConfig.packetTimeoutInMilliseconds) <
 			std::chrono::system_clock::now())
 			return true;
@@ -295,14 +296,14 @@ namespace GetgudSDK {
 		// Check if game is ended, has no actions and grace time to add remaining
 		// actions has passed
 		if (m_isGameMarkedAsEnded == true && gameSizeInBytes == 0 &&
-			m_lastUpdateTime + std::chrono::milliseconds(
+			m_lastUpdateTime + ToSystemDuration(
 				sdkConfig.gameCloseGraceAfterMarkEndInMilliseconds) <
 			std::chrono::system_clock::now())
 			return true;
 
 		// Check if this game did not receive any actions for a very long long time,
 		// indicating it's probably closed
-		else if (gameSizeInBytes == 0 && m_lastUpdateTime + std::chrono::milliseconds(
+		else if (gameSizeInBytes == 0 && m_lastUpdateTime + ToSystemDuration(
 			sdkConfig.liveGameTimeoutInMilliseconds) <
 			std::chrono::system_clock::now())
 			return true;
