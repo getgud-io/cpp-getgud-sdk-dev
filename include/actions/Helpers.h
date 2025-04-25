@@ -67,7 +67,9 @@ namespace GetgudSDK {
 		Ragequit,
 		Afk,
 		Teaming,
-		RapidFire
+		RapidFire,
+		AffectAbuse,
+		AffectHacking
 	};
 
 

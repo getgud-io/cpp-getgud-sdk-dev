@@ -14,7 +14,7 @@
 
 // ================ CONSTANTS ================
 const int TITLE_ID = 239;
-const std::string PRIVATE_KEY = "3f2c15d0-1c5f-11f0-88b3-fd424aa02c9e";
+const std::string PRIVATE_KEY = "24249810-21c4-11f0-901b-db667d0d1572";
 // ===========================================
 
 // Custom assertion macro that prints a message and returns false on failure
@@ -688,7 +688,7 @@ int main() {
         // Create multiple games
         for (int i = 0; i < numGames; i++) {
             std::string testGameGuid = GetgudSDK::StartGame(
-                TITLE_ID + i, // Unique title ID for each game
+                TITLE_ID, // Unique title ID for each game
                 PRIVATE_KEY,
                 "server-" + std::to_string(i),
                 "game-mode-" + std::to_string(i),
@@ -1156,6 +1156,58 @@ int main() {
     }
     std::cout << "\n========== VISUAL DASHBOARD TESTS COMPLETE ==========\n" << std::endl;
     // ============ END VISUAL DASHBOARD TESTS ============
+
+    // === Test for new TbTypes (AffectAbuse, AffectHacking) ===
+    std::cout << "\nTesting new TbTypes (AffectAbuse, AffectHacking)..." << std::endl;
+    {
+        GetgudSDK::ReportInfo reportAffectAbuse;
+        reportAffectAbuse.MatchGuid = matchGuid; // Reverted to use matchGuid from main scope
+        reportAffectAbuse.SuspectedPlayerGuid = "Player_With_AffectAbuse";
+        reportAffectAbuse.TbType = GetgudSDK::TbType::AffectAbuse;
+        reportAffectAbuse.ReportedTimeEpoch = 1684059337532; // Using a static timestamp
+        reportAffectAbuse.ReporterName = "TestReporter_Abuse"; 
+        reportAffectAbuse.ReporterType = GetgudSDK::ReporterType::Player; // Added optional field
+        reportAffectAbuse.ReporterSubType = GetgudSDK::ReporterSubtype::None; // Added optional field
+        reportAffectAbuse.TbTimeEpoch = 1684059337500; // Added optional field (slightly before report time)
+        reportAffectAbuse.SuggestedToxicityScore = 85; // Added optional field
+        std::deque<GetgudSDK::ReportInfo> abuseDeque = {reportAffectAbuse}; // Put single report in deque
+        bool reportSentAbuse = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, abuseDeque);
+        TEST_ASSERT(reportSentAbuse, "SendReports should succeed for AffectAbuse");
+        std::cout << "  Sent report for AffectAbuse (Success: " << std::boolalpha << reportSentAbuse << ")" << std::endl;
+
+        GetgudSDK::ReportInfo reportAffectHacking;
+        reportAffectHacking.MatchGuid = matchGuid; // Reverted to use matchGuid from main scope
+        reportAffectHacking.SuspectedPlayerGuid = "Player_With_AffectHacking";
+        reportAffectHacking.TbType = GetgudSDK::TbType::AffectHacking;
+        reportAffectHacking.ReportedTimeEpoch = 1684059337532; // Using a static timestamp
+        reportAffectHacking.ReporterName = "TestReporter_Hacking"; 
+        reportAffectHacking.ReporterType = GetgudSDK::ReporterType::Moderator; // Added optional field
+        reportAffectHacking.ReporterSubType = GetgudSDK::ReporterSubtype::CommunityManager; // Added optional field
+        reportAffectHacking.TbTimeEpoch = 1684059337510; // Added optional field
+        reportAffectHacking.SuggestedToxicityScore = 90; // Added optional field
+        std::deque<GetgudSDK::ReportInfo> hackingDeque = {reportAffectHacking}; // Put single report in deque
+        bool reportSentHacking = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, hackingDeque);
+        TEST_ASSERT(reportSentHacking, "SendReports should succeed for AffectHacking");
+        std::cout << "  Sent report for AffectHacking (Success: " << std::boolalpha << reportSentHacking << ")" << std::endl;
+
+        // Add another report with some other TbType
+        GetgudSDK::ReportInfo reportOtherTbType;
+        reportOtherTbType.MatchGuid = matchGuid; // Reverted to use matchGuid from main scope
+        reportOtherTbType.SuspectedPlayerGuid = "Player_With_OtherTbType";
+        reportOtherTbType.TbType = GetgudSDK::TbType::Wallhack;
+        reportOtherTbType.ReportedTimeEpoch = 1684059337532;
+        reportOtherTbType.ReporterName = "TestReporter_Other"; 
+        reportOtherTbType.ReporterType = GetgudSDK::ReporterType::Client; // Added optional field
+        reportOtherTbType.ReporterSubType = GetgudSDK::ReporterSubtype::Custom; // Added optional field
+        reportOtherTbType.TbTimeEpoch = 1684059337520; // Added optional field
+        reportOtherTbType.SuggestedToxicityScore = 75; // Added optional field
+        std::deque<GetgudSDK::ReportInfo> otherDeque = {reportOtherTbType}; // Put single report in deque
+        bool reportSentOther = GetgudSDK::SendReports(TITLE_ID, PRIVATE_KEY, otherDeque);
+        TEST_ASSERT(reportSentOther, "SendReports should succeed for OtherTbType");
+        std::cout << "  Sent report for OtherTbType (Success: " << std::boolalpha << reportSentOther << ")" << std::endl;
+        
+    }
+    // ========================================================
 
     // Wait until packets potentially generated by tests are sent
     std::cout << "\nWaiting for final packets to send before ending game..." << std::endl;
