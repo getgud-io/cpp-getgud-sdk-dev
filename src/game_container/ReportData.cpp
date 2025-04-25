@@ -85,7 +85,7 @@ namespace GetgudSDK {
 		isCoreValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
 		isCoreValid &= Validator::ValidateStringLength(m_reportInfo.SuspectedPlayerGuid, 1, 36);
 		isCoreValid &= Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
-		isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 1, static_cast<int>(TbType::RapidFire));
+		isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 1, static_cast<int>(TbType::AffectHacking));
 
 		if (m_reportInfo.ReporterType != ReporterType::None)
 		{
