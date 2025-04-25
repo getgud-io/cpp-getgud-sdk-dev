@@ -25,4 +25,5 @@ namespace GetgudSDK {
 	std::string GenerateGuid();
 	std::string GetCurrentTimeString();
 	std::string ShortenDecimalNumber(std::string decimalIn);
+	std::chrono::system_clock::duration ToSystemDuration(int ms);
 }  // namespace GetgudSDK

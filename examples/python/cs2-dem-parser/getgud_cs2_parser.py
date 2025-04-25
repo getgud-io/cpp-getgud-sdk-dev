@@ -613,7 +613,7 @@ class GetgudDemoParser:
         
         # Define specific events we want to process together
         event_names_to_parse = ['player_spawn', 'player_death', 'player_hurt', 'bomb_planted', 'bomb_defused', 'bomb_exploded', 'smokegrenade_detonate', 'smokegrenade_expired', 
-                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end', 'item_purchase']
+                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end', 'item_purchase', 'chat_message']
         
         # Process main events together
         events = dict(
@@ -673,6 +673,7 @@ class GetgudDemoParser:
         weapon_fires = self.parse_weapon_fires(events)
         grenades = self.parse_grenades()
         ticks = self.parse_ticks()
+        chat = self.parse_chat(events)
         
         return {
             # "parser": parser,
@@ -688,8 +689,39 @@ class GetgudDemoParser:
             # Parsed from parser
             "grenades": grenades,
             "ticks": ticks,
+            "chat": chat,
         }
-    
+        
+    def parse_chat(self, events: dict[str, pd.DataFrame]) -> pd.DataFrame:
+        """Parse the chat messages of the demofile.
+
+        Args:
+            events: A dictionary of parsed events.
+
+        Returns:
+            The chat messages for the demofile.
+        """
+        chat_df = events.get("chat_message")
+        if chat_df is None or chat_df.empty:
+            # chat_message not found or empty in events.
+            return pd.DataFrame()
+
+
+        # Ensure expected columns exist based on how parse_events works
+        relevant_cols = ["tick", "user_steamid", "user_name", "chat_message"]
+        available_cols = [col for col in relevant_cols if col in chat_df.columns]
+        chat_df = chat_df[available_cols]
+
+        # Ensure 'chat_message' column exists and is string type
+        if 'chat_message' in chat_df.columns:
+            chat_df['chat_message'] = chat_df['chat_message'].astype(str)
+        else:
+             # If 'chat_message' column is missing, return empty or handle appropriately
+             print("Warning: 'chat_message' column missing in chat_message events.")
+             return pd.DataFrame()
+
+        return chat_df
+        
 class GetgudCS2Parser:
     def __init__(self, sdk, dem_file_path, report_players=[]):
         self.sdk = sdk
@@ -775,6 +807,7 @@ class GetgudCS2Parser:
             weapon_fires_match_data = demo_data['weapon_fires'].loc[(demo_data['weapon_fires']['tick'] >= round_start_tick) & (demo_data['weapon_fires']['tick'] <= round_end_tick)].reset_index(drop = True)
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
+            chat_match_data = demo_data['chat'].loc[(demo_data['chat']['tick'] >= round_start_tick) & (demo_data['chat']['tick'] <= round_end_tick)].reset_index(drop=True)
             
             # Filter item_purchase events for the current round
             item_purchase_match_data = pd.DataFrame() # Initialize empty DataFrame
@@ -873,6 +906,22 @@ class GetgudCS2Parser:
                             AffectState.Activate # Buying is an activation event
                         )
                     ])
+
+            # Process chat messages for this match
+            for _, chat_row in chat_match_data.iterrows():
+                player_id = str(chat_row['user_steamid'])
+                message = chat_row['chat_message']
+                timestamp = round(self.game_start_time_in_milliseconds + (chat_row['tick'] / tick_rate) * 1000)
+                # Use SendChatMessage as provided
+                sdk_commands.append([
+                    timestamp,
+                    SendChatMessage(
+                        match_guid,
+                        timestamp, 
+                        player_id, 
+                        message
+                    )
+                ])
 
             # Process bomb events directly from event data
             # Process bomb plant events

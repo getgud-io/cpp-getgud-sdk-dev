@@ -7,6 +7,7 @@
 #include "./zip/Zip.h"
 #include "../src/utils/Validator.h"
 #include "../src/config/Config.h"
+#include "../utils/Sanitizer.h"
 #include <sstream>
 #include <iomanip> // For std::setw, std::setfill
 
@@ -584,15 +585,37 @@ namespace GetgudSDK {
 	}
 
 	bool MatchData::IsValid() {
-		bool isActionValid = Validator::ValidateStringLength(m_gameGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_gameGuid);
-		isActionValid &= Validator::ValidateStringLength(m_matchMode, 0, 36);
-		isActionValid &= Validator::ValidateStringChars(m_matchMode);
-		isActionValid &= Validator::ValidateStringLength(m_mapName, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_mapName);
-		isActionValid &= Validator::ValidateStringLength(m_customField, 0, 128);
-		isActionValid &= Validator::ValidateStringChars(m_customField);
-		return isActionValid;
+		// 1. Core validation for gameGuid
+		bool isGameGuidValid = Validator::ValidateStringLength(m_gameGuid, 1, 36);
+		isGameGuidValid &= Validator::ValidateStringChars(m_gameGuid);
+
+		// If gameGuid is invalid, fail early.
+		if (!isGameGuidValid) {
+			return false;
+		}
+
+		// 2. Sanitize mapName first
+		Sanitizer::SanitizeStringChars(m_mapName);
+		Sanitizer::SanitizeStringLength(m_mapName, 36); // Apply truncation with ellipsis if needed
+
+		// 3. Check mapName length (1-36) *after* sanitization using Validator
+		bool isMapNameValid = Validator::ValidateStringLength(m_mapName, 1, 36);
+
+		// 4. Combine checks: Both gameGuid and sanitized mapName (length 1-36) are required.
+		bool isCoreValid = isGameGuidValid && isMapNameValid;
+
+		// 5. Sanitize other non-core fields (these don't affect the return value)
+		if (!m_matchMode.empty()) {
+		    Sanitizer::SanitizeStringChars(m_matchMode);
+		    Sanitizer::SanitizeStringLength(m_matchMode, 36);
+		}
+		if (!m_customField.empty()) {
+		    // Assuming standard chars for customField, adjust if needed
+		    Sanitizer::SanitizeStringChars(m_customField);
+		    Sanitizer::SanitizeStringLength(m_customField, 128);
+		}
+
+		return isCoreValid;
 	}
 
 }  // namespace GetgudSDK

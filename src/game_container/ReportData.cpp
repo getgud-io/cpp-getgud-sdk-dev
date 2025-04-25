@@ -1,5 +1,6 @@
 #include "ReportData.h"
 #include "../src/utils/Validator.h"
+#include "../src/utils/Sanitizer.h"
 #include "../src/config/Config.h"
 
 #ifdef __linux__
@@ -79,47 +80,46 @@ namespace GetgudSDK {
 	 *
 	 **/
 	bool ReportData::IsValid() {
-		bool isActionValid =
-			Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
-		isActionValid &=
-			Validator::ValidateStringLength(m_reportInfo.ReporterName, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_reportInfo.ReporterName);
+		// Core validations
+		bool isCoreValid = Validator::ValidateStringLength(m_reportInfo.MatchGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_reportInfo.MatchGuid);
+		isCoreValid &= Validator::ValidateStringLength(m_reportInfo.SuspectedPlayerGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
+		isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 1, 1000);
+
 		if (m_reportInfo.ReporterType != ReporterType::None)
 		{
-			isActionValid &=
-				Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterType), 0, static_cast<int>(ReporterType::Custom));
+			isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterType), 0, static_cast<int>(ReporterType::Custom));
 		}
 		if (m_reportInfo.ReporterSubType != ReporterSubtype::None)
 		{
-			isActionValid &=
-				Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::AFK));
+			isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_reportInfo.ReporterSubType), 0, static_cast<int>(ReporterSubtype::AFK));
 		}
-		isActionValid &= Validator::ValidateStringLength(
-			m_reportInfo.SuspectedPlayerGuid, 1, 36);
-		isActionValid &=
-			Validator::ValidateStringChars(m_reportInfo.SuspectedPlayerGuid);
-		isActionValid &=
-			Validator::ValidateItemValue(static_cast<int>(m_reportInfo.TbType), 1, static_cast<int>(TbType::RapidFire));
 		if (m_reportInfo.TbTimeEpoch != -1)
 		{
-			isActionValid &= Validator::ValidateItemValue(
+			isCoreValid &= Validator::ValidateItemValue(
 				m_reportInfo.TbTimeEpoch,
 				sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 				sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
 		}
 		if (m_reportInfo.SuggestedToxicityScore != -1)
 		{
-			isActionValid &=
-				Validator::ValidateItemValue(m_reportInfo.SuggestedToxicityScore, 1, 100);
+			isCoreValid &= Validator::ValidateItemValue(m_reportInfo.SuggestedToxicityScore, 1, 100);
 		}
 		if (m_reportInfo.ReportedTimeEpoch != -1)
 		{
-			isActionValid &= Validator::ValidateItemValue(
+			isCoreValid &= Validator::ValidateItemValue(
 				m_reportInfo.ReportedTimeEpoch,
 				sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 				sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
 		}
-		return isActionValid;
+
+		// Sanitize non-core fields
+		if (!m_reportInfo.ReporterName.empty()) { // ReporterName is optional
+		    Sanitizer::SanitizeStringChars(m_reportInfo.ReporterName);
+		    Sanitizer::SanitizeStringLength(m_reportInfo.ReporterName, 36);
+		}
+
+		return isCoreValid;
 	}
 }  // namespace GetgudSDK
