@@ -351,20 +351,17 @@ class GetgudDemoParser:
 
         # Get bomb defuses
         bomb_defused = events.get("bomb_defused")
-        if bomb_defused is None:
-            bomb_defused_missing_msg = "bomb_defused not found in events."
-            raise KeyError(bomb_defused_missing_msg)
-
-        bomb_defused["event"] = "defused"
-        bomb_defused = self.remove_nonplay_ticks(bomb_defused)
+        # in case no bomb defused found we can proceed
+        if bomb_defused is not None:
+            bomb_defused["event"] = "defused"
+            bomb_defused = self.remove_nonplay_ticks(bomb_defused)
 
         # Get bomb explosions
         bomb_exploded = events.get("bomb_exploded")
-        if bomb_exploded is None:
-            return pd.DataFrame()
-
-        bomb_exploded["event"] = "exploded"
-        bomb_exploded = self.remove_nonplay_ticks(bomb_exploded)
+        # in case no bomb exploded found we can proceed
+        if bomb_exploded is not None:
+            bomb_exploded["event"] = "exploded"
+            bomb_exploded = self.remove_nonplay_ticks(bomb_exploded)
         # Combine all bomb events
         bomb_df = pd.concat([bomb_planted, bomb_defused, bomb_exploded])
         # Rename columns
@@ -807,7 +804,12 @@ class GetgudCS2Parser:
             weapon_fires_match_data = demo_data['weapon_fires'].loc[(demo_data['weapon_fires']['tick'] >= round_start_tick) & (demo_data['weapon_fires']['tick'] <= round_end_tick)].reset_index(drop = True)
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
-            chat_match_data = demo_data['chat'].loc[(demo_data['chat']['tick'] >= round_start_tick) & (demo_data['chat']['tick'] <= round_end_tick)].reset_index(drop=True)
+            
+            chat_match_data = pd.DataFrame() # init empty 
+            # If chat data exists in match
+            if demo_data['chat'].shape[0] > 0:
+                chat_match_data = demo_data['chat'].loc[(demo_data['chat']['tick'] >= round_start_tick) & (demo_data['chat']['tick'] <= round_end_tick)].reset_index(drop=True)
+           
             
             # Filter item_purchase events for the current round
             item_purchase_match_data = pd.DataFrame() # Initialize empty DataFrame
@@ -821,12 +823,14 @@ class GetgudCS2Parser:
             if (spawn_match_data.shape[0] == 0 or tick_match_data.shape[0] == 0):
                 continue
                 
-            # Start a new match and record its GUID
+            # Extract match ID from the demo file path
+            demo_filename = self.dem_file_path.split('/')[-1]
+            # Start a new match and record its GUID with original match ID in custom field
             match_guid = StartMatch(
                 game_guid,
                 "5v5",
                 demo_data['header']['map_name'].replace(' ', '-')[:CHAR_LIMIT['small']],
-                self.dem_file_path.split('/')[-1]
+                demo_filename  # Store the original filename containing match ID as custom field
             ).call(self.sdk)
             match_guids.append(match_guid)
             
