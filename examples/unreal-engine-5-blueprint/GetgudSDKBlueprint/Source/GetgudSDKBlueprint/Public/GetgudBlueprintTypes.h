@@ -9,6 +9,7 @@
 UENUM(BlueprintType)
 enum class EGetgudToxicBehavior : uint8
 {
+	None = 0,  // Placeholder required by UE5 (SDK TbType starts at 1)
 	Other = 1,
 	Aimbot,
 	Wallhack,
