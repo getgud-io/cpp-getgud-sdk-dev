@@ -33,9 +33,13 @@ public class GetgudSDKBlueprint : ModuleRules
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{
-			// DLL path
+			// DLL and LIB paths
 			string DLLPath = Path.Combine(BinPath, "GetgudSDK.dll");
+			string LIBPath = Path.Combine(BinPath, "GetgudSDK.lib");
 			string ConfigPath = Path.Combine(BinPath, "config.json");
+
+			// Link against the import library
+			PublicAdditionalLibraries.Add(LIBPath);
 
 			// Delay load the DLL
 			PublicDelayLoadDLLs.Add("GetgudSDK.dll");
