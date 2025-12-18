@@ -41,14 +41,14 @@ public class GetgudSDKBlueprint : ModuleRules
 			// Link against the import library
 			PublicAdditionalLibraries.Add(LIBPath);
 
-			// Delay load the DLL
+			// Delay load the DLL (loaded manually in StartupModule)
 			PublicDelayLoadDLLs.Add("GetgudSDK.dll");
 
-			// Copy DLL to output directory
-			RuntimeDependencies.Add("$(TargetOutputDir)/GetgudSDK.dll", DLLPath);
+			// Copy DLL to output directory (NonUFS ensures it's a loose file, not in PAK)
+			RuntimeDependencies.Add("$(BinaryOutputDir)/GetgudSDK.dll", DLLPath, StagedFileType.NonUFS);
 
-			// Copy config.json to output directory (NonUFS keeps it as loose file, not in PAK)
-			RuntimeDependencies.Add("$(TargetOutputDir)/config.json", ConfigPath, StagedFileType.NonUFS);
+			// Copy config.json to output directory
+			RuntimeDependencies.Add("$(BinaryOutputDir)/config.json", ConfigPath, StagedFileType.NonUFS);
 		}
 	}
 }

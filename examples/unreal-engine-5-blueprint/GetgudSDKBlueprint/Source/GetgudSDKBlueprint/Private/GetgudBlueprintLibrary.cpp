@@ -2,6 +2,7 @@
 #include "GetgudSDK.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
+#include "Interfaces/IPluginManager.h"
 #include <cstdlib>
 
 // Helper to convert FGetgudPosition to SDK PositionF
@@ -142,15 +143,60 @@ bool UGetgudBlueprintLibrary::Init()
 	char* EnvPath = std::getenv("GETGUD_CONFIG_PATH");
 	if (EnvPath && strlen(EnvPath) > 0)
 	{
-		// SDK will use env var
+		UE_LOG(LogTemp, Log, TEXT("GetgudSDK: Using config from GETGUD_CONFIG_PATH env var"));
 		return GetgudSDK::Init();
 	}
 
-	// Find config.json next to executable
-	FString ExeDir = FPaths::GetPath(FPlatformProcess::ExecutablePath());
-	FString ConfigPath = FPaths::Combine(ExeDir, TEXT("config.json"));
+	// Search for config.json in multiple locations
+	TArray<FString> SearchPaths;
 
-	return GetgudSDK::Init(TCHAR_TO_UTF8(*ConfigPath));
+	// Path 1: Use IPluginManager to get plugin directory (works in Editor)
+	TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("GetgudSDKBlueprint"));
+	if (Plugin.IsValid())
+	{
+		SearchPaths.Add(FPaths::Combine(
+			Plugin->GetBaseDir(),
+			TEXT("ThirdParty"),
+			TEXT("GetgudSDK"),
+			TEXT("bin"),
+			TEXT("Win64"),
+			TEXT("config.json")
+		));
+	}
+
+	// Path 2: Next to executable (for packaged games)
+	SearchPaths.Add(FPaths::Combine(
+		FPaths::GetPath(FPlatformProcess::ExecutablePath()),
+		TEXT("config.json")
+	));
+
+	// Path 3: Project Binaries folder
+	SearchPaths.Add(FPaths::Combine(
+		FPaths::ProjectDir(),
+		TEXT("Binaries"),
+		TEXT("Win64"),
+		TEXT("config.json")
+	));
+
+	// Try each path
+	for (const FString& Path : SearchPaths)
+	{
+		FString FullPath = FPaths::ConvertRelativePathToFull(Path);
+		if (FPaths::FileExists(FullPath))
+		{
+			UE_LOG(LogTemp, Log, TEXT("GetgudSDK: Found config.json at: %s"), *FullPath);
+			return GetgudSDK::Init(TCHAR_TO_UTF8(*FullPath));
+		}
+	}
+
+	// Log error if not found
+	UE_LOG(LogTemp, Error, TEXT("GetgudSDK: config.json not found! Searched paths:"));
+	for (const FString& Path : SearchPaths)
+	{
+		UE_LOG(LogTemp, Error, TEXT("  - %s"), *FPaths::ConvertRelativePathToFull(Path));
+	}
+
+	return false;
 }
 
 bool UGetgudBlueprintLibrary::InitWithPath(const FString& ConfigFileFullPath)
