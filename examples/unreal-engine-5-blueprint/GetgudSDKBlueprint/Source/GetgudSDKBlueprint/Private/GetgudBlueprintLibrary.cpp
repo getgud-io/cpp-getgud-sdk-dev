@@ -346,7 +346,7 @@ bool UGetgudBlueprintLibrary::SendHealAction(const FString& MatchGuid, int64 Act
 	return ::SendHealAction(baseData, HealthGained) != 0;
 }
 
-bool UGetgudBlueprintLibrary::SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& AffectGuid, const FString& PlayerGuid, EGetgudAffectState AffectState)
+bool UGetgudBlueprintLibrary::SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& AffectGuid, EGetgudAffectState AffectState)
 {
 	struct ::BaseActionData baseData;
 	baseData.actionTimeEpoch = ActionTimeEpoch;

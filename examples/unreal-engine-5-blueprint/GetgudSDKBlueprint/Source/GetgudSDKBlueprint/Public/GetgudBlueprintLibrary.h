@@ -118,7 +118,7 @@ public:
 	 * Send an affect action (buff/debuff state changes)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Actions")
-	static bool SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& AffectGuid, const FString& PlayerGuid, EGetgudAffectState AffectState);
+	static bool SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& AffectGuid, EGetgudAffectState AffectState);
 
 	// ============================================
 	// Reports/Chat/Players
