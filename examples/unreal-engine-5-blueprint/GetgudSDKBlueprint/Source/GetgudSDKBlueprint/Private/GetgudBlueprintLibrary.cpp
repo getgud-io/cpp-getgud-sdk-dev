@@ -368,179 +368,159 @@ bool UGetgudBlueprintLibrary::SendAffectAction(const FString& MatchGuid, int64 A
 // Reports/Chat/Players
 // ============================================
 
-bool UGetgudBlueprintLibrary::SendInMatchReport(const FGetgudReportInfo& InReportInfo)
+bool UGetgudBlueprintLibrary::SendInMatchReport(const FString& MatchGuid, const FString& ReporterName, EGetgudReporterType ReporterType, EGetgudReporterSubtype ReporterSubType, const FString& SuspectedPlayerGuid, EGetgudToxicBehavior TbType, int64 TbTimeEpoch, int32 SuggestedToxicityScore, int64 ReportedTimeEpoch)
 {
 	struct ::ReportInfo cReport;
 
-	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*InReportInfo.MatchGuid);
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
 	cReport.matchGuid = MatchGuidUtf8.Get();
-	cReport.matchGuidSize = InReportInfo.MatchGuid.Len();
+	cReport.matchGuidSize = MatchGuid.Len();
 
-	auto ReporterNameUtf8 = StringCast<ANSICHAR>(*InReportInfo.ReporterName);
+	auto ReporterNameUtf8 = StringCast<ANSICHAR>(*ReporterName);
 	cReport.reporterName = ReporterNameUtf8.Get();
-	cReport.reporterNameSize = InReportInfo.ReporterName.Len();
+	cReport.reporterNameSize = ReporterName.Len();
 
-	cReport.reporterType = ToCReporterType(InReportInfo.ReporterType);
-	cReport.reporterSubType = ToCReporterSubtype(InReportInfo.ReporterSubType);
+	cReport.reporterType = ToCReporterType(ReporterType);
+	cReport.reporterSubType = ToCReporterSubtype(ReporterSubType);
 
-	auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*InReportInfo.SuspectedPlayerGuid);
+	auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*SuspectedPlayerGuid);
 	cReport.suspectedPlayerGuid = SuspectedPlayerGuidUtf8.Get();
-	cReport.suspectedPlayerGuidSize = InReportInfo.SuspectedPlayerGuid.Len();
+	cReport.suspectedPlayerGuidSize = SuspectedPlayerGuid.Len();
 
-	cReport.tbType = ToCTbType(InReportInfo.TbType);
-	cReport.tbTimeEpoch = InReportInfo.TbTimeEpoch;
-	cReport.suggestedToxicityScore = InReportInfo.SuggestedToxicityScore;
-	cReport.reportedTimeEpoch = InReportInfo.ReportedTimeEpoch;
+	cReport.tbType = ToCTbType(TbType);
+	cReport.tbTimeEpoch = TbTimeEpoch;
+	cReport.suggestedToxicityScore = SuggestedToxicityScore;
+	cReport.reportedTimeEpoch = ReportedTimeEpoch;
 
 	return ::SendInMatchReport(cReport) != 0;
 }
 
-bool UGetgudBlueprintLibrary::SendChatMessage(const FGetgudChatMessage& MessageInfo)
+bool UGetgudBlueprintLibrary::SendChatMessage(const FString& MatchGuid, int64 MessageTimeEpoch, const FString& PlayerGuid, const FString& Message)
 {
 	struct ::ChatMessageInfo cMessage;
-	cMessage.messageTimeEpoch = MessageInfo.MessageTimeEpoch;
+	cMessage.messageTimeEpoch = MessageTimeEpoch;
 
-	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MessageInfo.MatchGuid);
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
 	cMessage.matchGuid = MatchGuidUtf8.Get();
-	cMessage.matchGuidSize = MessageInfo.MatchGuid.Len();
+	cMessage.matchGuidSize = MatchGuid.Len();
 
-	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*MessageInfo.PlayerGuid);
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
 	cMessage.playerGuid = PlayerGuidUtf8.Get();
-	cMessage.playerGuidSize = MessageInfo.PlayerGuid.Len();
+	cMessage.playerGuidSize = PlayerGuid.Len();
 
-	auto MessageUtf8 = StringCast<ANSICHAR>(*MessageInfo.Message);
+	auto MessageUtf8 = StringCast<ANSICHAR>(*Message);
 	cMessage.message = MessageUtf8.Get();
-	cMessage.messageSize = MessageInfo.Message.Len();
+	cMessage.messageSize = Message.Len();
 
 	return ::SendChatMessage(cMessage) != 0;
 }
 
-bool UGetgudBlueprintLibrary::SendReports(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudReportInfo>& Reports)
+bool UGetgudBlueprintLibrary::SendReport(int32 TitleId, const FString& PrivateKey, const FGetgudReportInfo& Report)
 {
 	auto PrivateKeyUtf8 = StringCast<ANSICHAR>(*PrivateKey);
 
-	bool bAllSuccess = true;
-	for (const FGetgudReportInfo& Report : Reports)
-	{
-		struct ::ReportInfo cReport;
+	struct ::ReportInfo cReport;
 
-		auto MatchGuidUtf8 = StringCast<ANSICHAR>(*Report.MatchGuid);
-		cReport.matchGuid = MatchGuidUtf8.Get();
-		cReport.matchGuidSize = Report.MatchGuid.Len();
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*Report.MatchGuid);
+	cReport.matchGuid = MatchGuidUtf8.Get();
+	cReport.matchGuidSize = Report.MatchGuid.Len();
 
-		auto ReporterNameUtf8 = StringCast<ANSICHAR>(*Report.ReporterName);
-		cReport.reporterName = ReporterNameUtf8.Get();
-		cReport.reporterNameSize = Report.ReporterName.Len();
+	auto ReporterNameUtf8 = StringCast<ANSICHAR>(*Report.ReporterName);
+	cReport.reporterName = ReporterNameUtf8.Get();
+	cReport.reporterNameSize = Report.ReporterName.Len();
 
-		cReport.reporterType = ToCReporterType(Report.ReporterType);
-		cReport.reporterSubType = ToCReporterSubtype(Report.ReporterSubType);
+	cReport.reporterType = ToCReporterType(Report.ReporterType);
+	cReport.reporterSubType = ToCReporterSubtype(Report.ReporterSubType);
 
-		auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*Report.SuspectedPlayerGuid);
-		cReport.suspectedPlayerGuid = SuspectedPlayerGuidUtf8.Get();
-		cReport.suspectedPlayerGuidSize = Report.SuspectedPlayerGuid.Len();
+	auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*Report.SuspectedPlayerGuid);
+	cReport.suspectedPlayerGuid = SuspectedPlayerGuidUtf8.Get();
+	cReport.suspectedPlayerGuidSize = Report.SuspectedPlayerGuid.Len();
 
-		cReport.tbType = ToCTbType(Report.TbType);
-		cReport.tbTimeEpoch = Report.TbTimeEpoch;
-		cReport.suggestedToxicityScore = Report.SuggestedToxicityScore;
-		cReport.reportedTimeEpoch = Report.ReportedTimeEpoch;
+	cReport.tbType = ToCTbType(Report.TbType);
+	cReport.tbTimeEpoch = Report.TbTimeEpoch;
+	cReport.suggestedToxicityScore = Report.SuggestedToxicityScore;
+	cReport.reportedTimeEpoch = Report.ReportedTimeEpoch;
 
-		if (::SendReport(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cReport) == 0)
-		{
-			bAllSuccess = false;
-		}
-	}
-	return bAllSuccess;
+	return ::SendReport(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cReport) != 0;
 }
 
-bool UGetgudBlueprintLibrary::UpdatePlayers(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudPlayerInfo>& Players)
+bool UGetgudBlueprintLibrary::UpdatePlayer(int32 TitleId, const FString& PrivateKey, const FGetgudPlayerInfo& Player)
 {
 	auto PrivateKeyUtf8 = StringCast<ANSICHAR>(*PrivateKey);
 
-	bool bAllSuccess = true;
-	for (const FGetgudPlayerInfo& Player : Players)
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*Player.PlayerGuid);
+	auto PlayerNicknameUtf8 = StringCast<ANSICHAR>(*Player.PlayerNickname);
+	auto PlayerEmailUtf8 = StringCast<ANSICHAR>(*Player.PlayerEmail);
+	auto PlayerSuspectScoreUtf8 = StringCast<ANSICHAR>(*Player.PlayerSuspectScore);
+	auto PlayerReputationUtf8 = StringCast<ANSICHAR>(*Player.PlayerReputation);
+	auto PlayerStatusUtf8 = StringCast<ANSICHAR>(*Player.PlayerStatus);
+	auto PlayerCampaignUtf8 = StringCast<ANSICHAR>(*Player.PlayerCampaign);
+	auto PlayerNotesUtf8 = StringCast<ANSICHAR>(*Player.PlayerNotes);
+	auto PlayerDeviceUtf8 = StringCast<ANSICHAR>(*Player.PlayerDevice);
+	auto PlayerOSUtf8 = StringCast<ANSICHAR>(*Player.PlayerOS);
+	auto PlayerGenderUtf8 = StringCast<ANSICHAR>(*Player.PlayerGender);
+	auto PlayerLocationUtf8 = StringCast<ANSICHAR>(*Player.PlayerLocation);
+
+	TArray<struct ::PlayerTransactions> cTransactions;
+	TArray<TArray<ANSICHAR>> transGuidBuffers;
+	TArray<TArray<ANSICHAR>> transNameBuffers;
+
+	for (const FGetgudPlayerTransaction& Trans : Player.Transactions)
 	{
-		// Prepare all string conversions first (they need to stay in scope)
-		auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*Player.PlayerGuid);
-		auto PlayerNicknameUtf8 = StringCast<ANSICHAR>(*Player.PlayerNickname);
-		auto PlayerEmailUtf8 = StringCast<ANSICHAR>(*Player.PlayerEmail);
-		auto PlayerSuspectScoreUtf8 = StringCast<ANSICHAR>(*Player.PlayerSuspectScore);
-		auto PlayerReputationUtf8 = StringCast<ANSICHAR>(*Player.PlayerReputation);
-		auto PlayerStatusUtf8 = StringCast<ANSICHAR>(*Player.PlayerStatus);
-		auto PlayerCampaignUtf8 = StringCast<ANSICHAR>(*Player.PlayerCampaign);
-		auto PlayerNotesUtf8 = StringCast<ANSICHAR>(*Player.PlayerNotes);
-		auto PlayerDeviceUtf8 = StringCast<ANSICHAR>(*Player.PlayerDevice);
-		auto PlayerOSUtf8 = StringCast<ANSICHAR>(*Player.PlayerOS);
-		auto PlayerGenderUtf8 = StringCast<ANSICHAR>(*Player.PlayerGender);
-		auto PlayerLocationUtf8 = StringCast<ANSICHAR>(*Player.PlayerLocation);
+		auto TransGuidUtf8 = StringCast<ANSICHAR>(*Trans.TransactionGuid);
+		auto TransNameUtf8 = StringCast<ANSICHAR>(*Trans.TransactionName);
 
-		// Prepare transactions
-		TArray<struct ::PlayerTransactions> cTransactions;
-		TArray<TArray<ANSICHAR>> transGuidBuffers;
-		TArray<TArray<ANSICHAR>> transNameBuffers;
+		TArray<ANSICHAR> guidBuf;
+		guidBuf.Append(TransGuidUtf8.Get(), Trans.TransactionGuid.Len() + 1);
+		transGuidBuffers.Add(MoveTemp(guidBuf));
 
-		for (const FGetgudPlayerTransaction& Trans : Player.Transactions)
-		{
-			// Store UTF8 strings in buffers that persist
-			auto TransGuidUtf8 = StringCast<ANSICHAR>(*Trans.TransactionGuid);
-			auto TransNameUtf8 = StringCast<ANSICHAR>(*Trans.TransactionName);
-
-			TArray<ANSICHAR> guidBuf;
-			guidBuf.Append(TransGuidUtf8.Get(), Trans.TransactionGuid.Len() + 1);
-			transGuidBuffers.Add(MoveTemp(guidBuf));
-
-			TArray<ANSICHAR> nameBuf;
-			nameBuf.Append(TransNameUtf8.Get(), Trans.TransactionName.Len() + 1);
-			transNameBuffers.Add(MoveTemp(nameBuf));
-		}
-
-		// Now build the transactions array with pointers to our buffers
-		for (int32 i = 0; i < Player.Transactions.Num(); i++)
-		{
-			struct ::PlayerTransactions cTrans;
-			cTrans.TransactionGuid = transGuidBuffers[i].GetData();
-			cTrans.TransactionGuidSize = Player.Transactions[i].TransactionGuid.Len();
-			cTrans.TransactionName = transNameBuffers[i].GetData();
-			cTrans.TransactionNameSize = Player.Transactions[i].TransactionName.Len();
-			cTrans.TransactionDateEpoch = Player.Transactions[i].TransactionDateEpoch;
-			cTrans.TransactionValueUSD = Player.Transactions[i].TransactionValueUSD;
-			cTransactions.Add(cTrans);
-		}
-
-		struct ::PlayerInfo cPlayer;
-		cPlayer.playerGuid = PlayerGuidUtf8.Get();
-		cPlayer.playerGuidSize = Player.PlayerGuid.Len();
-		cPlayer.playerNickname = PlayerNicknameUtf8.Get();
-		cPlayer.playerNicknameSize = Player.PlayerNickname.Len();
-		cPlayer.playerEmail = PlayerEmailUtf8.Get();
-		cPlayer.playerEmailSize = Player.PlayerEmail.Len();
-		cPlayer.playerRank = Player.PlayerRank;
-		cPlayer.playerJoinDateEpoch = Player.PlayerJoinDateEpoch;
-		cPlayer.playerSuspectScore = PlayerSuspectScoreUtf8.Get();
-		cPlayer.playerSuspectScoreSize = Player.PlayerSuspectScore.Len();
-		cPlayer.playerReputation = PlayerReputationUtf8.Get();
-		cPlayer.playerReputationSize = Player.PlayerReputation.Len();
-		cPlayer.playerStatus = PlayerStatusUtf8.Get();
-		cPlayer.playerStatusSize = Player.PlayerStatus.Len();
-		cPlayer.playerCampaign = PlayerCampaignUtf8.Get();
-		cPlayer.playerCampaignSize = Player.PlayerCampaign.Len();
-		cPlayer.playerNotes = PlayerNotesUtf8.Get();
-		cPlayer.playerNotesSize = Player.PlayerNotes.Len();
-		cPlayer.playerDevice = PlayerDeviceUtf8.Get();
-		cPlayer.playerDeviceSize = Player.PlayerDevice.Len();
-		cPlayer.playerOS = PlayerOSUtf8.Get();
-		cPlayer.playerOSSize = Player.PlayerOS.Len();
-		cPlayer.playerAge = Player.PlayerAge;
-		cPlayer.playerGender = PlayerGenderUtf8.Get();
-		cPlayer.playerGenderSize = Player.PlayerGender.Len();
-		cPlayer.playerLocation = PlayerLocationUtf8.Get();
-		cPlayer.playerLocationSize = Player.PlayerLocation.Len();
-		cPlayer.transactions = cTransactions.Num() > 0 ? cTransactions.GetData() : nullptr;
-		cPlayer.transactionsSize = cTransactions.Num();
-
-		if (::UpdatePlayer(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cPlayer) == 0)
-		{
-			bAllSuccess = false;
-		}
+		TArray<ANSICHAR> nameBuf;
+		nameBuf.Append(TransNameUtf8.Get(), Trans.TransactionName.Len() + 1);
+		transNameBuffers.Add(MoveTemp(nameBuf));
 	}
-	return bAllSuccess;
+
+	for (int32 i = 0; i < Player.Transactions.Num(); i++)
+	{
+		struct ::PlayerTransactions cTrans;
+		cTrans.TransactionGuid = transGuidBuffers[i].GetData();
+		cTrans.TransactionGuidSize = Player.Transactions[i].TransactionGuid.Len();
+		cTrans.TransactionName = transNameBuffers[i].GetData();
+		cTrans.TransactionNameSize = Player.Transactions[i].TransactionName.Len();
+		cTrans.TransactionDateEpoch = Player.Transactions[i].TransactionDateEpoch;
+		cTrans.TransactionValueUSD = Player.Transactions[i].TransactionValueUSD;
+		cTransactions.Add(cTrans);
+	}
+
+	struct ::PlayerInfo cPlayer;
+	cPlayer.playerGuid = PlayerGuidUtf8.Get();
+	cPlayer.playerGuidSize = Player.PlayerGuid.Len();
+	cPlayer.playerNickname = PlayerNicknameUtf8.Get();
+	cPlayer.playerNicknameSize = Player.PlayerNickname.Len();
+	cPlayer.playerEmail = PlayerEmailUtf8.Get();
+	cPlayer.playerEmailSize = Player.PlayerEmail.Len();
+	cPlayer.playerRank = Player.PlayerRank;
+	cPlayer.playerJoinDateEpoch = Player.PlayerJoinDateEpoch;
+	cPlayer.playerSuspectScore = PlayerSuspectScoreUtf8.Get();
+	cPlayer.playerSuspectScoreSize = Player.PlayerSuspectScore.Len();
+	cPlayer.playerReputation = PlayerReputationUtf8.Get();
+	cPlayer.playerReputationSize = Player.PlayerReputation.Len();
+	cPlayer.playerStatus = PlayerStatusUtf8.Get();
+	cPlayer.playerStatusSize = Player.PlayerStatus.Len();
+	cPlayer.playerCampaign = PlayerCampaignUtf8.Get();
+	cPlayer.playerCampaignSize = Player.PlayerCampaign.Len();
+	cPlayer.playerNotes = PlayerNotesUtf8.Get();
+	cPlayer.playerNotesSize = Player.PlayerNotes.Len();
+	cPlayer.playerDevice = PlayerDeviceUtf8.Get();
+	cPlayer.playerDeviceSize = Player.PlayerDevice.Len();
+	cPlayer.playerOS = PlayerOSUtf8.Get();
+	cPlayer.playerOSSize = Player.PlayerOS.Len();
+	cPlayer.playerAge = Player.PlayerAge;
+	cPlayer.playerGender = PlayerGenderUtf8.Get();
+	cPlayer.playerGenderSize = Player.PlayerGender.Len();
+	cPlayer.playerLocation = PlayerLocationUtf8.Get();
+	cPlayer.playerLocationSize = Player.PlayerLocation.Len();
+	cPlayer.transactions = cTransactions.Num() > 0 ? cTransactions.GetData() : nullptr;
+	cPlayer.transactionsSize = cTransactions.Num();
+
+	return ::UpdatePlayer(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cPlayer) != 0;
 }

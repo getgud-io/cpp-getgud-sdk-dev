@@ -242,23 +242,3 @@ struct FGetgudPlayerInfo
 	TArray<FGetgudPlayerTransaction> Transactions;
 };
 
-/**
- * Chat message struct matching SDK ChatMessageInfo
- */
-USTRUCT(BlueprintType)
-struct FGetgudChatMessage
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
-	FString MatchGuid;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
-	int64 MessageTimeEpoch = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
-	FString PlayerGuid;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
-	FString Message;
-};

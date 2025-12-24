@@ -128,23 +128,23 @@ public:
 	 * Send an in-match report
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Reports")
-	static bool SendInMatchReport(const FGetgudReportInfo& ReportInfo);
+	static bool SendInMatchReport(const FString& MatchGuid, const FString& ReporterName, EGetgudReporterType ReporterType, EGetgudReporterSubtype ReporterSubType, const FString& SuspectedPlayerGuid, EGetgudToxicBehavior TbType, int64 TbTimeEpoch, int32 SuggestedToxicityScore, int64 ReportedTimeEpoch);
 
 	/**
 	 * Send a chat message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Chat")
-	static bool SendChatMessage(const FGetgudChatMessage& MessageInfo);
+	static bool SendChatMessage(const FString& MatchGuid, int64 MessageTimeEpoch, const FString& PlayerGuid, const FString& Message);
 
 	/**
-	 * Send out-of-match reports with credentials
+	 * Send out-of-match report with credentials
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Reports")
-	static bool SendReports(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudReportInfo>& Reports);
+	static bool SendReport(int32 TitleId, const FString& PrivateKey, const FGetgudReportInfo& Report);
 
 	/**
 	 * Update player information with credentials
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Players")
-	static bool UpdatePlayers(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudPlayerInfo>& Players);
+	static bool UpdatePlayer(int32 TitleId, const FString& PrivateKey, const FGetgudPlayerInfo& Player);
 };
