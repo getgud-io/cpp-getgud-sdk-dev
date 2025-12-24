@@ -56,25 +56,11 @@ public:
 	static FString StartGame(int32 TitleId, const FString& PrivateKey, const FString& ServerGuid, const FString& GameMode, const FString& ServerLocation);
 
 	/**
-	 * Start a new game session using credentials from config
-	 * @return GameGuid on success, empty string on failure
-	 */
-	UFUNCTION(BlueprintCallable, Category = "GetGud|Game")
-	static FString StartGameWithConfig(const FString& ServerGuid, const FString& GameMode, const FString& ServerLocation);
-
-	/**
 	 * Start a new match within a game
 	 * @return MatchGuid on success, empty string on failure
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Game")
-	static FString StartMatch(const FString& GameGuid, const FString& MatchMode, const FString& MapName);
-
-	/**
-	 * Start a new match with custom field
-	 * @return MatchGuid on success, empty string on failure
-	 */
-	UFUNCTION(BlueprintCallable, Category = "GetGud|Game")
-	static FString StartMatchWithCustomField(const FString& GameGuid, const FString& MatchMode, const FString& MapName, const FString& CustomField);
+	static FString StartMatch(const FString& GameGuid, const FString& MatchMode, const FString& MapName, const FString& CustomField);
 
 	/**
 	 * Mark a game as ended
@@ -148,7 +134,7 @@ public:
 	 * Send a chat message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Chat")
-	static bool SendChatMessage(const FString& MatchGuid, const FGetgudChatMessage& MessageInfo);
+	static bool SendChatMessage(const FGetgudChatMessage& MessageInfo);
 
 	/**
 	 * Send out-of-match reports with credentials
@@ -157,20 +143,8 @@ public:
 	static bool SendReports(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudReportInfo>& Reports);
 
 	/**
-	 * Send out-of-match reports using credentials from config
-	 */
-	UFUNCTION(BlueprintCallable, Category = "GetGud|Reports")
-	static bool SendReportsWithConfig(const TArray<FGetgudReportInfo>& Reports);
-
-	/**
 	 * Update player information with credentials
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GetGud|Players")
 	static bool UpdatePlayers(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudPlayerInfo>& Players);
-
-	/**
-	 * Update player information using credentials from config
-	 */
-	UFUNCTION(BlueprintCallable, Category = "GetGud|Players")
-	static bool UpdatePlayersWithConfig(const TArray<FGetgudPlayerInfo>& Players);
 };

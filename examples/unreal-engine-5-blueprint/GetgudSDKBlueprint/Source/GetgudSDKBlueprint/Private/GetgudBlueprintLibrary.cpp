@@ -1,136 +1,68 @@
 #include "GetgudBlueprintLibrary.h"
-#include "GetgudSDK.h"
+#include "GetgudSDK_C.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "Interfaces/IPluginManager.h"
 #include <cstdlib>
+#include <cstring>
 
-// Helper to convert FGetgudPosition to SDK PositionF
-static GetgudSDK::PositionF ToSDKPosition(const FGetgudPosition& Pos)
+// Helper to convert FGetgudPosition to C PositionF
+static PositionF ToCPosition(const FGetgudPosition& Pos)
 {
-	GetgudSDK::PositionF Result;
+	PositionF Result;
 	Result.X = Pos.X;
 	Result.Y = Pos.Y;
 	Result.Z = Pos.Z;
 	return Result;
 }
 
-// Helper to convert FGetgudRotation to SDK RotationF
-static GetgudSDK::RotationF ToSDKRotation(const FGetgudRotation& Rot)
+// Helper to convert FGetgudRotation to C RotationF
+static RotationF ToCRotation(const FGetgudRotation& Rot)
 {
-	GetgudSDK::RotationF Result;
+	RotationF Result;
 	Result.Yaw = Rot.Yaw;
 	Result.Pitch = Rot.Pitch;
 	Result.Roll = Rot.Roll;
 	return Result;
 }
 
-// Helper to convert EGetgudAffectState to SDK AffectState
-static GetgudSDK::AffectState ToSDKAffectState(EGetgudAffectState State)
+// Helper to convert EGetgudAffectState to C AffectState enum
+static enum AffectState ToCAffectState(EGetgudAffectState State)
 {
 	switch (State)
 	{
-	case EGetgudAffectState::Attach: return GetgudSDK::AffectState::Attach;
-	case EGetgudAffectState::Activate: return GetgudSDK::AffectState::Activate;
-	case EGetgudAffectState::Deactivate: return GetgudSDK::AffectState::Deactivate;
-	case EGetgudAffectState::Detach: return GetgudSDK::AffectState::Detach;
-	default: return GetgudSDK::AffectState::Attach;
+	case EGetgudAffectState::Attach: return Attach;
+	case EGetgudAffectState::Activate: return Activate;
+	case EGetgudAffectState::Deactivate: return Deactivate;
+	case EGetgudAffectState::Detach: return Detach;
+	default: return Attach;
 	}
 }
 
-// Helper to convert EGetgudToxicBehavior to SDK TbType
-static GetgudSDK::TbType ToSDKTbType(EGetgudToxicBehavior Type)
-{
-	return static_cast<GetgudSDK::TbType>(static_cast<int>(Type));
-}
-
-// Helper to convert EGetgudReporterType to SDK ReporterType
-// Note: SDK uses None=-1, but UE uint8 enum can't have -1, so we handle explicitly
-static GetgudSDK::ReporterType ToSDKReporterType(EGetgudReporterType Type)
+// Helper to convert EGetgudReporterType to C int
+static int ToCReporterType(EGetgudReporterType Type)
 {
 	if (Type == EGetgudReporterType::None)
 	{
-		return GetgudSDK::ReporterType::None; // SDK -1
+		return -1; // C SDK uses -1 for None
 	}
-	// Other values start at 1 in both
-	return static_cast<GetgudSDK::ReporterType>(static_cast<int>(Type));
+	return static_cast<int>(Type);
 }
 
-// Helper to convert EGetgudReporterSubtype to SDK ReporterSubtype
-// Note: SDK uses None=-1, but UE uint8 enum can't have -1, so we handle explicitly
-static GetgudSDK::ReporterSubtype ToSDKReporterSubtype(EGetgudReporterSubtype Type)
+// Helper to convert EGetgudReporterSubtype to C int
+static int ToCReporterSubtype(EGetgudReporterSubtype Type)
 {
 	if (Type == EGetgudReporterSubtype::None)
 	{
-		return GetgudSDK::ReporterSubtype::None; // SDK -1
+		return -1; // C SDK uses -1 for None
 	}
-	// Other values start at 1 in both
-	return static_cast<GetgudSDK::ReporterSubtype>(static_cast<int>(Type));
+	return static_cast<int>(Type);
 }
 
-// Helper to convert FGetgudReportInfo to SDK ReportInfo
-static GetgudSDK::ReportInfo ToSDKReportInfo(const FGetgudReportInfo& Info)
+// Helper to convert EGetgudToxicBehavior to C int
+static int ToCTbType(EGetgudToxicBehavior Type)
 {
-	GetgudSDK::ReportInfo Result;
-	Result.MatchGuid = TCHAR_TO_UTF8(*Info.MatchGuid);
-	Result.ReporterName = TCHAR_TO_UTF8(*Info.ReporterName);
-	Result.ReporterType = ToSDKReporterType(Info.ReporterType);
-	Result.ReporterSubType = ToSDKReporterSubtype(Info.ReporterSubType);
-	Result.SuspectedPlayerGuid = TCHAR_TO_UTF8(*Info.SuspectedPlayerGuid);
-	Result.TbType = ToSDKTbType(Info.TbType);
-	Result.TbTimeEpoch = Info.TbTimeEpoch;
-	Result.SuggestedToxicityScore = Info.SuggestedToxicityScore;
-	Result.ReportedTimeEpoch = Info.ReportedTimeEpoch;
-	return Result;
-}
-
-// Helper to convert FGetgudPlayerTransaction to SDK PlayerTransactions
-static GetgudSDK::PlayerTransactions ToSDKTransaction(const FGetgudPlayerTransaction& Trans)
-{
-	GetgudSDK::PlayerTransactions Result;
-	Result.TransactionGuid = TCHAR_TO_UTF8(*Trans.TransactionGuid);
-	Result.TransactionName = TCHAR_TO_UTF8(*Trans.TransactionName);
-	Result.TransactionDateEpoch = Trans.TransactionDateEpoch;
-	Result.TransactionValueUSD = Trans.TransactionValueUSD;
-	return Result;
-}
-
-// Helper to convert FGetgudPlayerInfo to SDK PlayerInfo
-static GetgudSDK::PlayerInfo ToSDKPlayerInfo(const FGetgudPlayerInfo& Info)
-{
-	GetgudSDK::PlayerInfo Result;
-	Result.PlayerGuid = TCHAR_TO_UTF8(*Info.PlayerGuid);
-	Result.PlayerNickname = TCHAR_TO_UTF8(*Info.PlayerNickname);
-	Result.PlayerEmail = TCHAR_TO_UTF8(*Info.PlayerEmail);
-	Result.PlayerRank = Info.PlayerRank;
-	Result.PlayerJoinDateEpoch = Info.PlayerJoinDateEpoch;
-	Result.PlayerSuspectScore = TCHAR_TO_UTF8(*Info.PlayerSuspectScore);
-	Result.PlayerReputation = TCHAR_TO_UTF8(*Info.PlayerReputation);
-	Result.PlayerStatus = TCHAR_TO_UTF8(*Info.PlayerStatus);
-	Result.PlayerCampaign = TCHAR_TO_UTF8(*Info.PlayerCampaign);
-	Result.PlayerNotes = TCHAR_TO_UTF8(*Info.PlayerNotes);
-	Result.PlayerDevice = TCHAR_TO_UTF8(*Info.PlayerDevice);
-	Result.PlayerOS = TCHAR_TO_UTF8(*Info.PlayerOS);
-	Result.PlayerAge = Info.PlayerAge;
-	Result.PlayerGender = TCHAR_TO_UTF8(*Info.PlayerGender);
-	Result.PlayerLocation = TCHAR_TO_UTF8(*Info.PlayerLocation);
-
-	for (const FGetgudPlayerTransaction& Trans : Info.Transactions)
-	{
-		Result.Transactions.push_back(ToSDKTransaction(Trans));
-	}
-
-	return Result;
-}
-
-// Helper to convert FGetgudChatMessage to SDK ChatMessageInfo
-static GetgudSDK::ChatMessageInfo ToSDKChatMessage(const FGetgudChatMessage& Msg)
-{
-	GetgudSDK::ChatMessageInfo Result;
-	Result.messageTimeEpoch = Msg.MessageTimeEpoch;
-	Result.playerGuid = TCHAR_TO_UTF8(*Msg.PlayerGuid);
-	Result.message = TCHAR_TO_UTF8(*Msg.Message);
-	return Result;
+	return static_cast<int>(Type);
 }
 
 // ============================================
@@ -144,7 +76,7 @@ bool UGetgudBlueprintLibrary::Init()
 	if (EnvPath && strlen(EnvPath) > 0)
 	{
 		UE_LOG(LogTemp, Log, TEXT("GetgudSDK: Using config from GETGUD_CONFIG_PATH env var"));
-		return GetgudSDK::Init();
+		return init() != 0;
 	}
 
 	// Search for config.json in multiple locations
@@ -185,7 +117,7 @@ bool UGetgudBlueprintLibrary::Init()
 		if (FPaths::FileExists(FullPath))
 		{
 			UE_LOG(LogTemp, Log, TEXT("GetgudSDK: Found config.json at: %s"), *FullPath);
-			return GetgudSDK::Init(TCHAR_TO_UTF8(*FullPath));
+			return init_conf_path(TCHAR_TO_UTF8(*FullPath)) != 0;
 		}
 	}
 
@@ -201,17 +133,17 @@ bool UGetgudBlueprintLibrary::Init()
 
 bool UGetgudBlueprintLibrary::InitWithPath(const FString& ConfigFileFullPath)
 {
-	return GetgudSDK::Init(TCHAR_TO_UTF8(*ConfigFileFullPath));
+	return init_conf_path(TCHAR_TO_UTF8(*ConfigFileFullPath)) != 0;
 }
 
 bool UGetgudBlueprintLibrary::InitWithContent(const FString& ConfigFile, bool PassAsContent)
 {
-	return GetgudSDK::Init(TCHAR_TO_UTF8(*ConfigFile), PassAsContent);
+	return init_conf(TCHAR_TO_UTF8(*ConfigFile), PassAsContent ? 1 : 0) != 0;
 }
 
 void UGetgudBlueprintLibrary::Dispose()
 {
-	GetgudSDK::Dispose();
+	dispose();
 }
 
 // ============================================
@@ -220,55 +152,76 @@ void UGetgudBlueprintLibrary::Dispose()
 
 FString UGetgudBlueprintLibrary::StartGame(int32 TitleId, const FString& PrivateKey, const FString& ServerGuid, const FString& GameMode, const FString& ServerLocation)
 {
-	std::string Result = GetgudSDK::StartGame(
-		TitleId,
-		TCHAR_TO_UTF8(*PrivateKey),
-		TCHAR_TO_UTF8(*ServerGuid),
-		TCHAR_TO_UTF8(*GameMode),
-		TCHAR_TO_UTF8(*ServerLocation)
-	);
-	return UTF8_TO_TCHAR(Result.c_str());
+	struct ::StartGameInfo gameInfo;
+	gameInfo.titleId = TitleId;
+
+	auto PrivateKeyUtf8 = StringCast<ANSICHAR>(*PrivateKey);
+	gameInfo.privateKey = PrivateKeyUtf8.Get();
+	gameInfo.privateKeySize = PrivateKey.Len();
+
+	auto ServerGuidUtf8 = StringCast<ANSICHAR>(*ServerGuid);
+	gameInfo.serverGuid = ServerGuidUtf8.Get();
+	gameInfo.serverGuidSize = ServerGuid.Len();
+
+	auto GameModeUtf8 = StringCast<ANSICHAR>(*GameMode);
+	gameInfo.gameMode = GameModeUtf8.Get();
+	gameInfo.gameModeSize = GameMode.Len();
+
+	auto ServerLocationUtf8 = StringCast<ANSICHAR>(*ServerLocation);
+	gameInfo.serverLocation = ServerLocationUtf8.Get();
+	gameInfo.serverLocationSize = ServerLocation.Len();
+
+	char gameGuidOut[128] = {0};
+	int size = ::StartGame(gameInfo, gameGuidOut);
+
+	if (size > 0)
+	{
+		return FString(UTF8_TO_TCHAR(gameGuidOut));
+	}
+	return FString();
 }
 
-FString UGetgudBlueprintLibrary::StartGameWithConfig(const FString& ServerGuid, const FString& GameMode, const FString& ServerLocation)
+FString UGetgudBlueprintLibrary::StartMatch(const FString& GameGuid, const FString& MatchMode, const FString& MapName, const FString& CustomField)
 {
-	std::string Result = GetgudSDK::StartGame(
-		TCHAR_TO_UTF8(*ServerGuid),
-		TCHAR_TO_UTF8(*GameMode),
-		TCHAR_TO_UTF8(*ServerLocation)
-	);
-	return UTF8_TO_TCHAR(Result.c_str());
-}
+	struct ::StartMatchInfo matchInfo;
 
-FString UGetgudBlueprintLibrary::StartMatch(const FString& GameGuid, const FString& MatchMode, const FString& MapName)
-{
-	std::string Result = GetgudSDK::StartMatch(
-		TCHAR_TO_UTF8(*GameGuid),
-		TCHAR_TO_UTF8(*MatchMode),
-		TCHAR_TO_UTF8(*MapName)
-	);
-	return UTF8_TO_TCHAR(Result.c_str());
-}
+	auto GameGuidUtf8 = StringCast<ANSICHAR>(*GameGuid);
+	matchInfo.gameGuid = GameGuidUtf8.Get();
+	matchInfo.gameGuidSize = GameGuid.Len();
 
-FString UGetgudBlueprintLibrary::StartMatchWithCustomField(const FString& GameGuid, const FString& MatchMode, const FString& MapName, const FString& CustomField)
-{
-	std::string Result = GetgudSDK::StartMatch(
-		TCHAR_TO_UTF8(*GameGuid),
-		TCHAR_TO_UTF8(*MatchMode),
-		TCHAR_TO_UTF8(*MapName),
-		TCHAR_TO_UTF8(*CustomField)
-	);
-	return UTF8_TO_TCHAR(Result.c_str());
+	auto MatchModeUtf8 = StringCast<ANSICHAR>(*MatchMode);
+	matchInfo.matchMode = MatchModeUtf8.Get();
+	matchInfo.matchModeSize = MatchMode.Len();
+
+	auto MapNameUtf8 = StringCast<ANSICHAR>(*MapName);
+	matchInfo.mapName = MapNameUtf8.Get();
+	matchInfo.mapNameSize = MapName.Len();
+
+	auto CustomFieldUtf8 = StringCast<ANSICHAR>(*CustomField);
+	matchInfo.customField = CustomFieldUtf8.Get();
+	matchInfo.customFieldSize = CustomField.Len();
+
+	char matchGuidOut[128] = {0};
+	int size = ::StartMatch(matchInfo, matchGuidOut);
+
+	if (size > 0)
+	{
+		return FString(UTF8_TO_TCHAR(matchGuidOut));
+	}
+	return FString();
 }
 
 bool UGetgudBlueprintLibrary::MarkEndGame(const FString& GameGuid)
 {
-	return GetgudSDK::MarkEndGame(TCHAR_TO_UTF8(*GameGuid));
+	auto GameGuidUtf8 = StringCast<ANSICHAR>(*GameGuid);
+	return ::MarkEndGame(GameGuidUtf8.Get(), GameGuid.Len()) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SetMatchWinTeam(const FString& MatchGuid, const FString& TeamGuid)
 {
-	return GetgudSDK::SetMatchWinTeam(TCHAR_TO_UTF8(*MatchGuid), TCHAR_TO_UTF8(*TeamGuid));
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	auto TeamGuidUtf8 = StringCast<ANSICHAR>(*TeamGuid);
+	return ::SetMatchWinTeam(MatchGuidUtf8.Get(), MatchGuid.Len(), TeamGuidUtf8.Get(), TeamGuid.Len()) != 0;
 }
 
 // ============================================
@@ -277,134 +230,317 @@ bool UGetgudBlueprintLibrary::SetMatchWinTeam(const FString& MatchGuid, const FS
 
 bool UGetgudBlueprintLibrary::SendSpawnAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& CharacterGuid, const FString& TeamGuid, float InitialHealth, const FGetgudPosition& Position, const FGetgudRotation& Rotation)
 {
-	return GetgudSDK::SendSpawnAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		TCHAR_TO_UTF8(*CharacterGuid),
-		TCHAR_TO_UTF8(*TeamGuid),
-		InitialHealth,
-		ToSDKPosition(Position),
-		ToSDKRotation(Rotation)
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto CharacterGuidUtf8 = StringCast<ANSICHAR>(*CharacterGuid);
+	auto TeamGuidUtf8 = StringCast<ANSICHAR>(*TeamGuid);
+
+	PositionF pos = ToCPosition(Position);
+	RotationF rot = ToCRotation(Rotation);
+
+	return ::SendSpawnAction(baseData,
+		CharacterGuidUtf8.Get(), CharacterGuid.Len(),
+		TeamGuidUtf8.Get(), TeamGuid.Len(),
+		InitialHealth, pos, rot) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendPositionAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FGetgudPosition& Position, const FGetgudRotation& Rotation)
 {
-	return GetgudSDK::SendPositionAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		ToSDKPosition(Position),
-		ToSDKRotation(Rotation)
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	PositionF pos = ToCPosition(Position);
+	RotationF rot = ToCRotation(Rotation);
+
+	return ::SendPositionAction(baseData, pos, rot) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendAttackAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& WeaponGuid)
 {
-	return GetgudSDK::SendAttackAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		TCHAR_TO_UTF8(*WeaponGuid)
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto WeaponGuidUtf8 = StringCast<ANSICHAR>(*WeaponGuid);
+
+	return ::SendAttackAction(baseData, WeaponGuidUtf8.Get(), WeaponGuid.Len()) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendDamageAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& VictimPlayerGuid, float DamageDone, const FString& WeaponGuid)
 {
-	return GetgudSDK::SendDamageAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		TCHAR_TO_UTF8(*VictimPlayerGuid),
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto VictimGuidUtf8 = StringCast<ANSICHAR>(*VictimPlayerGuid);
+	auto WeaponGuidUtf8 = StringCast<ANSICHAR>(*WeaponGuid);
+
+	return ::SendDamageAction(baseData,
+		VictimGuidUtf8.Get(), VictimPlayerGuid.Len(),
 		DamageDone,
-		TCHAR_TO_UTF8(*WeaponGuid)
-	);
+		WeaponGuidUtf8.Get(), WeaponGuid.Len()) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendDeathAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& AttackerGuid)
 {
-	return GetgudSDK::SendDeathAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		TCHAR_TO_UTF8(*AttackerGuid)
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto AttackerGuidUtf8 = StringCast<ANSICHAR>(*AttackerGuid);
+
+	return ::SendDeathAction(baseData, AttackerGuidUtf8.Get(), AttackerGuid.Len()) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendHealAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, float HealthGained)
 {
-	return GetgudSDK::SendHealAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*PlayerGuid),
-		HealthGained
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	return ::SendHealAction(baseData, HealthGained) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& AffectGuid, const FString& PlayerGuid, EGetgudAffectState AffectState)
 {
-	return GetgudSDK::SendAffectAction(
-		TCHAR_TO_UTF8(*MatchGuid),
-		ActionTimeEpoch,
-		TCHAR_TO_UTF8(*AffectGuid),
-		TCHAR_TO_UTF8(*PlayerGuid),
-		ToSDKAffectState(AffectState)
-	);
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto AffectGuidUtf8 = StringCast<ANSICHAR>(*AffectGuid);
+
+	return ::SendAffectAction(baseData, AffectGuidUtf8.Get(), AffectGuid.Len(), ToCAffectState(AffectState)) != 0;
 }
 
 // ============================================
 // Reports/Chat/Players
 // ============================================
 
-bool UGetgudBlueprintLibrary::SendInMatchReport(const FGetgudReportInfo& ReportInfo)
+bool UGetgudBlueprintLibrary::SendInMatchReport(const FGetgudReportInfo& InReportInfo)
 {
-	GetgudSDK::ReportInfo SDKReport = ToSDKReportInfo(ReportInfo);
-	return GetgudSDK::SendInMatchReport(SDKReport);
+	struct ::ReportInfo cReport;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*InReportInfo.MatchGuid);
+	cReport.matchGuid = MatchGuidUtf8.Get();
+	cReport.matchGuidSize = InReportInfo.MatchGuid.Len();
+
+	auto ReporterNameUtf8 = StringCast<ANSICHAR>(*InReportInfo.ReporterName);
+	cReport.reporterName = ReporterNameUtf8.Get();
+	cReport.reporterNameSize = InReportInfo.ReporterName.Len();
+
+	cReport.reporterType = ToCReporterType(InReportInfo.ReporterType);
+	cReport.reporterSubType = ToCReporterSubtype(InReportInfo.ReporterSubType);
+
+	auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*InReportInfo.SuspectedPlayerGuid);
+	cReport.suspectedPlayerGuid = SuspectedPlayerGuidUtf8.Get();
+	cReport.suspectedPlayerGuidSize = InReportInfo.SuspectedPlayerGuid.Len();
+
+	cReport.tbType = ToCTbType(InReportInfo.TbType);
+	cReport.tbTimeEpoch = InReportInfo.TbTimeEpoch;
+	cReport.suggestedToxicityScore = InReportInfo.SuggestedToxicityScore;
+	cReport.reportedTimeEpoch = InReportInfo.ReportedTimeEpoch;
+
+	return ::SendInMatchReport(cReport) != 0;
 }
 
-bool UGetgudBlueprintLibrary::SendChatMessage(const FString& MatchGuid, const FGetgudChatMessage& MessageInfo)
+bool UGetgudBlueprintLibrary::SendChatMessage(const FGetgudChatMessage& MessageInfo)
 {
-	GetgudSDK::ChatMessageInfo SDKMessage = ToSDKChatMessage(MessageInfo);
-	return GetgudSDK::SendChatMessage(TCHAR_TO_UTF8(*MatchGuid), SDKMessage);
+	struct ::ChatMessageInfo cMessage;
+	cMessage.messageTimeEpoch = MessageInfo.MessageTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MessageInfo.MatchGuid);
+	cMessage.matchGuid = MatchGuidUtf8.Get();
+	cMessage.matchGuidSize = MessageInfo.MatchGuid.Len();
+
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*MessageInfo.PlayerGuid);
+	cMessage.playerGuid = PlayerGuidUtf8.Get();
+	cMessage.playerGuidSize = MessageInfo.PlayerGuid.Len();
+
+	auto MessageUtf8 = StringCast<ANSICHAR>(*MessageInfo.Message);
+	cMessage.message = MessageUtf8.Get();
+	cMessage.messageSize = MessageInfo.Message.Len();
+
+	return ::SendChatMessage(cMessage) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SendReports(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudReportInfo>& Reports)
 {
-	std::deque<GetgudSDK::ReportInfo> SDKReports;
-	for (const FGetgudReportInfo& Report : Reports)
-	{
-		SDKReports.push_back(ToSDKReportInfo(Report));
-	}
-	return GetgudSDK::SendReports(TitleId, TCHAR_TO_UTF8(*PrivateKey), SDKReports);
-}
+	auto PrivateKeyUtf8 = StringCast<ANSICHAR>(*PrivateKey);
 
-bool UGetgudBlueprintLibrary::SendReportsWithConfig(const TArray<FGetgudReportInfo>& Reports)
-{
-	std::deque<GetgudSDK::ReportInfo> SDKReports;
+	bool bAllSuccess = true;
 	for (const FGetgudReportInfo& Report : Reports)
 	{
-		SDKReports.push_back(ToSDKReportInfo(Report));
+		struct ::ReportInfo cReport;
+
+		auto MatchGuidUtf8 = StringCast<ANSICHAR>(*Report.MatchGuid);
+		cReport.matchGuid = MatchGuidUtf8.Get();
+		cReport.matchGuidSize = Report.MatchGuid.Len();
+
+		auto ReporterNameUtf8 = StringCast<ANSICHAR>(*Report.ReporterName);
+		cReport.reporterName = ReporterNameUtf8.Get();
+		cReport.reporterNameSize = Report.ReporterName.Len();
+
+		cReport.reporterType = ToCReporterType(Report.ReporterType);
+		cReport.reporterSubType = ToCReporterSubtype(Report.ReporterSubType);
+
+		auto SuspectedPlayerGuidUtf8 = StringCast<ANSICHAR>(*Report.SuspectedPlayerGuid);
+		cReport.suspectedPlayerGuid = SuspectedPlayerGuidUtf8.Get();
+		cReport.suspectedPlayerGuidSize = Report.SuspectedPlayerGuid.Len();
+
+		cReport.tbType = ToCTbType(Report.TbType);
+		cReport.tbTimeEpoch = Report.TbTimeEpoch;
+		cReport.suggestedToxicityScore = Report.SuggestedToxicityScore;
+		cReport.reportedTimeEpoch = Report.ReportedTimeEpoch;
+
+		if (::SendReport(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cReport) == 0)
+		{
+			bAllSuccess = false;
+		}
 	}
-	return GetgudSDK::SendReports(SDKReports);
+	return bAllSuccess;
 }
 
 bool UGetgudBlueprintLibrary::UpdatePlayers(int32 TitleId, const FString& PrivateKey, const TArray<FGetgudPlayerInfo>& Players)
 {
-	std::deque<GetgudSDK::PlayerInfo> SDKPlayers;
-	for (const FGetgudPlayerInfo& Player : Players)
-	{
-		SDKPlayers.push_back(ToSDKPlayerInfo(Player));
-	}
-	return GetgudSDK::UpdatePlayers(TitleId, TCHAR_TO_UTF8(*PrivateKey), SDKPlayers);
-}
+	auto PrivateKeyUtf8 = StringCast<ANSICHAR>(*PrivateKey);
 
-bool UGetgudBlueprintLibrary::UpdatePlayersWithConfig(const TArray<FGetgudPlayerInfo>& Players)
-{
-	std::deque<GetgudSDK::PlayerInfo> SDKPlayers;
+	bool bAllSuccess = true;
 	for (const FGetgudPlayerInfo& Player : Players)
 	{
-		SDKPlayers.push_back(ToSDKPlayerInfo(Player));
+		// Prepare all string conversions first (they need to stay in scope)
+		auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*Player.PlayerGuid);
+		auto PlayerNicknameUtf8 = StringCast<ANSICHAR>(*Player.PlayerNickname);
+		auto PlayerEmailUtf8 = StringCast<ANSICHAR>(*Player.PlayerEmail);
+		auto PlayerSuspectScoreUtf8 = StringCast<ANSICHAR>(*Player.PlayerSuspectScore);
+		auto PlayerReputationUtf8 = StringCast<ANSICHAR>(*Player.PlayerReputation);
+		auto PlayerStatusUtf8 = StringCast<ANSICHAR>(*Player.PlayerStatus);
+		auto PlayerCampaignUtf8 = StringCast<ANSICHAR>(*Player.PlayerCampaign);
+		auto PlayerNotesUtf8 = StringCast<ANSICHAR>(*Player.PlayerNotes);
+		auto PlayerDeviceUtf8 = StringCast<ANSICHAR>(*Player.PlayerDevice);
+		auto PlayerOSUtf8 = StringCast<ANSICHAR>(*Player.PlayerOS);
+		auto PlayerGenderUtf8 = StringCast<ANSICHAR>(*Player.PlayerGender);
+		auto PlayerLocationUtf8 = StringCast<ANSICHAR>(*Player.PlayerLocation);
+
+		// Prepare transactions
+		TArray<struct ::PlayerTransactions> cTransactions;
+		TArray<TArray<ANSICHAR>> transGuidBuffers;
+		TArray<TArray<ANSICHAR>> transNameBuffers;
+
+		for (const FGetgudPlayerTransaction& Trans : Player.Transactions)
+		{
+			// Store UTF8 strings in buffers that persist
+			auto TransGuidUtf8 = StringCast<ANSICHAR>(*Trans.TransactionGuid);
+			auto TransNameUtf8 = StringCast<ANSICHAR>(*Trans.TransactionName);
+
+			TArray<ANSICHAR> guidBuf;
+			guidBuf.Append(TransGuidUtf8.Get(), Trans.TransactionGuid.Len() + 1);
+			transGuidBuffers.Add(MoveTemp(guidBuf));
+
+			TArray<ANSICHAR> nameBuf;
+			nameBuf.Append(TransNameUtf8.Get(), Trans.TransactionName.Len() + 1);
+			transNameBuffers.Add(MoveTemp(nameBuf));
+		}
+
+		// Now build the transactions array with pointers to our buffers
+		for (int32 i = 0; i < Player.Transactions.Num(); i++)
+		{
+			struct ::PlayerTransactions cTrans;
+			cTrans.TransactionGuid = transGuidBuffers[i].GetData();
+			cTrans.TransactionGuidSize = Player.Transactions[i].TransactionGuid.Len();
+			cTrans.TransactionName = transNameBuffers[i].GetData();
+			cTrans.TransactionNameSize = Player.Transactions[i].TransactionName.Len();
+			cTrans.TransactionDateEpoch = Player.Transactions[i].TransactionDateEpoch;
+			cTrans.TransactionValueUSD = Player.Transactions[i].TransactionValueUSD;
+			cTransactions.Add(cTrans);
+		}
+
+		struct ::PlayerInfo cPlayer;
+		cPlayer.playerGuid = PlayerGuidUtf8.Get();
+		cPlayer.playerGuidSize = Player.PlayerGuid.Len();
+		cPlayer.playerNickname = PlayerNicknameUtf8.Get();
+		cPlayer.playerNicknameSize = Player.PlayerNickname.Len();
+		cPlayer.playerEmail = PlayerEmailUtf8.Get();
+		cPlayer.playerEmailSize = Player.PlayerEmail.Len();
+		cPlayer.playerRank = Player.PlayerRank;
+		cPlayer.playerJoinDateEpoch = Player.PlayerJoinDateEpoch;
+		cPlayer.playerSuspectScore = PlayerSuspectScoreUtf8.Get();
+		cPlayer.playerSuspectScoreSize = Player.PlayerSuspectScore.Len();
+		cPlayer.playerReputation = PlayerReputationUtf8.Get();
+		cPlayer.playerReputationSize = Player.PlayerReputation.Len();
+		cPlayer.playerStatus = PlayerStatusUtf8.Get();
+		cPlayer.playerStatusSize = Player.PlayerStatus.Len();
+		cPlayer.playerCampaign = PlayerCampaignUtf8.Get();
+		cPlayer.playerCampaignSize = Player.PlayerCampaign.Len();
+		cPlayer.playerNotes = PlayerNotesUtf8.Get();
+		cPlayer.playerNotesSize = Player.PlayerNotes.Len();
+		cPlayer.playerDevice = PlayerDeviceUtf8.Get();
+		cPlayer.playerDeviceSize = Player.PlayerDevice.Len();
+		cPlayer.playerOS = PlayerOSUtf8.Get();
+		cPlayer.playerOSSize = Player.PlayerOS.Len();
+		cPlayer.playerAge = Player.PlayerAge;
+		cPlayer.playerGender = PlayerGenderUtf8.Get();
+		cPlayer.playerGenderSize = Player.PlayerGender.Len();
+		cPlayer.playerLocation = PlayerLocationUtf8.Get();
+		cPlayer.playerLocationSize = Player.PlayerLocation.Len();
+		cPlayer.transactions = cTransactions.Num() > 0 ? cTransactions.GetData() : nullptr;
+		cPlayer.transactionsSize = cTransactions.Num();
+
+		if (::UpdatePlayer(TitleId, PrivateKeyUtf8.Get(), PrivateKey.Len(), cPlayer) == 0)
+		{
+			bAllSuccess = false;
+		}
 	}
-	return GetgudSDK::UpdatePlayers(SDKPlayers);
+	return bAllSuccess;
 }

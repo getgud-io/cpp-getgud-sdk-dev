@@ -251,6 +251,9 @@ struct FGetgudChatMessage
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
+	FString MatchGuid;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
 	int64 MessageTimeEpoch = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GetGud")
