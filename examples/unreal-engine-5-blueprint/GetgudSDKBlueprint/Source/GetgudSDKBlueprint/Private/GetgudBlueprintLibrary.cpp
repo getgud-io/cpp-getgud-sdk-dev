@@ -131,12 +131,12 @@ bool UGetgudBlueprintLibrary::Init()
 	return false;
 }
 
-bool UGetgudBlueprintLibrary::InitWithPath(const FString& ConfigFileFullPath)
+bool UGetgudBlueprintLibrary::InitConfPath(const FString& ConfigFilePath)
 {
-	return init_conf_path(TCHAR_TO_UTF8(*ConfigFileFullPath)) != 0;
+	return init_conf_path(TCHAR_TO_UTF8(*ConfigFilePath)) != 0;
 }
 
-bool UGetgudBlueprintLibrary::InitWithContent(const FString& ConfigFile, bool PassAsContent)
+bool UGetgudBlueprintLibrary::InitConf(const FString& ConfigFile, bool PassAsContent)
 {
 	return init_conf(TCHAR_TO_UTF8(*ConfigFile), PassAsContent ? 1 : 0) != 0;
 }
