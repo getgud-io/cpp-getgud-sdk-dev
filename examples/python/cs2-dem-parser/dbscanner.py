@@ -28,6 +28,11 @@ class DatabaseDemScanner:
         os.makedirs(SCAN_FOLDER_PATH, exist_ok=True)
 
     def get_data_to_process(self):
+        # Reconnect if connection lost
+        if not self.mydb.is_connected():
+            print("[DBScanner] MySQL connection lost, reconnecting...")
+            self.mydb.reconnect(attempts=3, delay=5)
+        
         mycursor = self.mydb.cursor()
         mycursor.execute(f'''
         SELECT id, resolvedUrl, hasBannedPlayer, bannedPlayerId
@@ -41,6 +46,11 @@ class DatabaseDemScanner:
         return data
 
     def update_is_processed(self, _id):
+        # Reconnect if connection lost
+        if not self.mydb.is_connected():
+            print("[DBScanner] MySQL connection lost, reconnecting...")
+            self.mydb.reconnect(attempts=3, delay=5)
+        
         mycursor = self.mydb.cursor()
         query = f"UPDATE `{DB_TABLE_NAME}` SET isProcessed = 1 WHERE id = %s"
         values = (_id,)
@@ -112,7 +122,13 @@ class DatabaseDemScanner:
 
     def scanner_loop(self):
         while self.is_scanner_active:
-            data = self.get_data_to_process()
+            try:
+                data = self.get_data_to_process()
+            except mysql.connector.Error as e:
+                print(f"[DBScanner] MySQL error: {e}, will retry in {LOOP_SLEEP_TIME_IN_SECONDS}s")
+                time.sleep(LOOP_SLEEP_TIME_IN_SECONDS)
+                continue
+            
             for row in data:
                 _id, resolved_url, has_banned_player, banned_player_id = row
                 print(f"[DBScanner] Processing entry ID {_id}")
