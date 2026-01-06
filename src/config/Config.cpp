@@ -285,6 +285,17 @@ namespace GetgudSDK {
 				_hyperModeThreadCreationStaggerMilliseconds;
 		}
 
+		// Read blocking mode variables
+		unsigned int _markEndGameBlockingTimeoutMilliseconds = 0;
+		valueReadResult = GetConfigValue(
+			configData, sdkConfigFieldNames.markEndGameBlockingTimeoutMilliseconds,
+			_markEndGameBlockingTimeoutMilliseconds);
+		valueReadResult &= Validator::ValidateItemValue(
+			_markEndGameBlockingTimeoutMilliseconds, 1000U, 60000U);  // 1-60 seconds
+		if (valueReadResult) {
+			sdkConfig.markEndGameBlockingTimeoutMilliseconds = _markEndGameBlockingTimeoutMilliseconds;
+		}
+
 		GetConfigValue(configData, sdkConfigFieldNames.logLevel, sdkConfig.logLevel);
 
 		return true;
@@ -563,7 +574,10 @@ namespace GetgudSDK {
 		configString +=
 			"\t" + fieldNames.hyperModeThreadCreationStaggerMilliseconds + ": " +
 			std::to_string(sdkConfig.hyperModeThreadCreationStaggerMilliseconds) +
-			"\n";
+			",\n";
+
+		configString += "\t" + fieldNames.markEndGameBlockingTimeoutMilliseconds + ": " +
+			std::to_string(sdkConfig.markEndGameBlockingTimeoutMilliseconds) + "\n";
 
 		return configString;
 	}

@@ -48,7 +48,7 @@ int main() {
 
   SendDeathAction(baseData, "attacker_guid", 13);
 
-  int martResult = MarkEndGame(gameGuid, 36);
+  int martResult = MarkEndGame(gameGuid, 36, 0);  // 0 = non-blocking
 
   printf("matchSize: %i\n", martResult);
 

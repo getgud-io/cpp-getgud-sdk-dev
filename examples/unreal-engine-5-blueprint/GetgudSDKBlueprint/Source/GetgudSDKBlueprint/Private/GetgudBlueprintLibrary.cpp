@@ -211,10 +211,10 @@ FString UGetgudBlueprintLibrary::StartMatch(const FString& GameGuid, const FStri
 	return FString();
 }
 
-bool UGetgudBlueprintLibrary::MarkEndGame(const FString& GameGuid)
+bool UGetgudBlueprintLibrary::MarkEndGame(const FString& GameGuid, bool Blocking)
 {
 	auto GameGuidUtf8 = StringCast<ANSICHAR>(*GameGuid);
-	return ::MarkEndGame(GameGuidUtf8.Get(), GameGuid.Len()) != 0;
+	return ::MarkEndGame(GameGuidUtf8.Get(), GameGuid.Len(), Blocking ? 1 : 0) != 0;
 }
 
 bool UGetgudBlueprintLibrary::SetMatchWinTeam(const FString& MatchGuid, const FString& TeamGuid)

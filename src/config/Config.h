@@ -76,6 +76,9 @@ namespace GetgudSDK {
 		std::string hyperModeUpperPercentageBound = "hyperModeUpperPercentageBound";
 		std::string hyperModeThreadCreationStaggerMilliseconds =
 			"hyperModeThreadCreationStaggerMilliseconds";
+
+		// Blocking mode fields
+		std::string markEndGameBlockingTimeoutMilliseconds = "markEndGameBlockingTimeoutMilliseconds";
 	};
 
 	/**
@@ -145,6 +148,9 @@ namespace GetgudSDK {
 		unsigned int hyperModeAtBufferPercentage = 10;
 		unsigned int hyperModeUpperPercentageBound = 90;
 		unsigned int hyperModeThreadCreationStaggerMilliseconds = 500;
+
+		// Blocking mode default values
+		unsigned int markEndGameBlockingTimeoutMilliseconds = 10000;  // 10 seconds
 
 		// Other sdk default values
 		unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;

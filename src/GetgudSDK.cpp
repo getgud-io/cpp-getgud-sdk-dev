@@ -198,16 +198,17 @@ namespace GetgudSDK {
 	 * MarkEndGame:
 	 *
 	 * Mark started game as finished
+	 * @param blocking - If true, waits until all queued actions are sent before returning
 	 **/
-	bool MarkEndGame(std::string gameGuid) {
+	bool MarkEndGame(std::string gameGuid, bool blocking) {
 
 		bool gameEnded = false;
 
 		try {
 
-			logger.Log(LogType::DEBUG, std::string("Marking End Game for the following Game Guid: gameGuid: " + gameGuid));
+			logger.Log(LogType::DEBUG, std::string("Marking End Game for the following Game Guid: gameGuid: " + gameGuid + " blocking: " + (blocking ? "true" : "false")));
 
-			gameEnded = gameContainer.MarkEndGame(gameGuid);
+			gameEnded = gameContainer.MarkEndGame(gameGuid, blocking);
 
 		}
 		catch (std::exception& _error) {

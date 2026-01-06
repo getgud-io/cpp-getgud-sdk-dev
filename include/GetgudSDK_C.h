@@ -166,8 +166,9 @@ extern "C" {
 	 * MarkEndGame:
 	 *
 	 * Mark started game as finished
+	 * @param blocking - If 1, waits until all queued actions are sent before returning
 	 **/
-	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
+	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize, int blocking);
 
 	/**
      * SetMatchWinTeam:

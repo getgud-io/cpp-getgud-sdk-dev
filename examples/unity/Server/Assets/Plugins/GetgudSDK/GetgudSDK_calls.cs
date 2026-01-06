@@ -210,7 +210,7 @@ namespace GetgudSDK_calls
         public static extern int StartMatch(StartMatchInfoWrapper matchInfo, IntPtr matchGuidOut);
 
         [DllImport(dllPath)]
-        public static extern int MarkEndGame(IntPtr gameGuid, int gameGuidSize);
+        public static extern int MarkEndGame(IntPtr gameGuid, int gameGuidSize, int blocking);
 
         [DllImport(dllPath)]
         public static extern int SetMatchWinTeam(IntPtr matchGuid, int matchGuidSize, IntPtr teamGuid, int teamGuidSize);

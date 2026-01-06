@@ -4,7 +4,9 @@
 #include "../../include/actions/DamageActionData.h"
 #include "../../include/actions/AttackActionData.h"
 #include "../../include/actions/DeathActionData.h"
+#include <chrono>
 #include <sstream>
+#include <thread>
 
 namespace GetgudSDK {
 
@@ -390,8 +392,10 @@ namespace GetgudSDK {
 	/**
 	 * MarkEndGame:
 	 *
+	 * @param gameGuid - The GUID of the game to mark as ended
+	 * @param blocking - If true, waits until all queued actions are sent before returning
 	 **/
-	bool GameContainer::MarkEndGame(std::string gameGuid) {
+	bool GameContainer::MarkEndGame(std::string gameGuid, bool blocking) {
 		bool retValue = true;
 
 		m_gameContainerMutex.lock();
@@ -407,6 +411,36 @@ namespace GetgudSDK {
 		}
 
 		m_gameContainerMutex.unlock();
+
+		// Blocking mode: wait until queue is empty and no threads are working
+		bool isQueueEmpty = false;
+		int workingThreadCount = 0;
+		int sleptForMs = 0;
+		bool timeoutReached = false;
+		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds * 2;
+
+		while (blocking == true && timeoutReached == false) {
+			{   
+				std::lock_guard<std::mutex> locker(m_gameContainerMutex);
+				isQueueEmpty = (m_gameContainerSizeInBytes == 0);
+				workingThreadCount = m_workingThreadCount;
+			}   
+
+			if (isQueueEmpty == false || workingThreadCount > 0) {
+				// 1. SLEEP
+				std::this_thread::sleep_for(std::chrono::milliseconds(sleepIntervalMs));
+				// 2. sleptForMs += sleep time
+				sleptForMs += sleepIntervalMs;
+				// 3. If(sleptForMs > timeout) -> timeoutReached = TRUE
+				if (sleptForMs > (int)sdkConfig.markEndGameBlockingTimeoutMilliseconds) {
+					timeoutReached = true;
+					logger.Log(LogType::WARN, std::string("GameContainer::MarkEndGame->Blocking timeout reached for game: " + gameGuid));
+				}
+			}
+			else {
+				break;
+			}
+		}
 
 		return retValue;
 	}

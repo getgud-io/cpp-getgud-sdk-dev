@@ -95,6 +95,9 @@ namespace GetgudSDK {
 			gameDataToSend = gameContainer.PopNextGameToProcess();
 			if (gameDataToSend == nullptr) return;
 
+			// Increment working thread count for blocking mode tracking
+			gameContainer.m_workingThreadCount++;
+
 			// If there is a game packet to send go through each match of the packet
 			// check if it is interesting for Getgud or no with a thtrottle check
 			// api request.
@@ -124,6 +127,12 @@ namespace GetgudSDK {
 		// check if this is the first time a packet contains the MarkEndGame signal, if so, mark the fact that this signal was sent to the server
 		if (gameDataToSend->IsGameMarkedAsEnded() == true && gameDataToSend->DidSendGameMarkedAsEnded() == false) {
 			gameContainer.SentGameMarkedAsEnded(gameDataToSend->GetGameGuid());
+		}
+
+		// Decrement working thread count for blocking mode tracking
+		{
+			std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
+			gameContainer.m_workingThreadCount--;
 		}
 
 		// Dispose of the cloned game

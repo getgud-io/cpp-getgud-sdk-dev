@@ -191,8 +191,9 @@ extern "C" {
 	 * MarkEndGame:
 	 *
 	 * Mark started game as finished
+	 * @param blocking - If 1, waits until all queued actions are sent before returning
 	 **/
-	int MarkEndGame(const char* gameGuid, int guidSize) {
+	int MarkEndGame(const char* gameGuid, int guidSize, int blocking) {
 		bool result = false;
 		try {
 			std::string endGameGuid;
@@ -202,7 +203,7 @@ extern "C" {
 				endGameGuid = std::string(gameGuid, guidSize);
 			}
 
-			result = GetgudSDK::MarkEndGame(endGameGuid.c_str());
+			result = GetgudSDK::MarkEndGame(endGameGuid.c_str(), blocking != 0);
 		}
 		catch (std::exception& _error) {
 			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,

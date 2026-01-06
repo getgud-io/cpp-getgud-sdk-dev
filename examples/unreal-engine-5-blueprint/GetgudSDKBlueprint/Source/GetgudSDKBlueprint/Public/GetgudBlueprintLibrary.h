@@ -64,9 +64,10 @@ public:
 
 	/**
 	 * Mark a game as ended
+	 * @param Blocking - If true, waits until all queued actions are sent before returning
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Getgud|Game")
-	static bool MarkEndGame(const FString& GameGuid);
+	static bool MarkEndGame(const FString& GameGuid, bool Blocking = false);
 
 	/**
 	 * Set the winning team for a match
