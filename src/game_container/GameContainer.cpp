@@ -422,38 +422,36 @@ namespace GetgudSDK {
 	 * Returns true on success, false on timeout.
 	 **/
 	bool GameContainer::Flush() {
-		bool isQueueEmpty = false;
-		int workingThreadCount = 0;
-		int sleptForMs = 0;
-		bool timeoutReached = false;
-		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds * 2;
+		auto startTime = std::chrono::steady_clock::now();
+		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds / 2;
 
-		while (timeoutReached == false) {
+		while (true) {
+			// Check timeout using wall-clock time
+			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now() - startTime
+			).count();
+
+			if (elapsed > (long long)sdkConfig.markEndGameBlockingTimeoutMilliseconds) {
+				logger.Log(LogType::WARN, std::string("GameContainer::Flush->Timeout reached while waiting for queue to empty"));
+				return false;
+			}
+
+			bool isQueueEmpty = false;
+			int workingThreadCount = 0;
 			{
 				std::lock_guard<std::mutex> locker(m_gameContainerMutex);
 				isQueueEmpty = (m_gameContainerSizeInBytes == 0);
 				workingThreadCount = m_workingThreadCount;
 			}
 
-			if (isQueueEmpty == false || workingThreadCount > 0) {
-				// 1. SLEEP
-				std::this_thread::sleep_for(std::chrono::milliseconds(sleepIntervalMs));
-				// 2. sleptForMs += sleep time
-				sleptForMs += sleepIntervalMs;
-				// 3. If(sleptForMs > timeout) -> timeoutReached = TRUE
-				if (sleptForMs > (int)sdkConfig.markEndGameBlockingTimeoutMilliseconds) {
-					timeoutReached = true;
-					logger.Log(LogType::WARN, std::string("GameContainer::Flush->Timeout reached while waiting for queue to empty"));
-				}
-			}
-			else {
+			if (isQueueEmpty && workingThreadCount == 0) {
 				// Queue is empty and no threads are working
 				logger.Log(LogType::DEBUG, std::string("GameContainer::Flush->Queue flushed successfully"));
 				return true;
 			}
-		}
 
-		return false;
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleepIntervalMs));
+		}
 	}
 
 	void GameContainer::SentGameMarkedAsEnded(std::string gameGuid) {
