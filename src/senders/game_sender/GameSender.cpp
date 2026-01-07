@@ -130,10 +130,7 @@ namespace GetgudSDK {
 		}
 
 		// Decrement working thread count for blocking mode tracking
-		{
-			std::lock_guard<std::mutex> locker(gameContainer.m_gameContainerMutex);
-			gameContainer.m_workingThreadCount--;
-		}
+		gameContainer.m_workingThreadCount--;
 
 		// Dispose of the cloned game
 		gameDataToSend->Dispose();
