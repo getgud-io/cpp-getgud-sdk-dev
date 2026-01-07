@@ -317,16 +317,27 @@ namespace GetgudSDK
          * MarkEndGame:
          *
          * Mark started game as finished
-         * @param blocking - If true, waits until all queued actions are sent before returning
          **/
-        static public int MarkEndGame(string gameGuid, bool blocking = false)
+        static public int MarkEndGame(string gameGuid)
         {
             var unmanagedGameGuid = Marshal.StringToHGlobalAnsi(gameGuid);
-            var result = GetgudSDK_calls.GetgudSDK_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length, blocking ? 1 : 0);
+            var result = GetgudSDK_calls.GetgudSDK_calls.MarkEndGame(unmanagedGameGuid, gameGuid.Length);
 
             Marshal.FreeHGlobal(unmanagedGameGuid);
 
             return result;
+        }
+
+        /**
+         * Flush:
+         *
+         * Wait until all queued actions are sent before returning.
+         * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+         * Returns 1 on success, 0 on timeout.
+         **/
+        static public int Flush()
+        {
+            return GetgudSDK_calls.GetgudSDK_calls.Flush();
         }
 
         /**

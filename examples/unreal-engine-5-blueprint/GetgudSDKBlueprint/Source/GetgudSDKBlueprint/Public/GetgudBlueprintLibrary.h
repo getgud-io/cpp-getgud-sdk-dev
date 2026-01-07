@@ -64,10 +64,17 @@ public:
 
 	/**
 	 * Mark a game as ended
-	 * @param Blocking - If true, waits until all queued actions are sent before returning
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Getgud|Game")
-	static bool MarkEndGame(const FString& GameGuid, bool Blocking = false);
+	static bool MarkEndGame(const FString& GameGuid);
+
+	/**
+	 * Flush waits until all queued actions are sent before returning.
+	 * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+	 * @return true on success, false on timeout
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Getgud|Game")
+	static bool Flush();
 
 	/**
 	 * Set the winning team for a match

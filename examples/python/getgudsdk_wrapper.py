@@ -69,8 +69,15 @@ class GetgudSDK:
 
         return ffi.string(match_guid).decode('utf-8')
 
-    def mark_end_game(self, game_guid, blocking=False):
-        return getgudsdk.MarkEndGame(game_guid.encode('utf-8'), len(game_guid), 1 if blocking else 0)
+    def mark_end_game(self, game_guid):
+        return getgudsdk.MarkEndGame(game_guid.encode('utf-8'), len(game_guid))
+
+    def flush(self):
+        """Wait until all queued actions are sent before returning.
+        Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+        Returns 1 on success, 0 on timeout.
+        """
+        return getgudsdk.Flush()
     
     def set_match_win_team(self, match_guid, team_guid):
         match_guid_data = ffi.new("char[]", match_guid.encode('utf-8'))

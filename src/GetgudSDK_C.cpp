@@ -191,9 +191,8 @@ extern "C" {
 	 * MarkEndGame:
 	 *
 	 * Mark started game as finished
-	 * @param blocking - If 1, waits until all queued actions are sent before returning
 	 **/
-	int MarkEndGame(const char* gameGuid, int guidSize, int blocking) {
+	int MarkEndGame(const char* gameGuid, int guidSize) {
 		bool result = false;
 		try {
 			std::string endGameGuid;
@@ -203,7 +202,7 @@ extern "C" {
 				endGameGuid = std::string(gameGuid, guidSize);
 			}
 
-			result = GetgudSDK::MarkEndGame(endGameGuid.c_str(), blocking != 0);
+			result = GetgudSDK::MarkEndGame(endGameGuid.c_str());
 		}
 		catch (std::exception& _error) {
 			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
@@ -213,7 +212,27 @@ extern "C" {
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Returns 1 on success, 0 on timeout.
+	 **/
+	int Flush() {
+		bool result = false;
+		try {
+			result = GetgudSDK::Flush();
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::Flush "
+					"can not be called: ") +
+				std::string(_error.what()));
+		}
+		return result;
+	}
+
 	/**
 	 * SetMatchWinTeam:
 	 *

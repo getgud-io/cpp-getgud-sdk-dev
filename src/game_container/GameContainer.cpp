@@ -393,9 +393,8 @@ namespace GetgudSDK {
 	 * MarkEndGame:
 	 *
 	 * @param gameGuid - The GUID of the game to mark as ended
-	 * @param blocking - If true, waits until all queued actions are sent before returning
 	 **/
-	bool GameContainer::MarkEndGame(std::string gameGuid, bool blocking) {
+	bool GameContainer::MarkEndGame(std::string gameGuid) {
 		bool retValue = true;
 
 		m_gameContainerMutex.lock();
@@ -412,19 +411,29 @@ namespace GetgudSDK {
 
 		m_gameContainerMutex.unlock();
 
-		// Blocking mode: wait until queue is empty and no threads are working
+		return retValue;
+	}
+
+	/**
+	 * Flush:
+	 *
+	 * Waits until all queued actions are sent before returning.
+	 * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+	 * Returns true on success, false on timeout.
+	 **/
+	bool GameContainer::Flush() {
 		bool isQueueEmpty = false;
 		int workingThreadCount = 0;
 		int sleptForMs = 0;
 		bool timeoutReached = false;
 		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds * 2;
 
-		while (blocking == true && timeoutReached == false) {
-			{   
+		while (timeoutReached == false) {
+			{
 				std::lock_guard<std::mutex> locker(m_gameContainerMutex);
 				isQueueEmpty = (m_gameContainerSizeInBytes == 0);
 				workingThreadCount = m_workingThreadCount;
-			}   
+			}
 
 			if (isQueueEmpty == false || workingThreadCount > 0) {
 				// 1. SLEEP
@@ -434,15 +443,17 @@ namespace GetgudSDK {
 				// 3. If(sleptForMs > timeout) -> timeoutReached = TRUE
 				if (sleptForMs > (int)sdkConfig.markEndGameBlockingTimeoutMilliseconds) {
 					timeoutReached = true;
-					logger.Log(LogType::WARN, std::string("GameContainer::MarkEndGame->Blocking timeout reached for game: " + gameGuid));
+					logger.Log(LogType::WARN, std::string("GameContainer::Flush->Timeout reached while waiting for queue to empty"));
 				}
 			}
 			else {
-				break;
+				// Queue is empty and no threads are working
+				logger.Log(LogType::DEBUG, std::string("GameContainer::Flush->Queue flushed successfully"));
+				return true;
 			}
 		}
 
-		return retValue;
+		return false;
 	}
 
 	void GameContainer::SentGameMarkedAsEnded(std::string gameGuid) {

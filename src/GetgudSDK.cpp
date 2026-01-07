@@ -198,17 +198,16 @@ namespace GetgudSDK {
 	 * MarkEndGame:
 	 *
 	 * Mark started game as finished
-	 * @param blocking - If true, waits until all queued actions are sent before returning
 	 **/
-	bool MarkEndGame(std::string gameGuid, bool blocking) {
+	bool MarkEndGame(std::string gameGuid) {
 
 		bool gameEnded = false;
 
 		try {
 
-			logger.Log(LogType::DEBUG, std::string("Marking End Game for the following Game Guid: gameGuid: " + gameGuid + " blocking: " + (blocking ? "true" : "false")));
+			logger.Log(LogType::DEBUG, std::string("Marking End Game for the following Game Guid: gameGuid: " + gameGuid));
 
-			gameEnded = gameContainer.MarkEndGame(gameGuid, blocking);
+			gameEnded = gameContainer.MarkEndGame(gameGuid);
 
 		}
 		catch (std::exception& _error) {
@@ -216,6 +215,30 @@ namespace GetgudSDK {
 			logger.Log(LogType::FATAL, std::string("GetgudSDK::MarkEndGame->: ") + std::string(_error.what()));
 		}
 		return gameEnded;
+	}
+
+	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+	 **/
+	bool Flush() {
+
+		bool success = false;
+
+		try {
+
+			logger.Log(LogType::DEBUG, std::string("Flushing SDK - waiting for queue to empty"));
+
+			success = gameContainer.Flush();
+
+		}
+		catch (std::exception& _error) {
+
+			logger.Log(LogType::FATAL, std::string("GetgudSDK::Flush->: ") + std::string(_error.what()));
+		}
+		return success;
 	}
 
 	bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
