@@ -152,6 +152,7 @@ namespace GetgudSDK {
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
+		bool loggedInvalidAction = false;
 
 		for (auto& nextAction : actionVector) {
 
@@ -170,10 +171,14 @@ namespace GetgudSDK {
 			if (nextAction->IsValid() == false) {
 
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
-				logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
-				std::ostringstream oss;
-				nextAction->ToString(oss);
-				logger.Log(LogType::DEBUG, oss.str());
+				// Only log once per AddActions call to avoid flooding logs with 1M+ messages
+				if (!loggedInvalidAction) {
+					logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
+					std::ostringstream oss;
+					nextAction->ToString(oss);
+					logger.Log(LogType::DEBUG, oss.str());
+					loggedInvalidAction = true;
+				}
 				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
 				delete nextAction;
 				continue;
@@ -418,7 +423,7 @@ namespace GetgudSDK {
 	 * Flush:
 	 *
 	 * Waits until all queued actions are sent before returning.
-	 * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+	 * Uses timeout from config (flushTimeoutMilliseconds).
 	 * Returns true on success, false on timeout.
 	 **/
 	bool GameContainer::Flush() {
@@ -431,7 +436,7 @@ namespace GetgudSDK {
 				std::chrono::steady_clock::now() - startTime
 			).count();
 
-			if (elapsed > (long long)sdkConfig.markEndGameBlockingTimeoutMilliseconds) {
+			if (elapsed > (long long)sdkConfig.flushTimeoutMilliseconds) {
 				logger.Log(LogType::WARN, std::string("GameContainer::Flush->Timeout reached while waiting for queue to empty"));
 				return false;
 			}

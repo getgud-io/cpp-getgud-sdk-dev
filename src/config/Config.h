@@ -77,8 +77,8 @@ namespace GetgudSDK {
 		std::string hyperModeThreadCreationStaggerMilliseconds =
 			"hyperModeThreadCreationStaggerMilliseconds";
 
-		// Blocking mode fields
-		std::string markEndGameBlockingTimeoutMilliseconds = "markEndGameBlockingTimeoutMilliseconds";
+		// Flush timeout field
+		std::string flushTimeoutMilliseconds = "flushTimeoutMilliseconds";
 	};
 
 	/**
@@ -149,8 +149,8 @@ namespace GetgudSDK {
 		unsigned int hyperModeUpperPercentageBound = 90;
 		unsigned int hyperModeThreadCreationStaggerMilliseconds = 500;
 
-		// Blocking mode default values
-		unsigned int markEndGameBlockingTimeoutMilliseconds = 10000;  // 10 seconds
+		// Flush timeout default value
+		unsigned int flushTimeoutMilliseconds = 10000;  // 10 seconds
 
 		// Other sdk default values
 		unsigned int bufferAvgSizeCalcDelayMilliseconds = 1000;

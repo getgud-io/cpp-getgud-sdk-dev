@@ -74,7 +74,7 @@ class GetgudSDK:
 
     def flush(self):
         """Wait until all queued actions are sent before returning.
-        Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+        Uses timeout from config (flushTimeoutMilliseconds).
         Returns 1 on success, 0 on timeout.
         """
         return getgudsdk.Flush()

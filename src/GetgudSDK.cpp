@@ -221,7 +221,7 @@ namespace GetgudSDK {
 	 * Flush:
 	 *
 	 * Wait until all queued actions are sent before returning.
-	 * Uses timeout from config (markEndGameBlockingTimeoutMilliseconds).
+	 * Uses timeout from config (flushTimeoutMilliseconds).
 	 **/
 	bool Flush() {
 
