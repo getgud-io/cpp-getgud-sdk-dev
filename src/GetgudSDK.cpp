@@ -217,6 +217,30 @@ namespace GetgudSDK {
 		return gameEnded;
 	}
 
+	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Uses timeout from config (flushTimeoutMilliseconds).
+	 **/
+	bool Flush() {
+
+		bool success = false;
+
+		try {
+
+			logger.Log(LogType::DEBUG, std::string("Flushing SDK - waiting for queue to empty"));
+
+			success = gameContainer.Flush();
+
+		}
+		catch (std::exception& _error) {
+
+			logger.Log(LogType::FATAL, std::string("GetgudSDK::Flush->: ") + std::string(_error.what()));
+		}
+		return success;
+	}
+
 	bool SetMatchWinTeam(std::string matchGuid, std::string teamGuid) {
 
 		bool retValue = false;

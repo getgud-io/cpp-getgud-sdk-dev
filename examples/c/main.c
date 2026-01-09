@@ -48,11 +48,13 @@ int main() {
 
   SendDeathAction(baseData, "attacker_guid", 13);
 
-  int martResult = MarkEndGame(gameGuid, 36);
+  int markResult = MarkEndGame(gameGuid, 36);
 
-  printf("matchSize: %i\n", martResult);
+  printf("markResult: %i\n", markResult);
 
-  Sleep(6000);
+  // Flush waits until all queued actions are sent
+  int flushResult = Flush();
+  printf("flushResult: %i\n", flushResult);
 
   dispose();
 

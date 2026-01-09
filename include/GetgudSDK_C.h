@@ -170,6 +170,15 @@ extern "C" {
 	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
 
 	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Uses timeout from config (flushTimeoutMilliseconds).
+	 * Returns 1 on success, 0 on timeout.
+	 **/
+	GETGUDSDK_API int Flush();
+
+	/**
      * SetMatchWinTeam:
      *
      * Set the winning team for a match

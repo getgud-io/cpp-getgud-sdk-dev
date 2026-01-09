@@ -217,6 +217,11 @@ bool UGetgudBlueprintLibrary::MarkEndGame(const FString& GameGuid)
 	return ::MarkEndGame(GameGuidUtf8.Get(), GameGuid.Len()) != 0;
 }
 
+bool UGetgudBlueprintLibrary::Flush()
+{
+	return ::Flush() != 0;
+}
+
 bool UGetgudBlueprintLibrary::SetMatchWinTeam(const FString& MatchGuid, const FString& TeamGuid)
 {
 	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
