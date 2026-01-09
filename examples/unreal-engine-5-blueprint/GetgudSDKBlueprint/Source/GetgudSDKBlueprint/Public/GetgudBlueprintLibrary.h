@@ -69,6 +69,14 @@ public:
 	static bool MarkEndGame(const FString& GameGuid);
 
 	/**
+	 * Flush waits until all queued actions are sent before returning.
+	 * Uses timeout from config (flushTimeoutMilliseconds).
+	 * @return true on success, false on timeout
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Getgud|Game")
+	static bool Flush();
+
+	/**
 	 * Set the winning team for a match
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Getgud|Game")

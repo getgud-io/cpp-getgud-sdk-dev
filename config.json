@@ -28,5 +28,6 @@
   "hyperModeAtBufferPercentage": 10,
   "hyperModeUpperPercentageBound": 90,
   "hyperModeThreadCreationStaggerMilliseconds": 100,
+  "flushTimeoutMilliseconds": 10000,
   "logLevel": "FULL"
 }
