@@ -429,6 +429,8 @@ namespace GetgudSDK {
 	bool GameContainer::Flush() {
 		auto startTime = std::chrono::steady_clock::now();
 		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds / 2;
+		bool isQueueEmpty = false;
+		int workingThreadCount = 0;
 
 		while (true) {
 			// Check timeout using wall-clock time
@@ -441,8 +443,6 @@ namespace GetgudSDK {
 				return false;
 			}
 
-			bool isQueueEmpty = false;
-			int workingThreadCount = 0;
 			{
 				std::lock_guard<std::mutex> locker(m_gameContainerMutex);
 				isQueueEmpty = (m_gameContainerSizeInBytes == 0);
