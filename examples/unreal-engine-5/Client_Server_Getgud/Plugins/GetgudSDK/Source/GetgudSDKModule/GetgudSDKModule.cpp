@@ -87,5 +87,5 @@ GetgudSDK::RotationF UGetgudUtils::UnrealToGetGud(const FRotator& Rotation)
 	auto Yaw = -static_cast<double>(LongYaw);
 	auto Pitch = -static_cast<double>(Rotation.Pitch);
 	
-	return { static_cast<float>(Pitch), static_cast<float>(Yaw) };
+	return { static_cast<float>(Yaw), static_cast<float>(Pitch) };
 }
