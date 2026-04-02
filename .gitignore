@@ -36,3 +36,4 @@ GetgudSDK.vcxproj
 
 *.dem
 examples/python/move-title-data/*
+examples/python/copy-title-data/*
