@@ -800,13 +800,31 @@ class GetgudCS2Parser:
 
         sdk_commands = []
         match_guids = []
-        
+
         # Process each match ("round")
         extra_ticks = 128
-        for round_num in range(len(demo_data['events']['round_start'])):
-            round_start_tick = demo_data['events']['round_start'].iloc[round_num]['tick']
-            # for every round except last we take end tick as the start tick of next round
-            round_end_tick = demo_data['events']['round_end'].iloc[round_num]['tick'] + extra_ticks
+
+        # FACEIT/ESL demos can have more round_start events than round_end events
+        # (warmup/restart rounds). Pair each round_end with the latest round_start
+        # that came after the previous round_end — this skips aborted rounds and
+        # keeps tick windows from overlapping.
+        round_starts_sorted = demo_data['events']['round_start'].sort_values('tick').reset_index(drop=True)
+        round_ends_sorted = demo_data['events']['round_end'].sort_values('tick').reset_index(drop=True)
+        paired_rounds = []
+        last_end_tick = -1
+        for _, re_row in round_ends_sorted.iterrows():
+            re_tick = int(re_row['tick'])
+            candidates = round_starts_sorted[
+                (round_starts_sorted['tick'] > last_end_tick) &
+                (round_starts_sorted['tick'] < re_tick)
+            ]
+            if len(candidates) == 0:
+                continue
+            paired_rounds.append((int(candidates.iloc[-1]['tick']), re_tick))
+            last_end_tick = re_tick
+
+        for round_num, (round_start_tick, _round_end_raw) in enumerate(paired_rounds):
+            round_end_tick = _round_end_raw + extra_ticks
             
             kill_match_data = demo_data['kills'].loc[(demo_data['kills']['tick'] >= round_start_tick) & (demo_data['kills']['tick'] <= round_end_tick)].reset_index(drop = True)
             damage_match_data = demo_data['damages'].loc[(demo_data['damages']['tick'] >= round_start_tick) & (demo_data['damages']['tick'] <= round_end_tick)].reset_index(drop = True)
