@@ -81,7 +81,16 @@ class GetgudDemoParser:
             The grenade trajectories for the demofile.
         """
         grenade_df = self.parser.parse_grenades()
-        grenade_df = grenade_df.rename(columns={"name": "thrower"})
+        grenade_df = grenade_df.rename(
+            columns={
+                "name": "thrower",
+                "steamid": "thrower_steamid",
+                "x": "X",
+                "y": "Y",
+                "z": "Z",
+                "grenade_entity_id": "entity_id",
+            }
+        )
         return grenade_df[
             [
                 "thrower_steamid",
