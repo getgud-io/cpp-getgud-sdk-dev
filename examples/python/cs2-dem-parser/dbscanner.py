@@ -78,6 +78,19 @@ class DatabaseDemScanner:
         os.makedirs(temp_output_folder, exist_ok=True)
 
         local_filepath = os.path.join(temp_output_folder, local_filename)
+
+        # Skip if the final .dem is already on disk — prevents redownloading files
+        # the parser is currently mmap-reading (which would cause SIGBUS).
+        if local_filename.endswith('.bz2'):
+            final_dem = local_filepath[:-4]
+        else:
+            final_dem = local_filepath
+        if has_banned_player == 1:
+            final_dem = f"{final_dem.replace('.dem', '')}_banned_{banned_player_id}.dem"
+        if os.path.exists(final_dem) and os.path.getsize(final_dem) > 0:
+            print(f"[DBScanner] {final_dem} already on disk, skipping download")
+            return final_dem
+
         try:
             # Download the file
             with requests.get(url, stream=True) as r:
