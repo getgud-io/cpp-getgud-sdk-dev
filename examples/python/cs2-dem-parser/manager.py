@@ -6,6 +6,9 @@ import shutil
 import sys
 import threading
 import queue
+import math
+import random
+from datetime import datetime
 
 from dbscanner import DatabaseDemScanner
 
@@ -18,7 +21,21 @@ GETGUD_PRIVATE_KEY = os.environ.get("GETGUD_PRIVATE_KEY")
 SCAN_FOLDER_PATH = os.environ.get("SCAN_FOLDER_PATH")
 SCRIPT_INVOKE_INTERVAL_MS = int(os.environ.get("SCRIPT_INVOKE_INTERVAL_MS"))
 FILE_SCANNER_INVOKE_EVERY_MS = SCRIPT_INVOKE_INTERVAL_MS
-SCANNER_SLEEP_TIME_BETWEEN_GAMES = 0
+
+# Throttle game submissions to mimic a real player-activity curve.
+# Cosine-shaped rate peaks at PEAK_HOUR_UTC (evening), trough 12h earlier; ±30% jitter.
+TARGET_GAMES_PER_DAY = 1000
+PEAK_HOUR_UTC = 21
+RATE_AMPLITUDE = 0.6  # 1+A at peak, 1-A at trough
+
+
+def compute_inter_game_sleep_seconds():
+    avg_rate_per_hour = TARGET_GAMES_PER_DAY / 24.0
+    hour = datetime.utcnow().hour + datetime.utcnow().minute / 60.0
+    phase = (hour - PEAK_HOUR_UTC) / 24.0 * 2 * math.pi
+    rate_multiplier = 1 + RATE_AMPLITUDE * math.cos(phase)
+    games_per_hour = max(avg_rate_per_hour * rate_multiplier, 1.0)
+    return (3600.0 / games_per_hour) * random.uniform(0.7, 1.3)
 
 
 
@@ -68,8 +85,9 @@ class GetgudParserManager:
                         print(f'[Manager] Error processing {filepath}: {e}')
                     
                     if success:
-                        print(f'[Manager] Sleeping for {SCANNER_SLEEP_TIME_BETWEEN_GAMES} seconds before processing the next game.')
-                        time.sleep(SCANNER_SLEEP_TIME_BETWEEN_GAMES)
+                        sleep_seconds = compute_inter_game_sleep_seconds()
+                        print(f'[Manager] Sleeping for {sleep_seconds:.1f}s before next game (target {TARGET_GAMES_PER_DAY}/day, peak {PEAK_HOUR_UTC}:00 UTC).')
+                        time.sleep(sleep_seconds)
                     
                     # Delete the file after processing, regardless of success or failure
                     try:
