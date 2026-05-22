@@ -24,9 +24,9 @@ FILE_SCANNER_INVOKE_EVERY_MS = SCRIPT_INVOKE_INTERVAL_MS
 
 # Throttle game submissions to mimic a real player-activity curve.
 # Cosine-shaped rate peaks at PEAK_HOUR_UTC (evening), trough 12h earlier; ±30% jitter.
-TARGET_GAMES_PER_DAY = 1000
+TARGET_GAMES_PER_DAY = 120  # ~5/hr average
 PEAK_HOUR_UTC = 21
-RATE_AMPLITUDE = 0.6  # 1+A at peak, 1-A at trough
+RATE_AMPLITUDE = 0.85  # 1+A at peak (~9/hr), 1-A at trough (~0.75/hr)
 
 
 def compute_inter_game_sleep_seconds():
