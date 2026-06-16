@@ -9,6 +9,7 @@ import numpy as np
 from typing import Any
 from tqdm import tqdm
 import re
+from getgud_parser_structs import AffectState
 
 CHAR_LIMIT = { "small": 20, "big": 36 }
 
@@ -80,7 +81,16 @@ class GetgudDemoParser:
             The grenade trajectories for the demofile.
         """
         grenade_df = self.parser.parse_grenades()
-        grenade_df = grenade_df.rename(columns={"name": "thrower"})
+        grenade_df = grenade_df.rename(
+            columns={
+                "name": "thrower",
+                "steamid": "thrower_steamid",
+                "x": "X",
+                "y": "Y",
+                "z": "Z",
+                "grenade_entity_id": "entity_id",
+            }
+        )
         return grenade_df[
             [
                 "thrower_steamid",
@@ -350,20 +360,17 @@ class GetgudDemoParser:
 
         # Get bomb defuses
         bomb_defused = events.get("bomb_defused")
-        if bomb_defused is None:
-            bomb_defused_missing_msg = "bomb_defused not found in events."
-            raise KeyError(bomb_defused_missing_msg)
-
-        bomb_defused["event"] = "defused"
-        bomb_defused = self.remove_nonplay_ticks(bomb_defused)
+        # in case no bomb defused found we can proceed
+        if bomb_defused is not None:
+            bomb_defused["event"] = "defused"
+            bomb_defused = self.remove_nonplay_ticks(bomb_defused)
 
         # Get bomb explosions
         bomb_exploded = events.get("bomb_exploded")
-        if bomb_exploded is None:
-            return pd.DataFrame()
-
-        bomb_exploded["event"] = "exploded"
-        bomb_exploded = self.remove_nonplay_ticks(bomb_exploded)
+        # in case no bomb exploded found we can proceed
+        if bomb_exploded is not None:
+            bomb_exploded["event"] = "exploded"
+            bomb_exploded = self.remove_nonplay_ticks(bomb_exploded)
         # Combine all bomb events
         bomb_df = pd.concat([bomb_planted, bomb_defused, bomb_exploded])
         # Rename columns
@@ -609,9 +616,15 @@ class GetgudDemoParser:
     
     def parse_demo(self) -> dict[str, Any]:
         header = self.parser.parse_header()
+        
+        # Define specific events we want to process together
+        event_names_to_parse = ['player_spawn', 'player_death', 'player_hurt', 'bomb_planted', 'bomb_defused', 'bomb_exploded', 'smokegrenade_detonate', 'smokegrenade_expired', 
+                          'inferno_startburn', 'inferno_expire', 'weapon_fire', 'round_end', 'item_purchase', 'chat_message']
+        
+        # Process main events together
         events = dict(
             self.parser.parse_events(
-                self.parser.list_game_events() + ['round_end'],
+                event_names_to_parse,
                 player=[
                     "X",
                     "Y",
@@ -651,14 +664,22 @@ class GetgudDemoParser:
             )
         )
         
+        # Parse round_start separately without extra fields
+        try:
+            round_start_result = dict(self.parser.parse_events(['round_start']))
+            events['round_start'] = round_start_result.get('round_start')
+        except Exception as e:
+            print(f"Error processing round_start: {e}")
+        
         kills = self.parse_kills(events)
         damages = self.parse_damages(events)
-        # bomb = self.parse_bomb(events)
+        bomb = self.parse_bomb(events)
         smokes = self.parse_smokes(events)
         infernos = self.parse_infernos(events)
         weapon_fires = self.parse_weapon_fires(events)
         grenades = self.parse_grenades()
         ticks = self.parse_ticks()
+        chat = self.parse_chat(events)
         
         return {
             # "parser": parser,
@@ -674,8 +695,39 @@ class GetgudDemoParser:
             # Parsed from parser
             "grenades": grenades,
             "ticks": ticks,
+            "chat": chat,
         }
-    
+        
+    def parse_chat(self, events: dict[str, pd.DataFrame]) -> pd.DataFrame:
+        """Parse the chat messages of the demofile.
+
+        Args:
+            events: A dictionary of parsed events.
+
+        Returns:
+            The chat messages for the demofile.
+        """
+        chat_df = events.get("chat_message")
+        if chat_df is None or chat_df.empty:
+            # chat_message not found or empty in events.
+            return pd.DataFrame()
+
+
+        # Ensure expected columns exist based on how parse_events works
+        relevant_cols = ["tick", "user_steamid", "user_name", "chat_message"]
+        available_cols = [col for col in relevant_cols if col in chat_df.columns]
+        chat_df = chat_df[available_cols]
+
+        # Ensure 'chat_message' column exists and is string type
+        if 'chat_message' in chat_df.columns:
+            chat_df['chat_message'] = chat_df['chat_message'].astype(str)
+        else:
+             # If 'chat_message' column is missing, return empty or handle appropriately
+             print("Warning: 'chat_message' column missing in chat_message events.")
+             return pd.DataFrame()
+
+        return chat_df
+        
 class GetgudCS2Parser:
     def __init__(self, sdk, dem_file_path, report_players=[]):
         self.sdk = sdk
@@ -696,7 +748,6 @@ class GetgudCS2Parser:
             return "skipped"
         print('[Parser] Demo parsed!')
         print('[Parser] Pushing commands into SDK queue...')
-        self.game_start_time_in_milliseconds = round(time.time() * 1000)
         game_guid, sdk_commands = self.push_sdk_commands_from_cs2_dem(demo_data)
         print('[Parser] Pushed commands to SDK queue!')
         print('[Parser] Running SDK on queue...')
@@ -745,35 +796,68 @@ class GetgudCS2Parser:
         ).call(self.sdk)
 
         # Set the match start time once for the entire game
-        self.match_start_time_in_milliseconds = round(time.time() * 1000)
+        self.game_start_time_in_milliseconds = round(time.time() * 1000)
 
         sdk_commands = []
         match_guids = []
-        
-        round_stop_ticks = demo_data['events']['round_officially_ended'][demo_data['events']['round_officially_ended']['is_freeze_period'] == True].reset_index(drop=True)
-        
+
         # Process each match ("round")
-        for round_num in range(len(demo_data['events']['round_freeze_end'])):
-            round_start_tick = demo_data['events']['round_freeze_end'].iloc[round_num]['tick']
-            # for every round except last we take end tick as the start tick of next round
-            if round_num < len(demo_data['events']['round_freeze_end'])-1:
-                round_end_tick = demo_data['events']['round_freeze_end'].iloc[round_num+1]['tick']
-            else:
-                # for last round end tick is the last tick of the whole event list
-                round_end_tick = demo_data['ticks']['tick'].max()
-                
+        extra_ticks = 128
+
+        # FACEIT/ESL demos can have more round_start events than round_end events
+        # (warmup/restart rounds). Pair each round_end with the latest round_start
+        # that came after the previous round_end — this skips aborted rounds and
+        # keeps tick windows from overlapping.
+        round_starts_sorted = demo_data['events']['round_start'].sort_values('tick').reset_index(drop=True)
+        round_ends_sorted = demo_data['events']['round_end'].sort_values('tick').reset_index(drop=True)
+        paired_rounds = []
+        last_end_tick = -1
+        for _, re_row in round_ends_sorted.iterrows():
+            re_tick = int(re_row['tick'])
+            candidates = round_starts_sorted[
+                (round_starts_sorted['tick'] > last_end_tick) &
+                (round_starts_sorted['tick'] < re_tick)
+            ]
+            if len(candidates) == 0:
+                continue
+            paired_rounds.append((int(candidates.iloc[-1]['tick']), re_tick))
+            last_end_tick = re_tick
+
+        for round_num, (round_start_tick, _round_end_raw) in enumerate(paired_rounds):
+            round_end_tick = _round_end_raw + extra_ticks
+            
             kill_match_data = demo_data['kills'].loc[(demo_data['kills']['tick'] >= round_start_tick) & (demo_data['kills']['tick'] <= round_end_tick)].reset_index(drop = True)
             damage_match_data = demo_data['damages'].loc[(demo_data['damages']['tick'] >= round_start_tick) & (demo_data['damages']['tick'] <= round_end_tick)].reset_index(drop = True)
             weapon_fires_match_data = demo_data['weapon_fires'].loc[(demo_data['weapon_fires']['tick'] >= round_start_tick) & (demo_data['weapon_fires']['tick'] <= round_end_tick)].reset_index(drop = True)
             tick_match_data = demo_data['ticks'].loc[(demo_data['ticks']['tick'] >= round_start_tick) & (demo_data['ticks']['tick'] <= round_end_tick)].reset_index(drop = True)
-            # TODO: use this for spawns, but currently doesn't have health data
             spawn_match_data = demo_data['events']['player_spawn'].loc[(demo_data['events']['player_spawn']['tick'] >= round_start_tick) & (demo_data['events']['player_spawn']['tick'] <= round_end_tick)].reset_index(drop = True)
             
-            # Start a new match and record its GUID
+            chat_match_data = pd.DataFrame() # init empty 
+            # If chat data exists in match
+            if demo_data['chat'].shape[0] > 0:
+                chat_match_data = demo_data['chat'].loc[(demo_data['chat']['tick'] >= round_start_tick) & (demo_data['chat']['tick'] <= round_end_tick)].reset_index(drop=True)
+           
+            
+            # Filter item_purchase events for the current round
+            item_purchase_match_data = pd.DataFrame() # Initialize empty DataFrame
+            if 'item_purchase' in demo_data['events'] and demo_data['events']['item_purchase'] is not None and not demo_data['events']['item_purchase'].empty:
+                 item_purchase_match_data = demo_data['events']['item_purchase'].loc[
+                     (demo_data['events']['item_purchase']['tick'] >= round_start_tick) & 
+                     (demo_data['events']['item_purchase']['tick'] <= round_end_tick)
+                 ].reset_index(drop=True)
+
+            # don't start round/push match if we couldn't find any spawn or tick data
+            if (spawn_match_data.shape[0] == 0 or tick_match_data.shape[0] == 0):
+                continue
+                
+            # Extract match ID from the demo file path
+            demo_filename = self.dem_file_path.split('/')[-1]
+            # Start a new match and record its GUID with original match ID in custom field
             match_guid = StartMatch(
                 game_guid,
                 "5v5",
-                demo_data['header']['map_name'].replace(' ', '-')[:CHAR_LIMIT['small']]
+                demo_data['header']['map_name'].replace(' ', '-')[:CHAR_LIMIT['small']],
+                demo_filename  # Store the original filename containing match ID as custom field
             ).call(self.sdk)
             match_guids.append(match_guid)
             
@@ -796,6 +880,12 @@ class GetgudCS2Parser:
                 damage = damage_row['dmg_health'] + damage_row['dmg_armor']
                 weapon = damage_row['weapon'].replace(' ', '-')[:CHAR_LIMIT['small']]
                 
+                # getgud requires attack and damage guids to be the same
+                # we are replacing inferno with molotov because that's how it's called during
+                # attack event
+                if weapon == 'inferno':
+                    weapon = 'molotov'
+                
                 if pd.isna(attacker_steamid) or attacker_steamid == '' or attacker_steamid is None:
                     attacker_steamid = 'PvE'
                     weapon = 'PvE'
@@ -808,7 +898,7 @@ class GetgudCS2Parser:
                         attacker_steamid,
                         victim_steamid,
                         damage,
-                        weapon[:CHAR_LIMIT['small']]
+                        weapon
                     )
                 ])
 
@@ -824,51 +914,161 @@ class GetgudCS2Parser:
                     )
                 ])
             
-            # Spawn all players at the start of each round
-            # Assuming that demo_data['ticks'] includes ticks for all rounds and all matches
-            round_start_ticks = demo_data['ticks'][demo_data['ticks']['tick'] == round_start_tick]
-            spectator_ids = []
-            for _, tick_row in round_start_ticks.iterrows():
-                player_id = tick_row['steamid']
-                player_side = tick_row['side']
-                # don't log spectators
-                if player_side == 'spectator':
-                    spectator_ids.append(player_id)
-                    continue
-                if player_side == 'TERRORIST':
-                    player_side = 'T'
-                    
-                if player_side is not None:
+            # Process item purchases for this match
+            for _, purchase_row in item_purchase_match_data.iterrows():
+                player_id = purchase_row.get('steamid', None)
+                item_name = purchase_row.get('item_name', 'unknown_item')
+                
+                # Only process if we have a valid player ID and it's likely a weapon
+                # (You might want to refine the item check later based on specific needs)
+                if player_id is not None and player_id != '' and not pd.isna(player_id) and isinstance(item_name, str):
+                    purchase_timestamp = round(self.game_start_time_in_milliseconds + (purchase_row['tick'] / tick_rate) * 1000)
+                    # Sanitize weapon name for GUID
+                    weapon_guid = item_name.replace(' ', '').replace('weapon_', '').replace('_silencer', '')[:CHAR_LIMIT['small']]
+                    affect_guid = f"Buy-{weapon_guid}"[:CHAR_LIMIT['big']] # Ensure affect GUID is within limits
+
                     sdk_commands.append([
-                        round(self.match_start_time_in_milliseconds + (round_start_tick / tick_rate) * 1000),
+                        purchase_timestamp,
+                        AffectActionData(
+                            match_guid,
+                            purchase_timestamp,
+                            str(player_id),
+                            affect_guid,
+                            AffectState.Activate # Buying is an activation event
+                        )
+                    ])
+
+            # Process chat messages for this match
+            for _, chat_row in chat_match_data.iterrows():
+                player_id = str(chat_row['user_steamid'])
+                message = chat_row['chat_message']
+                timestamp = round(self.game_start_time_in_milliseconds + (chat_row['tick'] / tick_rate) * 1000)
+                # Use SendChatMessage as provided
+                sdk_commands.append([
+                    timestamp,
+                    SendChatMessage(
+                        match_guid,
+                        timestamp, 
+                        player_id, 
+                        message
+                    )
+                ])
+
+            # Process bomb events directly from event data
+            # Process bomb plant events
+            bomb_plant_data = None
+            if 'bomb_planted' in demo_data['events'] and not demo_data['events']['bomb_planted'].empty:
+                bomb_plant_data = demo_data['events']['bomb_planted'].loc[
+                    (demo_data['events']['bomb_planted']['tick'] >= round_start_tick) & 
+                    (demo_data['events']['bomb_planted']['tick'] <= round_end_tick)
+                ].reset_index(drop=True)
+                
+                for _, plant_row in bomb_plant_data.iterrows():
+                    player_id = plant_row.get('user_steamid', None)
+                    if player_id is not None and player_id != '' and not pd.isna(player_id):
+                        plant_timestamp = round(self.game_start_time_in_milliseconds + (plant_row['tick'] / tick_rate) * 1000)
+                        
+                        # Create Activate affect action for Bomb
+                        sdk_commands.append([
+                            plant_timestamp,
+                            AffectActionData(
+                                match_guid,
+                                plant_timestamp,
+                                str(player_id),
+                                "Plant-Bomb",  # affect_guid for the bomb
+                                AffectState.Activate  # Bomb is now active
+                            )
+                        ])
+
+            
+            # Process bomb defuse events
+            bomb_defuse_data = None
+            if 'bomb_defused' in demo_data['events'] and not demo_data['events']['bomb_defused'].empty:
+                bomb_defuse_data = demo_data['events']['bomb_defused'].loc[
+                    (demo_data['events']['bomb_defused']['tick'] >= round_start_tick) & 
+                    (demo_data['events']['bomb_defused']['tick'] <= round_end_tick)
+                ].reset_index(drop=True)
+                
+                for _, defuse_row in bomb_defuse_data.iterrows():
+                    player_id = defuse_row.get('user_steamid', None)
+                    if player_id is not None and player_id != '' and not pd.isna(player_id):
+                        defuse_timestamp = round(self.game_start_time_in_milliseconds + (defuse_row['tick'] / tick_rate) * 1000)
+                        
+                        # Create Deactivate affect action for Bomb
+                        sdk_commands.append([
+                            defuse_timestamp,
+                            AffectActionData(
+                                match_guid,
+                                defuse_timestamp,
+                                str(player_id),
+                                "Disable-Bomb",  # affect_guid for the bomb
+                                AffectState.Activate # Bomb is now inactive
+                            )
+                        ])
+            
+            
+            # Send spawn events from spawn event data
+            player_match_spawns = spawn_match_data[(spawn_match_data['tick']>=round_start_tick) & (spawn_match_data['tick']<=round_end_tick)]
+            
+            for _, spawn_row in player_match_spawns.iterrows():
+                player_health = 100
+                x,y,z = spawn_row['user_X'], spawn_row['user_Y'], spawn_row['user_Z']
+                pitch, yaw = spawn_row['user_pitch'], spawn_row['user_yaw']
+
+                
+                # we need to grab player health from firs tick of match because 
+                # health seems not to be always available on spawn
+                for _, tick_row in tick_match_data.iterrows():
+                    player_id = str(tick_row['steamid'])
+                    if player_id == spawn_row['user_steamid']:
+                        player_health = tick_row['health']
+                        x,y,z = tick_row['X'], tick_row['Y'], tick_row['Z']
+                        pitch, yaw = tick_row['pitch'], tick_row['yaw']
+                        break
+                    
+                    
+                player_team = spawn_row['user_team_name'] 
+                
+                # renaming for consistency with match win team
+                if player_team == 'TERRORIST':
+                    player_team = 'T'
+                
+                # it's likely a spectator or a bug, we are not going
+                # to spawn this player
+                if player_team != 'T' and player_team != 'CT':
+                    continue
+                
+                sdk_commands.append([
+                        round(self.game_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
                         SpawnActionData(
                             match_guid,
-                            round(self.match_start_time_in_milliseconds + (round_start_tick / tick_rate) * 1000),
-                            player_id,
-                            player_side, # character guid
-                            player_side, # team guid
-                            tick_row['health'], # + tick_row['armor'],  # Assuming 'armor' value is available
-                            Position(tick_row['X'], tick_row['Y'], tick_row['Z']),
-                            Rotation(tick_row['pitch'], tick_row['yaw'], 0),
+                            round(self.game_start_time_in_milliseconds + (spawn_row['tick'] / tick_rate) * 1000),
+                            spawn_row['user_steamid'],
+                            player_team, # character guid
+                            player_team, # team guid
+                            player_health, # todo: where to get armor? 
+                            Position(x,y,z),
+                            Rotation(pitch, yaw, 0),
                         )
                     ])
             
-            # Log position for all ticks in the round
+            # Log position and check for affect changes for all ticks in the round
             for _, tick_row in tick_match_data.iterrows():
-                player_id = tick_row['steamid']
-                # don't log spectator players
-                if player_id in spectator_ids:
-                    continue
+                player_id = str(tick_row['steamid'])
+                timestamp = round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000)
+
+                # --- Position Update ---
                 sdk_commands.append([
-                    round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                    timestamp,
                     PositionActionData(
                         match_guid,
-                        round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                        timestamp,
                         player_id,
                         Position(tick_row['X'], tick_row['Y'], tick_row['Z']),
                         Rotation(tick_row['pitch'], tick_row['yaw'], 0),
                     )
                 ])
+
 
             round_end_event = demo_data['events']['round_end'].loc[
                 (demo_data['events']['round_end']['tick'] > round_start_tick) & 
@@ -880,7 +1080,7 @@ class GetgudCS2Parser:
                 winning_team = round_end_event.iloc[0].get('winner', "unknown")
 
             sdk_commands.append([
-                round(self.match_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
+                round(self.game_start_time_in_milliseconds + (tick_row['tick'] / tick_rate) * 1000),
                 SetMatchWinTeam(match_guid, winning_team)
             ])
 
@@ -893,7 +1093,7 @@ class GetgudCS2Parser:
             sdk_output_commands.append(command)
 
         # Generate reports and mark the end of the game
-        last_timestamp = sdk_commands[-1][0] if sdk_commands else self.match_start_time_in_milliseconds
+        last_timestamp = sdk_commands[-1][0] if sdk_commands else self.game_start_time_in_milliseconds
         for match_guid in match_guids:
             for report_player_id in self.report_players:
                 sdk_output_commands.append(SendInMatchReport(
@@ -921,7 +1121,8 @@ class GetgudCS2Parser:
             print(f'[Parser] Game from {self.resolved_url} is empty, we will not push it!')
         for command in sdk_commands:
             command.call(self.sdk)
-            time.sleep(0.00003125) # this will push about 32,000 actions / second
+            time.sleep(0.00000125)
+
 
     def dispose(self):
         pass

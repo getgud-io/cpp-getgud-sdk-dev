@@ -212,7 +212,27 @@ extern "C" {
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Returns 1 on success, 0 on timeout.
+	 **/
+	int Flush() {
+		bool result = false;
+		try {
+			result = GetgudSDK::Flush();
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::Flush "
+					"can not be called: ") +
+				std::string(_error.what()));
+		}
+		return result;
+	}
+
 	/**
 	 * SetMatchWinTeam:
 	 *

@@ -2,6 +2,7 @@
 #include <mutex>
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+// #include "../utils/Sanitizer.h" // No non-core fields here
 
 #ifdef _DEBUG
 std::mutex counterMutex;
@@ -77,24 +78,25 @@ namespace GetgudSDK {
 	/**
 	 * IsValid:
 	 *
-	 * Check if action is valid, if action is not valid we will delete the
-	 * game!
+	 * Check if core action data is valid. Returns false if core fields are invalid.
+	 * Non-core fields are handled (sanitized) in derived classes.
 	 **/
 	bool BaseActionData::IsValid() {
-		bool isActionValid = Validator::ValidateStringLength(m_playerGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_playerGuid);
-		isActionValid &= Validator::ValidateStringLength(m_matchGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_matchGuid);
-		isActionValid &= Validator::ValidateItemValue(
+		// Core validations only
+		bool isCoreValid = Validator::ValidateStringLength(m_playerGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_playerGuid);
+		isCoreValid &= Validator::ValidateStringLength(m_matchGuid, 1, 36);
+		isCoreValid &= Validator::ValidateStringChars(m_matchGuid);
+		isCoreValid &= Validator::ValidateItemValue(
 			m_actionTimeEpoch, sdkConfig.sdkValidatorConfig.minActionTimeEpochTime,
 			sdkConfig.sdkValidatorConfig.maxActionTimeEpochTime);
-		isActionValid &= Validator::ValidateActionType((unsigned int)m_actionType);
+		isCoreValid &= Validator::ValidateActionType((unsigned int)m_actionType);
 
 		// empty action is passed when game container or action buffer are full
-		// for game deletion purposes
-		isActionValid &= !m_isEmpty;
+		// for game deletion purposes - these are considered invalid for processing.
+		isCoreValid &= !m_isEmpty;
 
-		return isActionValid;
+		return isCoreValid;
 	}
 
 	/**

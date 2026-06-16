@@ -60,32 +60,13 @@ GetgudSDK::PositionF UGetgudUtils::UnrealToGetGud(const FVector& Position)
 
 GetgudSDK::RotationF UGetgudUtils::UnrealToGetGud(const FRotator& Rotation)
 {
-	long YawLong = static_cast<long>(Rotation.Yaw);
-	long LongYaw;
+	// Normalize to -180..+180 — GetControlRotation() can return accumulated
+	// values outside this range (e.g. pitch of -355° instead of 5°)
+	FRotator NormalizedRotation = Rotation;
+	NormalizedRotation.Normalize();
 
-	// convert -360..360
-	if(YawLong > 0)
-	{
-		LongYaw = (YawLong + 360) % 360;
-	}
-	else
-	{
-		LongYaw = -((-YawLong + 360) % 360);
-	}
+	auto Yaw = -static_cast<double>(NormalizedRotation.Yaw);
+	auto Pitch = -static_cast<double>(NormalizedRotation.Pitch);
 
-	// convert -180..180
-	if(LongYaw > 180)
-	{
-		LongYaw = -180 + (LongYaw - 180);
-	}
-	else if(LongYaw < -180)
-	{
-		LongYaw = 180 - (LongYaw + 180);
-	}
-	
-
-	auto Yaw = -static_cast<double>(LongYaw);
-	auto Pitch = -static_cast<double>(Rotation.Pitch);
-	
-	return { static_cast<float>(Pitch), static_cast<float>(Yaw) };
+	return { static_cast<float>(Yaw), static_cast<float>(Pitch) };
 }

@@ -1,6 +1,7 @@
 #include "AffectActionData.h"
 #include "../config/Config.h"
 #include "../utils/Validator.h"
+#include "../utils/Sanitizer.h"
 #include <sstream>
 
 namespace GetgudSDK {
@@ -40,17 +41,20 @@ namespace GetgudSDK {
 	/**
 	 * IsValid:
 	 *
-	 * Check if action is valid, if action is not valid we will delete the
-	 * game!
+	 * Check if core action data is valid. Sanitize non-core fields.
 	 **/
 	bool AffectActionData::IsValid() {
-		// basic validations are done in the base class first
-		bool isActionValid = BaseActionData::IsValid();
-		isActionValid &= Validator::ValidateStringLength(m_affectGuid, 1, 36);
-		isActionValid &= Validator::ValidateStringChars(m_affectGuid);
-		isActionValid &= Validator::ValidateItemValue(static_cast<int>(m_affectState), 0, 3);
+		// Core validations (playerGuid, matchGuid, timestamp, actionType)
+		bool isCoreValid = BaseActionData::IsValid();
 
-		return isActionValid;
+		// Core validation for enum range
+		isCoreValid &= Validator::ValidateItemValue(static_cast<int>(m_affectState), 0, 3); 
+
+		// Sanitize non-core fields
+		Sanitizer::SanitizeStringChars(m_affectGuid); // Assuming standard disallowed chars for affectGuid
+		Sanitizer::SanitizeStringLength(m_affectGuid, 36); // Max length 36
+
+		return isCoreValid;
 	}
 
 	/**

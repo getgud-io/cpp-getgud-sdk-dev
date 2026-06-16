@@ -4,7 +4,9 @@
 #include "../../include/actions/DamageActionData.h"
 #include "../../include/actions/AttackActionData.h"
 #include "../../include/actions/DeathActionData.h"
+#include <chrono>
 #include <sstream>
+#include <thread>
 
 namespace GetgudSDK {
 
@@ -150,6 +152,7 @@ namespace GetgudSDK {
 		// cluster all new actions according to their match guid and place them in a
 		// dedicated vector per match guid
 		bool failedToPushSomeActions = false;
+		bool loggedInvalidAction = false;
 
 		for (auto& nextAction : actionVector) {
 
@@ -168,10 +171,14 @@ namespace GetgudSDK {
 			if (nextAction->IsValid() == false) {
 
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
-				logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
-				std::ostringstream oss;
-				nextAction->ToString(oss);
-				logger.Log(LogType::DEBUG, oss.str());
+				// Only log once per AddActions call to avoid flooding logs with 1M+ messages
+				if (!loggedInvalidAction) {
+					logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
+					std::ostringstream oss;
+					nextAction->ToString(oss);
+					logger.Log(LogType::DEBUG, oss.str());
+					loggedInvalidAction = true;
+				}
 				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
 				delete nextAction;
 				continue;
@@ -390,6 +397,7 @@ namespace GetgudSDK {
 	/**
 	 * MarkEndGame:
 	 *
+	 * @param gameGuid - The GUID of the game to mark as ended
 	 **/
 	bool GameContainer::MarkEndGame(std::string gameGuid) {
 		bool retValue = true;
@@ -409,6 +417,46 @@ namespace GetgudSDK {
 		m_gameContainerMutex.unlock();
 
 		return retValue;
+	}
+
+	/**
+	 * Flush:
+	 *
+	 * Waits until all queued actions are sent before returning.
+	 * Uses timeout from config (flushTimeoutMilliseconds).
+	 * Returns true on success, false on timeout.
+	 **/
+	bool GameContainer::Flush() {
+		auto startTime = std::chrono::steady_clock::now();
+		int sleepIntervalMs = sdkConfig.gameSenderSleepIntervalMilliseconds / 2;
+		bool isQueueEmpty = false;
+		int workingThreadCount = 0;
+
+		while (true) {
+			// Check timeout using wall-clock time
+			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now() - startTime
+			).count();
+
+			if (elapsed > (long long)sdkConfig.flushTimeoutMilliseconds) {
+				logger.Log(LogType::WARN, std::string("GameContainer::Flush->Timeout reached while waiting for queue to empty"));
+				return false;
+			}
+
+			{
+				std::lock_guard<std::mutex> locker(m_gameContainerMutex);
+				isQueueEmpty = (m_gameContainerSizeInBytes == 0);
+				workingThreadCount = m_workingThreadCount;
+			}
+
+			if (isQueueEmpty && workingThreadCount == 0) {
+				// Queue is empty and no threads are working
+				logger.Log(LogType::DEBUG, std::string("GameContainer::Flush->Queue flushed successfully"));
+				return true;
+			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleepIntervalMs));
+		}
 	}
 
 	void GameContainer::SentGameMarkedAsEnded(std::string gameGuid) {

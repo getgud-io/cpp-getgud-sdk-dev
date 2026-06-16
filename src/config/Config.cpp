@@ -285,6 +285,17 @@ namespace GetgudSDK {
 				_hyperModeThreadCreationStaggerMilliseconds;
 		}
 
+		// Read flush timeout variable
+		unsigned int _flushTimeoutMilliseconds = 0;
+		valueReadResult = GetConfigValue(
+			configData, sdkConfigFieldNames.flushTimeoutMilliseconds,
+			_flushTimeoutMilliseconds);
+		valueReadResult &= Validator::ValidateItemValue(
+			_flushTimeoutMilliseconds, 1000U, 60000U);  // 1-60 seconds
+		if (valueReadResult) {
+			sdkConfig.flushTimeoutMilliseconds = _flushTimeoutMilliseconds;
+		}
+
 		GetConfigValue(configData, sdkConfigFieldNames.logLevel, sdkConfig.logLevel);
 
 		return true;
@@ -563,7 +574,10 @@ namespace GetgudSDK {
 		configString +=
 			"\t" + fieldNames.hyperModeThreadCreationStaggerMilliseconds + ": " +
 			std::to_string(sdkConfig.hyperModeThreadCreationStaggerMilliseconds) +
-			"\n";
+			",\n";
+
+		configString += "\t" + fieldNames.flushTimeoutMilliseconds + ": " +
+			std::to_string(sdkConfig.flushTimeoutMilliseconds) + "\n";
 
 		return configString;
 	}

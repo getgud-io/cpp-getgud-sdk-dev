@@ -5,7 +5,7 @@
 #define GETGUDSDK_API __declspec(dllimport)
 #endif
 #else // not win32
-#define GETGUDSDK_API
+#define GETGUDSDK_API __attribute__((visibility("default")))
 #endif
 
 enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
@@ -168,6 +168,15 @@ extern "C" {
 	 * Mark started game as finished
 	 **/
 	GETGUDSDK_API int MarkEndGame(const char* gameGuid, int guidSize);
+
+	/**
+	 * Flush:
+	 *
+	 * Wait until all queued actions are sent before returning.
+	 * Uses timeout from config (flushTimeoutMilliseconds).
+	 * Returns 1 on success, 0 on timeout.
+	 **/
+	GETGUDSDK_API int Flush();
 
 	/**
      * SetMatchWinTeam:

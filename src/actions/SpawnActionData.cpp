@@ -1,5 +1,7 @@
 #include "SpawnActionData.h"
 #include "../config/Config.h"
+#include "../utils/Validator.h"
+#include "../utils/Sanitizer.h"
 #include "../utils/Utils.h"
 #include <sstream>
 
@@ -47,17 +49,19 @@ SpawnActionData::~SpawnActionData() {}
 /**
  * IsValid:
  *
- * Check if action is valid, if action is not valid we will delete the
- * game!
+ * Check if core action data is valid. Sanitize non-core fields.
  **/
 bool SpawnActionData::IsValid() {
-	bool isActionValid = BaseActionData::IsValid();
-	isActionValid &= Validator::ValidateStringLength(m_characterGuid, 1, 36);
-	isActionValid &= Validator::ValidateStringChars(m_characterGuid);
-	isActionValid &= Validator::ValidateStringLength(m_teamGuid, 1, 36);
-	isActionValid &= Validator::ValidateStringChars(m_teamGuid);
+	// Core validations (playerGuid, matchGuid, timestamp, actionType)
+	bool isCoreValid = BaseActionData::IsValid();
 
-	return isActionValid;
+	// Sanitize non-core fields
+	Sanitizer::SanitizeStringChars(m_characterGuid);
+	Sanitizer::SanitizeStringLength(m_characterGuid, 36);
+	Sanitizer::SanitizeStringChars(m_teamGuid);
+	Sanitizer::SanitizeStringLength(m_teamGuid, 36);
+
+	return isCoreValid;
 }
 
 /**

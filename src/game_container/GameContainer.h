@@ -25,6 +25,7 @@ namespace GetgudSDK {
 
 	public:
 		std::mutex m_gameContainerMutex;
+		int m_workingThreadCount = 0;
 
 	public:
 		std::string AddGame(int titleId,
@@ -43,6 +44,7 @@ namespace GetgudSDK {
 		unsigned int GetAverageSizeInBytes();
 		GameData* PopNextGameToProcess();
 		bool MarkEndGame(std::string gameGuid);
+		bool Flush();
 		void SentGameMarkedAsEnded(std::string gameGuid);
 		void MarkGameMatchesAsNotInteresting(std::string gameGuid, std::vector<std::string>& matchGuids);
 		void SetGameMatchesIncompleteState(std::string gameGuid, std::vector<std::string>& matchGuids, MatchCompletionState state);

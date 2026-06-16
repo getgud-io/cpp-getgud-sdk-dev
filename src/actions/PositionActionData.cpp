@@ -1,6 +1,7 @@
 #include "PositionActionData.h"
 #include "../config/Config.h"
-#include "../utils/Utils.h"
+#include "../utils/Validator.h"
+#include "../utils/Sanitizer.h"
 #include "../utils/Utils.h"
 #include <sstream>
 
@@ -52,12 +53,12 @@ namespace GetgudSDK {
 	/**
 	 * IsValid:
 	 *
-	 * Check if action is valid, if action is not valid we will delete the
-	 * game!
+	 * Check if core action data is valid. Sanitize non-core fields.
 	 **/
 	bool PositionActionData::IsValid() {
-		bool isActionValid = BaseActionData::IsValid();
-		return isActionValid;
+		// Core validations (playerGuid, matchGuid, timestamp, actionType)
+		bool isCoreValid = BaseActionData::IsValid();
+		return isCoreValid;
 	}
 
 	/**

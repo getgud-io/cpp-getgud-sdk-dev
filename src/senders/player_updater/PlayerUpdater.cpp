@@ -209,7 +209,7 @@ namespace GetgudSDK {
 		if (sendCode != CURLcode::CURLE_OK) {
 			if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
 				logger.Log(LogType::DEBUG,
-					"GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
+					"PlayerUpdater::SendUpdatePlayerPacket->Failed to send Update Player request: " +
 					m_curlReadBuffer);
 			}
 
@@ -222,7 +222,7 @@ namespace GetgudSDK {
 		{
 			if (m_curlReadBuffer.find("\"ErrorType\"") != std::string::npos) {
 				logger.Log(LogType::DEBUG,
-					"GameSender::SendUpdatePlayerPacket->Failed to send Update Player request: " +
+					"PlayerUpdater::SendUpdatePlayerPacket->Failed to send Update Player request: " +
 					m_curlReadBuffer);
 			}
 		}

@@ -129,6 +129,8 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 
 	FRotator CameraRotation = Controller->GetControlRotation();
 	FVector position = GetActorLocation();
+	float yaw = CameraRotation.Yaw;
+	float pitch = CameraRotation.Pitch;
 
 	UE_LOG(LogTemp, Warning, TEXT("Character Position: %s"), *position.ToString());
 	UE_LOG(LogTemp, Warning, TEXT("Character Rotation: %s"), *CameraRotation.ToString());
@@ -138,38 +140,16 @@ void AClient_Server_GetgudCharacter::ServerRemoteMove_Implementation(const FInpu
 	// Calculate the Unix timestamp in milliseconds
 	int64 UnixTimestampMillis = (Now.GetTicks() - FDateTime(1970, 1, 1, 0, 0, 0, 0).GetTicks()) / ETimespan::TicksPerMillisecond;
 
-	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
-	{
-		pitch = CameraRotation.Pitch * -1;
-	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
-	{
-		pitch = 360 - CameraRotation.Pitch;
-	}
-
-	float yaw = 0;
-
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
-	{
-		yaw = CameraRotation.Yaw * -1;
-	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
-	{
-		yaw = 360 - CameraRotation.Yaw;
-	}
-
-
 	// divide position to transform from cm to meters
 	GetgudSDK::BaseActionData* outAction = nullptr;
 	outAction = new GetgudSDK::PositionActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid,
 		GetgudSDK::PositionF{ 	
-			(float)position.X / 100.0f, 
-			(float)position.Y / 100.0f, 
-			(float)position.Z / 100.0f 
+			(float)position.X, 
+			(float)position.Y, 
+			(float)position.Z, 
 		},
-		GetgudSDK::RotationF{pitch, yaw, 0});
+		GetgudSDK::RotationF{yaw, pitch, 0});
 
 	GetgudSDK::SendAction(outAction);
 
@@ -190,43 +170,23 @@ void AClient_Server_GetgudCharacter::ServerRemoteSpawn_Implementation(const FInp
 	FRotator CameraRotation = Controller->GetControlRotation();
 	UE_LOG(LogTemp, Warning, TEXT("Character Position: %s"), *position.ToString());
 
+	float yaw = CameraRotation.Yaw;
+	float pitch = CameraRotation.Pitch;
 	FDateTime Now = FDateTime::UtcNow();
 
 	// Calculate the Unix timestamp in milliseconds
 	int64 UnixTimestampMillis = (Now.GetTicks() - FDateTime(1970, 1, 1, 0, 0, 0, 0).GetTicks()) / ETimespan::TicksPerMillisecond;
 
-	GetgudSDK::BaseActionData* outAction = nullptr;
-
-
-	float pitch = 0;
-	if (CameraRotation.Pitch >= 0 && CameraRotation.Pitch <= 90)
-	{
-		pitch = CameraRotation.Pitch * -1;
-	}
-	else if (CameraRotation.Pitch >= 270 && CameraRotation.Pitch <= 360)
-	{
-		pitch = 360 - CameraRotation.Pitch;
-	}
-
-	float yaw = 0;
-	if (CameraRotation.Yaw >= 0 && CameraRotation.Yaw <= 180)
-	{
-		yaw = CameraRotation.Yaw * -1;
-	}
-	else if (CameraRotation.Yaw >= 180 && CameraRotation.Yaw <= 360)
-	{
-		yaw = 360 - CameraRotation.Yaw;
-	}
-	
+	GetgudSDK::BaseActionData* outAction = nullptr;	
 	// divide position to transform from cm to meters
 	outAction = new GetgudSDK::SpawnActionData(
 		g_matchGuid, UnixTimestampMillis, g_playerGuid, "halls_green", "Team_1", 100.f,
 		GetgudSDK::PositionF{ 	
-			(float)position.X / 100.0f, 
-			(float)position.Y / 100.0f, 
-			(float)position.Z / 100.0f 
+			(float)position.X, 
+			(float)position.Y, 
+			(float)position.Z 
 		},
-		GetgudSDK::RotationF{pitch, yaw, 0});
+		GetgudSDK::RotationF{yaw, pitch, 0});
 
 	GetgudSDK::SendAction(outAction);
 
