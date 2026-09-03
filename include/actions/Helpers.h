@@ -69,7 +69,8 @@ namespace GetgudSDK {
 		Teaming,
 		RapidFire,
 		AffectAbuse,
-		AffectHacking
+		AffectHacking,
+		NameAbuse
 	};
 
 
