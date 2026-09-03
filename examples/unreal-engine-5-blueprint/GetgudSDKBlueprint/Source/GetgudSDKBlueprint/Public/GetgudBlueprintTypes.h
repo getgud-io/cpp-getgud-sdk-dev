@@ -33,7 +33,8 @@ enum class EGetgudToxicBehavior : uint8
 	Teaming,
 	RapidFire,
 	AffectAbuse,
-	AffectHacking
+	AffectHacking,
+	NameAbuse
 };
 
 /**
