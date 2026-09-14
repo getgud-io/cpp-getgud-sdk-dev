@@ -1084,8 +1084,11 @@ class GetgudCS2Parser:
                 SetMatchWinTeam(match_guid, winning_team)
             ])
 
-        # Sort SDK commands by timestamp
-        sdk_commands.sort(key=lambda x: x[0])
+        # Sort SDK commands by timestamp. On a tie, spawns go first and positions next, so a
+        # tick's shots, hits and deaths follow that tick's aim; guard laws read the latest
+        # position at or before an action and would otherwise get the previous tick.
+        tick_order = {SpawnActionData: 0, PositionActionData: 1}
+        sdk_commands.sort(key=lambda x: (x[0], tick_order.get(type(x[1]), 2)))
         
         # Finalize the SDK commands
         sdk_output_commands = []
