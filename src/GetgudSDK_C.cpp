@@ -319,6 +319,68 @@ extern "C" {
 	}
 
 	/**
+	 * SendCustomEventAction:
+	 *
+	 **/
+	int SendCustomEventAction(struct BaseActionData baseData,
+		const char* customEventGuid,
+		int customEventGuidSize,
+		int version,
+		const char* payload,
+		int payloadSize)
+	{
+		bool sendResult = false;
+		try {
+			std::string matchGuid;
+			std::string playerGuid;
+			std::string inCustomEventGuid;
+			std::string inPayload;
+
+			if (baseData.matchGuid != NULL &&
+				strlen(baseData.matchGuid) == baseData.matchGuidSize)
+			{
+				matchGuid = std::string(baseData.matchGuid, baseData.matchGuidSize);
+			}
+
+			if (baseData.playerGuid != NULL &&
+				strlen(baseData.playerGuid) == baseData.playerGuidSize)
+			{
+				playerGuid = std::string(baseData.playerGuid, baseData.playerGuidSize);
+			}
+
+			if (customEventGuid != NULL &&
+				strlen(customEventGuid) == customEventGuidSize)
+			{
+				inCustomEventGuid = std::string(customEventGuid, customEventGuidSize);
+			}
+
+			// payloadSize is trusted over strlen so a payload may carry embedded NULs
+			if (payload != NULL && payloadSize > 0)
+			{
+				inPayload = std::string(payload, payloadSize);
+			}
+
+			GetgudSDK::CustomEventActionData* customEventAction = new GetgudSDK::CustomEventActionData(
+				matchGuid,
+				baseData.actionTimeEpoch,
+				playerGuid,
+				inCustomEventGuid,
+				version,
+				inPayload);
+			std::deque<GetgudSDK::BaseActionData*> actions = { customEventAction };
+			sendResult = GetgudSDK::SendActions(actions);
+			delete customEventAction;
+		}
+		catch (std::exception& _error) {
+			GetgudSDK::logger.Log(GetgudSDK::LogType::FATAL,
+				std::string("GetgudSDK::SendCustomEventAction "
+					"can not be sent: ") +
+				std::string(_error.what()));
+		}
+		return sendResult;
+	}
+
+	/**
 	 * SendAttackAction:
 	 *
 	 **/

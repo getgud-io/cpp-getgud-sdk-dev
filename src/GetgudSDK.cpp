@@ -371,6 +371,33 @@ namespace GetgudSDK {
 	}
 
 	/**
+	 * SendCustomEventAction:
+	 *
+	 **/
+	bool SendCustomEventAction(const std::string& matchGuid,
+		long long actionTimeEpoch,
+		const std::string& playerGuid,
+		const std::string& customEventGuid,
+		int version,
+		const std::string& payload) {
+		bool sendResult = false;
+		try {
+			CustomEventActionData* customEventAction =
+				new CustomEventActionData(matchGuid, actionTimeEpoch, playerGuid, customEventGuid, version, payload);
+			std::deque<BaseActionData*> actions = { customEventAction };
+			sendResult = SendActions(actions);
+			delete customEventAction;
+		}
+		catch (std::exception& _error)
+		{
+			logger.Log(LogType::FATAL, std::string("GetgudSDK::SendCustomEventAction->Couldn't "
+				"send actions to Action Buffer: ") +
+				std::string(_error.what()));
+		}
+		return sendResult;
+	}
+
+	/**
 	 * SendAttackAction:
 	 *
 	 **/

@@ -132,7 +132,7 @@ namespace GetgudSDK {
 		 **/
 		bool ValidateActionType(unsigned int actionType) {
 			if (actionType > 0U &&
-				actionType <= (unsigned int)Actions::Spawn)
+				actionType <= (unsigned int)Actions::CustomEvent)
 				return true;
 			else
 				return false;

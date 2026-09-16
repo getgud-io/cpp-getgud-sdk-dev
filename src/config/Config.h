@@ -16,6 +16,7 @@ namespace GetgudSDK {
 	struct SdkValidatorConfig {
 		long long minActionTimeEpochTime = 1000000000000;
 		long long maxActionTimeEpochTime = 2000000000000;
+		int maxCustomEventPayloadBase64Length = 8192;
 	};
 
 	/**

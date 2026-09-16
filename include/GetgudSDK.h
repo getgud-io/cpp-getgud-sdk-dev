@@ -18,6 +18,7 @@
 #include "actions/PositionActionData.h"
 #include "actions/SpawnActionData.h"
 #include "actions/AffectActionData.h"
+#include "actions/CustomEventActionData.h"
 
 #include <deque>
 
@@ -53,6 +54,12 @@ namespace GetgudSDK {
 		const std::string& affectGuid,
 		const std::string& playerGuid,
 		AffectState affectState);
+	GETGUDSDK_API bool SendCustomEventAction(const std::string& matchGuid,
+		long long actionTimeEpoch,
+		const std::string& playerGuid,
+		const std::string& customEventGuid,
+		int version,
+		const std::string& payload);
 	GETGUDSDK_API bool SendAttackAction(const std::string& matchGuid,
 		long long actionTimeEpoch,
 		const std::string& playerGuid,

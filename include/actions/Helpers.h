@@ -8,6 +8,7 @@ namespace GetgudSDK {
 
 	namespace Values {
 		const std::string g_Environment = "Environment";
+		const std::string g_PvE = "PvE";
 	}
 
 	/**
@@ -27,7 +28,7 @@ namespace GetgudSDK {
 	/**
 	 * Actions:
 	 *
-	 * Our primal 6, action types you can send to Getgud
+	 * Our primal 7 action types plus Custom Event, action types you can send to Getgud
 	 **/
 	enum class Actions : int {
 		None = -1,
@@ -37,7 +38,8 @@ namespace GetgudSDK {
 		Death,
 		Heal,
 		Position,
-		Spawn
+		Spawn,
+		CustomEvent
 	};
 
 	/**
