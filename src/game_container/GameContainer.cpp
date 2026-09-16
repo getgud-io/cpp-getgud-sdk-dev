@@ -173,10 +173,10 @@ namespace GetgudSDK {
 				// action is invalid and thus we are going to mark this match as not interesting to avoid sending anymore actions to the server
 				// Only log once per AddActions call to avoid flooding logs with 1M+ messages
 				if (!loggedInvalidAction) {
-					logger.Log(LogType::DEBUG, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
+					logger.Log(LogType::_ERROR, std::string("Action is invalid - Dropping the action and marking the match incomplete, thus match will not be analyzed for toxic behaviors by Getgud. match guid:" + matchData->GetMatchGuid()));
 					std::ostringstream oss;
 					nextAction->ToString(oss);
-					logger.Log(LogType::DEBUG, oss.str());
+					logger.Log(LogType::_ERROR, oss.str());
 					loggedInvalidAction = true;
 				}
 				matchData->SetMatchIncompleteState(MatchCompletionState::ActionDrop);
