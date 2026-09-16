@@ -1,14 +1,10 @@
 #include "CustomEventActionData.h"
-#include "../config/Config.h"
 #include "../utils/Validator.h"
 #include "../utils/Sanitizer.h"
 #include "../utils/Utils.h"
-#include <limits>
 #include <sstream>
 
 namespace GetgudSDK {
-
-	extern Config sdkConfig;
 
 	/**
 	 * CustomEventActionData:
@@ -52,13 +48,8 @@ namespace GetgudSDK {
 	 **/
 	bool CustomEventActionData::IsValid() {
 		// Core validations (playerGuid, matchGuid, timestamp, actionType)
+		// The payload and version are the customer's business: pass them through untouched.
 		bool isCoreValid = BaseActionData::IsValid();
-
-		isCoreValid &= Validator::ValidateItemValue(m_version, 0, std::numeric_limits<int>::max());
-
-		// An empty payload would serialize as an empty trailing field, which the
-		// stream parsers trim away and then misread the action as too short.
-		isCoreValid &= Validator::ValidateStringLength(m_payloadBase64, 1, sdkConfig.sdkValidatorConfig.maxCustomEventPayloadBase64Length);
 
 		// Sanitize non-core fields
 		Sanitizer::SanitizeStringChars(m_customEventGuid);

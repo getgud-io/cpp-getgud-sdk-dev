@@ -27,12 +27,10 @@ int main() {
     assert(matchEvent.IsValid());
     assert(serialize(matchEvent) == "1757961234567,C,PvE,StormPhaseChanged,0,cGhhc2UsMg==,");
 
-    // the payload is the whole point of the action, an empty one is rejected
-    GetgudSDK::CustomEventActionData emptyPayload(match, ts, "Player_123", "Choice_Selected", 0, "");
-    assert(!emptyPayload.IsValid());
-
-    GetgudSDK::CustomEventActionData negativeVersion(match, ts, "Player_123", "Choice_Selected", -1, json);
-    assert(!negativeVersion.IsValid());
+    // payload and version are passed through without validation, an empty payload is an empty field
+    GetgudSDK::CustomEventActionData emptyPayload(match, ts, "Player_123", "Choice_Selected", -1, "");
+    assert(emptyPayload.IsValid());
+    assert(serialize(emptyPayload) == "1757961234567,C,Player_123,Choice_Selected,-1,,");
 
     // event guids get the same sanitizing as affect guids: bad chars replaced, capped at 36
     GetgudSDK::CustomEventActionData dirtyGuid(match, ts, "Player_123", "Choice$Selected", 0, json);

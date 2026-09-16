@@ -198,6 +198,7 @@ extern "C" {
 	 * SendCustomEventAction:
 	 *
 	 * baseData.playerGuid may be NULL for a match-level event (sent as PvE).
+	 * version and payload are passed through as given, nothing is validated.
 	 * payload is base64 encoded by the SDK before it enters the action stream.
 	 **/
 	GETGUDSDK_API int SendCustomEventAction(struct BaseActionData baseData,
