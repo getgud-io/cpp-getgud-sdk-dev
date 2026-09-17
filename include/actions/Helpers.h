@@ -7,7 +7,8 @@
 namespace GetgudSDK {
 
 	namespace Values {
-		const std::string g_Environment = "Environment";
+		// the backend only treats the literal PvE as a non-player source; any other value becomes a real player
+		const std::string g_Environment = "PvE";
 		const std::string g_PvE = "PvE";
 	}
 
