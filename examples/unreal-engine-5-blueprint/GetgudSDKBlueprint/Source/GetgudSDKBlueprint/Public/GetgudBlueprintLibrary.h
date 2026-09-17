@@ -128,6 +128,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Getgud|Actions")
 	static bool SendAffectAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& AffectGuid, EGetgudAffectState AffectState);
 
+	/**
+	 * Send a custom event (any game-specific event with your own payload).
+	 * Leave PlayerGuid empty for a match-level event. Payload is any string, ideally JSON; nothing is validated.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Getgud|Actions")
+	static bool SendCustomEventAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& CustomEventGuid, int32 Version, const FString& Payload);
+
 	// ============================================
 	// Reports/Chat/Players
 	// ============================================

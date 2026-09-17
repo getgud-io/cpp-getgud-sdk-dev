@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GetgudSDK
 {
-    public enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+    public enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn, CustomEvent };
     public enum AffectState { Attach, Activate, Deactivate, Detach };
 
     public struct PositionF
@@ -143,6 +143,15 @@ namespace GetgudSDK_calls
             public int affectGuidSize;
             public AffectState affectState;
         }
+        public struct SendCustomEventActionWrapper
+        {
+            public BaseActionDataWrapper baseData;
+            public IntPtr customEventGuid;
+            public int customEventGuidSize;
+            public int version;
+            public IntPtr payload;
+            public int payloadSize;
+        }
         public struct SendAttackActionWrapper
         {
             public BaseActionDataWrapper baseData;
@@ -223,6 +232,9 @@ namespace GetgudSDK_calls
 
         [DllImport(dllPath)]
         public static extern int SendAttackAction(BaseActionDataWrapper matchInfo, IntPtr weaponGuid, int weaponGuidSize);
+
+        [DllImport(dllPath)]
+        public static extern int SendCustomEventAction(BaseActionDataWrapper matchInfo, IntPtr customEventGuid, int customEventGuidSize, int version, IntPtr payload, int payloadSize);
 
         [DllImport(dllPath)]
         public static extern int SendDamageAction(BaseActionDataWrapper matchInfo, IntPtr victimPlayerGuid, int victimPlayerGuidSize,
