@@ -371,7 +371,7 @@ namespace GetgudSDK
          * SendAffectAction:
          *
          **/
-        static public int SendAffectkAction(SendAffectActionInfo info)
+        static public int SendAffectAction(SendAffectActionInfo info)
         {
             var unmanagedWeaponGuid = Marshal.StringToHGlobalAnsi(info.affectGuid);
             var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
@@ -391,6 +391,9 @@ namespace GetgudSDK
 
             return result;
         }
+
+        [Obsolete("Use SendAffectAction")]
+        static public int SendAffectkAction(SendAffectActionInfo info) => SendAffectAction(info);
 
         /**
          * SendCustomEventAction:
