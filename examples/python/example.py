@@ -55,6 +55,11 @@ def test_1(title_id = 1, private_key="pk"):
     affect_guid = random_string(5)
     affect_state = sdk.AffectState.Activate
     sdk.send_affect_action(match_guid, action_time_epoch, player_guid, affect_guid, affect_state)
+
+    # Add an example of send_custom_event_action: a player-level event with a JSON payload
+    # and a match-level event (no player) with a plain string
+    sdk.send_custom_event_action(match_guid, action_time_epoch, player_guid, "Choice_Selected", 1, {"choiceId": "weapon_upgrade", "level": 3})
+    sdk.send_custom_event_action(match_guid, action_time_epoch, None, "StormPhaseChanged", 0, "phase 2")
     
     # Add an example of update_player
     title_id = 1

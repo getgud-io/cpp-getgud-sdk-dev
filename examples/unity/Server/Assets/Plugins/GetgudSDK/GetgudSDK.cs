@@ -28,6 +28,15 @@ namespace GetgudSDK
         public string affectGuid;
         public AffectState affectState;
     };
+    public struct SendCustomEventActionInfo
+    {
+        // baseData.playerGuid may be null or empty for a match-level event, it is sent as PvE
+        public BaseActionData baseData;
+        public string customEventGuid;
+        public int version;
+        // any string, ideally JSON; the SDK base64 encodes it, nothing is validated
+        public string payload;
+    };
     public struct SendAttackActionInfo
     {
         public BaseActionData baseData;
@@ -362,7 +371,7 @@ namespace GetgudSDK
          * SendAffectAction:
          *
          **/
-        static public int SendAffectkAction(SendAffectActionInfo info)
+        static public int SendAffectAction(SendAffectActionInfo info)
         {
             var unmanagedWeaponGuid = Marshal.StringToHGlobalAnsi(info.affectGuid);
             var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
@@ -379,6 +388,41 @@ namespace GetgudSDK
             Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
             Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
             Marshal.FreeHGlobal(unmanagedWeaponGuid);
+
+            return result;
+        }
+
+        [Obsolete("Use SendAffectAction")]
+        static public int SendAffectkAction(SendAffectActionInfo info) => SendAffectAction(info);
+
+        /**
+         * SendCustomEventAction:
+         *
+         **/
+        static public int SendCustomEventAction(SendCustomEventActionInfo info)
+        {
+            var playerGuid = info.baseData.playerGuid ?? "";
+            var unmanagedCustomEventGuid = Marshal.StringToHGlobalAnsi(info.customEventGuid);
+            // the payload is arbitrary text, so it goes over as UTF-8 bytes with an explicit length
+            var payloadBytes = System.Text.Encoding.UTF8.GetBytes(info.payload ?? "");
+            var unmanagedPayload = Marshal.AllocHGlobal(payloadBytes.Length + 1);
+            Marshal.Copy(payloadBytes, 0, unmanagedPayload, payloadBytes.Length);
+            Marshal.WriteByte(unmanagedPayload, payloadBytes.Length, 0);
+            var unmanagedBaseData = new GetgudSDK_calls.GetgudSDK_calls.BaseActionDataWrapper
+            {
+                actionTimeEpoch = info.baseData.actionTimeEpoch,
+                matchGuid = Marshal.StringToHGlobalAnsi(info.baseData.matchGuid),
+                matchGuidSize = info.baseData.matchGuid.Length,
+                playerGuid = Marshal.StringToHGlobalAnsi(playerGuid),
+                playerGuidSize = playerGuid.Length
+            };
+
+            var result = GetgudSDK_calls.GetgudSDK_calls.SendCustomEventAction(unmanagedBaseData, unmanagedCustomEventGuid, info.customEventGuid.Length, info.version, unmanagedPayload, payloadBytes.Length);
+
+            Marshal.FreeHGlobal(unmanagedBaseData.matchGuid);
+            Marshal.FreeHGlobal(unmanagedBaseData.playerGuid);
+            Marshal.FreeHGlobal(unmanagedCustomEventGuid);
+            Marshal.FreeHGlobal(unmanagedPayload);
 
             return result;
         }

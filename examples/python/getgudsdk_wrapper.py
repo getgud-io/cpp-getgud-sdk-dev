@@ -1,5 +1,6 @@
 import getgudsdk.lib as getgudsdk
 from getgudsdk import ffi
+import json
 import time
 from enum import Enum
 
@@ -299,6 +300,34 @@ class GetgudSDK:
             affect_state_value = affect_state.value
 
         result_code = getgudsdk.SendAffectAction(base_data[0], affect_guid_data, affect_guid_size, affect_state_value)
+
+        return result_code
+
+    def send_custom_event_action(self, match_guid, action_time_epoch, player_guid, custom_event_guid, version=0, payload=""):
+        # player_guid may be None or "" for a match-level event, it is sent as PvE.
+        # payload is any string, ideally JSON; a dict or list is JSON-encoded for you. The SDK base64
+        # encodes it and validates nothing.
+        base_data = ffi.new("struct BaseActionData*")
+        base_data.actionTimeEpoch = action_time_epoch
+
+        match_guid_data = ffi.new("char[]", match_guid.encode('utf-8'))
+        base_data.matchGuid = match_guid_data
+        base_data.matchGuidSize = len(match_guid)
+
+        player_guid = player_guid or ""
+        player_guid_data = ffi.new("char[]", player_guid.encode('utf-8'))
+        base_data.playerGuid = player_guid_data
+        base_data.playerGuidSize = len(player_guid)
+
+        custom_event_guid_data = ffi.new("char[]", custom_event_guid.encode('utf-8'))
+        custom_event_guid_size = len(custom_event_guid)
+
+        if not isinstance(payload, (str, bytes)):
+            payload = json.dumps(payload)
+        payload_bytes = payload if isinstance(payload, bytes) else payload.encode('utf-8')
+        payload_data = ffi.new("char[]", payload_bytes)
+
+        result_code = getgudsdk.SendCustomEventAction(base_data[0], custom_event_guid_data, custom_event_guid_size, version, payload_data, len(payload_bytes))
 
         return result_code
      

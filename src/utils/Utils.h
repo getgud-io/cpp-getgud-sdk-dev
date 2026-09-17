@@ -22,6 +22,7 @@ namespace GetgudSDK {
 			std::chrono::system_clock::now();
 		void UpdateSize(unsigned int size);
 	};
+	std::string Base64Encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 	std::string GenerateGuid();
 	std::string GetCurrentTimeString();
 	std::string ShortenDecimalNumber(std::string decimalIn);

@@ -369,6 +369,28 @@ bool UGetgudBlueprintLibrary::SendAffectAction(const FString& MatchGuid, int64 A
 	return ::SendAffectAction(baseData, AffectGuidUtf8.Get(), AffectGuid.Len(), ToCAffectState(AffectState)) != 0;
 }
 
+bool UGetgudBlueprintLibrary::SendCustomEventAction(const FString& MatchGuid, int64 ActionTimeEpoch, const FString& PlayerGuid, const FString& CustomEventGuid, int32 Version, const FString& Payload)
+{
+	struct ::BaseActionData baseData;
+	baseData.actionTimeEpoch = ActionTimeEpoch;
+
+	auto MatchGuidUtf8 = StringCast<ANSICHAR>(*MatchGuid);
+	baseData.matchGuid = MatchGuidUtf8.Get();
+	baseData.matchGuidSize = MatchGuid.Len();
+
+	// an empty player guid is passed through as an empty string, which the SDK sends as PvE
+	auto PlayerGuidUtf8 = StringCast<ANSICHAR>(*PlayerGuid);
+	baseData.playerGuid = PlayerGuidUtf8.Get();
+	baseData.playerGuidSize = PlayerGuid.Len();
+
+	auto CustomEventGuidUtf8 = StringCast<ANSICHAR>(*CustomEventGuid);
+
+	// the payload is arbitrary text, so it goes over as UTF-8 bytes with the byte length, not the character count
+	FTCHARToUTF8 PayloadUtf8(*Payload);
+
+	return ::SendCustomEventAction(baseData, CustomEventGuidUtf8.Get(), CustomEventGuid.Len(), Version, PayloadUtf8.Get(), PayloadUtf8.Length()) != 0;
+}
+
 // ============================================
 // Reports/Chat/Players
 // ============================================

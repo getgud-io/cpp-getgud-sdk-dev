@@ -8,7 +8,7 @@
 #define GETGUDSDK_API __attribute__((visibility("default")))
 #endif
 
-enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn };
+enum Actions { None = -1, Affect, Attack, Damage, Death, Heal, Position, Spawn, CustomEvent };
 enum AffectState { Attach, Activate, Deactivate, Detach };
 
 struct PositionF {
@@ -193,6 +193,20 @@ extern "C" {
 		const char* affectGuid,
 		int affectGuidSize,
 		enum AffectState affectState);
+
+	/**
+	 * SendCustomEventAction:
+	 *
+	 * baseData.playerGuid may be NULL for a match-level event (sent as PvE).
+	 * version and payload are passed through as given, nothing is validated.
+	 * payload is base64 encoded by the SDK before it enters the action stream.
+	 **/
+	GETGUDSDK_API int SendCustomEventAction(struct BaseActionData baseData,
+		const char* customEventGuid,
+		int customEventGuidSize,
+		int version,
+		const char* payload,
+		int payloadSize);
 
 	/**
 	 * SendAttackAction:
