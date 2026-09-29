@@ -18,6 +18,7 @@ namespace GetgudSDK {
 		// Stored already base64 encoded so the payload can never carry the
 		// action-stream delimiter, whatever the customer puts in it.
 		std::string m_payloadBase64;
+		size_t m_payloadSize;
 
 	public:
 		// Empty playerGuid marks a match-level event and is sent as PvE.

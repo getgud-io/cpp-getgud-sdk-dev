@@ -34,7 +34,7 @@ namespace GetgudSDK
         public BaseActionData baseData;
         public string customEventGuid;
         public int version;
-        // any string, ideally JSON; the SDK base64 encodes it, nothing is validated
+        // any string, ideally JSON; up to 2048 bytes; the SDK base64 encodes it
         public string payload;
     };
     public struct SendAttackActionInfo
