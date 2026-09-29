@@ -20,7 +20,8 @@ namespace GetgudSDK {
 			playerGuid.empty() ? Values::g_PvE : playerGuid, matchGuid }),
 		m_customEventGuid(customEventGuid), m_version(version),
 		m_payloadBase64(Base64Encode(reinterpret_cast<const unsigned char*>(payload.data()),
-			static_cast<unsigned int>(payload.size()))) {
+			static_cast<unsigned int>(payload.size()))),
+		m_payloadSize(payload.size()) {
 
 	};
 
@@ -30,7 +31,8 @@ namespace GetgudSDK {
 	 **/
 	CustomEventActionData::CustomEventActionData(const CustomEventActionData& data)
 		: BaseActionData(data), m_customEventGuid(data.m_customEventGuid),
-		m_version(data.m_version), m_payloadBase64(data.m_payloadBase64) {}
+		m_version(data.m_version), m_payloadBase64(data.m_payloadBase64),
+		m_payloadSize(data.m_payloadSize) {}
 
 
 	/**
@@ -48,8 +50,10 @@ namespace GetgudSDK {
 	 **/
 	bool CustomEventActionData::IsValid() {
 		// Core validations (playerGuid, matchGuid, timestamp, actionType)
-		// The payload and version are the customer's business: pass them through untouched.
+		// The payload content and version are the customer's business: pass them through untouched.
 		bool isCoreValid = BaseActionData::IsValid();
+		// Payloads ride in the action stream, so oversized ones are dropped here where the SDK log reports them
+		isCoreValid &= m_payloadSize <= 2048;
 
 		// Sanitize non-core fields
 		Sanitizer::SanitizeStringChars(m_customEventGuid);

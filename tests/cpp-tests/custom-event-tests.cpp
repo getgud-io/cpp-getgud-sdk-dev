@@ -32,6 +32,12 @@ int main() {
     assert(emptyPayload.IsValid());
     assert(serialize(emptyPayload) == "1757961234567,C,Player_123,Choice_Selected,-1,,");
 
+    // payloads are capped at 2048 bytes
+    GetgudSDK::CustomEventActionData maxPayload(match, ts, "Player_123", "Choice_Selected", 0, std::string(2048, 'a'));
+    assert(maxPayload.IsValid());
+    GetgudSDK::CustomEventActionData oversizedPayload(match, ts, "Player_123", "Choice_Selected", 0, std::string(2049, 'a'));
+    assert(!oversizedPayload.IsValid());
+
     // event guids get the same sanitizing as affect guids: bad chars replaced, capped at 36
     GetgudSDK::CustomEventActionData dirtyGuid(match, ts, "Player_123", "Choice$Selected", 0, json);
     assert(dirtyGuid.IsValid());
